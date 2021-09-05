@@ -18,77 +18,121 @@
 *   Copyright (c) 2013-2020 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
-
+#include <stdio.h>
 #include "raylib.h"
 #include "spritesheet.h"
 #include "card.h"
 
-int main() 
+struct SpriteInfo retroBackInfo[13] = {
+    {.x = 5, .y = 4, .w = 71, .h = 96},
+    {.x = 85, .y = 4, .w = 71, .h = 96},
+    {.x = 185, .y = 4, .w = 71, .h = 96},
+    {.x = 245, .y = 4, .w = 71, .h = 96},
+    {.x = 325, .y = 4, .w = 71, .h = 96},
+    {.x = 405, .y = 4, .w = 71, .h = 96},
+    {.x = 485, .y = 4, .w = 71, .h = 96},
+    {.x = 5, .y = 140, .w = 71, .h = 96},
+    {.x = 85, .y = 140, .w = 71, .h = 96},
+    {.x = 185, .y = 140, .w = 71, .h = 96},
+    {.x = 245, .y = 140, .w = 71, .h = 96},
+    {.x = 325, .y = 140, .w = 71, .h = 96},
+    {.x = 405, .y = 140, .w = 71, .h = 96},
+};
+
+struct Spritesheet* ssFace;
+struct Spritesheet* ssBack;
+struct Card c;
+
+void BaizeInit(void);
+void BaizeUpdate(void);
+void BaizeDraw(void);
+void BaizeFree(void);
+
+void BaizeInit(void) {
+    ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
+    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", (struct SpriteInfo*)retroBackInfo, 13);
+}
+
+void BaizeUpdate(void) {
+
+    static struct Card* currCard = NULL;
+    static float dx, dy;
+
+    Vector2 touchPosition = GetTouchPosition(0);
+    int gesture = GetGestureDetected();
+
+    if ( gesture == GESTURE_TAP && CardIsAt(&c, touchPosition) ) {
+        dx = touchPosition.x - c.rect.x;
+        dy = touchPosition.y - c.rect.y;
+        currCard = &c;
+    }
+    if ( gesture == GESTURE_DRAG && currCard ) {
+        // card_position(&c, touchPosition.x - c.rect.width / 2, touchPosition.y - c.rect.height / 2);
+        CardSetPosition(&c, (Vector2){touchPosition.x - dx, touchPosition.y - dy});
+    }
+    if ( gesture == GESTURE_NONE ) {
+        currCard = NULL;
+    }
+
+    // if ( pc == NULL ) {
+    //     if ( card_isAt(&c, touchPosition) ) {
+    //         DrawText("touch on card", 0, 100, 16, WHITE);
+    //         pc = &c;
+    //     }
+    // }
+
+    // int dx = c.rect.x - touchPosition.x;
+    // int dy = c.rect.y - touchPosition.y;
+    // {
+    //     char buf[64];
+    //     sprintf(buf, "dragging %d,%d", dx, dy);
+    //     DrawText(buf, 0, 130, 16, WHITE);
+    // }
+    // card_position(&c, touchPosition.x - dx, touchPosition.y - dy);
+}
+
+void BaizeDraw(void) {
+    ClearBackground(DARKGREEN);
+    BeginDrawing();
+    CardDraw(&c);
+    DrawFPS(10, 10);
+    EndDrawing();
+}
+
+void BaizeFree(void) {
+    SpritesheetFree(ssFace);
+    SpritesheetFree(ssBack);
+}
+
+
+// int main(int argc, char* argv[], char* envp[]);
+
+// int main(int argc, char* argv[], char* envp[]) 
+int main(void) 
 {
     // Initialization
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib");
-
-    Camera camera = { 0 };
-    camera.position = (Vector3){ 10.0f, 10.0f, 8.0f };
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 60.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
-    
-    SetCameraMode(camera, CAMERA_ORBITAL);
-
-    Vector3 cubePosition = { 0 };
+    InitWindow(screenWidth, screenHeight, "Oddstream Solitaire");
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
 
-    struct spritesheet* s = spritesheet_new("assets/cards71x96.png", 71, 96, 52, 13);
-    struct card* c = card_new(s, DIAMOND, QUEEN);
+    BaizeInit();
 
-    // Main game loop
+    c = CardNew(ssFace, ssBack, CLUB, ACE);
+    CardSetPosition(&c, (Vector2){100, 200});
+
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        UpdateCamera(&camera);
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginDrawing();
-
-            ClearBackground(DARKGREEN);
-
-            BeginMode3D(camera);
-
-                DrawCube(cubePosition, 2.0f, 2.0f, 2.0f, RED);
-                DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
-                DrawGrid(10, 1.0f);
-
-            EndMode3D();
-
-            card_position(c, 100, 200);
-            card_draw(c);
-
-            DrawText("This is a raylib example", 10, 40, 20, DARKGRAY);
-
-            DrawFPS(10, 10);
-
-        EndDrawing();
-        //----------------------------------------------------------------------------------
+        BaizeUpdate();
+        BaizeDraw();
     }
 
-    card_dispose(c);
-    spritesheet_dispose(s);
+    BaizeFree();
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
     CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
 
     return 0;
 }

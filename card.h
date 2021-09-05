@@ -1,4 +1,7 @@
-/* card.h */
+/* Card.h */
+
+#ifndef CARD_H
+#define CARD_H
 
 enum CardSuit {
     CLUB = 0,
@@ -23,9 +26,20 @@ enum CardOrdinal {
     KING = 13,
 };
 
-struct card;
+struct Card /* tag */ {
+    struct Spritesheet *ssFace;
+    struct Spritesheet *ssBack;
+    int frame;
+    enum CardSuit suit;
+    enum CardOrdinal ord;
+    bool prone;
+    Rectangle rect;
+} /* variable definition */;
 
-struct card* card_new(struct spritesheet* s, enum CardSuit suit, enum CardOrdinal ord);
-void card_dispose(struct card*);
-void card_position(struct card* c, int x, int y);
-void card_draw(struct card*);
+struct Card CardNew(struct Spritesheet* ssFace, struct Spritesheet* ssBack, enum CardSuit suit, enum CardOrdinal ord);
+void CardSetPosition(struct Card* c, Vector2 pos);
+bool CardIsAt(struct Card* c, Vector2 point);
+void CardDraw(struct Card*);
+void CardFlip(struct Card*);
+
+#endif

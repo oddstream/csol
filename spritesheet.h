@@ -1,7 +1,17 @@
 /* spritesheet.h */
 
-struct spritesheet;
+#ifndef SPRITESHEET_H
+#define SPRITESHEET_H
 
-struct spritesheet* spritesheet_new(const char * fname, int x, int y, int maxFrame, int framesWide);
-void spritesheet_dispose(struct spritesheet*);
-void spritesheet_draw(struct spritesheet *s, int frame, float x, float y);
+struct Spritesheet;
+
+struct SpriteInfo {
+    int x, y, w, h;
+};
+
+struct Spritesheet* SpritesheetNew(const char * fname, int x, int y, int maxFrame, int framesWide);
+struct Spritesheet* SpritesheetNewInfo(const char * fname, struct SpriteInfo* info, int maxFrame);
+void SpritesheetFree(struct Spritesheet*);
+void SpritesheetDraw(struct Spritesheet *s, int frame, float x, float y);
+
+#endif

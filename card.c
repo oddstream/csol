@@ -1,4 +1,4 @@
-/* card.c */
+/* Card.c */
 
 #include <stdlib.h>
 
@@ -6,37 +6,36 @@
 #include "spritesheet.h"
 #include "card.h"
 
-struct card {
-    struct spritesheet *s;
-    int frame;
-    enum CardSuit suit;
-    enum CardOrdinal ord;
-    Rectangle rect;
-};
-
-struct card* card_new(struct spritesheet* s, enum CardSuit suit, enum CardOrdinal ord) {
-    struct card* c = malloc(sizeof(struct card));
-    if ( NULL == c ) {
-        return NULL;
-    }
-    c->s = s;
-    c->suit = suit;
-    c->ord = ord;
-    c->frame = (suit * 13) + (ord - 1);
-    c->rect.x = c->rect.y = 0;
-    c->rect.width = c->rect.height = 0;
+struct Card CardNew(struct Spritesheet* ssFace, struct Spritesheet* ssBack, enum CardSuit suit, enum CardOrdinal ord) {
+    struct Card c = {.ssFace = ssFace, .ssBack = ssBack, .suit = suit, .ord = ord, .prone = false};
+    // c.s = s;
+    // c.suit = suit;
+    // c.ord = ord;
+    // c.prone = false;
+    c.frame = (suit * 13) + (ord - 1);
+    c.rect.x = c.rect.y = 0.0;
+    c.rect.width = 71.0;
+    c.rect.height = 96.0;
     return c;
 }
 
-void card_dispose(struct card* c) {
-    free(c);
+void CardSetPosition(struct Card* c, Vector2 pos) {
+    c->rect.x = pos.x;
+    c->rect.y = pos.y;
 }
 
-void card_position(struct card* c, int x, int y) {
-    c->rect.x = x;
-    c->rect.y = y;
+bool CardIsAt(struct Card* c, Vector2 point) {
+    return CheckCollisionPointRec(point, c->rect);
 }
 
-void card_draw(struct card* c) {
-    spritesheet_draw(c->s, c->frame, (float)c->rect.x, (float)c->rect.y);
+void CardDraw(struct Card* c) {
+    if ( c->prone ) {
+        SpritesheetDraw(c->ssBack, 6, c->rect.x, c->rect.y);
+    } else {
+        SpritesheetDraw(c->ssFace, c->frame, c->rect.x, c->rect.y);
+    }
+}
+
+void CardFlip(struct Card* c) {
+    c->prone = !c->prone;
 }
