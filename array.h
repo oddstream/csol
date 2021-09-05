@@ -11,6 +11,7 @@ struct Array  {
 
 struct Array ArrayNew(size_t initialSize);
 int ArrayLen(struct Array* a);
+void** ArrayGet(struct Array* a, int pos);
 void ArrayPush(struct Array* a, void** element);
 void** ArrayPeek(struct Array* a);
 void** ArrayPop(struct Array* a);

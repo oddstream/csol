@@ -39,3 +39,7 @@ void CardDraw(struct Card* c) {
 void CardFlip(struct Card* c) {
     c->prone = !c->prone;
 }
+
+void CardFree(struct Card* c) {
+    (void)c;
+}

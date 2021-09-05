@@ -41,5 +41,6 @@ void CardSetPosition(struct Card* c, Vector2 pos);
 bool CardIsAt(struct Card* c, Vector2 point);
 void CardDraw(struct Card*);
 void CardFlip(struct Card*);
+void CardFree(struct Card*);
 
 #endif
