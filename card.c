@@ -6,8 +6,11 @@
 #include "spritesheet.h"
 #include "card.h"
 
-struct Card CardNew(struct Spritesheet* ssFace, struct Spritesheet* ssBack, enum CardSuit suit, enum CardOrdinal ord) {
-    struct Card c = {.ssFace = ssFace, .ssBack = ssBack, .suit = suit, .ord = ord, .prone = false};
+extern struct Spritesheet* ssFace;
+extern struct Spritesheet* ssBack;
+
+struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord) {
+    struct Card c = {.suit = suit, .ord = ord, .prone = false};
     // c.s = s;
     // c.suit = suit;
     // c.ord = ord;
@@ -17,6 +20,14 @@ struct Card CardNew(struct Spritesheet* ssFace, struct Spritesheet* ssBack, enum
     c.rect.width = 71.0;
     c.rect.height = 96.0;
     return c;
+}
+
+void CardSetOwner(struct Card* c, struct Pile* p) {
+    c->owner = p;
+}
+
+struct Pile* CardgetOwner(struct Card* c) {
+    return c->owner;
 }
 
 void CardSetPosition(struct Card* c, Vector2 pos) {
@@ -30,9 +41,9 @@ bool CardIsAt(struct Card* c, Vector2 point) {
 
 void CardDraw(struct Card* c) {
     if ( c->prone ) {
-        SpritesheetDraw(c->ssBack, 6, c->rect.x, c->rect.y);
+        SpritesheetDraw(ssBack, 6, c->rect.x, c->rect.y);
     } else {
-        SpritesheetDraw(c->ssFace, c->frame, c->rect.x, c->rect.y);
+        SpritesheetDraw(ssFace, c->frame, c->rect.x, c->rect.y);
     }
 }
 

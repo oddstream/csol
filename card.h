@@ -27,17 +27,18 @@ enum CardOrdinal {
 };
 
 struct Card /* tag */ {
-    struct Spritesheet *ssFace;
-    struct Spritesheet *ssBack;
     int frame;
     enum CardSuit suit;
     enum CardOrdinal ord;
     bool prone;
     Rectangle rect;
+    struct Pile* owner;
 } /* variable definition */;
 
-struct Card CardNew(struct Spritesheet* ssFace, struct Spritesheet* ssBack, enum CardSuit suit, enum CardOrdinal ord);
+struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord);
 void CardSetPosition(struct Card* c, Vector2 pos);
+void CardSetOwner(struct Card* c, struct Pile* p);
+struct Pile* CardGetOwner(struct Card* c);
 bool CardIsAt(struct Card* c, Vector2 point);
 void CardDraw(struct Card*);
 void CardFlip(struct Card*);

@@ -5,23 +5,31 @@
 #include "pile.h"
 #include "array.h"
 
-struct Pile* PileNew() {
+struct Pile* PileNew(Vector2 pos) {
     struct Pile* p = malloc(sizeof(struct Pile));
-    p->pos = (Vector2){10.0, 10.0};
+    p->pos = pos;
     p->cards = ArrayNew(52);
     return p;
 }
 
-void PilePush(struct Pile* p, struct Card* pc) {
-    ArrayPush(&p->cards, (void**)pc);
+void PilePush(struct Pile* p, struct Card* c) {
+    CardSetOwner(c, p);
+    CardSetPosition(c, p->pos);
+    ArrayPush(&p->cards, (void**)c);
 }
 
 struct Card* PilePop(struct Pile* p) {
-    return (struct Card*)ArrayPop(&p->cards);
+    struct Card* c = (struct Card*)ArrayPop(&p->cards);
+    CardSetOwner(c, NULL);
+    return c;
 }
 
 struct Card* PilePeek(struct Pile* p) {
     return (struct Card*)ArrayPeek(&p->cards);
+}
+
+Vector2 PileGetPosition(struct Pile* p) {
+    return p->pos;
 }
 
 void PileUpdate(struct Pile* p) {

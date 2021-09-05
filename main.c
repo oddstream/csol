@@ -49,8 +49,6 @@ struct Card cardLibrary[52];    // all references to Card objects are pointers i
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
-    // Initialization
-    //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
     const int screenHeight = 450;
 
@@ -65,14 +63,11 @@ int main(void)
         int i = 0;
         for ( enum CardSuit s = CLUB; s<=SPADE; s++ ) {
             for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
-                cardLibrary[i++] = CardNew(ssFace, ssBack, s, o);
+                cardLibrary[i++] = CardNew(s, o);
             }
         }
     }
     struct Baize* baize = BaizeNew();
-
-    // c = CardNew(ssFace, ssBack, CLUB, ACE);
-    // CardSetPosition(&c, (Vector2){100, 200});
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {

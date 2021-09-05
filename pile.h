@@ -12,7 +12,7 @@ struct Pile {
     struct Array cards;
 };
 
-struct Pile* PileNew(void);
+struct Pile* PileNew(Vector2 pos);
 void PilePush(struct Pile* p, struct Card* pc);
 struct Card* PilePop(struct Pile* p);
 struct Card* PilePeek(struct Pile* p);
