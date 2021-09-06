@@ -10,47 +10,47 @@ extern struct Spritesheet* ssFace;
 extern struct Spritesheet* ssBack;
 
 struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord) {
-    struct Card c = {.suit = suit, .ord = ord, .prone = false};
+    struct Card self = {.suit = suit, .ord = ord, .prone = false};
     // c.s = s;
     // c.suit = suit;
     // c.ord = ord;
     // c.prone = false;
-    c.frame = (suit * 13) + (ord - 1);
-    c.rect.x = c.rect.y = 0.0;
-    c.rect.width = 71.0;
-    c.rect.height = 96.0;
-    return c;
+    self.frame = (suit * 13) + (ord - 1);
+    self.rect.x = self.rect.y = 0.0;
+    self.rect.width = 71.0;
+    self.rect.height = 96.0;
+    return self;
 }
 
-void CardSetOwner(struct Card* c, struct Pile* p) {
-    c->owner = p;
+void CardSetOwner(struct Card* self, struct Pile* p) {
+    self->owner = p;
 }
 
-struct Pile* CardgetOwner(struct Card* c) {
-    return c->owner;
+struct Pile* CardgetOwner(struct Card* self) {
+    return self->owner;
 }
 
-void CardSetPosition(struct Card* c, Vector2 pos) {
-    c->rect.x = pos.x;
-    c->rect.y = pos.y;
+void CardSetPosition(struct Card* self, Vector2 pos) {
+    self->rect.x = pos.x;
+    self->rect.y = pos.y;
 }
 
-bool CardIsAt(struct Card* c, Vector2 point) {
-    return CheckCollisionPointRec(point, c->rect);
+bool CardIsAt(struct Card* self, Vector2 point) {
+    return CheckCollisionPointRec(point, self->rect);
 }
 
-void CardDraw(struct Card* c) {
-    if ( c->prone ) {
-        SpritesheetDraw(ssBack, 6, c->rect.x, c->rect.y);
+void CardDraw(struct Card* self) {
+    if ( self->prone ) {
+        SpritesheetDraw(ssBack, 6, self->rect.x, self->rect.y);
     } else {
-        SpritesheetDraw(ssFace, c->frame, c->rect.x, c->rect.y);
+        SpritesheetDraw(ssFace, self->frame, self->rect.x, self->rect.y);
     }
 }
 
-void CardFlip(struct Card* c) {
-    c->prone = !c->prone;
+void CardFlip(struct Card* self) {
+    self->prone = !self->prone;
 }
 
-void CardFree(struct Card* c) {
-    (void)c;
+void CardFree(struct Card* self) {
+    (void)self;
 }

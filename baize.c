@@ -9,35 +9,35 @@ extern struct Card cardLibrary[52];
 
 struct Baize* BaizeNew() {
 
-    struct Baize* b = malloc(sizeof(struct Baize));
-    b->piles = ArrayNew(16);
+    struct Baize* self = malloc(sizeof(struct Baize));
+    self->piles = ArrayNew(16);
 
-    b->stock = PileNew((Vector2){100, 100});
-    ArrayPush(&b->piles, (void**)b->stock);
-    PilePush(b->stock, &cardLibrary[0]);
+    self->stock = PileNew((Vector2){100, 100});
+    ArrayPush(&self->piles, (void**)self->stock);
+    PilePush(self->stock, &cardLibrary[0]);
 
     struct Pile* pf = PileNew((Vector2){200, 100});
-    ArrayPush(&b->piles, (void**)pf);
+    ArrayPush(&self->piles, (void**)pf);
     PilePush(pf, &cardLibrary[1]);
 
     pf = PileNew((Vector2){300, 100});
-    ArrayPush(&b->piles, (void**)pf);
+    ArrayPush(&self->piles, (void**)pf);
     PilePush(pf, &cardLibrary[2]);
 
     pf = PileNew((Vector2){400, 100});
-    ArrayPush(&b->piles, (void**)pf);
+    ArrayPush(&self->piles, (void**)pf);
     PilePush(pf, &cardLibrary[3]);
 
     pf = PileNew((Vector2){500, 100});
-    ArrayPush(&b->piles, (void**)pf);
+    ArrayPush(&self->piles, (void**)pf);
     PilePush(pf, &cardLibrary[4]);
 
-    return b;
+    return self;
 }
 
-void BaizeUpdate(struct Baize* b) {
+void BaizeUpdate(struct Baize* self) {
 
-    (void)b;
+    (void)self;
 
     static struct Card* currCard = NULL;
     static float dx, dy;
@@ -86,13 +86,13 @@ void BaizeUpdate(struct Baize* b) {
     // card_position(&c, touchPosition.x - dx, touchPosition.y - dy);
 }
 
-void BaizeDraw(struct Baize* b) {
+void BaizeDraw(struct Baize* self) {
     // struct Card* ace = PilePeek(b->stock);
 
     ClearBackground(DARKGREEN);
     BeginDrawing();
     int i = 0;
-    struct Pile* p = (struct Pile*)ArrayFirst(&b->piles, &i);
+    struct Pile* p = (struct Pile*)ArrayFirst(&self->piles, &i);
     while ( p ) {
         PileDraw(p);
         int j = 0;
@@ -101,17 +101,17 @@ void BaizeDraw(struct Baize* b) {
             CardDraw(c);
             c = (struct Card*)ArrayNext(&p->cards, &j);
         }
-        p = (struct Pile*)ArrayNext(&b->piles, &i);
+        p = (struct Pile*)ArrayNext(&self->piles, &i);
     }
     DrawFPS(10, 10);
     EndDrawing();
 }
 
-void BaizeFree(struct Baize* b) {
-    for ( int i = 0; i<ArrayLen(&b->piles); i++ ) {
-        struct Pile* pp = (struct Pile*)ArrayGet(&b->piles, i);
+void BaizeFree(struct Baize* self) {
+    for ( int i = 0; i<ArrayLen(&self->piles); i++ ) {
+        struct Pile* pp = (struct Pile*)ArrayGet(&self->piles, i);
         PileFree(pp);
     }
-    ArrayFree(&b->piles);
-    free(b);
+    ArrayFree(&self->piles);
+    free(self);
 }

@@ -43,6 +43,7 @@
             "name": "Linux",
             "includePath": [
                 "/home/gilbert/raylib/src/**",
+                "/home/gilbert/lua-5.4.3/src/**",
                 "${workspaceFolder}/**"
             ],
             "defines": [
@@ -53,7 +54,7 @@
                 "PLATFORM_DESKTOP"
             ],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
+            "cStandard": "c99",
             "cppStandard": "c++14",
             "intelliSenseMode": "linux-gcc-x64"
 

@@ -19,7 +19,10 @@
 *
 ********************************************************************************************/
 #include <stdio.h>
-#include "raylib.h"
+#include <raylib.h>
+#include <lua.h>
+#include <lauxlib.h>
+
 #include "baize.h"
 #include "spritesheet.h"
 #include "card.h"
@@ -44,13 +47,50 @@ struct Spritesheet* ssFace;
 struct Spritesheet* ssBack;
 struct Card cardLibrary[52];    // all references to Card objects are pointers into this array
 
+int getglobint(lua_State *, const char* var);
+
+int getglobint(lua_State * L, const char* var) {
+    int isnum, result;
+    lua_getglobal(L, var);
+    result = lua_tointegerx(L, -1, &isnum);
+    if ( !isnum ) {
+        fprintf(stderr, "not a number\n");
+    }
+    lua_pop(L, 1);
+    return result;
+}
+
 // int main(int argc, char* argv[], char* envp[]);
 
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    int screenWidth = 640;
+    int screenHeight = 480;
+
+    {
+        lua_State *L = luaL_newstate();
+
+        if ( luaL_loadfile(L, "csol.settings.lua") || lua_pcall(L, 0, 0, 0) ) {
+            fprintf(stderr, "%s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+        } else {
+            screenWidth = getglobint(L, "width");
+            screenHeight = getglobint(L, "height");
+        }
+        // int error = luaL_loadstring(L, "io.stderr:write(\"Hello from Lua\")");
+        // if ( error ) {
+        //     fprintf(stderr, "loadstring %s\n", lua_tostring(L, -1));
+        //     lua_pop(L, 1);
+        // } else {
+        //     error = lua_pcall(L, 0, 0, 0);
+        //     if ( error ) {
+        //         fprintf(stderr, "pcall %s\n", lua_tostring(L, -1));
+        //         lua_pop(L, 1);
+        //     }
+        // }
+        lua_close(L);
+    }
 
     InitWindow(screenWidth, screenHeight, "Oddstream Solitaire");
 

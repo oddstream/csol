@@ -5,71 +5,71 @@
 #include "array.h"
 
 struct Array ArrayNew(size_t initialSize) {
-    struct Array a = {.used = 0, .size = initialSize};
-    a.array = calloc(initialSize, sizeof(void**));
-    return a;
+    struct Array self = {.used = 0, .size = initialSize};
+    self.array = calloc(initialSize, sizeof(void**));
+    return self;
 }
 
-int ArrayLen(struct Array* a) {
-    return a->used;
+int ArrayLen(struct Array* self) {
+    return self->used;
 }
 
-void** ArrayGet(struct Array* a, int pos) {
-    return a->array[pos];
+void** ArrayGet(struct Array* self, int pos) {
+    return self->array[pos];
 }
 
-void** ArrayFirst(struct Array* a, int* savedPos) {
+void** ArrayFirst(struct Array* self, int* savedPos) {
     *savedPos = 0;
-    return a->array[0];
+    return self->array[0];
 }
 
-void** ArrayNext(struct Array* a, int* savedPos) {
+void** ArrayNext(struct Array* self, int* savedPos) {
     *savedPos = *savedPos + 1;
-    return a->array[*savedPos];
+    return self->array[*savedPos];
 }
 
-void** ArrayPrev(struct Array* a, int* savedPos) {
+void** ArrayPrev(struct Array* self, int* savedPos) {
     if ( *savedPos == 0 ) {
         return NULL;
     }
     *savedPos = *savedPos - 1;
-    return a->array[*savedPos];
+    return self->array[*savedPos];
 }
 
-void** ArrayLast(struct Array* a, int* savedPos) {
-    if ( a->used == 0 ) {
+void** ArrayLast(struct Array* self, int* savedPos) {
+    if ( self->used == 0 ) {
         return NULL;
     }
-    *savedPos = a->used - 1;
-    return a->array[*savedPos];
+    *savedPos = self->used - 1;
+    return self->array[*savedPos];
 }
 
-void ArrayPush(struct Array* a, void** element) {
+void ArrayPush(struct Array* self, void** element) {
   // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
   // Therefore a->used can go up to a->size 
-    if ( a->used == a->size ) {
-        a->size *= 2;
-        a->array = reallocarray(a->array, a->size, sizeof(void**));
+    if ( self->used == self->size ) {
+        self->size *= 2;
+        self->array = reallocarray(self->array, self->size, sizeof(void**));
     }
-    a->array[a->used++] = element;
+    self->array[self->used++] = element;
 }
 
-void** ArrayPeek(struct Array* a) {
-    if ( a->used == 0 ) {
+void** ArrayPeek(struct Array* self) {
+    if ( self->used == 0 ) {
         return NULL;
     }
-    return a->array[a->used - 1];
+    return self->array[self->used - 1];
 }
 
-void** ArrayPop(struct Array* a) {
-    if ( a->used == 0 ) {
+void** ArrayPop(struct Array* self) {
+    if ( self->used == 0 ) {
         return NULL;
     }
-    return a->array[a->used-- - 1];
+    return self->array[self->used-- - 1];
 }
 
-void ArrayFree(struct Array *a) {
-    free(a->array);
-    a->array = NULL;
-    a->used = a->size = 0;
+void ArrayFree(struct Array *self) {
+    free(self->array);
+    self->array = NULL;
+    self->used = self->size = 0;
 }

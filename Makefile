@@ -148,7 +148,7 @@ EXAMPLE_RUNTIME_PATH   ?= $(RAYLIB_RELEASE_PATH)
 
 # Define default C compiler: gcc
 # NOTE: define g++ compiler if using C++
-CC = gcc
+CC = cc
 
 ifeq ($(PLATFORM),PLATFORM_DESKTOP)
     ifeq ($(PLATFORM_OS),OSX)
@@ -250,6 +250,8 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
     EXT = .html
 endif
 
+LUA_PATH = /home/gilbert/lua-5.4.3/src
+
 # Define include paths for required headers
 # NOTE: Several external required libraries (stb and others)
 INCLUDE_PATHS = -I. -I$(RAYLIB_PATH)/src -I$(RAYLIB_PATH)/src/external
@@ -270,6 +272,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
         # Reset everything.
         # Precedence: immediately local, installed version, raysan5 provided libs -I$(RAYLIB_H_INSTALL_PATH) -I$(RAYLIB_PATH)/release/include
         INCLUDE_PATHS = -I$(RAYLIB_H_INSTALL_PATH) -isystem. -isystem$(RAYLIB_PATH)/src -isystem$(RAYLIB_PATH)/release/include -isystem$(RAYLIB_PATH)/src/external
+        INCLUDE_PATHS += -I$(LUA_PATH)
     endif
 endif
 
@@ -285,6 +288,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
         # Reset everything.
         # Precedence: immediately local, installed version, raysan5 provided libs
         LDFLAGS = -L. -L$(RAYLIB_INSTALL_PATH) -L$(RAYLIB_RELEASE_PATH)
+        LDFLAGS += -L$(LUA_PATH)
     endif
 endif
 
@@ -306,7 +310,7 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
         # Libraries for Debian GNU/Linux desktop compiling
         # NOTE: Required packages: libegl1-mesa-dev
         LDLIBS = -lraylib -lGL -lm -lpthread -ldl -lrt
-        
+        LDLIBS += -llua
         # On X11 requires also below libraries
         LDLIBS += -lX11
         # NOTE: It seems additional libraries are not required any more, latest GLFW just dlopen them
@@ -359,7 +363,8 @@ OBJ_DIR = obj
 # Define all object files from source files
 SRC = $(call rwildcard, *.c, *.h)
 #OBJS = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-OBJS ?= main.c baize.c pile.c array.c spritesheet.c card.c
+#OBJS ?= main.c baize.c pile.c array.c spritesheet.c card.c
+OBJS ?= *.c
 
 # For Android platform we call a custom Makefile.Android
 ifeq ($(PLATFORM),PLATFORM_ANDROID)
@@ -373,9 +378,10 @@ endif
 # Default target entry
 # NOTE: We call this Makefile target or Makefile.Android target
 all:
-	@echo $(PLATFORM_OS)
-	@echo $(PLATFORM)
-	@echo $(BUILD_MODE)
+	@echo $(PLATFORM_OS) "/" $(PLATFORM) "/" $(BUILD_MODE)
+	@echo "INCLUDE_PATHS =" $(INCLUDE_PATHS)
+	@echo "LDFLAGS =" $(LDFLAGS)
+	@echo "OBJS =" $(OBJS)
 	$(MAKE) $(MAKEFILE_PARAMS)
 
 # Project target defined by PROJECT_NAME

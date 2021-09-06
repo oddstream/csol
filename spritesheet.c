@@ -32,61 +32,61 @@ struct Spritesheet {
 };
 
 struct Spritesheet* SpritesheetNew(const char * fname, int x, int y, int maxFrame, int framesWide) {
-    struct Spritesheet* s = malloc(sizeof(struct Spritesheet));
-    if (NULL == s) {
+    struct Spritesheet* self = malloc(sizeof(struct Spritesheet));
+    if (NULL == self) {
         return NULL;
     }
-    s->texture = LoadTexture(fname);
-    s->info = NULL;
-    s->frameSize.x = x;
-    s->frameSize.y = y;
-    s->maxFrame = maxFrame;
-    s->framesWide = framesWide;
-    s->origin.x = 0;
-    s->origin.y = 0;
-    return s;
+    self->texture = LoadTexture(fname);
+    self->info = NULL;
+    self->frameSize.x = x;
+    self->frameSize.y = y;
+    self->maxFrame = maxFrame;
+    self->framesWide = framesWide;
+    self->origin.x = 0;
+    self->origin.y = 0;
+    return self;
 }
 
 struct Spritesheet* SpritesheetNewInfo(const char* fname, struct SpriteInfo* info, int maxFrame) {
-    struct Spritesheet* s = malloc(sizeof(struct Spritesheet));
-    if (NULL == s) {
+    struct Spritesheet* self = malloc(sizeof(struct Spritesheet));
+    if (NULL == self) {
         return NULL;
     }
-    s->texture = LoadTexture(fname);
-    s->info = info;
-    s->maxFrame = maxFrame;
-    return s;
+    self->texture = LoadTexture(fname);
+    self->info = info;
+    self->maxFrame = maxFrame;
+    return self;
 }
 
-void SpritesheetFree(struct Spritesheet *s) {
-    if (NULL == s) {
+void SpritesheetFree(struct Spritesheet *self) {
+    if (NULL == self) {
         return;
     }
-    UnloadTexture(s->texture);
-    free(s);
+    UnloadTexture(self->texture);
+    free(self);
 }
 
-void SpritesheetDraw(struct Spritesheet *s, int frame, float x, float y) {
+void SpritesheetDraw(struct Spritesheet *self, int frame, float x, float y) {
     const float scale = 1.0;
     const float ang = 0.0;
     const Color c = WHITE;
-    if ( s->info == NULL ) {
-        float ox = (frame % s->framesWide) * s->frameSize.x;
-        float oy = (frame / s->framesWide) * s->frameSize.y;
+    if ( self->info == NULL ) {
+        float ox = (frame % self->framesWide) * self->frameSize.x;
+        float oy = (frame / self->framesWide) * self->frameSize.y;
         DrawTexturePro(
-            s->texture,
-            (Rectangle){ox, oy, s->frameSize.x,s->frameSize.y}, 
-            (Rectangle){x, y, s->frameSize.x * scale, s->frameSize.y * scale}, 
-            (Vector2){s->origin.x * scale, s->origin.y * scale},
+            self->texture,
+            (Rectangle){ox, oy, self->frameSize.x,self->frameSize.y}, 
+            (Rectangle){x, y, self->frameSize.x * scale, self->frameSize.y * scale}, 
+            (Vector2){self->origin.x * scale, self->origin.y * scale},
             ang,
             c
         );
     } else {
         DrawTexturePro(
-            s->texture,
-            (Rectangle){.x = (float)s->info[frame].x, .y=(float)s->info[frame].y, .width=(float)s->info[frame].w, .height=(float)s->info[frame].h},
-            (Rectangle){.x = x, .y = y, .width = (float)s->info[frame].w, .height = (float)s->info[frame].h},
-            (Vector2){s->origin.x * scale, s->origin.y * scale},
+            self->texture,
+            (Rectangle){.x = (float)self->info[frame].x, .y=(float)self->info[frame].y, .width=(float)self->info[frame].w, .height=(float)self->info[frame].h},
+            (Rectangle){.x = x, .y = y, .width = (float)self->info[frame].w, .height = (float)self->info[frame].h},
+            (Vector2){self->origin.x * scale, self->origin.y * scale},
             ang,
             c
         );
