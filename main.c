@@ -45,18 +45,30 @@ struct SpriteInfo retroBackInfo[13] = {
 
 struct Spritesheet* ssFace;
 struct Spritesheet* ssBack;
-struct Card cardLibrary[52];    // all references to Card objects are pointers into this array
 
-int getglobint(lua_State *, const char* var);
+int getglobint(lua_State *, const char* var, const int);
 
-int getglobint(lua_State * L, const char* var) {
-    int isnum, result;
-    lua_getglobal(L, var);
-    result = lua_tointegerx(L, -1, &isnum);
-    if ( !isnum ) {
-        fprintf(stderr, "not a number\n");
+int getglobint(lua_State * L, const char* var, const int def) {
+    int result = def;
+    // fprintf(stderr, "stack %d\n", lua_gettop(L));
+    int typ = lua_getglobal(L, var);
+    if ( typ != LUA_TNUMBER ) {
+        fprintf(stderr, "%s is not a number\n", var);
+        result = def;
+    } else {
+        int isnum;
+        result = lua_tointegerx(L, -1, &isnum);
+        if ( !isnum ) {
+            fprintf(stderr, "%s cannot be converted to an integer\n", var);
+            result = def;
+        }
     }
-    lua_pop(L, 1);
+    // if ( lua_gettop(L) ) {
+    //     lua_pop(L, 1);
+    // }
+    lua_settop(L, 0);   // clear the stack
+    fprintf(stderr, "%s=%d\n", var, result);
+    // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
 }
 
@@ -65,8 +77,7 @@ int getglobint(lua_State * L, const char* var) {
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
-    int screenWidth = 640;
-    int screenHeight = 480;
+    int windowWidth, windowHeight;
 
     {
         lua_State *L = luaL_newstate();
@@ -75,39 +86,21 @@ int main(void)
             fprintf(stderr, "%s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
-            screenWidth = getglobint(L, "width");
-            screenHeight = getglobint(L, "height");
+            windowWidth = getglobint(L, "windowWidth", 640);
+            windowHeight = getglobint(L, "windowHeight", 480);
         }
-        // int error = luaL_loadstring(L, "io.stderr:write(\"Hello from Lua\")");
-        // if ( error ) {
-        //     fprintf(stderr, "loadstring %s\n", lua_tostring(L, -1));
-        //     lua_pop(L, 1);
-        // } else {
-        //     error = lua_pcall(L, 0, 0, 0);
-        //     if ( error ) {
-        //         fprintf(stderr, "pcall %s\n", lua_tostring(L, -1));
-        //         lua_pop(L, 1);
-        //     }
-        // }
+
         lua_close(L);
     }
 
-    InitWindow(screenWidth, screenHeight, "Oddstream Solitaire");
+    InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
     ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
     ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", (struct SpriteInfo*)retroBackInfo, 13);
     
-    {
-        int i = 0;
-        for ( enum CardSuit s = CLUB; s<=SPADE; s++ ) {
-            for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
-                cardLibrary[i++] = CardNew(s, o);
-            }
-        }
-    }
-    struct Baize* baize = BaizeNew();
+    struct Baize* baize = BaizeNew("Freecell");
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {

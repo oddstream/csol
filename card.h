@@ -36,6 +36,7 @@ struct Card /* tag */ {
 } /* variable definition */;
 
 struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord);
+void CardShorthand(struct Card* self, char* z);
 void CardSetPosition(struct Card* c, Vector2 pos);
 void CardSetOwner(struct Card* c, struct Pile* p);
 struct Pile* CardGetOwner(struct Card* c);

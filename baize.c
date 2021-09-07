@@ -2,35 +2,55 @@
 
 #include <stdlib.h>
 #include <raylib.h>
+#include <lua.h>
+#include <lauxlib.h>
+
 #include "baize.h"
 #include "card.h"
 
-extern struct Card cardLibrary[52];
+struct Baize* BaizeNew(const char* variantName) {
 
-struct Baize* BaizeNew() {
+    (void)variantName;
 
     struct Baize* self = malloc(sizeof(struct Baize));
+
+    self->L = luaL_newstate();
+
+    // open and read variant.lua to get number of packs
+
+    self->cardLibrary = calloc(52, sizeof(struct Card));
+    {
+        int i = 0;
+        for ( enum CardSuit s = CLUB; s<=SPADE; s++ ) {
+            for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
+                self->cardLibrary[i++] = CardNew(s, o);
+            }
+        }
+    }
+
     self->piles = ArrayNew(16);
 
-    self->stock = PileNew((Vector2){100, 100});
+    // call BuildVariant() in variant.lua
+
+    self->stock = PileNew("Stock", (Vector2){100, 100}, NONE);
     ArrayPush(&self->piles, (void**)self->stock);
-    PilePush(self->stock, &cardLibrary[0]);
+    PilePush(self->stock, &self->cardLibrary[0]);
 
-    struct Pile* pf = PileNew((Vector2){200, 100});
+    struct Pile* pf = PileNew("Foundation", (Vector2){200, 100}, DOWN);
     ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &cardLibrary[1]);
+    PilePush(pf, &self->cardLibrary[1]);
 
-    pf = PileNew((Vector2){300, 100});
+    pf = PileNew("Foundation", (Vector2){300, 100}, DOWN);
     ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &cardLibrary[2]);
+    PilePush(pf, &self->cardLibrary[2]);
 
-    pf = PileNew((Vector2){400, 100});
+    pf = PileNew("Foundation", (Vector2){400, 100}, DOWN);
     ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &cardLibrary[3]);
+    PilePush(pf, &self->cardLibrary[3]);
 
-    pf = PileNew((Vector2){500, 100});
+    pf = PileNew("Foundation", (Vector2){500, 100}, DOWN);
     ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &cardLibrary[4]);
+    PilePush(pf, &self->cardLibrary[4]);
 
     return self;
 }
@@ -48,7 +68,7 @@ void BaizeUpdate(struct Baize* self) {
     // TODO search piles from bottom to top, not this...
     struct Card* ace = NULL;
     for ( int i=0; i<52; i++ ) {
-        struct Card* c = &cardLibrary[i];
+        struct Card* c = &self->cardLibrary[i];
         if ( CheckCollisionPointRec(touchPosition, c->rect) ) {
             ace = c;
             break;
@@ -108,10 +128,13 @@ void BaizeDraw(struct Baize* self) {
 }
 
 void BaizeFree(struct Baize* self) {
-    for ( int i = 0; i<ArrayLen(&self->piles); i++ ) {
-        struct Pile* pp = (struct Pile*)ArrayGet(&self->piles, i);
-        PileFree(pp);
-    }
+    // for ( int i = 0; i<ArrayLen(&self->piles); i++ ) {
+    //     struct Pile* pp = (struct Pile*)ArrayGet(&self->piles, i);
+    //     PileFree(pp);
+    // }
+    ArrayForeach(&self->piles, (ArrayIterFunc)PileFree);
     ArrayFree(&self->piles);
+    free(self->cardLibrary);
+    lua_close(self->L);
     free(self);
 }

@@ -22,6 +22,15 @@ struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord) {
     return self;
 }
 
+void CardShorthand(struct Card* self, char* z) {
+    static char suit[] = "CHDS";
+    static char ord[] = "0A23456789XJQK";
+
+    z[0] = suit[self->suit];
+    z[1] = ord[self->ord];
+    z[2] = '\0';
+}
+
 void CardSetOwner(struct Card* self, struct Pile* p) {
     self->owner = p;
 }

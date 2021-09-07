@@ -45,8 +45,8 @@ void** ArrayLast(struct Array* self, int* savedPos) {
 }
 
 void ArrayPush(struct Array* self, void** element) {
-  // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
-  // Therefore a->used can go up to a->size 
+    // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
+    // Therefore a->used can go up to a->size 
     if ( self->used == self->size ) {
         self->size *= 2;
         self->array = reallocarray(self->array, self->size, sizeof(void**));
@@ -66,6 +66,12 @@ void** ArrayPop(struct Array* self) {
         return NULL;
     }
     return self->array[self->used-- - 1];
+}
+
+void ArrayForeach(struct Array *self, ArrayIterFunc f) {
+    for ( size_t i = 0; i<self->used; i++ ) {
+        f(self->array[i]);
+    }
 }
 
 void ArrayFree(struct Array *self) {

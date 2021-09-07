@@ -1,4 +1,4 @@
 -- csol.settings.lua
 
-width = 640 * 2
-height = 480 * 2
+windowWidth = 640 * 2
+windowHeight = 480 * 2

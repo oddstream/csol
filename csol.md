@@ -1,12 +1,20 @@
 # csol
 
+## Next
+
+- minimal Makefile
+- Klondike.lua
+- CreatePile function in C callable from Lua
+
 ## Conventions
 
-No typedefs.
+No typedefs on structs or enums.
 
 Functions names are in PascalCase, ObjectVerb.
 
 Hashed string heap for quick string comparisons?
+
+Use "AC", "2H", "XD", "KS" shorthand for cards.
 
 ## Makefile
 
@@ -25,7 +33,7 @@ Edit `c_cpp_properties.json` to add `/home/gilbet/lua-5.4.3/src` to `includePath
 
 ## Variant
 
-Try a command-driven config files, one per variant, stored in a directory with filename = variant name, *eg*
+Command-driven config files, one per variant, stored in a directory with filename = variant name. Tricky if compiled with emscripten and running in a browser.
 
 Programming in Lua 4th Edition uses 5.3
 
@@ -35,15 +43,24 @@ Maybe edit `luaconf.h` to use int and float the same size as raylib (which certa
 
 ```lua
 -- Freecell
-Description("Popular game, unusual because almost all deals are winnable")
 
-local stock, p
+-- variant globals
+name = "Freecell"
+description = "Popular game invented by Paul Alfille, unusual because almost all deals are winnable."
+wikipedia = "https://en.wikipedia.org/wiki/FreeCell"
+packs = 1 -- for building cardLibrary, defaults to 1
 
-stock = CreatePile("Stock", -2, -2, "None", {0,0,0})
+function BuildVariant(name)
+    local stock, p
 
-p = CreatePile("Foundation", 4, 0, "None", {21,0,0})
-p.SetAccept(p, "AC")
+    stock = CreatePile("Stock", -2, -2, "None", {0,0,0})
 
-p = CreatePile("Tableau", 0, 1, "Down", {42,42,1})
-p.Deal("UUUUUUU")
+    p = PileCreate("Foundation", 4, 0, "None", {21,0,0})
+    -- is p userdata
+    PileSetAccept(p, "AC")
+
+    p = CreatePile("Tableau", 0, 1, "Down", {42,42,1})
+    PileDeal(p, "UUUUUUU")
+
+end
 ```
