@@ -64,3 +64,9 @@ function BuildVariant(name)
 
 end
 ```
+
+## Fonts
+
+See [Parrots font drawing] for use of ttf font.
+
+Can use Acme for pile accept, and even create scaled cards.

@@ -10,15 +10,12 @@ extern struct Spritesheet* ssFace;
 extern struct Spritesheet* ssBack;
 
 struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord) {
+    extern float cardWidth, cardHeight;
     struct Card self = {.suit = suit, .ord = ord, .prone = false};
-    // c.s = s;
-    // c.suit = suit;
-    // c.ord = ord;
-    // c.prone = false;
     self.frame = (suit * 13) + (ord - 1);
     self.rect.x = self.rect.y = 0.0;
-    self.rect.width = 71.0;
-    self.rect.height = 96.0;
+    self.rect.width = cardWidth;
+    self.rect.height = cardHeight;
     return self;
 }
 
@@ -48,7 +45,12 @@ bool CardIsAt(struct Card* self, Vector2 point) {
     return CheckCollisionPointRec(point, self->rect);
 }
 
+void CardUpdate(struct Card* self) {
+    (void)self;
+}
+
 void CardDraw(struct Card* self) {
+    // BeginDrawing() has been called by BaizeDraw()
     if ( self->prone ) {
         SpritesheetDraw(ssBack, 6, self->rect.x, self->rect.y);
     } else {

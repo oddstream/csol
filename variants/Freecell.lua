@@ -1,0 +1,3 @@
+-- Freecell
+
+Packs = 1

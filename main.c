@@ -23,6 +23,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "moon.h"
 #include "baize.h"
 #include "spritesheet.h"
 #include "card.h"
@@ -46,31 +47,9 @@ struct SpriteInfo retroBackInfo[13] = {
 struct Spritesheet* ssFace;
 struct Spritesheet* ssBack;
 
-int getglobint(lua_State *, const char* var, const int);
+float cardWidth = 71.0, cardHeight = 96.0;
 
-int getglobint(lua_State * L, const char* var, const int def) {
-    int result = def;
-    // fprintf(stderr, "stack %d\n", lua_gettop(L));
-    int typ = lua_getglobal(L, var);
-    if ( typ != LUA_TNUMBER ) {
-        fprintf(stderr, "%s is not a number\n", var);
-        result = def;
-    } else {
-        int isnum;
-        result = lua_tointegerx(L, -1, &isnum);
-        if ( !isnum ) {
-            fprintf(stderr, "%s cannot be converted to an integer\n", var);
-            result = def;
-        }
-    }
-    // if ( lua_gettop(L) ) {
-    //     lua_pop(L, 1);
-    // }
-    lua_settop(L, 0);   // clear the stack
-    fprintf(stderr, "%s=%d\n", var, result);
-    // fprintf(stderr, "stack %d\n", lua_gettop(L));
-    return result;
-}
+Color baizeColor;   // pedantically, can't initialize with a struct in C, because initializer element is not constant [-Werror=pedantic]
 
 // int main(int argc, char* argv[], char* envp[]);
 
@@ -86,8 +65,19 @@ int main(void)
             fprintf(stderr, "%s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
-            windowWidth = getglobint(L, "windowWidth", 640);
-            windowHeight = getglobint(L, "windowHeight", 480);
+            windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);
+            windowHeight = MoonGetGlobalInt(L, "WindowHeight", 480);
+            int typ = lua_getglobal(L, "BaizeColor");
+            if ( typ == LUA_TTABLE ) {
+                float r, g, b, a;
+                r = MoonGetFieldNumber(L, "red", 1);
+                g = MoonGetFieldNumber(L, "green", 1);
+                b = MoonGetFieldNumber(L, "blue", 1);
+                a = MoonGetFieldNumber(L, "alpha", 1);
+                baizeColor = (Color){.r=r*255, .g=g*255, .b=b*255, .a=a*255};
+            } else {
+                baizeColor = DARKGREEN;
+            }
         }
 
         lua_close(L);

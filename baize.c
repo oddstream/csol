@@ -1,25 +1,35 @@
 /* baize.c */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <raylib.h>
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "moon.h"
 #include "baize.h"
 #include "card.h"
 
 struct Baize* BaizeNew(const char* variantName) {
 
-    (void)variantName;
+    char fname[64];
+    int packs = 1;
 
     struct Baize* self = malloc(sizeof(struct Baize));
 
     self->L = luaL_newstate();
 
-    // open and read variant.lua to get number of packs
+    sprintf(fname, "variants/%s.lua", variantName);
 
-    self->cardLibrary = calloc(52, sizeof(struct Card));
-    {
+    if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
+        fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
+        lua_pop(self->L, 1);
+    } else {
+        packs = MoonGetGlobalInt(self->L, "Packs", 1);
+    }
+
+    self->cardLibrary = calloc(packs * 52, sizeof(struct Card));
+    for ( int pack = 0; pack < packs; pack++ ) {
         int i = 0;
         for ( enum CardSuit s = CLUB; s<=SPADE; s++ ) {
             for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
@@ -109,7 +119,9 @@ void BaizeUpdate(struct Baize* self) {
 void BaizeDraw(struct Baize* self) {
     // struct Card* ace = PilePeek(b->stock);
 
-    ClearBackground(DARKGREEN);
+    extern Color baizeColor;
+
+    ClearBackground(baizeColor);
     BeginDrawing();
     int i = 0;
     struct Pile* p = (struct Pile*)ArrayFirst(&self->piles, &i);

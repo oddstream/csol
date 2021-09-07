@@ -42,7 +42,10 @@ void PileUpdate(struct Pile* self) {
 }
 
 void PileDraw(struct Pile* self) {
-    (void)self;
+    extern float cardWidth, cardHeight;
+    // BeginDrawing() has been called by BaizeDraw()
+    Rectangle r = {.x=self->pos.x, .y=self->pos.y, cardWidth, cardHeight};
+    DrawRectangleRoundedLines(r, 0.1, 4, 2.0, (Color){255,255,255,63});
 }
 
 void PileFree(struct Pile* self) {
