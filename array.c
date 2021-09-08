@@ -4,9 +4,11 @@
 
 #include "array.h"
 
-struct Array ArrayNew(size_t initialSize) {
-    struct Array self = {.used = 0, .size = initialSize};
-    self.array = calloc(initialSize, sizeof(void**));
+struct Array* ArrayNew(size_t initialSize) {
+    struct Array* self = malloc(sizeof(struct Array));
+    self->used = 0;
+    self->size = initialSize;
+    self->array = calloc(initialSize, sizeof(void**));
     return self;
 }
 
@@ -78,6 +80,5 @@ void ArrayForeach(struct Array *self, ArrayIterFunc f) {
 
 void ArrayFree(struct Array *self) {
     free(self->array);
-    self->array = NULL;
-    self->used = self->size = 0;
+    free(self);
 }

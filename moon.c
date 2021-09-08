@@ -95,7 +95,7 @@ int MoonAddPile(lua_State* L) {
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", class, x, y, fan);
 
     struct Pile* p = PileNew(class, (Vector2){x, y}, fan);
-    ArrayPush(&baize->piles, (void**)p);
+    ArrayPush(baize->piles, (void**)p);
     lua_pushlightuserdata(L, p);
 
     return 1;   // number of args pushed
@@ -127,7 +127,7 @@ int MoonFindPile(lua_State* L) {
     int n = lua_tointeger(L, 2); // doesn't alter stack
 
     int savedPos;
-    struct Pile* p = (struct Pile*)ArrayFirst(&baize->piles, &savedPos);
+    struct Pile* p = (struct Pile*)ArrayFirst(baize->piles, &savedPos);
     while ( p ) {
         if ( strcmp(p->class, class) == 0 ) {
             n--;
@@ -136,7 +136,7 @@ int MoonFindPile(lua_State* L) {
                 return 1;
             }
         }
-        p = (struct Pile*)ArrayNext(&baize->piles, &savedPos);
+        p = (struct Pile*)ArrayNext(baize->piles, &savedPos);
     }
 
     return 0;

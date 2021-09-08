@@ -11,7 +11,7 @@ struct Array  {
 
 typedef void (*ArrayIterFunc)(void**);
 
-struct Array ArrayNew(size_t initialSize);
+struct Array* ArrayNew(size_t initialSize);
 int ArrayLen(struct Array* a);
 void** ArrayGet(struct Array* a, int pos);
 void** ArrayFirst(struct Array* a, int* savedPos);

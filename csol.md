@@ -2,8 +2,8 @@
 
 ## Next
 
-- Freecell.lua
-- CreatePile function in C callable from Lua
+- Array didn't grow when adding piles
+- should Array be alloc'd?
 - minimal Makefile
 
 ## Conventions

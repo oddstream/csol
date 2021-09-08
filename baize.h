@@ -12,7 +12,7 @@ struct Baize {
     unsigned magic;
     struct Card* cardLibrary;
     lua_State *L;
-    struct Array piles;
+    struct Array* piles;
     struct Pile* stock;
 };
 

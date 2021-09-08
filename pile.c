@@ -6,10 +6,12 @@
 #include "pile.h"
 #include "array.h"
 
+#define MAGIC (0xdeadbeef)
+
 struct Pile* PileNew(const char* class, Vector2 pos, enum FanType fan) {
     struct Pile* self = malloc(sizeof(struct Pile));
     if ( self ) {
-        self->magic = 0xdeadbeef;
+        self->magic = MAGIC;
         strncpy(self->class, class, sizeof self->class - 1);
         self->pos = pos;
         self->fan = fan;
@@ -19,21 +21,21 @@ struct Pile* PileNew(const char* class, Vector2 pos, enum FanType fan) {
 }
 
 bool PileValid(struct Pile* self) {
-    return self && self->magic == 0xdeadbeef;
+    return self && self->magic == MAGIC;
 }
 
 size_t PileLen(struct Pile* self) {
-    return ArrayLen(&self->cards);
+    return ArrayLen(self->cards);
 }
 
 void PilePush(struct Pile* self, struct Card* c) {
     CardSetOwner(c, self);
     CardSetPosition(c, self->pos);
-    ArrayPush(&self->cards, (void**)c);
+    ArrayPush(self->cards, (void**)c);
 }
 
 struct Card* PilePop(struct Pile* self) {
-    struct Card* c = (struct Card*)ArrayPop(&self->cards);
+    struct Card* c = (struct Card*)ArrayPop(self->cards);
     if ( c ) {
         CardSetOwner(c, NULL);
     }
@@ -41,7 +43,7 @@ struct Card* PilePop(struct Pile* self) {
 }
 
 struct Card* PilePeek(struct Pile* self) {
-    return (struct Card*)ArrayPeek(&self->cards);
+    return (struct Card*)ArrayPeek(self->cards);
 }
 
 Vector2 PileGetPosition(struct Pile* self) {
@@ -62,7 +64,7 @@ void PileDraw(struct Pile* self) {
 void PileFree(struct Pile* self) {
     // Card objects exist in the Baize->cardLibrary array, so we don't free them here
     if ( self ) {
-        ArrayFree(&self->cards);
+        ArrayFree(self->cards);
         self->magic = 0;
         free(self);
     }

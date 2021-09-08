@@ -22,7 +22,7 @@ struct Pile {
     char class[16];
     enum FanType fan;
     Vector2 pos;
-    struct Array cards;
+    struct Array* cards;
 };
 
 struct Pile* PileNew(const char* class, Vector2 pos, enum FanType fan);

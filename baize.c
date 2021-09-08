@@ -11,13 +11,15 @@
 #include "baize.h"
 #include "card.h"
 
+#define MAGIC (0x79767)
+
 struct Baize* BaizeNew(const char* variantName) {
 
     char fname[64];
     int packs = 1;
 
     struct Baize* self = malloc(sizeof(struct Baize));
-    self->magic = 0x12345678;
+    self->magic = MAGIC;
 
     self->L = luaL_newstate();
     luaL_openlibs(self->L);
@@ -47,16 +49,16 @@ struct Baize* BaizeNew(const char* variantName) {
         }
     }
 
-    self->piles = ArrayNew(32);
+    self->piles = ArrayNew(8);
 
-    // always create a stock pile
+    // always create a stock pile, and fill it
     struct Pile* stock = PileNew("Stock", (Vector2){0,0}, NONE);
     if ( stock ) {
-        ArrayPush(&self->piles, (void**)stock);
+        ArrayPush(self->piles, (void**)stock);
         for ( int i=0; i<packs*52; i++ ) {
             PilePush(stock, &self->cardLibrary[i]);
         }
-        self->stock = (struct Pile*)ArrayFirst(&self->piles, NULL);
+        self->stock = (struct Pile*)ArrayFirst(self->piles, NULL);
     }
 
     fprintf(stderr, "stock now has %lu cards\n", PileLen(self->stock));
@@ -73,15 +75,15 @@ struct Baize* BaizeNew(const char* variantName) {
         }
     }
 
-    fprintf(stderr, "%d piles created\n", ArrayLen(&self->piles));
+    fprintf(stderr, "%d piles created\n", ArrayLen(self->piles));
 
-    self->stock = (struct Pile*)ArrayGet(&self->piles, 0);
+    self->stock = (struct Pile*)ArrayGet(self->piles, 0);
 
     return self;
 }
 
 bool BaizeValid(struct Baize* self) {
-    return self && self->magic == 0x12345678;
+    return self && self->magic == MAGIC;
 }
 
 void BaizeUpdate(struct Baize* self) {
@@ -136,35 +138,30 @@ void BaizeUpdate(struct Baize* self) {
 }
 
 void BaizeDraw(struct Baize* self) {
-    // struct Card* ace = PilePeek(b->stock);
 
     extern Color baizeColor;
 
     ClearBackground(baizeColor);
     BeginDrawing();
     int i = 0;
-    struct Pile* p = (struct Pile*)ArrayFirst(&self->piles, &i);
+    struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &i);
     while ( p ) {
         PileDraw(p);
         int j = 0;
-        struct Card* c = (struct Card*)ArrayFirst(&p->cards, &j);
+        struct Card* c = (struct Card*)ArrayFirst(p->cards, &j);
         while ( c ) {
             CardDraw(c);
-            c = (struct Card*)ArrayNext(&p->cards, &j);
+            c = (struct Card*)ArrayNext(p->cards, &j);
         }
-        p = (struct Pile*)ArrayNext(&self->piles, &i);
+        p = (struct Pile*)ArrayNext(self->piles, &i);
     }
     DrawFPS(10, 10);
     EndDrawing();
 }
 
 void BaizeFree(struct Baize* self) {
-    // for ( int i = 0; i<ArrayLen(&self->piles); i++ ) {
-    //     struct Pile* pp = (struct Pile*)ArrayGet(&self->piles, i);
-    //     PileFree(pp);
-    // }
-    ArrayForeach(&self->piles, (ArrayIterFunc)PileFree);
-    ArrayFree(&self->piles);
+    ArrayForeach(self->piles, (ArrayIterFunc)PileFree);
+    ArrayFree(self->piles);
     free(self->cardLibrary);
     lua_close(self->L);
     self->magic = 0;
