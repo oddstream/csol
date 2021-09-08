@@ -2,9 +2,9 @@
 
 ## Next
 
-- minimal Makefile
-- Klondike.lua
+- Freecell.lua
 - CreatePile function in C callable from Lua
+- minimal Makefile
 
 ## Conventions
 

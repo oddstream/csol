@@ -19,7 +19,9 @@ void** ArrayGet(struct Array* self, int pos) {
 }
 
 void** ArrayFirst(struct Array* self, int* savedPos) {
-    *savedPos = 0;
+    if ( savedPos ) {
+        *savedPos = 0;
+    }
     return self->array[0];
 }
 

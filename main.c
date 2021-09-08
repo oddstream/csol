@@ -78,6 +78,7 @@ int main(void)
             } else {
                 baizeColor = DARKGREEN;
             }
+            lua_pop(L, 1);  // remove global (table)
         }
 
         lua_close(L);

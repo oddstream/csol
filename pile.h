@@ -18,6 +18,7 @@ enum FanType {
 };
 
 struct Pile {
+    unsigned magic;
     char class[16];
     enum FanType fan;
     Vector2 pos;
@@ -25,6 +26,8 @@ struct Pile {
 };
 
 struct Pile* PileNew(const char* class, Vector2 pos, enum FanType fan);
+bool PileValid(struct Pile* self);
+size_t PileLen(struct Pile* self);
 void PilePush(struct Pile* p, struct Card* pc);
 struct Card* PilePop(struct Pile* p);
 struct Card* PilePeek(struct Pile* p);

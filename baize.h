@@ -9,6 +9,7 @@
 #include "pile.h"
 
 struct Baize {
+    unsigned magic;
     struct Card* cardLibrary;
     lua_State *L;
     struct Array piles;
@@ -16,8 +17,9 @@ struct Baize {
 };
 
 struct Baize* BaizeNew(const char* variantName);
-void BaizeUpdate(struct Baize* b);
-void BaizeDraw(struct Baize* b);
-void BaizeFree(struct Baize *b);
+bool BaizeValid(struct Baize* self);
+void BaizeUpdate(struct Baize* self);
+void BaizeDraw(struct Baize* self);
+void BaizeFree(struct Baize* self);
 
 #endif

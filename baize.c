@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <lualib.h>
 
 #include "moon.h"
 #include "baize.h"
@@ -16,8 +17,16 @@ struct Baize* BaizeNew(const char* variantName) {
     int packs = 1;
 
     struct Baize* self = malloc(sizeof(struct Baize));
+    self->magic = 0x12345678;
 
     self->L = luaL_newstate();
+    luaL_openlibs(self->L);
+
+    MoonRegisterFunctions(self->L);
+
+    // create a handle to this Baize inside Lua
+    lua_pushlightuserdata(self->L, self);
+    lua_setglobal(self->L, "BAIZE");
 
     sprintf(fname, "variants/%s.lua", variantName);
 
@@ -38,31 +47,41 @@ struct Baize* BaizeNew(const char* variantName) {
         }
     }
 
-    self->piles = ArrayNew(16);
+    self->piles = ArrayNew(32);
 
-    // call BuildVariant() in variant.lua
+    // always create a stock pile
+    struct Pile* stock = PileNew("Stock", (Vector2){0,0}, NONE);
+    if ( stock ) {
+        ArrayPush(&self->piles, (void**)stock);
+        for ( int i=0; i<packs*52; i++ ) {
+            PilePush(stock, &self->cardLibrary[i]);
+        }
+        self->stock = (struct Pile*)ArrayFirst(&self->piles, NULL);
+    }
 
-    self->stock = PileNew("Stock", (Vector2){100, 100}, NONE);
-    ArrayPush(&self->piles, (void**)self->stock);
-    PilePush(self->stock, &self->cardLibrary[0]);
+    fprintf(stderr, "stock now has %lu cards\n", PileLen(self->stock));
 
-    struct Pile* pf = PileNew("Foundation", (Vector2){200, 100}, DOWN);
-    ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &self->cardLibrary[1]);
+    int typ = lua_getglobal(self->L, "Build");  // push value of Build onto the stack
+    if ( typ != LUA_TFUNCTION ) {
+        fprintf(stderr, "Build is not a function\n");
+    } else {
+        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
+            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);
+        } else {
+            fprintf(stderr, "Build called ok\n");
+        }
+    }
 
-    pf = PileNew("Foundation", (Vector2){300, 100}, DOWN);
-    ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &self->cardLibrary[2]);
+    fprintf(stderr, "%d piles created\n", ArrayLen(&self->piles));
 
-    pf = PileNew("Foundation", (Vector2){400, 100}, DOWN);
-    ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &self->cardLibrary[3]);
-
-    pf = PileNew("Foundation", (Vector2){500, 100}, DOWN);
-    ArrayPush(&self->piles, (void**)pf);
-    PilePush(pf, &self->cardLibrary[4]);
+    self->stock = (struct Pile*)ArrayGet(&self->piles, 0);
 
     return self;
+}
+
+bool BaizeValid(struct Baize* self) {
+    return self && self->magic == 0x12345678;
 }
 
 void BaizeUpdate(struct Baize* self) {
@@ -148,5 +167,6 @@ void BaizeFree(struct Baize* self) {
     ArrayFree(&self->piles);
     free(self->cardLibrary);
     lua_close(self->L);
+    self->magic = 0;
     free(self);
 }
