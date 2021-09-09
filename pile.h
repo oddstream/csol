@@ -31,6 +31,8 @@ size_t PileLen(struct Pile* self);
 void PilePush(struct Pile* p, struct Card* pc);
 struct Card* PilePop(struct Pile* p);
 struct Card* PilePeek(struct Pile* p);
+void PileShuffle(struct Pile* self);
+Vector2 PilePushedFannedPosition(struct Pile* self);
 void PileUpdate(struct Pile* p);
 void PileDraw(struct Pile* p);
 void PileFree(struct Pile* p);

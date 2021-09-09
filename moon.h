@@ -9,7 +9,8 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def);
 float MoonGetFieldNumber(lua_State* L, const char* key, const float def);
 
 int MoonAddPile(lua_State* L);
-int MoonDeal(lua_State* L);
+int MoonDealUp(lua_State* L);
+int MoonDealDown(lua_State* L);
 int MoonFindPile(lua_State* L);
 
 #endif

@@ -1,5 +1,7 @@
 -- Freecell
 
+FanDown = 3
+
 Packs = 1
 
 -- C sets variable 'baize'
@@ -32,28 +34,28 @@ function Build()
         io.stderr:write("Build found a pile\n")
     end
 
-    pile = AddPile("Tableau", 200, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 200, 300, FanDown)
+    DealUp(pile, 7)
 
-    pile = AddPile("Tableau", 300, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 300, 300, FanDown)
+    DealUp(pile, 7)
 
-    pile = AddPile("Tableau", 400, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 400, 300, FanDown)
+    DealUp(pile, 7)
 
-    pile = AddPile("Tableau", 500, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 500, 300, FanDown)
+    DealUp(pile, 7)
 
-    pile = AddPile("Tableau", 600, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 600, 300, FanDown)
+    DealUp(pile, 6)
 
-    pile = AddPile("Tableau", 700, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 700, 300, FanDown)
+    DealUp(pile, 6)
 
-    pile = AddPile("Tableau", 800, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 800, 300, FanDown)
+    DealUp(pile, 6)
 
-    pile = AddPile("Tableau", 900, 300, 0)
-    Deal(pile)
+    pile = AddPile("Tableau", 900, 300, FanDown)
+    DealUp(pile, 2)
 
 end

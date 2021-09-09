@@ -28,20 +28,20 @@
 #include "spritesheet.h"
 #include "card.h"
 
-struct SpriteInfo retroBackInfo[13] = {
-    {.x = 5, .y = 4, .w = 71, .h = 96},
-    {.x = 85, .y = 4, .w = 71, .h = 96},
-    {.x = 185, .y = 4, .w = 71, .h = 96},
-    {.x = 245, .y = 4, .w = 71, .h = 96},
-    {.x = 325, .y = 4, .w = 71, .h = 96},
-    {.x = 405, .y = 4, .w = 71, .h = 96},
-    {.x = 485, .y = 4, .w = 71, .h = 96},
-    {.x = 5, .y = 140, .w = 71, .h = 96},
-    {.x = 85, .y = 140, .w = 71, .h = 96},
-    {.x = 185, .y = 140, .w = 71, .h = 96},
-    {.x = 245, .y = 140, .w = 71, .h = 96},
-    {.x = 325, .y = 140, .w = 71, .h = 96},
-    {.x = 405, .y = 140, .w = 71, .h = 96},
+struct Rectangle retroBackInfo[13] = {
+    {.x = 5, .y = 4, .width = 71, .height = 96},
+    {.x = 85, .y = 4, .width = 71, .height = 96},
+    {.x = 185, .y = 4, .width = 71, .height = 96},
+    {.x = 245, .y = 4, .width = 71, .height = 96},
+    {.x = 325, .y = 4, .width = 71, .height = 96},
+    {.x = 405, .y = 4, .width = 71, .height = 96},
+    {.x = 485, .y = 4, .width = 71, .height = 96},
+    {.x = 5, .y = 140, .width = 71, .height = 96},
+    {.x = 85, .y = 140, .width = 71, .height = 96},
+    {.x = 185, .y = 140, .width = 71, .height = 96},
+    {.x = 245, .y = 140, .width = 71, .height = 96},
+    {.x = 325, .y = 140, .width = 71, .height = 96},
+    {.x = 405, .y = 140, .width = 71, .height = 96},
 };
 
 struct Spritesheet* ssFace;
@@ -89,7 +89,7 @@ int main(void)
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
     ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
-    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", (struct SpriteInfo*)retroBackInfo, 13);
+    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
     
     struct Baize* baize = BaizeNew("Freecell");
 

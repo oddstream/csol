@@ -16,36 +16,45 @@ int ArrayLen(struct Array* self) {
     return self->used;
 }
 
+void ArraySwap(struct Array* self, int i, int j) {
+    void** tmp = self->array[i];
+    self->array[i] = self->array[j];
+    self->array[j] = tmp;
+}
+
 void** ArrayGet(struct Array* self, int pos) {
     return self->array[pos];
 }
 
-void** ArrayFirst(struct Array* self, int* savedPos) {
-    if ( savedPos ) {
-        *savedPos = 0;
-    }
-    return self->array[0];
-}
-
-void** ArrayNext(struct Array* self, int* savedPos) {
-    *savedPos = *savedPos + 1;
-    return self->array[*savedPos];
-}
-
-void** ArrayPrev(struct Array* self, int* savedPos) {
-    if ( *savedPos == 0 ) {
-        return NULL;
-    }
-    *savedPos = *savedPos - 1;
-    return self->array[*savedPos];
-}
-
-void** ArrayLast(struct Array* self, int* savedPos) {
+void** ArrayFirst(struct Array* self) {
     if ( self->used == 0 ) {
         return NULL;
     }
-    *savedPos = self->used - 1;
-    return self->array[*savedPos];
+    self->savedPos = 0;
+    return self->array[0];
+}
+
+void** ArrayNext(struct Array* self) {
+    if ( ++self->savedPos >= self->used ) {
+        return NULL;
+    }
+    return self->array[self->savedPos];
+}
+
+void** ArrayPrev(struct Array* self) {
+    if ( self->savedPos == 0 ) {
+        return NULL;
+    }
+    self->savedPos = self->savedPos - 1;
+    return self->array[self->savedPos];
+}
+
+void** ArrayLast(struct Array* self) {
+    if ( self->used == 0 ) {
+        return NULL;
+    }
+    self->savedPos = self->used - 1;
+    return self->array[self->savedPos];
 }
 
 void ArrayPush(struct Array* self, void** element) {

@@ -10,14 +10,13 @@
 #include "array.h"
 #include "moon.h"
 
-struct FunctionToRegister {
+static const struct FunctionToRegister {
     char luaFunction[32];
     lua_CFunction cFunction;
-};
-
-static struct FunctionToRegister FunctionsToRegister[] = {
+} FunctionsToRegister[] = {
     {"AddPile", MoonAddPile},
-    {"Deal", MoonDeal},
+    {"DealUp", MoonDealUp},
+    {"DealDown", MoonDealDown},
     {"FindPile", MoonFindPile},
 };
 
@@ -29,7 +28,7 @@ static struct Baize* getBaize(lua_State* L) {
     struct Baize* baize = lua_touserdata(L, -1); // doesn't alter stack
     lua_pop(L, 1);  // pop light userdata
     if ( !BaizeValid(baize) ) {
-        fprintf(stderr, "global BAIZE is not valid");
+        fprintf(stderr, "global BAIZE is not valid\n");
     }
     return baize;
 }
@@ -86,6 +85,9 @@ float MoonGetFieldNumber(lua_State* L, const char* key, const float def) {
 
 int MoonAddPile(lua_State* L) {
     struct Baize* baize = getBaize(L);
+    if ( !baize ) {
+        return 0;
+    }
 
     const char* class = lua_tostring(L, 1); // doesn't alter stack
     float x = lua_tonumber(L, 2); // doesn't alter stack
@@ -101,20 +103,55 @@ int MoonAddPile(lua_State* L) {
     return 1;   // number of args pushed
 }
 
-int MoonDeal(lua_State* L) {
+int MoonDealUp(lua_State* L) {
     struct Baize* baize = getBaize(L);
+    if ( !baize ) {
+        return 0;
+    }
 
     struct Pile* p = lua_touserdata(L, 1); // get argument
     if ( !PileValid(p) ) {
         fprintf(stderr, "destination pile is not valid");
         return 0;
     }
+    
+    int n = lua_tointeger(L, 2);
 
-    struct Card* c = PilePop(baize->stock);
-    if ( c ) {
-        PilePush(p, c);
-    } else {
-        fprintf(stderr, "cannot pop card\n");
+    while ( n-- ) {
+        struct Card* c = PilePop(baize->stock);
+        if ( c ) {
+            CardFlipUp(c);
+            PilePush(p, c);
+        } else {
+            fprintf(stderr, "cannot pop card from Stock\n");
+        }
+    }
+
+    return 0;
+}
+
+int MoonDealDown(lua_State* L) {
+    struct Baize* baize = getBaize(L);
+    if ( !baize ) {
+        return 0;
+    }
+
+    struct Pile* p = lua_touserdata(L, 1); // get argument
+    if ( !PileValid(p) ) {
+        fprintf(stderr, "destination pile is not valid");
+        return 0;
+    }
+    
+    int n = lua_tointeger(L, 2);
+
+    while ( n-- ) {
+        struct Card* c = PilePop(baize->stock);
+        if ( c ) {
+            CardFlipDown(c);
+            PilePush(p, c);
+        } else {
+            fprintf(stderr, "cannot pop card from Stock\n");
+        }
     }
 
     return 0;
@@ -122,12 +159,14 @@ int MoonDeal(lua_State* L) {
 
 int MoonFindPile(lua_State* L) {
     struct Baize* baize = getBaize(L);
+    if ( !baize ) {
+        return 0;
+    }
 
     const char* class = lua_tostring(L, 1); // doesn't alter stack
     int n = lua_tointeger(L, 2); // doesn't alter stack
 
-    int savedPos;
-    struct Pile* p = (struct Pile*)ArrayFirst(baize->piles, &savedPos);
+    struct Pile* p = (struct Pile*)ArrayFirst(baize->piles);
     while ( p ) {
         if ( strcmp(p->class, class) == 0 ) {
             n--;
@@ -136,7 +175,7 @@ int MoonFindPile(lua_State* L) {
                 return 1;
             }
         }
-        p = (struct Pile*)ArrayNext(baize->piles, &savedPos);
+        p = (struct Pile*)ArrayNext(baize->piles);
     }
 
     return 0;

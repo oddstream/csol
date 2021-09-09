@@ -2,8 +2,9 @@
 
 ## Next
 
-- Array didn't grow when adding piles
-- should Array be alloc'd?
+- fanned position
+- animate dragged cards back to pile
+- deal cards DealUp(p, n)/DealDown(p, n)/DealCard(p, "AC")
 - minimal Makefile
 
 ## Conventions

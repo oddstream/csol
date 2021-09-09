@@ -10,12 +10,9 @@ extern struct Spritesheet* ssFace;
 extern struct Spritesheet* ssBack;
 
 struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord) {
-    extern float cardWidth, cardHeight;
-    struct Card self = {.suit = suit, .ord = ord, .prone = false};
+    struct Card self = {.suit = suit, .ord = ord, .prone = true};
     self.frame = (suit * 13) + (ord - 1);
-    self.rect.x = self.rect.y = 0.0;
-    self.rect.width = cardWidth;
-    self.rect.height = cardHeight;
+    self.baizePos = (Vector2){0};
     return self;
 }
 
@@ -32,17 +29,19 @@ void CardSetOwner(struct Card* self, struct Pile* p) {
     self->owner = p;
 }
 
-struct Pile* CardgetOwner(struct Card* self) {
+struct Pile* CardGetOwner(struct Card* self) {
     return self->owner;
 }
 
 void CardSetPosition(struct Card* self, Vector2 pos) {
-    self->rect.x = pos.x;
-    self->rect.y = pos.y;
+    // sets the baize position of this card
+    self->baizePos = pos;
 }
 
 bool CardIsAt(struct Card* self, Vector2 point) {
-    return CheckCollisionPointRec(point, self->rect);
+    extern float cardWidth, cardHeight;
+    Rectangle rect = {.x=self->baizePos.x, .y=self->baizePos.y, .width=cardWidth, .height=cardHeight};
+    return CheckCollisionPointRec(point, rect);
 }
 
 void CardUpdate(struct Card* self) {
@@ -52,14 +51,18 @@ void CardUpdate(struct Card* self) {
 void CardDraw(struct Card* self) {
     // BeginDrawing() has been called by BaizeDraw()
     if ( self->prone ) {
-        SpritesheetDraw(ssBack, 6, self->rect.x, self->rect.y);
+        SpritesheetDraw(ssBack, 6, self->baizePos);
     } else {
-        SpritesheetDraw(ssFace, self->frame, self->rect.x, self->rect.y);
+        SpritesheetDraw(ssFace, self->frame, self->baizePos);
     }
 }
 
-void CardFlip(struct Card* self) {
-    self->prone = !self->prone;
+void CardFlipUp(struct Card* self) {
+    self->prone = false;
+}
+
+void CardFlipDown(struct Card* self) {
+    self->prone = true;
 }
 
 void CardFree(struct Card* self) {

@@ -58,7 +58,8 @@ struct Baize* BaizeNew(const char* variantName) {
         for ( int i=0; i<packs*52; i++ ) {
             PilePush(stock, &self->cardLibrary[i]);
         }
-        self->stock = (struct Pile*)ArrayFirst(self->piles, NULL);
+        PileShuffle(stock);
+        self->stock = (struct Pile*)ArrayFirst(self->piles);
     }
 
     fprintf(stderr, "stock now has %lu cards\n", PileLen(self->stock));
@@ -86,9 +87,24 @@ bool BaizeValid(struct Baize* self) {
     return self && self->magic == MAGIC;
 }
 
-void BaizeUpdate(struct Baize* self) {
+static struct Card* findCardAt(struct Baize* self, Vector2 pos) {
+    struct Pile* p = (struct Pile*)ArrayFirst(self->piles);
+    while ( p ) {
+        struct Card* c = (struct Card*)ArrayLast(p->cards);
+        while ( c ) {
+            extern float cardWidth, cardHeight;
+            Rectangle rect = {.x=c->baizePos.x, .y=c->baizePos.y, .width=cardWidth, .height=cardHeight};
+            if ( CheckCollisionPointRec(pos, rect) ) {
+                return c;
+            }
+            c = (struct Card*)ArrayPrev(p->cards);
+        }
+        p = (struct Pile*)ArrayNext(self->piles);
+    }
+    return NULL;
+}
 
-    (void)self;
+void BaizeUpdate(struct Baize* self) {
 
     static struct Card* currCard = NULL;
     static float dx, dy;
@@ -96,24 +112,14 @@ void BaizeUpdate(struct Baize* self) {
     Vector2 touchPosition = GetTouchPosition(0);
     int gesture = GetGestureDetected();
 
-    // TODO search piles from bottom to top, not this...
-    struct Card* ace = NULL;
-    for ( int i=0; i<52; i++ ) {
-        struct Card* c = &self->cardLibrary[i];
-        if ( CheckCollisionPointRec(touchPosition, c->rect) ) {
-            ace = c;
-            break;
-        }
-    }
+    struct Card* ace = findCardAt(self, touchPosition);
 
-    // if ( gesture == GESTURE_TAP && CardIsAt(ace, touchPosition) ) {
     if ( gesture == GESTURE_TAP && ace ) {
-        dx = touchPosition.x - ace->rect.x;
-        dy = touchPosition.y - ace->rect.y;
+        dx = touchPosition.x - ace->baizePos.x;
+        dy = touchPosition.y - ace->baizePos.y;
         currCard = ace;
     }
     if ( gesture == GESTURE_DRAG && currCard ) {
-        // card_position(&c, touchPosition.x - c.rect.width / 2, touchPosition.y - c.rect.height / 2);
         CardSetPosition(currCard, (Vector2){touchPosition.x - dx, touchPosition.y - dy});
     }
     if ( gesture == GESTURE_NONE ) {
@@ -143,17 +149,15 @@ void BaizeDraw(struct Baize* self) {
 
     ClearBackground(baizeColor);
     BeginDrawing();
-    int i = 0;
-    struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &i);
+    struct Pile* p = (struct Pile*)ArrayFirst(self->piles);
     while ( p ) {
         PileDraw(p);
-        int j = 0;
-        struct Card* c = (struct Card*)ArrayFirst(p->cards, &j);
+        struct Card* c = (struct Card*)ArrayFirst(p->cards);
         while ( c ) {
             CardDraw(c);
-            c = (struct Card*)ArrayNext(p->cards, &j);
+            c = (struct Card*)ArrayNext(p->cards);
         }
-        p = (struct Pile*)ArrayNext(self->piles, &i);
+        p = (struct Pile*)ArrayNext(self->piles);
     }
     DrawFPS(10, 10);
     EndDrawing();
