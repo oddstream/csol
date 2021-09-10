@@ -24,22 +24,22 @@ struct Pile* PileNew(const char* class, Vector2 pos, enum FanType fan) {
     return self;
 }
 
-bool PileValid(struct Pile* self) {
+bool PileValid(struct Pile *const self) {
     return self && self->magic == MAGIC;
 }
 
-size_t PileLen(struct Pile* self) {
+size_t PileLen(struct Pile *const self) {
     return ArrayLen(self->cards);
 }
 
-void PilePush(struct Pile* self, struct Card* c) {
+void PilePush(struct Pile *const self, struct Card* c) {
     CardSetOwner(c, self);
     Vector2 fannedPos = PilePushedFannedPosition(self); // do this *before* pushing card to pile
-    CardSetPosition(c, fannedPos);
+    CardTransitionTo(c, fannedPos); //CardSetPosition(c, fannedPos);
     ArrayPush(self->cards, (void**)c);
 }
 
-struct Card* PilePop(struct Pile* self) {
+struct Card* PilePop(struct Pile *const self) {
     struct Card* c = (struct Card*)ArrayPop(self->cards);
     if ( c ) {
         CardSetOwner(c, NULL);
@@ -47,19 +47,15 @@ struct Card* PilePop(struct Pile* self) {
     return c;
 }
 
-struct Card* PilePeek(struct Pile* self) {
+struct Card* PilePeek(struct Pile *const self) {
     return (struct Card*)ArrayPeek(self->cards);
 }
 
-Vector2 PileGetPosition(struct Pile* self) {
+Vector2 PileGetPosition(struct Pile *const self) {
     return self->pos;
 }
 
-void PileUpdate(struct Pile* self) {
-    (void)self;
-}
-
-void PileShuffle(struct Pile* self) {
+void PileShuffle(struct Pile *const self) {
     // Knuth-Fisher–Yates shuffle
     srand(time(NULL));
     int n = ArrayLen(self->cards);
@@ -69,7 +65,7 @@ void PileShuffle(struct Pile* self) {
     }
 }
 
-Vector2 PilePushedFannedPosition(struct Pile* self) {
+Vector2 PilePushedFannedPosition(struct Pile *const self) {
     extern float cardWidth, cardHeight;
     Vector2 pos = self->pos;
     float faceDelta, backDelta;
@@ -115,14 +111,25 @@ Vector2 PilePushedFannedPosition(struct Pile* self) {
     return pos;
 }
 
-void PileDraw(struct Pile* self) {
+void PileUpdate(struct Pile *const self) {
+
+    struct Card* c = (struct Card*)ArrayFirst(self->cards);
+    while ( c ) {
+        CardUpdate(c);
+        c = (struct Card*)ArrayNext(self->cards);
+    }
+
+}
+
+void PileDraw(struct Pile *const self) {
     extern float cardWidth, cardHeight;
     // BeginDrawing() has been called by BaizeDraw()
     Rectangle r = {.x=self->pos.x, .y=self->pos.y, cardWidth, cardHeight};
     DrawRectangleRoundedLines(r, 0.1, 4, 2.0, (Color){255,255,255,31});
+
 }
 
-void PileFree(struct Pile* self) {
+void PileFree(struct Pile *const self) {
     // Card objects exist in the Baize->cardLibrary array, so we don't free them here
     if ( self ) {
         ArrayFree(self->cards);

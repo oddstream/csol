@@ -44,8 +44,7 @@ struct Rectangle retroBackInfo[13] = {
     {.x = 405, .y = 140, .width = 71, .height = 96},
 };
 
-struct Spritesheet* ssFace;
-struct Spritesheet* ssBack;
+struct Spritesheet *ssFace, *ssBack;
 
 float cardWidth = 71.0, cardHeight = 96.0;
 

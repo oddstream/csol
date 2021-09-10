@@ -33,18 +33,29 @@ struct Card /* tag */ {
     bool prone;
     Vector2 baizePos;
     struct Pile* owner;
+
+    bool dragging;
+    Vector2 dragStartPos;
+    Vector2 lerpSrc, lerpDst;
+    float lerpStep, lerpStepAmount;
+
 } /* variable definition */;
 
 struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord);
-void CardShorthand(struct Card* self, char* z);
-void CardSetPosition(struct Card* self, Vector2 pos);
-void CardSetOwner(struct Card* self, struct Pile* p);
-struct Pile* CardGetOwner(struct Card* self);
+void CardSetOwner(struct Card *const self, struct Pile* p);
+void CardShorthand(struct Card *const self, char* z);
+void CardSetPosition(struct Card *const self, Vector2 pos);
+void CardTransitionTo(struct Card *const self, Vector2 pos);
+bool CardTransitioning(struct Card *const self);
+void CardStartDrag(struct Card *const self);
+void CardStopDrag(struct Card *const self);
+bool CardDragging(struct Card *const self);
+struct Pile* CardGetOwner(struct Card *const self);
 bool CardIsAt(struct Card* c, Vector2 point);
-void CardFlipUp(struct Card* self);
+void CardFlipUp(struct Card *const self);
 void CardFlipDown(struct Card*self);
-void CardUpdate(struct Card* self);
-void CardDraw(struct Card* self);
-void CardFree(struct Card* self);
+void CardUpdate(struct Card *const self);
+void CardDraw(struct Card *const self);
+void CardFree(struct Card *const self);
 
 #endif

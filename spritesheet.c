@@ -55,7 +55,7 @@ struct Spritesheet* SpritesheetNewInfo(const char* fname, Rectangle* info, int m
     return self;
 }
 
-void SpritesheetFree(struct Spritesheet* self) {
+void SpritesheetFree(struct Spritesheet *const self) {
     if ( !self ) {
         return;
     }
@@ -63,7 +63,7 @@ void SpritesheetFree(struct Spritesheet* self) {
     free(self);
 }
 
-void SpritesheetDraw(struct Spritesheet *self, int frame, Vector2 pos) {
+void SpritesheetDraw(struct Spritesheet *const self, int frame, Vector2 pos) {
     const float scale = 1.0;
     const float ang = 0.0;
     const Color c = WHITE;

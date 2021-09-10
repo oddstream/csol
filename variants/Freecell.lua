@@ -14,7 +14,13 @@ function Build()
         return
     end
 
-    io.stderr:write("in build\n")
+    s = FindPile("Stock", 1)
+    if s == nil then
+        io.stderr:write("Build cannot find pile\n")
+        return
+    else
+        io.stderr:write("Build found a pile\n")
+    end
 
     pile = AddPile("Cell", 200, 100, 0)
     pile = AddPile("Cell", 300, 100, 0)
@@ -25,14 +31,6 @@ function Build()
     pile = AddPile("Foundation", 700, 100, 0)
     pile = AddPile("Foundation", 800, 100, 0)
     pile = AddPile("Foundation", 900, 100, 0)
-
-    s = FindPile("Stock", 1)
-    if s == nil then
-        io.stderr:write("Build cannot find pile\n")
-        return
-    else
-        io.stderr:write("Build found a pile\n")
-    end
 
     pile = AddPile("Tableau", 200, 300, FanDown)
     DealUp(pile, 7)

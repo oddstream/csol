@@ -80,14 +80,16 @@ struct Baize* BaizeNew(const char* variantName) {
 
     self->stock = (struct Pile*)ArrayGet(self->piles, 0);
 
+    SetWindowTitle(variantName);
+
     return self;
 }
 
-bool BaizeValid(struct Baize* self) {
+bool BaizeValid(struct Baize *const self) {
     return self && self->magic == MAGIC;
 }
 
-static struct Card* findCardAt(struct Baize* self, Vector2 pos) {
+static struct Card* findCardAt(struct Baize *const self, Vector2 pos) {
     struct Pile* p = (struct Pile*)ArrayFirst(self->piles);
     while ( p ) {
         struct Card* c = (struct Card*)ArrayLast(p->cards);
@@ -104,7 +106,7 @@ static struct Card* findCardAt(struct Baize* self, Vector2 pos) {
     return NULL;
 }
 
-void BaizeUpdate(struct Baize* self) {
+void BaizeUpdate(struct Baize *const self) {
 
     static struct Card* currCard = NULL;
     static float dx, dy;
@@ -118,11 +120,16 @@ void BaizeUpdate(struct Baize* self) {
         dx = touchPosition.x - ace->baizePos.x;
         dy = touchPosition.y - ace->baizePos.y;
         currCard = ace;
+        CardStartDrag(currCard);
     }
     if ( gesture == GESTURE_DRAG && currCard ) {
         CardSetPosition(currCard, (Vector2){touchPosition.x - dx, touchPosition.y - dy});
     }
     if ( gesture == GESTURE_NONE ) {
+        if ( currCard ) {
+            // finished dragging
+            CardStopDrag(currCard);
+        }
         currCard = NULL;
     }
 
@@ -141,29 +148,59 @@ void BaizeUpdate(struct Baize* self) {
     //     DrawText(buf, 0, 130, 16, WHITE);
     // }
     // card_position(&c, touchPosition.x - dx, touchPosition.y - dy);
+
+    struct Pile* p = (struct Pile*)ArrayFirst(self->piles);
+    while ( p ) {
+        PileUpdate(p);
+        p = (struct Pile*)ArrayNext(self->piles);
+    }
+
 }
 
-void BaizeDraw(struct Baize* self) {
+void BaizeDraw(struct Baize *const self) {
 
     extern Color baizeColor;
 
     ClearBackground(baizeColor);
     BeginDrawing();
+
+    struct Card* c;
+
     struct Pile* p = (struct Pile*)ArrayFirst(self->piles);
     while ( p ) {
         PileDraw(p);
-        struct Card* c = (struct Card*)ArrayFirst(p->cards);
+        p = (struct Pile*)ArrayNext(self->piles);
+    }
+
+    p = (struct Pile*)ArrayFirst(self->piles);
+    while ( p ) {
+        c = (struct Card*)ArrayFirst(p->cards);
         while ( c ) {
-            CardDraw(c);
+            if ( !(CardTransitioning(c) || CardDragging(c)) ) {
+                CardDraw(c);
+            }
             c = (struct Card*)ArrayNext(p->cards);
         }
         p = (struct Pile*)ArrayNext(self->piles);
     }
+
+    p = (struct Pile*)ArrayFirst(self->piles);
+    while ( p ) {
+        c = (struct Card*)ArrayFirst(p->cards);
+        while ( c ) {
+            if ( CardTransitioning(c) || CardDragging(c) ) {
+                CardDraw(c);
+            }
+            c = (struct Card*)ArrayNext(p->cards);
+        }
+        p = (struct Pile*)ArrayNext(self->piles);
+    }
+
     DrawFPS(10, 10);
     EndDrawing();
 }
 
-void BaizeFree(struct Baize* self) {
+void BaizeFree(struct Baize *const self) {
     ArrayForeach(self->piles, (ArrayIterFunc)PileFree);
     ArrayFree(self->piles);
     free(self->cardLibrary);

@@ -2,9 +2,8 @@
 
 ## Next
 
-- fanned position
-- animate dragged cards back to pile
 - deal cards DealUp(p, n)/DealDown(p, n)/DealCard(p, "AC")
+- build only task
 - minimal Makefile
 
 ## Conventions
@@ -12,6 +11,8 @@
 No typedefs on structs or enums.
 
 Functions names are in PascalCase, ObjectVerb.
+
+Lua uses `self`, so do we.
 
 Hashed string heap for quick string comparisons?
 

@@ -17,9 +17,9 @@ struct Baize {
 };
 
 struct Baize* BaizeNew(const char* variantName);
-bool BaizeValid(struct Baize* self);
-void BaizeUpdate(struct Baize* self);
-void BaizeDraw(struct Baize* self);
-void BaizeFree(struct Baize* self);
+bool BaizeValid(struct Baize *const self);
+void BaizeUpdate(struct Baize *const self);
+void BaizeDraw(struct Baize *const self);
+void BaizeFree(struct Baize *const self);
 
 #endif
