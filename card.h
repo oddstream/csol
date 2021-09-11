@@ -3,13 +3,6 @@
 #ifndef CARD_H
 #define CARD_H
 
-enum CardSuit {
-    CLUB = 0,
-    DIAMOND = 1,
-    HEART = 2,
-    SPADE = 3,
-};
-
 enum CardOrdinal {
     ACE = 1,
     TWO = 2,
@@ -26,10 +19,17 @@ enum CardOrdinal {
     KING = 13,
 };
 
+enum CardSuit {
+    CLUB = 0,
+    DIAMOND = 1,
+    HEART = 2,
+    SPADE = 3,
+};
+
 struct Card /* tag */ {
     int frame;
-    enum CardSuit suit;
     enum CardOrdinal ord;
+    enum CardSuit suit;
     bool prone;
     Vector2 baizePos;
     struct Pile* owner;
@@ -41,14 +41,16 @@ struct Card /* tag */ {
 
 } /* variable definition */;
 
-struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord);
+struct Card CardNew(enum CardOrdinal ord, enum CardSuit suit);
 void CardSetOwner(struct Card *const self, struct Pile* p);
 void CardShorthand(struct Card *const self, char* z);
 void CardSetPosition(struct Card *const self, Vector2 pos);
+void CardMovePositionBy(struct Card *const self, Vector2 delta);
 void CardTransitionTo(struct Card *const self, Vector2 pos);
 bool CardTransitioning(struct Card *const self);
 void CardStartDrag(struct Card *const self);
 void CardStopDrag(struct Card *const self);
+bool CardNotDragged(struct Card *const self);
 bool CardDragging(struct Card *const self);
 struct Pile* CardGetOwner(struct Card *const self);
 bool CardIsAt(struct Card* c, Vector2 point);

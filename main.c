@@ -55,7 +55,7 @@ Color baizeColor;   // pedantically, can't initialize with a struct in C, becaus
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
-    int windowWidth, windowHeight;
+    int windowWidth = 640, windowHeight = 480;
 
     {
         lua_State *L = luaL_newstate();

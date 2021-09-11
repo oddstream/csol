@@ -9,12 +9,12 @@
 
 enum FanType {
     NONE = 0,
-    RIGHT,
-    LEFT,
     DOWN,
-    WASTE_RIGHT,
+    LEFT,
+    RIGHT,
+    WASTE_DOWN,
     WASTE_LEFT,
-    WASTE_DOWN
+    WASTE_RIGHT,
 };
 
 struct Pile {

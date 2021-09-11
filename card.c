@@ -10,19 +10,19 @@
 
 extern struct Spritesheet *ssFace, *ssBack;
 
-struct Card CardNew(enum CardSuit suit, enum CardOrdinal ord) {
-    struct Card self = {.suit = suit, .ord = ord, .prone = true, .dragging = false};
+struct Card CardNew(enum CardOrdinal ord, enum CardSuit suit) {
+    struct Card self = {.ord = ord, .suit = suit, .prone = true, .dragging = false};
     self.frame = (suit * 13) + (ord - 1);
     self.baizePos = (Vector2){0};
     return self;
 }
 
 void CardShorthand(struct Card *const self, char* z) {
-    static char suit[] = "CHDS";
     static char ord[] = "0A23456789XJQK";
+    static char suit[] = "CHDS";
 
-    z[0] = suit[self->suit];
-    z[1] = ord[self->ord];
+    z[0] = ord[self->ord];
+    z[1] = suit[self->suit];
     z[2] = '\0';
 }
 
@@ -36,6 +36,11 @@ struct Pile* CardGetOwner(struct Card *const self) {
 
 void CardSetPosition(struct Card *const self, Vector2 pos) {
     self->baizePos = pos;
+}
+
+void CardMovePositionBy(struct Card *const self, Vector2 delta) {
+    self->baizePos.x += delta.x;
+    self->baizePos.y += delta.y;
 }
 
 void CardTransitionTo(struct Card *const self, Vector2 pos) {
@@ -62,6 +67,10 @@ void CardStartDrag(struct Card *const self) {
 void CardStopDrag(struct Card *const self) {
     self->dragging = false;
     CardTransitionTo(self, self->dragStartPos);
+}
+
+bool CardNotDragged(struct Card *const self) {
+    return self->baizePos.x == self->dragStartPos.x && self->baizePos.y == self->dragStartPos.y;
 }
 
 bool CardDragging(struct Card *const self) {

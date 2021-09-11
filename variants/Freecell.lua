@@ -1,6 +1,7 @@
 -- Freecell
 
-FanDown = 3
+FanNone = 0
+FanDown = 1
 
 Packs = 1
 
@@ -22,38 +23,22 @@ function Build()
         io.stderr:write("Build found a pile\n")
     end
 
-    pile = AddPile("Cell", 200, 100, 0)
-    pile = AddPile("Cell", 300, 100, 0)
-    pile = AddPile("Cell", 400, 100, 0)
-    pile = AddPile("Cell", 500, 100, 0)
+    for x = 200, 500, 100 do
+        pile = AddPile("Cell", x, 100, FanNone)
+    end
 
-    pile = AddPile("Foundation", 600, 100, 0)
-    pile = AddPile("Foundation", 700, 100, 0)
-    pile = AddPile("Foundation", 800, 100, 0)
-    pile = AddPile("Foundation", 900, 100, 0)
+    for x = 600, 900, 100 do
+        pile = AddPile("Foundation", x, 100, FanNone)
+    end
 
-    pile = AddPile("Tableau", 200, 300, FanDown)
-    DealUp(pile, 7)
+    for x = 200, 500, 100 do
+        pile = AddPile("Tableau", x, 300, FanDown)
+        DealUp(pile, 7)
+    end
 
-    pile = AddPile("Tableau", 300, 300, FanDown)
-    DealUp(pile, 7)
-
-    pile = AddPile("Tableau", 400, 300, FanDown)
-    DealUp(pile, 7)
-
-    pile = AddPile("Tableau", 500, 300, FanDown)
-    DealUp(pile, 7)
-
-    pile = AddPile("Tableau", 600, 300, FanDown)
-    DealUp(pile, 6)
-
-    pile = AddPile("Tableau", 700, 300, FanDown)
-    DealUp(pile, 6)
-
-    pile = AddPile("Tableau", 800, 300, FanDown)
-    DealUp(pile, 6)
-
-    pile = AddPile("Tableau", 900, 300, FanDown)
-    DealUp(pile, 2)
+    for x = 600, 900, 100 do
+        pile = AddPile("Tableau", x, 300, FanDown)
+        DealUp(pile, 5)
+    end
 
 end

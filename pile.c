@@ -35,7 +35,7 @@ size_t PileLen(struct Pile *const self) {
 void PilePush(struct Pile *const self, struct Card* c) {
     CardSetOwner(c, self);
     Vector2 fannedPos = PilePushedFannedPosition(self); // do this *before* pushing card to pile
-    CardTransitionTo(c, fannedPos); //CardSetPosition(c, fannedPos);
+    CardTransitionTo(c, fannedPos);
     ArrayPush(self->cards, (void**)c);
 }
 
@@ -58,7 +58,7 @@ Vector2 PileGetPosition(struct Pile *const self) {
 void PileShuffle(struct Pile *const self) {
     // Knuth-Fisher–Yates shuffle
     srand(time(NULL));
-    int n = ArrayLen(self->cards);
+    size_t n = ArrayLen(self->cards);
     for ( int i = n-1; i > 0; i-- ) {
         int j = rand() % (i+1);
         ArraySwap(self->cards, i, j);
@@ -67,9 +67,12 @@ void PileShuffle(struct Pile *const self) {
 
 Vector2 PilePushedFannedPosition(struct Pile *const self) {
     extern float cardWidth, cardHeight;
+
     Vector2 pos = self->pos;
     float faceDelta, backDelta;
     struct Card* c;
+    size_t index = 0;
+
     switch ( self->fan ) {
         case NONE:
             // do nothing
@@ -77,28 +80,28 @@ Vector2 PilePushedFannedPosition(struct Pile *const self) {
         case RIGHT:
             faceDelta = cardWidth / CARD_FACE_FAN_FACTOR;
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
-            c = (struct Card*)ArrayFirst(self->cards);
+            c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
                 pos.x += c->prone ? backDelta : faceDelta;
-                c = (struct Card*)ArrayNext(self->cards);
+                c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
         case LEFT:
             faceDelta = cardWidth / CARD_FACE_FAN_FACTOR;
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
-            c = (struct Card*)ArrayFirst(self->cards);
+            c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
                 pos.x -= c->prone ? backDelta : faceDelta;
-                c = (struct Card*)ArrayNext(self->cards);
+                c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
         case DOWN:
             faceDelta = cardHeight / CARD_FACE_FAN_FACTOR;
             backDelta = cardHeight / CARD_BACK_FAN_FACTOR;
-            c = (struct Card*)ArrayFirst(self->cards);
+            c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
                 pos.y += c->prone ? backDelta : faceDelta;
-                c = (struct Card*)ArrayNext(self->cards);
+                c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
         case WASTE_RIGHT:
@@ -112,13 +115,7 @@ Vector2 PilePushedFannedPosition(struct Pile *const self) {
 }
 
 void PileUpdate(struct Pile *const self) {
-
-    struct Card* c = (struct Card*)ArrayFirst(self->cards);
-    while ( c ) {
-        CardUpdate(c);
-        c = (struct Card*)ArrayNext(self->cards);
-    }
-
+    ArrayForeach(self->cards, (ArrayIterFunc)CardUpdate);
 }
 
 void PileDraw(struct Pile *const self) {
@@ -126,7 +123,6 @@ void PileDraw(struct Pile *const self) {
     // BeginDrawing() has been called by BaizeDraw()
     Rectangle r = {.x=self->pos.x, .y=self->pos.y, cardWidth, cardHeight};
     DrawRectangleRoundedLines(r, 0.1, 4, 2.0, (Color){255,255,255,31});
-
 }
 
 void PileFree(struct Pile *const self) {

@@ -11,6 +11,7 @@
 	"files.associations": {
 		"bit": "c",
 		"*.tcc": "c",
-		"fstream": "c"
+		"fstream": "c",
+		"array.h": "c"
 	}
 }

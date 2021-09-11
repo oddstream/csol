@@ -1,6 +1,7 @@
 /* array.c */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "array.h"
 
@@ -12,8 +13,12 @@ struct Array* ArrayNew(size_t initialSize) {
     return self;
 }
 
-int ArrayLen(struct Array *const self) {
+size_t ArrayLen(struct Array *const self) {
     return self->used;
+}
+
+size_t ArrayCap(struct Array *const self) {
+    return self->size;
 }
 
 void ArraySwap(struct Array *const self, int i, int j) {
@@ -23,38 +28,40 @@ void ArraySwap(struct Array *const self, int i, int j) {
 }
 
 void** ArrayGet(struct Array *const self, int pos) {
+    // deprecated
     return self->array[pos];
 }
 
-void** ArrayFirst(struct Array *const self) {
+void** ArrayFirst(struct Array *const self, size_t *index) {
     if ( self->used == 0 ) {
         return NULL;
     }
-    self->savedPos = 0;
+    *index = 0;
     return self->array[0];
 }
 
-void** ArrayNext(struct Array *const self) {
-    if ( ++self->savedPos >= self->used ) {
+void** ArrayNext(struct Array *const self, size_t *index) {
+    *index += 1;
+    if ( *index >= self->used ) {
         return NULL;
     }
-    return self->array[self->savedPos];
+    return self->array[*index];
 }
 
-void** ArrayPrev(struct Array *const self) {
-    if ( self->savedPos == 0 ) {
+void** ArrayPrev(struct Array *const self, size_t *index) {
+    if ( *index == 0 ) {
         return NULL;
     }
-    self->savedPos = self->savedPos - 1;
-    return self->array[self->savedPos];
+    *index -= 1;
+    return self->array[*index];
 }
 
-void** ArrayLast(struct Array *const self) {
+void** ArrayLast(struct Array *const self, size_t *index) {
     if ( self->used == 0 ) {
         return NULL;
     }
-    self->savedPos = self->used - 1;
-    return self->array[self->savedPos];
+    *index = self->used - 1;
+    return self->array[*index];
 }
 
 void ArrayPush(struct Array *const self, void** element) {
@@ -87,7 +94,15 @@ void ArrayForeach(struct Array *const self, ArrayIterFunc f) {
     }
 }
 
+void ArrayCopyTail(struct Array *const dst, struct Array *const src, size_t first) {
+    size_t entries = src->used - first;
+    memcpy(dst->array, &src->array[first], entries * sizeof(void**));
+    dst->used = entries;
+}
+
 void ArrayFree(struct Array *const self) {
-    free(self->array);
-    free(self);
+    if ( self ) {
+        free(self->array);
+        free(self);
+    }
 }

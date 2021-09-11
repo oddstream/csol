@@ -166,7 +166,8 @@ int MoonFindPile(lua_State* L) {
     const char* class = lua_tostring(L, 1); // doesn't alter stack
     int n = lua_tointeger(L, 2); // doesn't alter stack
 
-    struct Pile* p = (struct Pile*)ArrayFirst(baize->piles);
+    size_t index;
+    struct Pile* p = (struct Pile*)ArrayFirst(baize->piles, &index);
     while ( p ) {
         if ( strcmp(p->class, class) == 0 ) {
             n--;
@@ -175,7 +176,7 @@ int MoonFindPile(lua_State* L) {
                 return 1;
             }
         }
-        p = (struct Pile*)ArrayNext(baize->piles);
+        p = (struct Pile*)ArrayNext(baize->piles, &index);
     }
 
     return 0;

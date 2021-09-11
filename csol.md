@@ -2,6 +2,8 @@
 
 ## Next
 
+- [x] drag a tail
+- [ ] pyle subtypes
 - deal cards DealUp(p, n)/DealDown(p, n)/DealCard(p, "AC")
 - build only task
 - minimal Makefile
@@ -15,6 +17,10 @@ Functions names are in PascalCase, ObjectVerb.
 Lua uses `self`, so do we.
 
 Hashed string heap for quick string comparisons?
+
+Club, Diamond, Heart, Spade - always in that order (alphabetical).
+
+Ordinal, Suit - always in that order (alphabetical, and how they are shown on cards).
 
 Use "AC", "2H", "XD", "KS" shorthand for cards.
 

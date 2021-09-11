@@ -14,10 +14,12 @@ struct Baize {
     lua_State *L;
     struct Array* piles;
     struct Pile* stock;
+    struct Array* tail;
 };
 
 struct Baize* BaizeNew(const char* variantName);
 bool BaizeValid(struct Baize *const self);
+void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
 void BaizeUpdate(struct Baize *const self);
 void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
