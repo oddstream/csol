@@ -5,7 +5,7 @@ FanDown = 1
 
 Packs = 1
 
--- C sets variable 'baize'
+-- C sets variable 'BAIZE'
 
 function Build()
     local pile
@@ -17,26 +17,27 @@ function Build()
 
     s = FindPile("Stock", 1)
     if s == nil then
-        io.stderr:write("Build cannot find pile\n")
+        io.stderr:write("Build cannot find Stock pile\n")
         return
     else
         io.stderr:write("Build found a pile\n")
+        MovePileTo(s, 10, 100)
     end
 
-    for x = 200, 500, 100 do
+    for x = 100, 400, 100 do
         pile = AddPile("Cell", x, 100, FanNone)
     end
 
-    for x = 600, 900, 100 do
+    for x = 500, 800, 100 do
         pile = AddPile("Foundation", x, 100, FanNone)
     end
 
-    for x = 200, 500, 100 do
+    for x = 100, 400, 100 do
         pile = AddPile("Tableau", x, 300, FanDown)
         DealUp(pile, 7)
     end
 
-    for x = 600, 900, 100 do
+    for x = 500, 800, 100 do
         pile = AddPile("Tableau", x, 300, FanDown)
         DealUp(pile, 5)
     end

@@ -55,8 +55,9 @@ Color baizeColor;   // pedantically, can't initialize with a struct in C, becaus
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
-    int windowWidth = 640, windowHeight = 480;
-
+    baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
+    int windowWidth = 640 * 2, windowHeight = 480 * 2;
+#if 0
     {
         lua_State *L = luaL_newstate();
 
@@ -82,7 +83,7 @@ int main(void)
 
         lua_close(L);
     }
-
+#endif
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second

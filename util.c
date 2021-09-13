@@ -19,4 +19,10 @@ float UtilSmootherstep(float A, float B, float v) {
 	return (B * v) + (A * (1.0 - v));
 }
 
+float UtilOverlapArea(Rectangle a, Rectangle b) {
+    float x = fmaxf(0, fminf(a.x + a.width, b.x + b.width) - fmaxf(a.x, b.x));
+    float y = fmaxf(0, fminf(a.y + a.height, b.y + b.height) - fmaxf(a.y, b.y));
+    return x * y;
+}
+
 #endif

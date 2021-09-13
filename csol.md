@@ -2,6 +2,14 @@
 
 ## Next
 
+- [ ] CardSetPos() problem
+- [ ] move csol.settings.lua into variant.lua
+- [x] Baize.LargestIntersection(baize, card)
+- [x] Pile.MoveCards(dst pile, src card)
+- [x] move tail after drag
+- [ ] compact pile/card format for undo
+        shorthand 2-char with lowercase suit for face down, uppercase suit for face up "2C3C4C4c"
+        also need pilenumber, accept, recycles
 - [x] drag a tail
 - [ ] pyle subtypes
 - deal cards DealUp(p, n)/DealDown(p, n)/DealCard(p, "AC")
@@ -21,6 +29,8 @@ Hashed string heap for quick string comparisons?
 Club, Diamond, Heart, Spade - always in that order (alphabetical).
 
 Ordinal, Suit - always in that order (alphabetical, and how they are shown on cards).
+
+Position (Vector2) functions and members refer to the Baize position of the Card/Pile, unless they have Screen in their name. All functions have Get and Set in their name, no matter how unfashionable.
 
 Use "AC", "2H", "XD", "KS" shorthand for cards.
 

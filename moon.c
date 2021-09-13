@@ -18,6 +18,7 @@ static const struct FunctionToRegister {
     {"DealUp", MoonDealUp},
     {"DealDown", MoonDealDown},
     {"FindPile", MoonFindPile},
+    {"MovePileTo", MoonMovePileTo},
 };
 
 static struct Baize* getBaize(lua_State* L) {
@@ -97,7 +98,7 @@ int MoonAddPile(lua_State* L) {
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", class, x, y, fan);
 
     struct Pile* p = PileNew(class, (Vector2){x, y}, fan);
-    ArrayPush(baize->piles, (void**)p);
+    ArrayPush(baize->piles, p);
     lua_pushlightuserdata(L, p);
 
     return 1;   // number of args pushed
@@ -118,10 +119,10 @@ int MoonDealUp(lua_State* L) {
     int n = lua_tointeger(L, 2);
 
     while ( n-- ) {
-        struct Card* c = PilePop(baize->stock);
+        struct Card* c = PilePopCard(baize->stock);
         if ( c ) {
             CardFlipUp(c);
-            PilePush(p, c);
+            PilePushCard(p, c);
         } else {
             fprintf(stderr, "cannot pop card from Stock\n");
         }
@@ -145,10 +146,10 @@ int MoonDealDown(lua_State* L) {
     int n = lua_tointeger(L, 2);
 
     while ( n-- ) {
-        struct Card* c = PilePop(baize->stock);
+        struct Card* c = PilePopCard(baize->stock);
         if ( c ) {
             CardFlipDown(c);
-            PilePush(p, c);
+            PilePushCard(p, c);
         } else {
             fprintf(stderr, "cannot pop card from Stock\n");
         }
@@ -177,6 +178,29 @@ int MoonFindPile(lua_State* L) {
             }
         }
         p = (struct Pile*)ArrayNext(baize->piles, &index);
+    }
+
+    return 0;
+}
+
+int MoonMovePileTo(lua_State* L) {
+
+    struct Pile* p = lua_touserdata(L, 1);
+    float x = lua_tonumber(L, 2);
+    float y = lua_tonumber(L, 3);
+
+    if ( PileValid(p) ) {
+        Vector2 oldPos = PileGetPos(p);
+        Vector2 newPos = (Vector2){.x=x, .y=y};
+        float dx = newPos.x - oldPos.x;
+        float dy = newPos.y - oldPos.y;
+        PileSetPos(p, newPos);
+        size_t index;
+        for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
+            Vector2 oldCardPos = CardGetPos(c);
+            Vector2 newCardPos = (Vector2){.x = oldCardPos.x + dx, .y = oldCardPos.y + dy};
+            CardSetPos(c, newCardPos);
+        }
     }
 
     return 0;

@@ -1,6 +1,7 @@
 /* pile.c */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <raylib.h>
@@ -32,14 +33,15 @@ size_t PileLen(struct Pile *const self) {
     return ArrayLen(self->cards);
 }
 
-void PilePush(struct Pile *const self, struct Card* c) {
+void PilePushCard(struct Pile *const self, struct Card* c) {
     CardSetOwner(c, self);
-    Vector2 fannedPos = PilePushedFannedPosition(self); // do this *before* pushing card to pile
+    Vector2 fannedPos = PileGetPushedFannedPosition(self); // do this *before* pushing card to pile
     CardTransitionTo(c, fannedPos);
-    ArrayPush(self->cards, (void**)c);
+    // CardSetPos(c, self->pos);
+    ArrayPush(self->cards, c);
 }
 
-struct Card* PilePop(struct Pile *const self) {
+struct Card* PilePopCard(struct Pile *const self) {
     struct Card* c = (struct Card*)ArrayPop(self->cards);
     if ( c ) {
         CardSetOwner(c, NULL);
@@ -47,12 +49,49 @@ struct Card* PilePop(struct Pile *const self) {
     return c;
 }
 
-struct Card* PilePeek(struct Pile *const self) {
+struct Card* PilePeekCard(struct Pile *const self) {
     return (struct Card*)ArrayPeek(self->cards);
 }
 
-Vector2 PileGetPosition(struct Pile *const self) {
+Vector2 PileGetPos(struct Pile *const self) {
     return self->pos;
+}
+
+Rectangle PileGetRect(struct Pile *const self) {
+    extern float cardWidth, cardHeight;
+    return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
+}
+
+void PileSetPos(struct Pile *const self, Vector2 pos) {
+    self->pos = pos;
+}
+
+Rectangle PileGetFannedRect(struct Pile *const self) {
+    // cannot use position of top card, in case it's being dragged
+    extern float cardWidth, cardHeight;
+    Rectangle r = PileGetRect(self);
+    if ( ArrayLen(self->cards) > 2 ) {
+        struct Card* c = ArrayPeek(self->cards);
+        Vector2 cPos = CardGetPos(c);
+        switch ( self->fan ) {
+            case NONE:
+                // do nothing
+                break;
+            case RIGHT:
+            case WASTE_RIGHT:
+                r.width = cPos.x + cardWidth - r.x;
+                break;
+            case LEFT:
+            case WASTE_LEFT:
+                r.width = cPos.x - cardWidth - r.x;
+                break;
+            case DOWN:
+            case WASTE_DOWN:
+                r.height = cPos.y + cardHeight - r.y;
+                break;
+        }
+    }
+    return r;
 }
 
 void PileShuffle(struct Pile *const self) {
@@ -65,7 +104,7 @@ void PileShuffle(struct Pile *const self) {
     }
 }
 
-Vector2 PilePushedFannedPosition(struct Pile *const self) {
+Vector2 PileGetPushedFannedPosition(struct Pile *const self) {
     extern float cardWidth, cardHeight;
 
     Vector2 pos = self->pos;
@@ -114,14 +153,56 @@ Vector2 PilePushedFannedPosition(struct Pile *const self) {
     return pos;
 }
 
+void PileMoveCards(struct Pile *const self, struct Card* c) {
+    // move cards to this pile
+
+    struct Pile* src = CardGetOwner(c);
+    size_t oldSrcLen = PileLen(src);
+
+    // find the new length of the source pile
+    size_t newSrcLen = 0, index;
+    struct Card* pc = ArrayFirst(src->cards, &index);
+    while ( pc ) {
+        if ( pc == c ) {
+            break;
+        }
+        newSrcLen++;
+        pc = ArrayNext(src->cards, &index);
+    }
+
+    // pop the tail off the source and push onto tmp stack
+    struct Array* tmp = ArrayNew(PileLen(self) + PileLen(src));
+    while ( PileLen(src) != newSrcLen ) {
+        ArrayPush(tmp, PilePopCard(src));
+    }
+
+    // make some noise
+
+    // pop all cards off the tmp stack and onto the destination (self)
+    while ( ArrayLen(tmp) ) {
+        PilePushCard(self, ArrayPop(tmp));
+    }
+    ArrayFree(tmp);
+
+    // if ( newSrcLen != oldSrcLen ) {
+    //     fprintf(stderr, "Something went wrong moving cards from %s to %s\n", src->class, self->class);
+    // }
+    fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
+
+    // flip up an exposed source card
+
+    // special case: waste may need refanning if we took a card from it
+
+    // scrunch
+}
+
 void PileUpdate(struct Pile *const self) {
     ArrayForeach(self->cards, (ArrayIterFunc)CardUpdate);
 }
 
 void PileDraw(struct Pile *const self) {
-    extern float cardWidth, cardHeight;
     // BeginDrawing() has been called by BaizeDraw()
-    Rectangle r = {.x=self->pos.x, .y=self->pos.y, cardWidth, cardHeight};
+    Rectangle r = PileGetFannedRect(self);
     DrawRectangleRoundedLines(r, 0.1, 4, 2.0, (Color){255,255,255,31});
 }
 
