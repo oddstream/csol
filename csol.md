@@ -16,13 +16,31 @@
 - build only task
 - minimal Makefile
 
+## OOP
+
+Every Pile will have magic, array of cards, position, and fan (which could be in subtypes, but is needed for a low level push).
+
+Stock will have recycles. Other piles will have accept.
+
+Pile does basic operations: push, pop, peek. Also a basic draw (a rectangle).
+
+Pile functions are never called directly, only via their subclass vtables.
+
+So instead of BaizeDraw calling PileDraw, it will call pile->vtable->Draw(pile)
+
+Subpiles will also have a draw (recycle or accept symbol), CanAcceptPile &c.
+
+Pile->category[] used by FindPile.
+
+You can always pass a pointer to Stock to any C function that expects a pointer to Pile. Pile is the *superclass*, Stock is the *subclass*. All functions from the superclass are *inherited* by the subclass.
+
 ## Conventions
 
 No typedefs on structs or enums.
 
 Functions names are in PascalCase, ObjectVerb.
 
-Lua uses `self`, so do we.
+Lua uses `self`, so do we. `this` is a reserved word in C++.
 
 Hashed string heap for quick string comparisons?
 

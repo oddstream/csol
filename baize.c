@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include <raylib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -9,6 +10,7 @@
 
 #include "moon.h"
 #include "baize.h"
+#include "stock.h"
 #include "card.h"
 #include "util.h"
 
@@ -37,6 +39,7 @@ struct Baize* BaizeNew(const char* variantName) {
         fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
         lua_pop(self->L, 1);
     } else {
+        // TODO read baizeColor &c
         packs = MoonGetGlobalInt(self->L, "Packs", 1);
     }
 
@@ -53,13 +56,19 @@ struct Baize* BaizeNew(const char* variantName) {
     self->piles = ArrayNew(8);
 
     // always create a stock pile, and fill it
-    self->stock = PileNew("Stock", (Vector2){0,0}, NONE);
+    self->stock = (struct Pile*)StockNew((Vector2){0,0}, NONE);
     if ( self->stock ) {
         ArrayPush(self->piles, self->stock);
         for ( int i=0; i<packs*52; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
-        PileShuffle(self->stock);
+        // Knuth-Fisher–Yates shuffle
+        srand(time(NULL));
+        size_t n = ArrayLen(self->stock->cards);
+        for ( int i = n-1; i > 0; i-- ) {
+            int j = rand() % (i+1);
+            ArraySwap(self->stock->cards, i, j);
+        }
     }
 
     fprintf(stderr, "stock now has %lu cards\n", PileLen(self->stock));
@@ -180,14 +189,22 @@ void BaizeTouchStop(struct Baize *const self) {
     if ( CardWasDragged(c) ) {
         struct Pile* p = BaizeLargestIntersection(self, c);
         if ( p ) {
-            fprintf(stderr, "Intersection with %s\n", p->class);
+            fprintf(stderr, "Intersection with %s\n", p->category);
             struct Card *cHeadOfTail = c;
             while ( c ) {
                 CardStopDrag(c);
                 // CardCancelDrag(c);  // transition card back for now
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
-            PileMoveCards(p, cHeadOfTail);
+            if ( p->vtable->CanAcceptTail(p, self->tail) ) {
+                PileMoveCards(p, cHeadOfTail);
+            } else {
+                fprintf(stderr, "cannot move cards there\n");
+                while ( c ) {
+                    CardCancelDrag(c);
+                    c = (struct Card*)ArrayNext(self->tail, &index);
+                }
+            }
         } else {
             fprintf(stderr, "No intersection\n");
             while ( c ) {
@@ -249,7 +266,8 @@ void BaizeDraw(struct Baize *const self) {
     size_t pindex, cindex;
     struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &pindex);
     while ( p ) {
-        PileDraw(p);
+        // PileDraw(p);
+        p->vtable->Draw(p);
         c = (struct Card*)ArrayFirst(p->cards, &cindex);
         while ( c ) {
             if ( !(CardTransitioning(c) || CardDragging(c)) ) {

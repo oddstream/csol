@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <raylib.h>
 #include "pile.h"
 #include "array.h"
@@ -13,16 +12,24 @@
 #define CARD_FACE_FAN_FACTOR ((float)3)
 #define CARD_BACK_FAN_FACTOR ((float)5)
 
-struct Pile* PileNew(const char* class, Vector2 pos, enum FanType fan) {
-    struct Pile* self = malloc(sizeof(struct Pile));
-    if ( self ) {
-        self->magic = MAGIC;
-        strncpy(self->class, class, sizeof self->class - 1);
-        self->pos = pos;
-        self->fan = fan;
-        self->cards = ArrayNew(52);
-    }
-    return self;
+// struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
+//     struct Pile* self = malloc(sizeof(struct Pile));
+//     if ( self ) {
+//         self->magic = MAGIC;
+//         strncpy(self->category, category, sizeof self->category - 1);
+//         self->pos = pos;
+//         self->fan = fan;
+//         self->cards = ArrayNew(52);
+//     }
+//     return self;
+// }
+
+void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan) {
+    self->magic = MAGIC;
+    strncpy(self->category, category, sizeof self->category - 1);
+    self->pos = pos;
+    self->fan = fan;
+    self->cards = ArrayNew(52);
 }
 
 bool PileValid(struct Pile *const self) {
@@ -35,7 +42,7 @@ size_t PileLen(struct Pile *const self) {
 
 void PilePushCard(struct Pile *const self, struct Card* c) {
     CardSetOwner(c, self);
-    Vector2 fannedPos = PileGetPushedFannedPosition(self); // do this *before* pushing card to pile
+    Vector2 fannedPos = PileGetPushedFannedPos(self); // do this *before* pushing card to pile
     CardTransitionTo(c, fannedPos);
     // CardSetPos(c, self->pos);
     ArrayPush(self->cards, c);
@@ -94,17 +101,7 @@ Rectangle PileGetFannedRect(struct Pile *const self) {
     return r;
 }
 
-void PileShuffle(struct Pile *const self) {
-    // Knuth-Fisher–Yates shuffle
-    srand(time(NULL));
-    size_t n = ArrayLen(self->cards);
-    for ( int i = n-1; i > 0; i-- ) {
-        int j = rand() % (i+1);
-        ArraySwap(self->cards, i, j);
-    }
-}
-
-Vector2 PileGetPushedFannedPosition(struct Pile *const self) {
+Vector2 PileGetPushedFannedPos(struct Pile *const self) {
     extern float cardWidth, cardHeight;
 
     Vector2 pos = self->pos;
@@ -185,7 +182,7 @@ void PileMoveCards(struct Pile *const self, struct Card* c) {
     ArrayFree(tmp);
 
     // if ( newSrcLen != oldSrcLen ) {
-    //     fprintf(stderr, "Something went wrong moving cards from %s to %s\n", src->class, self->class);
+    //     fprintf(stderr, "Something went wrong moving cards from %s to %s\n", src->category, self->category);
     // }
     fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
 

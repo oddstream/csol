@@ -8,6 +8,10 @@
 
 #include "baize.h"
 #include "array.h"
+#include "stock.h"
+#include "cell.h"
+#include "foundation.h"
+#include "tableau.h"
 #include "moon.h"
 
 static const struct FunctionToRegister {
@@ -90,16 +94,33 @@ int MoonAddPile(lua_State* L) {
         return 0;
     }
 
-    const char* class = lua_tostring(L, 1); // doesn't alter stack
+    const char* category = lua_tostring(L, 1); // doesn't alter stack
     float x = lua_tonumber(L, 2); // doesn't alter stack
     float y = lua_tonumber(L, 3); // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
 
-    // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", class, x, y, fan);
+    // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
 
-    struct Pile* p = PileNew(class, (Vector2){x, y}, fan);
-    ArrayPush(baize->piles, p);
-    lua_pushlightuserdata(L, p);
+    if ( strcmp(category, "Stock") == 0 ) {
+        struct Stock* p = StockNew((Vector2){x, y}, fan);
+        ArrayPush(baize->piles, p);
+        lua_pushlightuserdata(L, p);
+    } else if  ( strcmp(category, "Cell") == 0 ) {
+        struct Cell* p = CellNew((Vector2){x, y}, fan);
+        ArrayPush(baize->piles, p);
+        lua_pushlightuserdata(L, p);
+    } else if ( strcmp(category, "Foundation") == 0 ) {
+        struct Foundation* p = FoundationNew((Vector2){x, y}, fan);
+        ArrayPush(baize->piles, p);
+        lua_pushlightuserdata(L, p);
+    } else if  ( strcmp(category, "Tableau") == 0 ) {
+        struct Tableau* p = TableauNew((Vector2){x, y}, fan);
+        ArrayPush(baize->piles, p);
+        lua_pushlightuserdata(L, p);
+    } else {
+        fprintf(stderr, "Unknown pile category %s\n", category);
+        return 0;
+    }
 
     return 1;   // number of args pushed
 }
@@ -164,13 +185,13 @@ int MoonFindPile(lua_State* L) {
         return 0;
     }
 
-    const char* class = lua_tostring(L, 1); // doesn't alter stack
+    const char* category = lua_tostring(L, 1); // doesn't alter stack
     int n = lua_tointeger(L, 2); // doesn't alter stack
 
     size_t index;
     struct Pile* p = (struct Pile*)ArrayFirst(baize->piles, &index);
     while ( p ) {
-        if ( strcmp(p->class, class) == 0 ) {
+        if ( strcmp(p->category, category) == 0 ) {
             n--;
             if ( n == 0 ) {
                 lua_pushlightuserdata(L, p);

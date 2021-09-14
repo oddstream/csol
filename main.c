@@ -57,6 +57,9 @@ int main(void)
 {
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     int windowWidth = 640 * 2, windowHeight = 480 * 2;
+
+    fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
+
 #if 0
     {
         lua_State *L = luaL_newstate();
