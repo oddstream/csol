@@ -64,7 +64,7 @@ static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
     return result;
 }
 
-bool ConformantBuildTail(lua_State *L, struct Pile *const pile, struct Array* tail)
+bool ConformantBuildTail(lua_State *L, struct Pile *const pile, struct Array *tail)
 {
     if ( pile->buildfunc[0] == '\0' ) {
         return false;
@@ -73,24 +73,33 @@ bool ConformantBuildTail(lua_State *L, struct Pile *const pile, struct Array* ta
         fprintf(stderr, "WARNING: ConformantBuildTail passed empty tail\n");
         return false;
     }
-    if ( ArrayLen(tail) == 1 ) {
-        return true;
-    }
     return ConformantTail(L, pile->buildfunc, tail);
 }
 
-bool ConformantBuildPair(lua_State *L, struct Pile *const pile, struct Card* c0, struct Card* c1)
+bool ConformantBuildAppend(lua_State *L, struct Pile *const pile, struct Array *tail)
 {
-    if ( !c0 || ! c1 ) {
-        fprintf(stderr, "WARNING: ConformantBuildPair passed a null Card\n");
+    if ( ArrayLen(tail) == 0 ) {
+        fprintf(stderr, "WARNING: empty tail passed to ConformantBuildAppend\n");
+        return false;
     }
-    if ( pile->buildfunc[0] == '\0' ) return false;
+    struct Card *c = ArrayPeek(pile->cards);
+    if ( !c ) {
+        fprintf(stderr, "WARNING: ConformantBuildAppend onto an empty pile\n");
+        return false;
+    }
 
-    struct Array* tail = ArrayNew(2);
-    ArrayPush(tail, c0);
-    ArrayPush(tail, c1);
-    bool result = ConformantBuildTail(L, pile, tail);
-    ArrayFree(tail);
+    struct Array *t2 = ArrayNew(1 + ArrayLen(tail));
+    ArrayPush(t2, c);
+
+    size_t index;
+    c = ArrayFirst(tail, &index);
+    while ( c ) {
+        ArrayPush(t2, c);
+        c = ArrayNext(tail, &index);
+    }
+
+    bool result = ConformantTail(L, pile->buildfunc, t2);
+    ArrayFree(t2);
     return result;
 }
 
@@ -109,15 +118,3 @@ bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array* tai
 
     return ConformantTail(L, pile->dragfunc, tail);
 }
-
-// bool ConformantDragPair(lua_State *L, struct Pile *const pile, struct Card* c0, struct Card* c1)
-// {
-//     if ( pile->dragfunc[0] == '\0' ) return false;
-
-//     struct Array* tail = ArrayNew(2);
-//     ArrayPush(tail, c0);
-//     ArrayPush(tail, c1);
-//     bool result = ConformantDragTail(L, pile, tail);
-//     ArrayFree(tail);
-//     return result;
-// }

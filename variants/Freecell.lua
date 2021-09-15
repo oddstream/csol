@@ -43,26 +43,6 @@ function Build()
 
 end
 
-function ConformantPair(cPrev, cThis)
-    -- cards have .suit, .ordinal, .color, .prone
-    if cPrev.prone or cThis.prone then
-        return false
-    end
-    return false
-end
-
-function ConformantTail(cards)
-    local cPrev = cards[1]
-    for n=2, #cards do
-      local cThis = cards[n]
-      if not ConformantPair(cPrev, cThis) then
-        return false
-      end
-      cPrev = cThis
-    end
-    return true
-end
-
 function ChkFoundation(cards)
     io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards\n")
     local cPrev = cards[1]
@@ -86,9 +66,13 @@ function ChkFoundation(cards)
 end
 
 function ChkTableau(cards)
-    io.stderr:write("ChkTableau passed a tail of " .. tostring(#cards) .. " cards\n")
-    for n=1, #cards do
-        io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
+    -- io.stderr:write("ChkTableau passed a tail of " .. tostring(#cards) .. " cards\n")
+    -- for n=1, #cards do
+    --     io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
+    -- end
+    if #cards > 2 then
+        io.stderr:write("ChkTableau tail length fail\n")
+        return false
     end
     local cPrev = cards[1]
     for n=2, #cards do

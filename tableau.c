@@ -31,7 +31,8 @@ static struct PileVtable tableauVtable = {
     &PileFree,
 };
 
-struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc) {
+struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc)
+{
     struct Tableau* self = malloc(sizeof(struct Tableau));
     if ( self ) {
         PileCtor((struct Pile*)self, "Tableau", pos, fan, buildfunc, dragfunc);
@@ -41,30 +42,29 @@ struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc,
     return self;
 }
 
-bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail) {
+bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+{
     if ( ArrayLen(self->cards) == 0 ) {
         struct Tableau *t = (struct Tableau*)self;
-        if ( t->accept == 0 ) {
-            return true;
+        if ( t->accept != 0 ) {
+            struct Card* c = ArrayPeek(tail);
+            if ( c->ord != t->accept ) {
+                fprintf(stderr, "The tableau can only accept a %d, not a %d\n", t->accept, c->ord);
+                return false;
+            }
         }
-        struct Card* c = ArrayPeek(tail);
-        if ( c->ord != t->accept ) {
-            fprintf(stderr, "The tableau can only accept a %d, not a %d\n", t->accept, c->ord);
-            return false;
-        }
-        return true;
+        return ConformantBuildTail(L, self, tail);
     }
-    struct Card* c0 = ArrayPeek(self->cards);
-    struct Card* c1 = ArrayPeek(tail);
-
-    return ConformantBuildPair(L, self, c0, c1);
+    return ConformantBuildAppend(L, self, tail);
 }
 
-void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord) {
+void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)
+{
     ((struct Tableau*)self)->accept = ord;
 }
 
-void TableauDraw(struct Pile *const self) {
+void TableauDraw(struct Pile *const self)
+{
     PileDraw(self);
 
     struct Tableau* t = (struct Tableau*)self;

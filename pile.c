@@ -164,7 +164,7 @@ void PileMoveCards(struct Pile *const self, struct Card* c) {
     // move cards to this pile
 
     struct Pile* src = CardGetOwner(c);
-    size_t oldSrcLen = PileLen(src);
+    // size_t oldSrcLen = PileLen(src);
 
     // find the new length of the source pile
     size_t newSrcLen = 0, index;
@@ -194,7 +194,7 @@ void PileMoveCards(struct Pile *const self, struct Card* c) {
     // if ( newSrcLen != oldSrcLen ) {
     //     fprintf(stderr, "Something went wrong moving cards from %s to %s\n", src->category, self->category);
     // }
-    fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
+    // fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
 
     // flip up an exposed source card
 

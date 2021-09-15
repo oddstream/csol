@@ -64,9 +64,7 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
         }
         return true;
     }
-    struct Card* c0 = ArrayPeek(self->cards);
-    struct Card* c1 = ArrayPeek(tail);
-    return ConformantBuildPair(L, self, c0, c1);
+    return ConformantBuildAppend(L, self, tail);
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord) {
