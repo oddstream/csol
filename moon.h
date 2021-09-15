@@ -13,5 +13,6 @@ int MoonDealUp(lua_State* L);
 int MoonDealDown(lua_State* L);
 int MoonFindPile(lua_State* L);
 int MoonMovePileTo(lua_State* L);
+int MoonSetAccept(lua_State* L);
 
 #endif

@@ -29,9 +29,16 @@ struct Baize* BaizeNew(const char* variantName) {
 
     MoonRegisterFunctions(self->L);
 
-    // create a handle to this Baize inside Lua
-    lua_pushlightuserdata(self->L, self);
-    lua_setglobal(self->L, "BAIZE");
+    // create a handle to this Baize inside Lua TODO maybe not needed
+    lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
+
+    lua_pushinteger(self->L, NONE);         lua_setglobal(self->L, "FAN_NONE");
+    lua_pushinteger(self->L, DOWN);         lua_setglobal(self->L, "FAN_DOWN");
+    lua_pushinteger(self->L, LEFT);         lua_setglobal(self->L, "FAN_LEFT");
+    lua_pushinteger(self->L, RIGHT);        lua_setglobal(self->L, "FAN_RIGHT");
+    lua_pushinteger(self->L, WASTE_DOWN);   lua_setglobal(self->L, "FAN_WASTEDOWN");
+    lua_pushinteger(self->L, WASTE_LEFT);   lua_setglobal(self->L, "FAN_WASTELEFT");
+    lua_pushinteger(self->L, WASTE_RIGHT);  lua_setglobal(self->L, "FAN_WASTERIGHT");
 
     sprintf(fname, "variants/%s.lua", variantName);
 
@@ -56,7 +63,7 @@ struct Baize* BaizeNew(const char* variantName) {
     self->piles = ArrayNew(8);
 
     // always create a stock pile, and fill it
-    self->stock = (struct Pile*)StockNew((Vector2){0,0}, NONE);
+    self->stock = (struct Pile*)StockNew((Vector2){0,0}, NONE, NULL, NULL);
     if ( self->stock ) {
         ArrayPush(self->piles, self->stock);
         for ( int i=0; i<packs*52; i++ ) {
@@ -189,14 +196,14 @@ void BaizeTouchStop(struct Baize *const self) {
     if ( CardWasDragged(c) ) {
         struct Pile* p = BaizeLargestIntersection(self, c);
         if ( p ) {
+            
             fprintf(stderr, "Intersection with %s\n", p->category);
             struct Card *cHeadOfTail = c;
-            while ( c ) {
-                CardStopDrag(c);
-                // CardCancelDrag(c);  // transition card back for now
-                c = (struct Card*)ArrayNext(self->tail, &index);
-            }
-            if ( p->vtable->CanAcceptTail(p, self->tail) ) {
+            if ( p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
+                while ( c ) {
+                    CardStopDrag(c);
+                    c = (struct Card*)ArrayNext(self->tail, &index);
+                }
                 PileMoveCards(p, cHeadOfTail);
             } else {
                 fprintf(stderr, "cannot move cards there\n");

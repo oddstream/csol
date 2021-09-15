@@ -24,11 +24,21 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan) {
+void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc) {
     self->magic = MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->pos = pos;
     self->fan = fan;
+    if ( buildfunc ) {
+        strncpy(self->buildfunc, buildfunc, sizeof self->buildfunc - 1);
+    } else {
+        self->buildfunc[0] = '\0';
+    }
+    if ( dragfunc ) {
+        strncpy(self->dragfunc, dragfunc, sizeof self->dragfunc - 1);
+    } else {
+        self->dragfunc[0] = '\0';
+    }
     self->cards = ArrayNew(52);
 }
 

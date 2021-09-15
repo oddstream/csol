@@ -25,4 +25,14 @@ float UtilOverlapArea(Rectangle a, Rectangle b) {
     return x * y;
 }
 
+char* UtilOrdToShortString(int ord) {
+    static char* ords[14] = {"", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    return ords[ord];
+}
+
+char* UtilOrdToLongString(int ord) {
+    static char* ords[14] = {"", "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"};
+    return ords[ord];
+}
+
 #endif

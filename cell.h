@@ -13,8 +13,9 @@ struct Cell {
     struct Pile super;
 };
 
-struct Cell* CellNew(Vector2 pos, enum FanType fan);
-bool CellCanAcceptTail(struct Pile *const self, struct Array *const tail);
+struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
+void CellSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void CellDraw(struct Pile *const self);
 
 #endif

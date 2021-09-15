@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <raylib.h>
+#include <lua.h>
 #include "array.h"
 #include "card.h"
 #include "pile.h"
@@ -14,8 +15,9 @@ struct Tableau {
     enum CardOrdinal accept;
 };
 
-struct Tableau* TableauNew(Vector2 pos, enum FanType fan);
-bool TableauCanAcceptTail(struct Pile *const self, struct Array *const tail);
+struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
+void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void TableauDraw(struct Pile *const self);
 
 #endif

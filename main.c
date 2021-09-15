@@ -1,23 +1,5 @@
-/*******************************************************************************************
-*
-*   raylib [core] example - Basic 3d example
-*
-*   Welcome to raylib!
-*
-*   To compile example, just press F5.
-*   Note that compiled executable is placed in the same folder as .c file
-*
-*   You can find all basic examples on C:\raylib\raylib\examples folder or
-*   raylib official webpage: www.raylib.com
-*
-*   Enjoy using raylib. :)
-*
-*   This example has been created using raylib 1.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2013-2020 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
+/* main.c */
+
 #include <stdio.h>
 #include <raylib.h>
 #include <lua.h>
@@ -50,15 +32,29 @@ float cardWidth = 71.0, cardHeight = 96.0;
 
 Color baizeColor;   // pedantically, can't initialize with a struct in C, because initializer element is not constant [-Werror=pedantic]
 
+Font fontAcme = {0};
+
 // int main(int argc, char* argv[], char* envp[]);
 
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
-    baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
-    int windowWidth = 640 * 2, windowHeight = 480 * 2;
-
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
+
+    baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
+#if 0
+    {
+        int fontSizes[128-32];
+        for ( int i=32; i<128; i++ ) {
+            fontSizes[i] = i;
+        }
+        fontAcme = LoadFontEx("assets/Acme-Regular.ttf", 8, fontSizes, 128-32);
+        // fontAcme = LoadFontEx("assets/DejaVuSans-Bold.ttf", 8, 0, 255);
+        // fontAcme = LoadFontEx("assets/Roboto-Regular.ttf", 8, 0, 255);
+    }
+#endif
+
+    int windowWidth = 640 * 2, windowHeight = 480 * 2;
 
 #if 0
     {
@@ -106,6 +102,8 @@ int main(void)
 
     SpritesheetFree(ssFace);
     SpritesheetFree(ssBack);
+
+    // UnloadFont(fontAcme);
 
     CloseWindow();        // Close window and OpenGL context
 

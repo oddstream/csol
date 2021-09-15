@@ -23,6 +23,7 @@ static const struct FunctionToRegister {
     {"DealDown", MoonDealDown},
     {"FindPile", MoonFindPile},
     {"MovePileTo", MoonMovePileTo},
+    {"SetAccept", MoonSetAccept},
 };
 
 static struct Baize* getBaize(lua_State* L) {
@@ -98,31 +99,30 @@ int MoonAddPile(lua_State* L) {
     float x = lua_tonumber(L, 2); // doesn't alter stack
     float y = lua_tonumber(L, 3); // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
+    const char* buildfunc = lua_tostring(L, 5);
+    const char* dragfunc = lua_tostring(L, 6);
 
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
 
+    void* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-        struct Stock* p = StockNew((Vector2){x, y}, fan);
-        ArrayPush(baize->piles, p);
-        lua_pushlightuserdata(L, p);
+        p = StockNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Cell") == 0 ) {
-        struct Cell* p = CellNew((Vector2){x, y}, fan);
-        ArrayPush(baize->piles, p);
-        lua_pushlightuserdata(L, p);
+        p = CellNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if ( strcmp(category, "Foundation") == 0 ) {
-        struct Foundation* p = FoundationNew((Vector2){x, y}, fan);
-        ArrayPush(baize->piles, p);
-        lua_pushlightuserdata(L, p);
+        p = FoundationNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Tableau") == 0 ) {
-        struct Tableau* p = TableauNew((Vector2){x, y}, fan);
-        ArrayPush(baize->piles, p);
-        lua_pushlightuserdata(L, p);
+        p = TableauNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);
+    }
+    if ( p ) {
+        ArrayPush(baize->piles, p);
+        lua_pushlightuserdata(L, p);
+        return 1;
+    } else {
         return 0;
     }
-
-    return 1;   // number of args pushed
 }
 
 int MoonDealUp(lua_State* L) {
@@ -226,3 +226,14 @@ int MoonMovePileTo(lua_State* L) {
 
     return 0;
 }
+
+int MoonSetAccept(lua_State* L) {
+
+    struct Pile* p = lua_touserdata(L, 1);
+    enum CardOrdinal ord = lua_tointeger(L, 2);
+
+    p->vtable->SetAccept(p, ord);
+
+    return 0;
+}
+

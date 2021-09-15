@@ -4,6 +4,8 @@
 #define PILE_H
 
 #include <raylib.h>
+#include <lua.h>
+
 #include "array.h"
 #include "card.h"
 
@@ -25,6 +27,8 @@ struct Pile {
     char category[16];
     enum FanType fan;
     Vector2 pos;
+    char buildfunc[16];
+    char dragfunc[16];
     struct Array* cards;
 };
 
@@ -43,7 +47,8 @@ struct PileVtable {
     Rectangle (*GetFannedRect)(struct Pile *const self);
     Vector2 (*GetPushedFannedPos)(struct Pile *const self);
     
-    bool (*CanAcceptTail)(struct Pile *const self, struct Array *const tail);
+    bool (*CanAcceptTail)(struct Pile *const self, lua_State *L, struct Array *const tail);
+    void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
 
     void (*Update)(struct Pile *const self);
     void (*Draw)(struct Pile *const self);
@@ -51,7 +56,7 @@ struct PileVtable {
 };
 
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan);
-void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan);
+void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
 bool PileValid(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);

@@ -2,8 +2,14 @@
 
 ## Next
 
+- [ ] draw recycle
+- [ ] conformant functions in Lua? Register a conformant function from inside Lua Build RegisterConformantFunction("Tableau", TableauFn) and then call it from C with two Card args cPrev cNext, each arg is a table with {ord=3,suit=S,prone=false}
+- [ ] why does LoadFont cause a segmentation fault?
+- [ ] can remove a lot of Pile functions from the vtables
+- [ ] toast update/draw (error return from some functions could be a string)
+- [ ] Klondike
 - [ ] CardSetPos() problem
-- [ ] move csol.settings.lua into variant.lua
+- [x] move csol.settings.lua into variant.lua
 - [x] Baize.LargestIntersection(baize, card)
 - [x] Pile.MoveCards(dst pile, src card)
 - [x] move tail after drag
@@ -11,28 +17,10 @@
         shorthand 2-char with lowercase suit for face down, uppercase suit for face up "2C3C4C4c"
         also need pilenumber, accept, recycles
 - [x] drag a tail
-- [ ] pyle subtypes
+- [x] pyle subtypes
 - deal cards DealUp(p, n)/DealDown(p, n)/DealCard(p, "AC")
 - build only task
 - minimal Makefile
-
-## OOP
-
-Every Pile will have magic, array of cards, position, and fan (which could be in subtypes, but is needed for a low level push).
-
-Stock will have recycles. Other piles will have accept.
-
-Pile does basic operations: push, pop, peek. Also a basic draw (a rectangle).
-
-Pile functions are never called directly, only via their subclass vtables.
-
-So instead of BaizeDraw calling PileDraw, it will call pile->vtable->Draw(pile)
-
-Subpiles will also have a draw (recycle or accept symbol), CanAcceptPile &c.
-
-Pile->category[] used by FindPile.
-
-You can always pass a pointer to Stock to any C function that expects a pointer to Pile. Pile is the *superclass*, Stock is the *subclass*. All functions from the superclass are *inherited* by the subclass.
 
 ## Conventions
 
@@ -51,6 +39,8 @@ Ordinal, Suit - always in that order (alphabetical, and how they are shown on ca
 Position (Vector2) functions and members refer to the Baize position of the Card/Pile, unless they have Screen in their name. All functions have Get and Set in their name, no matter how unfashionable.
 
 Use "AC", "2H", "XD", "KS" shorthand for cards.
+
+Any card or cards can be dragged anywhere, anytime. If the move breaks the rules, csol puts the cards back.
 
 ## Makefile
 

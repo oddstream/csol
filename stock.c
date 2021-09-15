@@ -22,26 +22,33 @@ static struct PileVtable stockVtable = {
     &PileGetPushedFannedPos,
 
     &StockCanAcceptTail,
+    &StockSetAccept,
 
     &PileUpdate,
     &StockDraw,
     &PileFree,
 };
 
-struct Stock* StockNew(Vector2 pos, enum FanType fan) {
+struct Stock* StockNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc) {
     struct Stock* self = malloc(sizeof(struct Stock));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Stock", pos, fan);
+        PileCtor((struct Pile*)self, "Stock", pos, fan, buildfunc, dragfunc);
         self->super.vtable = &stockVtable;
         self->recycles = 0;
     }
     return self;
 }
 
-bool StockCanAcceptTail(struct Pile *const self, struct Array *const tail) {
+bool StockCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail) {
     (void)self;
+    (void)L;
     (void)tail;
     return false;
+}
+
+void StockSetAccept(struct Pile *const self, enum CardOrdinal ord) {
+    (void)self;
+    (void)ord;
 }
 
 void StockDraw(struct Pile *const self) {
