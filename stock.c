@@ -48,9 +48,12 @@ void StockCardTapped(lua_State *L, struct Card *c)
     }
     // TODO transfer 1-3 cards to Waste
     fprintf(stdout, "Stock card tapped\n");
-    // find a Waste pile using baize = c->owner->owner, baize->piles
+    struct Pile *w = BaizeFindPile(baize, "Waste", 1);
+    if ( w ) {
+        fprintf(stdout, "Found Waste\n");
+        PileMoveCards(w, c);
+    }
     (void)L;
-    (void)c;
 }
 
 void StockPileTapped(lua_State *L, struct Pile *p)

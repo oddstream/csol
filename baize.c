@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 #include <raylib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -107,6 +108,22 @@ struct Baize* BaizeNew(const char* variantName) {
 bool BaizeValid(struct Baize *const self)
 {
     return self && self->magic == MAGIC;
+}
+
+struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
+{
+    size_t index;
+    struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &index);
+    while ( p ) {
+        if ( strcmp(p->category, category) == 0 ) {
+            n--;
+            if ( n == 0 ) {
+                return p;
+            }
+        }
+        p = (struct Pile*)ArrayNext(self->piles, &index);
+    }
+    return NULL;
 }
 
 static struct Card* findCardAt(struct Baize *const self, Vector2 pos)
@@ -224,11 +241,11 @@ void BaizeTouchStop(struct Baize *const self)
     if ( self->tail ) {
         size_t index;
         struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
+        struct Card *cHeadOfTail = c;
         if ( CardWasDragged(c) ) {
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                struct Card *cHeadOfTail = c;
                 if ( p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
@@ -250,14 +267,14 @@ void BaizeTouchStop(struct Baize *const self)
                 }
             }
         } else {
-            char z[4];
-            CardShorthand(c, z);
-            fprintf(stdout, "Card %s tapped\n", z);
-            c->owner->vtable->CardTapped(self->L, c);
+            // char z[4];
+            // CardShorthand(c, z);
+            // fprintf(stdout, "Card %s tapped\n", z);
             while ( c ) {
-                CardCancelDrag(c);
+                CardStopDrag(c);    // CardCancelDrag() would use CardTransitionTo(), and we know the card didn't move
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
+            cHeadOfTail->owner->vtable->CardTapped(self->L, cHeadOfTail);
         }
         ArrayFree(self->tail);
         self->tail = NULL;

@@ -9,8 +9,8 @@
 
 #define MAGIC (0xdeadbeef)
 
-#define CARD_FACE_FAN_FACTOR ((float)3)
-#define CARD_BACK_FAN_FACTOR ((float)5)
+#define CARD_FACE_FAN_FACTOR (3.0f)
+#define CARD_BACK_FAN_FACTOR (5.0f)
 
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
 //     struct Pile* self = malloc(sizeof(struct Pile));
@@ -55,18 +55,25 @@ size_t PileLen(struct Pile *const self)
 
 void PilePushCard(struct Pile *const self, struct Card* c)
 {
+    if ( strncmp(self->category, "Stock", 5) == 0 ) {
+        CardFlipDown(c);
+    }
     CardSetOwner(c, self);
-    Vector2 fannedPos = PileGetPushedFannedPos(self); // do this *before* pushing card to pile
+    Vector2 fannedPos = PileGetPushedFannedPos(self); // get this *before* pushing card to pile
+    if ( strcmp(self->category, "Waste") == 0 ) {
+        fprintf(stdout, "Push from %.0f, %.0f to %.0f, %.0f\n", c->pos.x, c->pos.y, fannedPos.x, fannedPos.y);
+    }
     CardTransitionTo(c, fannedPos);
-    // CardSetPos(c, self->pos);
+    // CardSetPos(c, fannedPos);
     ArrayPush(self->cards, c);
 }
 
 struct Card* PilePopCard(struct Pile *const self)
 {
     struct Card* c = (struct Card*)ArrayPop(self->cards);
-    if ( c ) {
+    if ( CardValid(c) ) {
         CardSetOwner(c, NULL);
+        CardFlipUp(c);
     }
     return c;
 }
@@ -162,8 +169,10 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
             }
             break;
         case WASTE_RIGHT:
+            fprintf(stdout, "Waste Right before %.0f,%.0f\n", pos.x, pos.y);
             {
                 float x0 = pos.x;
+                float y0 = pos.y;
                 float x1 = x0 + cardWidth / CARD_FACE_FAN_FACTOR;
                 float x2 = x1 + cardWidth / CARD_FACE_FAN_FACTOR;
                 switch ( ArrayLen(self->cards) ) {
@@ -184,14 +193,15 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
                         pos.x = x2;
                         // top card needs to transition from slot[2] to slot[1]
                         int i = (int)ArrayLen(self->cards) - 1;
-                        CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x1, .y=pos.y});
+                        CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x1, .y=y0});
                         // mid card needs to transition from slot[1] to slot[0]
                         for ( --i; i>= 0; i-- ) {
-                            CardTransitionTo(ArrayGet(self->cards, i), pos);
+                            CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y0});
                         }
                         break;
                 }
             }
+            fprintf(stdout, "Waste Right after  %.0f,%.0f\n", pos.x, pos.y);
             break;
         case WASTE_LEFT:
             break;

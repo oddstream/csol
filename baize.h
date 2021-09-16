@@ -21,6 +21,7 @@ struct Baize {
 
 struct Baize* BaizeNew(const char* variantName);
 bool BaizeValid(struct Baize *const self);
+struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition);

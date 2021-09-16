@@ -15,8 +15,8 @@ float UtilDistance(Vector2 a, Vector2 b) {
 }
 
 float UtilSmootherstep(float A, float B, float v) {
-	v = (v) * (v) * (v) * ((v)*((v)*6-15) + 10);
-	return (B * v) + (A * (1.0 - v));
+	v = (v) * (v) * (v) * ((v)*((v) * 6.0f - 15.0f) + 10.0f);
+	return (B * v) + (A * (1.0f - v));
 }
 
 float UtilOverlapArea(Rectangle a, Rectangle b) {

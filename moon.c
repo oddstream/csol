@@ -192,17 +192,10 @@ int MoonFindPile(lua_State* L) {
     const char* category = lua_tostring(L, 1); // doesn't alter stack
     int n = lua_tointeger(L, 2); // doesn't alter stack
 
-    size_t index;
-    struct Pile* p = (struct Pile*)ArrayFirst(baize->piles, &index);
-    while ( p ) {
-        if ( strcmp(p->category, category) == 0 ) {
-            n--;
-            if ( n == 0 ) {
-                lua_pushlightuserdata(L, p);
-                return 1;
-            }
-        }
-        p = (struct Pile*)ArrayNext(baize->piles, &index);
+    struct Pile *p = BaizeFindPile(baize, category, n);
+    if ( p ) {
+        lua_pushlightuserdata(L, p);
+        return 1;
     }
 
     return 0;

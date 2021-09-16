@@ -68,6 +68,6 @@ bool CardFlipping(struct Card *const self);
 void CardUpdate(struct Card *const self);
 void CardDraw(struct Card *const self);
 void CardFree(struct Card *const self);
-void CardDrawRect(struct Card *const self, int x, int y);
+// void CardDrawRect(struct Card *const self, int x, int y);
 
 #endif

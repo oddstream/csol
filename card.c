@@ -173,14 +173,14 @@ void CardDraw(struct Card *const self)
     }
 }
 
-void CardDrawRect(struct Card *const self, int x, int y)
-{
-    extern float cardWidth, cardHeight;
-    char z[4], buf[104];
-    CardShorthand(self, z);
-    sprintf(buf, "%s %f,%f,%f,%f", z, self->pos.x, self->pos.y, cardWidth, cardHeight);
-    DrawText(buf, x, y, 24, WHITE);
-}
+// void CardDrawRect(struct Card *const self, int x, int y)
+// {
+//     extern float cardWidth, cardHeight;
+//     char z[4], buf[104];
+//     CardShorthand(self, z);
+//     sprintf(buf, "%s %f,%f,%f,%f", z, self->pos.x, self->pos.y, cardWidth, cardHeight);
+//     DrawText(buf, x, y, 24, WHITE);
+// }
 
 void CardFlipUp(struct Card *const self)
 {
