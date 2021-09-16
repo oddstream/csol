@@ -9,20 +9,8 @@
 #include "util.h"
 
 static struct PileVtable tableauVtable = {
-    &PileValid,
-    &PileLen,
-
-    &PilePushCard,
-    &PilePopCard,
-    &PilePeekCard,
-    &PileMoveCards,
-
-    &PileGetRect,
-    &PileGetPos,
-    &PileSetPos,
-    &PileGetFannedRect,
-    &PileGetPushedFannedPos,
-
+    &TableauCardTapped,
+    &TableauPileTapped,
     &TableauCanAcceptTail,
     &TableauSetAccept,
 
@@ -42,6 +30,18 @@ struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc,
     return self;
 }
 
+void TableauCardTapped(lua_State *L, struct Card *c)
+{
+    (void)L;
+    (void)c;
+}
+
+void TableauPileTapped(lua_State *L, struct Pile *p)
+{
+    (void)L;
+    (void)p;
+}
+
 bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
 {
     if ( ArrayLen(self->cards) == 0 ) {
@@ -49,7 +49,7 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
         if ( t->accept != 0 ) {
             struct Card* c = ArrayPeek(tail);
             if ( c->ord != t->accept ) {
-                fprintf(stderr, "The tableau can only accept a %d, not a %d\n", t->accept, c->ord);
+                fprintf(stderr, "The empty tableau can only accept a %d, not a %d\n", t->accept, c->ord);
                 return false;
             }
         }

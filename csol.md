@@ -2,13 +2,19 @@
 
 ## Next
 
+- [ ] Klondike (CardTapped, PileTapped)
+- [ ] don't like passing Baize->L around
+- [ ] Waste fanning
+- [ ] MoveCard(STOCK, pile, prone)
+- [ ] CanAcceptTail should return an error string for toasting later
+- [ ] baize dragging
 - [ ] draw recycle
-- [ ] conformant functions in Lua? Register a conformant function from inside Lua Build RegisterConformantFunction("Tableau", TableauFn) and then call it from C with two Card args cPrev cNext, each arg is a table with {ord=3,suit=S,prone=false}
 - [ ] why does LoadFont cause a segmentation fault?
-- [ ] can remove a lot of Pile functions from the vtables
 - [ ] toast update/draw (error return from some functions could be a string)
-- [ ] Klondike
 - [ ] CardSetPos() problem
+- [x] Card flipping
+- [x] conformant functions in Lua? Register a conformant function from inside Lua Build RegisterConformantFunction("Tableau", TableauFn) and then call it from C with two Card args cPrev cNext, each arg is a table with {ord=3,suit=S,prone=false}
+- [x] can remove a lot of Pile functions from the vtables
 - [x] move csol.settings.lua into variant.lua
 - [x] Baize.LargestIntersection(baize, card)
 - [x] Pile.MoveCards(dst pile, src card)
@@ -41,6 +47,8 @@ Position (Vector2) functions and members refer to the Baize position of the Card
 Use "AC", "2H", "XD", "KS" shorthand for cards.
 
 Any card or cards can be dragged anywhere, anytime. If the move breaks the rules, csol puts the cards back.
+
+Some behaviour is baked into each pyle subtype (eg cells only hold one card, foundations can only accept one card at a time, accept rules (which are set from Lua)), everyting else is configured by *variant.lua*.
 
 ## Makefile
 

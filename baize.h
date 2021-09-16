@@ -13,14 +13,14 @@ struct Baize {
     struct Card* cardLibrary;
     lua_State *L;
     struct Array* piles;
-    struct Pile* stock;
+    struct Pile* stock;     // actuall a struct Stock*
     struct Array* tail;
     Vector2 lastTouch;
+    struct Pile* touchedPile;
 };
 
 struct Baize* BaizeNew(const char* variantName);
 bool BaizeValid(struct Baize *const self);
-struct Pile* BaizeLargestIntersection(struct Baize *const self, struct Card *const c);
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition);

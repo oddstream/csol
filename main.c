@@ -90,7 +90,7 @@ int main(void)
     ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
     ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
     
-    struct Baize* baize = BaizeNew("Freecell");
+    struct Baize* baize = BaizeNew("Klondike");
 
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {

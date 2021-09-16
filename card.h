@@ -40,7 +40,10 @@ struct Card /* tag */ {
     Vector2 lerpSrc, lerpDst;
     float lerpStep, lerpStepAmount;
 
+    float flipStep, flipWidth;
 } /* variable definition */;
+
+#define FLIPSTEPAMOUNT (0.075f)
 
 struct Card CardNew(enum CardOrdinal ord, enum CardSuit suit);
 bool CardValid(struct Card *const self);
@@ -60,9 +63,11 @@ bool CardWasDragged(struct Card *const self);
 bool CardDragging(struct Card *const self);
 bool CardIsAt(struct Card* c, Vector2 point);
 void CardFlipUp(struct Card *const self);
-void CardFlipDown(struct Card*self);
+void CardFlipDown(struct Card *const self);
+bool CardFlipping(struct Card *const self);
 void CardUpdate(struct Card *const self);
 void CardDraw(struct Card *const self);
 void CardFree(struct Card *const self);
 void CardDrawRect(struct Card *const self, int x, int y);
+
 #endif

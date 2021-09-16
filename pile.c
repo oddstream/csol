@@ -24,7 +24,8 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc) {
+void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc)
+{
     self->magic = MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->pos = pos;
@@ -42,15 +43,18 @@ void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum F
     self->cards = ArrayNew(52);
 }
 
-bool PileValid(struct Pile *const self) {
+bool PileValid(struct Pile *const self)
+{
     return self && self->magic == MAGIC;
 }
 
-size_t PileLen(struct Pile *const self) {
+size_t PileLen(struct Pile *const self)
+{
     return ArrayLen(self->cards);
 }
 
-void PilePushCard(struct Pile *const self, struct Card* c) {
+void PilePushCard(struct Pile *const self, struct Card* c)
+{
     CardSetOwner(c, self);
     Vector2 fannedPos = PileGetPushedFannedPos(self); // do this *before* pushing card to pile
     CardTransitionTo(c, fannedPos);
@@ -58,7 +62,8 @@ void PilePushCard(struct Pile *const self, struct Card* c) {
     ArrayPush(self->cards, c);
 }
 
-struct Card* PilePopCard(struct Pile *const self) {
+struct Card* PilePopCard(struct Pile *const self)
+{
     struct Card* c = (struct Card*)ArrayPop(self->cards);
     if ( c ) {
         CardSetOwner(c, NULL);
@@ -66,24 +71,29 @@ struct Card* PilePopCard(struct Pile *const self) {
     return c;
 }
 
-struct Card* PilePeekCard(struct Pile *const self) {
+struct Card* PilePeekCard(struct Pile *const self)
+{
     return (struct Card*)ArrayPeek(self->cards);
 }
 
-Vector2 PileGetPos(struct Pile *const self) {
+Vector2 PileGetPos(struct Pile *const self)
+{
     return self->pos;
 }
 
-Rectangle PileGetRect(struct Pile *const self) {
+Rectangle PileGetRect(struct Pile *const self)
+{
     extern float cardWidth, cardHeight;
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
 }
 
-void PileSetPos(struct Pile *const self, Vector2 pos) {
+void PileSetPos(struct Pile *const self, Vector2 pos)
+{
     self->pos = pos;
 }
 
-Rectangle PileGetFannedRect(struct Pile *const self) {
+Rectangle PileGetFannedRect(struct Pile *const self)
+{
     // cannot use position of top card, in case it's being dragged
     extern float cardWidth, cardHeight;
     Rectangle r = PileGetRect(self);
@@ -111,7 +121,8 @@ Rectangle PileGetFannedRect(struct Pile *const self) {
     return r;
 }
 
-Vector2 PileGetPushedFannedPos(struct Pile *const self) {
+Vector2 PileGetPushedFannedPos(struct Pile *const self)
+{
     extern float cardWidth, cardHeight;
 
     Vector2 pos = self->pos;
@@ -151,6 +162,36 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self) {
             }
             break;
         case WASTE_RIGHT:
+            {
+                float x0 = pos.x;
+                float x1 = x0 + cardWidth / CARD_FACE_FAN_FACTOR;
+                float x2 = x1 + cardWidth / CARD_FACE_FAN_FACTOR;
+                switch ( ArrayLen(self->cards) ) {
+                    case 0:
+                        // do nothing, incoming card will be at pos
+                        break;
+                    case 1:
+                        // incoming card at slot[1]
+                        pos.x = x1;
+                        break;
+                    case 2:
+                        // incoming card at slot[2]
+                        pos.x = x2;
+                        break;
+                    default:
+                        // >= 3 cards
+                        // incoming card at slot[2]
+                        pos.x = x2;
+                        // top card needs to transition from slot[2] to slot[1]
+                        int i = (int)ArrayLen(self->cards) - 1;
+                        CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x1, .y=pos.y});
+                        // mid card needs to transition from slot[1] to slot[0]
+                        for ( --i; i>= 0; i-- ) {
+                            CardTransitionTo(ArrayGet(self->cards, i), pos);
+                        }
+                        break;
+                }
+            }
             break;
         case WASTE_LEFT:
             break;
@@ -160,7 +201,8 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self) {
     return pos;
 }
 
-void PileMoveCards(struct Pile *const self, struct Card* c) {
+void PileMoveCards(struct Pile *const self, struct Card* c)
+{
     // move cards to this pile
 
     struct Pile* src = CardGetOwner(c);
@@ -196,24 +238,43 @@ void PileMoveCards(struct Pile *const self, struct Card* c) {
     // }
     // fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
 
-    // flip up an exposed source card
+    // flip up an exposed source card, if src pile is not Stock*
+    if ( strncmp(src->category, "Stock", 5) ) {
+        struct Card* tc = PilePeekCard(src);
+        if ( tc ) {
+            CardFlipUp(tc);
+        }
+    }
 
     // special case: waste may need refanning if we took a card from it
+    if ( src->fan == WASTE_DOWN || src->fan == WASTE_LEFT || src->fan == WASTE_RIGHT ) {
+        // TODO PileRepushAllCards(src);
+    }
 
-    // scrunch
+    // TODO scrunch
 }
 
-void PileUpdate(struct Pile *const self) {
+bool PileIsAt(struct Pile *const self, Vector2 point)
+{
+    extern float cardWidth, cardHeight;
+    Rectangle rect = {.x=self->pos.x, .y=self->pos.y, .width=cardWidth, .height=cardHeight};
+    return CheckCollisionPointRec(point, rect);
+}
+
+void PileUpdate(struct Pile *const self)
+{
     ArrayForeach(self->cards, (ArrayIterFunc)CardUpdate);
 }
 
-void PileDraw(struct Pile *const self) {
+void PileDraw(struct Pile *const self)
+{
     // BeginDrawing() has been called by BaizeDraw()
     Rectangle r = PileGetFannedRect(self);
     DrawRectangleRoundedLines(r, 0.1, 4, 2.0, (Color){255,255,255,31});
 }
 
-void PileFree(struct Pile *const self) {
+void PileFree(struct Pile *const self)
+{
     // Card objects exist in the Baize->cardLibrary array, so we don't free them here
     if ( self ) {
         ArrayFree(self->cards);

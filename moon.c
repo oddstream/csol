@@ -12,6 +12,7 @@
 #include "cell.h"
 #include "foundation.h"
 #include "tableau.h"
+#include "waste.h"
 #include "moon.h"
 
 static const struct FunctionToRegister {
@@ -104,19 +105,22 @@ int MoonAddPile(lua_State* L) {
 
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
 
-    void* p = NULL;
+    struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-        p = StockNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)StockNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Cell") == 0 ) {
-        p = CellNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)CellNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if ( strcmp(category, "Foundation") == 0 ) {
-        p = FoundationNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Tableau") == 0 ) {
-        p = TableauNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)TableauNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+    } else if  ( strcmp(category, "Waste") == 0 ) {
+        p = (struct Pile*)WasteNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);
     }
-    if ( p ) {
+    if ( PileValid(p) ) {
+        p->owner = baize;
         ArrayPush(baize->piles, p);
         lua_pushlightuserdata(L, p);
         return 1;

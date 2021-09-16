@@ -10,20 +10,8 @@
 #include "cell.h"
 
 static struct PileVtable cellVtable = {
-    &PileValid,
-    &PileLen,
-
-    &PilePushCard,
-    &PilePopCard,
-    &PilePeekCard,
-    &PileMoveCards,
-
-    &PileGetRect,
-    &PileGetPos,
-    &PileSetPos,
-    &PileGetFannedRect,
-    &PileGetPushedFannedPos,
-
+    &CellCardTapped,
+    &CellPileTapped,
     &CellCanAcceptTail,
     &CellSetAccept,
 
@@ -32,7 +20,8 @@ static struct PileVtable cellVtable = {
     &PileFree,
 };
 
-struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc) {
+struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc)
+{
     struct Cell* self = malloc(sizeof(struct Cell));
     if ( self ) {
         PileCtor((struct Pile*)self, "Cell", pos, fan, buildfunc, dragfunc);
@@ -41,7 +30,20 @@ struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const
     return self;
 }
 
-bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail) {
+void CellCardTapped(lua_State *L, struct Card *c)
+{
+    (void)L;
+    (void)c;
+}
+
+void CellPileTapped(lua_State *L, struct Pile *p)
+{
+    (void)L;
+    (void)p;
+}
+
+bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+{
     (void)L;
     if ( ArrayLen(tail) != 1 ) {
         fprintf(stderr, "Can only move single cards to a cell\n");
@@ -54,7 +56,8 @@ bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *cons
     return true;
 }
 
-void CellSetAccept(struct Pile *const self, enum CardOrdinal ord) {
+void CellSetAccept(struct Pile *const self, enum CardOrdinal ord)
+{
     // we don't do that here
     (void)self;
     (void)ord;

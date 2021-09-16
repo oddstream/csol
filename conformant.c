@@ -82,7 +82,7 @@ bool ConformantBuildAppend(lua_State *L, struct Pile *const pile, struct Array *
         fprintf(stderr, "WARNING: empty tail passed to ConformantBuildAppend\n");
         return false;
     }
-    struct Card *c = ArrayPeek(pile->cards);
+    struct Card *c = PilePeekCard(pile);
     if ( !c ) {
         fprintf(stderr, "WARNING: ConformantBuildAppend onto an empty pile\n");
         return false;

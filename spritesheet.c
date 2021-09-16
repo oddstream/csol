@@ -63,16 +63,19 @@ void SpritesheetFree(struct Spritesheet *const self) {
     free(self);
 }
 
-void SpritesheetDraw(struct Spritesheet *const self, int frame, Vector2 pos) {
-    const float scale = 1.0;
-    const float ang = 0.0;
+void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Vector2 pos) {
+    const float yScale = 1.0f;
+    const float ang = 0.0f;
     const Color c = WHITE;
     if ( self->info ) {
         // extern float cardWidth, cardHeight;
         // Rectangle r = {.x=x, .y=y, cardWidth, cardHeight};
         // DrawRectangleRounded(r, 0.1, 4, (Color){0,0,127,255});
         Rectangle rSrc = self->info[frame];
-        Rectangle rDst = (Rectangle){.x = pos.x, .y = pos.y, .width = self->info[frame].width, .height = self->info[frame].height};
+        // TODO tidy up this math
+        float dstWidth = self->info[frame].width * xScale;
+        float xOffset = self->info[frame].width - dstWidth / 2.0f;
+        Rectangle rDst = (Rectangle){.x = pos.x + xOffset - (self->info[frame].width / 2.0f), .y = pos.y, .width = self->info[frame].width * xScale, .height = self->info[frame].height * yScale};
         DrawTexturePro(
             self->texture,
             rSrc,
@@ -84,10 +87,13 @@ void SpritesheetDraw(struct Spritesheet *const self, int frame, Vector2 pos) {
     } else {
         float ox = (frame % self->framesWide) * self->frameSize.x;
         float oy = (frame / self->framesWide) * self->frameSize.y;
+        // TODO tidy up this math
+        float dstWidth = self->frameSize.x * xScale;
+        float xOffset = self->frameSize.x - dstWidth / 2.0f;
         DrawTexturePro(
             self->texture,
             (Rectangle){ox, oy, self->frameSize.x,self->frameSize.y}, 
-            (Rectangle){pos.x, pos.y, self->frameSize.x * scale, self->frameSize.y * scale}, 
+            (Rectangle){pos.x + xOffset - (self->frameSize.x / 2.0), pos.y, self->frameSize.x * xScale, self->frameSize.y * yScale}, 
             (Vector2){0},//{self->origin.x * scale, self->origin.y * scale},
             ang,
             c

@@ -12,20 +12,8 @@
 #include "util.h"
 
 static struct PileVtable foundationVtable = {
-    &PileValid,
-    &PileLen,
-
-    &PilePushCard,
-    &PilePopCard,
-    &PilePeekCard,
-    &PileMoveCards,
-
-    &PileGetRect,
-    &PileGetPos,
-    &PileSetPos,
-    &PileGetFannedRect,
-    &PileGetPushedFannedPos,
-
+    &FoundationCardTapped,
+    &FoundationPileTapped,
     &FoundationCanAcceptTail,
     &FoundationSetAccept,
 
@@ -42,6 +30,16 @@ struct Foundation* FoundationNew(Vector2 pos, enum FanType fan, const char* buil
         self->accept = 0; // accept any by default
     }
     return self;
+}
+
+void FoundationCardTapped(lua_State *L, struct Card *c) {
+    (void)L;
+    (void)c;
+}
+
+void FoundationPileTapped(lua_State *L, struct Pile *p) {
+    (void)L;
+    (void)p;
 }
 
 bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail) {

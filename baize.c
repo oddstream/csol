@@ -47,7 +47,7 @@ struct Baize* BaizeNew(const char* variantName) {
         lua_pop(self->L, 1);
     } else {
         // TODO read baizeColor &c
-        packs = MoonGetGlobalInt(self->L, "Packs", 1);
+        packs = MoonGetGlobalInt(self->L, "PACKS", 1);
     }
 
     self->cardLibrary = calloc(packs * 52, sizeof(struct Card));
@@ -64,7 +64,9 @@ struct Baize* BaizeNew(const char* variantName) {
 
     // always create a stock pile, and fill it
     self->stock = (struct Pile*)StockNew((Vector2){0,0}, NONE, NULL, NULL);
-    if ( self->stock ) {
+    lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
+    if ( PileValid(self->stock) ) {
+        self->stock->owner = self;
         ArrayPush(self->piles, self->stock);
         for ( int i=0; i<packs*52; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
@@ -95,17 +97,20 @@ struct Baize* BaizeNew(const char* variantName) {
     fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
     self->tail = NULL;
+    self->touchedPile = NULL;
 
     SetWindowTitle(variantName);
 
     return self;
 }
 
-bool BaizeValid(struct Baize *const self) {
+bool BaizeValid(struct Baize *const self)
+{
     return self && self->magic == MAGIC;
 }
 
-static struct Card* findCardAt(struct Baize *const self, Vector2 pos) {
+static struct Card* findCardAt(struct Baize *const self, Vector2 pos)
+{
     size_t pindex, cindex;
     struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &pindex);
     while ( p ) {
@@ -126,7 +131,21 @@ static struct Card* findCardAt(struct Baize *const self, Vector2 pos) {
     return NULL;
 }
 
-struct Pile* BaizeLargestIntersection(struct Baize *const self, struct Card *const c) {
+static struct Pile* findPileAt(struct Baize *const self, Vector2 pos)
+{
+    size_t pindex;
+    struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &pindex);
+    while ( p ) {
+        if ( PileIsAt(p, pos) ) {
+            return p;
+        }
+        p = (struct Pile*)ArrayNext(self->piles, &pindex);
+    }
+    return NULL;
+}
+
+static struct Pile* largestIntersection(struct Baize *const self, struct Card *const c)
+{
     float largestArea = 0.0;
     struct Pile *pile = NULL;
     Rectangle rectCard = CardGetRect(c);
@@ -145,8 +164,8 @@ struct Pile* BaizeLargestIntersection(struct Baize *const self, struct Card *con
     return pile;
 }
 
-void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst) {
-    
+void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
+{
     if ( self->tail ) {
         ArrayFree(self->tail);
         self->tail = NULL;
@@ -164,7 +183,8 @@ void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst) {
     }
 }
 
-void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition) {
+void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
+{
     struct Card* c = findCardAt(self, touchPosition);
     if ( c ) {
         // record the distance from the card's origin to the tap point
@@ -176,64 +196,81 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition) {
             ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
         }
         self->lastTouch = touchPosition;
+    } else {
+        self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
     }
 }
 
-void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition) {
-    size_t index;
-    struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
-    while ( c ) {
-        Vector2 delta = {.x = touchPosition.x - self->lastTouch.x, .y = touchPosition.y - self->lastTouch.y};
-        CardMovePositionBy(c, delta);
-        c = (struct Card*)ArrayNext(self->tail, &index);
+void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
+{
+    if ( self->tail ) {
+        size_t index;
+        struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
+        while ( c ) {
+            Vector2 delta = {.x = touchPosition.x - self->lastTouch.x, .y = touchPosition.y - self->lastTouch.y};
+            CardMovePositionBy(c, delta);
+            c = (struct Card*)ArrayNext(self->tail, &index);
+        }
+    } else if ( self->touchedPile ) {
+        // do nothing, can't drag a pile
+    } else {
+        // TODO drag the baize
     }
     self->lastTouch = touchPosition;
 }
 
-void BaizeTouchStop(struct Baize *const self) {
-    size_t index;
-    struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
-    if ( CardWasDragged(c) ) {
-        struct Pile* p = BaizeLargestIntersection(self, c);
-        if ( p ) {
-            
-            fprintf(stderr, "Intersection with %s\n", p->category);
-            struct Card *cHeadOfTail = c;
-            if ( p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
-                while ( c ) {
-                    CardStopDrag(c);
-                    c = (struct Card*)ArrayNext(self->tail, &index);
+void BaizeTouchStop(struct Baize *const self)
+{
+    if ( self->tail ) {
+        size_t index;
+        struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
+        if ( CardWasDragged(c) ) {
+            struct Pile* p = largestIntersection(self, c);
+            if ( p ) {
+                // fprintf(stderr, "Intersection with %s\n", p->category);
+                struct Card *cHeadOfTail = c;
+                if ( p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
+                    while ( c ) {
+                        CardStopDrag(c);
+                        c = (struct Card*)ArrayNext(self->tail, &index);
+                    }
+                    PileMoveCards(p, cHeadOfTail);
+                } else {
+                    // fprintf(stderr, "cannot move cards there\n");
+                    while ( c ) {
+                        CardCancelDrag(c);
+                        c = (struct Card*)ArrayNext(self->tail, &index);
+                    }
                 }
-                PileMoveCards(p, cHeadOfTail);
             } else {
-                fprintf(stderr, "cannot move cards there\n");
+                // fprintf(stderr, "No intersection\n");
                 while ( c ) {
                     CardCancelDrag(c);
                     c = (struct Card*)ArrayNext(self->tail, &index);
                 }
             }
         } else {
-            fprintf(stderr, "No intersection\n");
+            char z[4];
+            CardShorthand(c, z);
+            fprintf(stdout, "Card %s tapped\n", z);
+            c->owner->vtable->CardTapped(self->L, c);
             while ( c ) {
                 CardCancelDrag(c);
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
         }
+        ArrayFree(self->tail);
+        self->tail = NULL;
+    } else if ( self->touchedPile ) {
+        self->touchedPile->vtable->PileTapped(self->L, self->touchedPile);
+        self->touchedPile = NULL;
     } else {
-        char z[4];
-        CardShorthand(c, z);
-        fprintf(stderr, "Card %s tapped\n", z);
-        while ( c ) {
-            CardCancelDrag(c);
-            c = (struct Card*)ArrayNext(self->tail, &index);
-        }
+        // TODO finish dragging baize
     }
-    ArrayFree(self->tail);
-    self->tail = NULL;
 }
 
-void BaizeUpdate(struct Baize *const self) {
-
+void BaizeUpdate(struct Baize *const self)
+{
     // static float dx, dy;
 
     Vector2 touchPosition = GetTouchPosition(0);
@@ -242,10 +279,10 @@ void BaizeUpdate(struct Baize *const self) {
     if ( gesture == GESTURE_TAP && !self->tail ) {
         BaizeTouchStart(self, touchPosition);
     }
-    if ( gesture == GESTURE_DRAG && self->tail ) {
+    if ( gesture == GESTURE_DRAG && (self->tail || self->touchedPile) ) {
         BaizeTouchMove(self, touchPosition);
     }
-    if ( gesture == GESTURE_NONE && self->tail ) {
+    if ( gesture == GESTURE_NONE && (self->tail || self->touchedPile) ) {
         BaizeTouchStop(self);
     }
 
@@ -262,8 +299,8 @@ void BaizeUpdate(struct Baize *const self) {
 
 }
 
-void BaizeDraw(struct Baize *const self) {
-
+void BaizeDraw(struct Baize *const self)
+{
     extern Color baizeColor;
 
     ClearBackground(baizeColor);
@@ -308,7 +345,8 @@ void BaizeDraw(struct Baize *const self) {
     EndDrawing();
 }
 
-void BaizeFree(struct Baize *const self) {
+void BaizeFree(struct Baize *const self)
+{
     ArrayFree(self->tail);
     ArrayForeach(self->piles, (ArrayIterFunc)PileFree);
     ArrayFree(self->piles);
