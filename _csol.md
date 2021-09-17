@@ -19,7 +19,7 @@
 - [ ] title bar
 - [ ] status bar
 - [x] CardToString, LOGCARD
-- [x] CardId
+- [x] CardId (easy to serialize)
 - [x] Klondike (CardTapped deal from Stock to Waste, PileTapped recycle from Waste to Stock)
 - [x] The empty tableau can only accept a 13, not a 11 (dragging KQJ to empty tab)
 - [x] Waste fanning

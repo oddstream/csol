@@ -119,6 +119,9 @@ Rectangle PileGetFannedRect(struct Pile *const self)
     Rectangle r = PileGetRect(self);
     if ( ArrayLen(self->cards) > 2 ) {
         struct Card* c = ArrayPeek(self->cards);
+        if ( CardDragging(c) ) {
+            return r;   // this and the rest are meaningless
+        }
         Vector2 cPos = CardGetPos(c);
         switch ( self->fan ) {
             case NONE:

@@ -51,7 +51,7 @@ int main(void)
     }
 #endif
 
-    int windowWidth = 640 * 2, windowHeight = 480 * 2;
+    int windowWidth = 1300, windowHeight = 1000;
 
 #if 0
     {
@@ -87,7 +87,7 @@ int main(void)
     ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
     ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
     
-    struct Baize* baize = BaizeNew("Klondike");
+    struct Baize* baize = BaizeNew("Limited");
     if ( BaizeValid(baize) ) {
         while (!WindowShouldClose())    // Detect window close button or ESC key
         {

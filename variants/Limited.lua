@@ -1,6 +1,6 @@
--- Klondike
+-- Limited
 
-PACKS = 1
+PACKS = 2
 
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
@@ -21,51 +21,21 @@ function Build()
     -- end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 100, 50)
-    SetRecycles(STOCK, 9999)
-  
-    local pile
+    MovePileTo(STOCK, 100, 100)
+    SetRecycles(STOCK, 0)
 
-    pile = AddPile("Waste", 200, 50, FAN_WASTERIGHT, "ChkFalse", "ChkFalse")
 
-    for x = 400, 700, 100 do
-        pile = AddPile("Foundation", x, 50, FAN_NONE, "ChkFoundation", "ChkFalse")
+    AddPile("Waste", 200, 100, FAN_WASTERIGHT, "ChkFalse", "ChkFalse")
+
+    for x = 500, 1200, 100 do
+        local pile = AddPile("Foundation", x, 100, FAN_NONE, "ChkFoundation", "ChkFalse")
         SetAccept(pile, 1)
     end
 
-    pile = AddPile("Tableau", 100, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 200, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealDown(pile, 1)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 300, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealDown(pile, 2)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 400, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealDown(pile, 3)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 500, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealDown(pile, 4)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 600, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealDown(pile, 5)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 700, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
-    SetAccept(pile, 13)
-    DealDown(pile, 6)
-    DealUp(pile, 1)
+    for x = 100, 1200, 100 do
+        local pile = AddPile("Tableau", x, 300, FAN_DOWN, "ChkTableau", "ChkTableau")
+        DealUp(pile, 3)
+    end
 
 end
 
@@ -101,6 +71,10 @@ function ChkTableau(cards)
     -- for n=1, #cards do
     --     io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
     -- end
+    if #cards > 2 then
+        io.stderr:write("ChkTableau tail length fail\n")
+        return false
+    end
     local cPrev = cards[1]
     for n=2, #cards do
       local cThis = cards[n]
@@ -108,7 +82,7 @@ function ChkTableau(cards)
         io.stderr:write("ChkTableau prone fail\n")
         return false
       end
-      if cPrev.color == cThis.color then
+      if cPrev.suit ~= cThis.suit then
         io.stderr:write("ChkTableau color fail\n")
         return false
       end

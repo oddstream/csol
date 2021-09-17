@@ -59,12 +59,14 @@ struct Baize* BaizeNew(const char* variantName) {
         packs = MoonGetGlobalInt(self->L, "PACKS", 1);
     }
 
-    self->cardLibrary = calloc(packs * 52, sizeof(struct Card));
-    for ( unsigned pack = 0; pack < packs; pack++ ) {
+    {   // scope for i
+        self->cardLibrary = calloc(packs * 52, sizeof(struct Card));
         int i = 0;
-        for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
-            for ( enum CardSuit s = CLUB; s <= SPADE; s++ ) {
-                self->cardLibrary[i++] = CardNew(pack, o, s);
+        for ( unsigned pack = 0; pack < packs; pack++ ) {
+            for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
+                for ( enum CardSuit s = CLUB; s <= SPADE; s++ ) {
+                    self->cardLibrary[i++] = CardNew(pack, o, s);
+                }
             }
         }
     }
@@ -281,6 +283,11 @@ void BaizeTouchStop(struct Baize *const self)
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
             cHeadOfTail->owner->vtable->CardTapped(cHeadOfTail);
+            // char *pt = _Generic(cHeadOfTail->owner,
+            //                 struct Pile* : "Pile",
+            //                 struct Tableau* : "Tableau",
+            //                 default: "Other");
+            // fprintf(stdout, "_Generic %s\n", pt);
         }
         ArrayFree(self->tail);
         self->tail = NULL;
