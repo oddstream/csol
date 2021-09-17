@@ -25,9 +25,11 @@ static const struct FunctionToRegister {
     {"FindPile", MoonFindPile},
     {"MovePileTo", MoonMovePileTo},
     {"SetAccept", MoonSetAccept},
+    {"SetRecycles", MoonSetRecycles},
 };
 
-static struct Baize* getBaize(lua_State* L) {
+static struct Baize* getBaize(lua_State* L)
+{
     int typ = lua_getglobal(L, "BAIZE");    // push light userdata on the stack
     if ( typ != LUA_TLIGHTUSERDATA ) {
         fprintf(stderr, "global BAIZE is not light userdata\n");
@@ -40,14 +42,16 @@ static struct Baize* getBaize(lua_State* L) {
     return baize;
 }
 
-void MoonRegisterFunctions(lua_State* L) {
+void MoonRegisterFunctions(lua_State* L)
+{
     for ( size_t i=0; i<sizeof(FunctionsToRegister) / sizeof(struct FunctionToRegister); i++ ) {
         lua_pushcfunction(L, FunctionsToRegister[i].cFunction);
         lua_setglobal(L, FunctionsToRegister[i].luaFunction);
     }
 }
 
-int MoonGetGlobalInt(lua_State* L, const char* var, const int def) {
+int MoonGetGlobalInt(lua_State* L, const char* var, const int def)
+{
     int result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     int typ = lua_getglobal(L, var);    // pushes value onto stack
@@ -72,7 +76,8 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def) {
     return result;
 }
 
-float MoonGetFieldNumber(lua_State* L, const char* key, const float def) {
+float MoonGetFieldNumber(lua_State* L, const char* key, const float def)
+{
     // assumes table is on top of stack
     float result = def;
     int isnum;
@@ -90,9 +95,10 @@ float MoonGetFieldNumber(lua_State* L, const char* key, const float def) {
     return result;
 }
 
-int MoonAddPile(lua_State* L) {
+int MoonAddPile(lua_State* L)
+{
     struct Baize* baize = getBaize(L);
-    if ( !baize ) {
+    if ( !BaizeValid(baize) ) {
         return 0;
     }
 
@@ -129,9 +135,10 @@ int MoonAddPile(lua_State* L) {
     }
 }
 
-int MoonDealUp(lua_State* L) {
+int MoonDealUp(lua_State* L)
+{
     struct Baize* baize = getBaize(L);
-    if ( !baize ) {
+    if ( !BaizeValid(baize) ) {
         return 0;
     }
 
@@ -156,9 +163,10 @@ int MoonDealUp(lua_State* L) {
     return 0;
 }
 
-int MoonDealDown(lua_State* L) {
+int MoonDealDown(lua_State* L)
+{
     struct Baize* baize = getBaize(L);
-    if ( !baize ) {
+    if ( !BaizeValid(baize) ) {
         return 0;
     }
 
@@ -183,9 +191,10 @@ int MoonDealDown(lua_State* L) {
     return 0;
 }
 
-int MoonFindPile(lua_State* L) {
+int MoonFindPile(lua_State* L)
+{
     struct Baize* baize = getBaize(L);
-    if ( !baize ) {
+    if ( !BaizeValid(baize) ) {
         return 0;
     }
 
@@ -193,7 +202,7 @@ int MoonFindPile(lua_State* L) {
     int n = lua_tointeger(L, 2); // doesn't alter stack
 
     struct Pile *p = BaizeFindPile(baize, category, n);
-    if ( p ) {
+    if ( PileValid(p) ) {
         lua_pushlightuserdata(L, p);
         return 1;
     }
@@ -201,8 +210,8 @@ int MoonFindPile(lua_State* L) {
     return 0;
 }
 
-int MoonMovePileTo(lua_State* L) {
-
+int MoonMovePileTo(lua_State* L)
+{
     struct Pile* p = lua_touserdata(L, 1);
     float x = lua_tonumber(L, 2);
     float y = lua_tonumber(L, 3);
@@ -224,13 +233,26 @@ int MoonMovePileTo(lua_State* L) {
     return 0;
 }
 
-int MoonSetAccept(lua_State* L) {
-
+int MoonSetAccept(lua_State* L)
+{
     struct Pile* p = lua_touserdata(L, 1);
     enum CardOrdinal ord = lua_tointeger(L, 2);
 
-    p->vtable->SetAccept(p, ord);
+    if ( PileValid(p) ) {
+        p->vtable->SetAccept(p, ord);
+    }
 
     return 0;
 }
 
+int MoonSetRecycles(lua_State* L)
+{
+    struct Pile* p = lua_touserdata(L, 1);
+    int r = lua_tointeger(L, 2);
+
+    if ( PileValid(p) ) {
+        p->vtable->SetRecycles(p, r);
+    }
+
+    return 0;
+}

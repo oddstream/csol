@@ -10,5 +10,7 @@ float UtilSmootherstep(float A, float B, float v);
 float UtilOverlapArea(Rectangle a, Rectangle b);
 char* UtilOrdToShortString(int ord);
 char* UtilOrdToLongString(int ord);
+char* UtilSuitToShortString(int suit);
+char* UtilSuitToLongString(int suit);
 
 #endif

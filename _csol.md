@@ -2,16 +2,27 @@
 
 ## Next
 
-- [ ] Klondike (CardTapped, PileTapped)
-- [ ] don't like passing Baize->L around
-- [ ] Waste fanning
-- [ ] MoveCard(STOCK, pile, prone)
+- [ ] _Generic
+- [ ] a savedPile is (`Pile` subtype members) and an `Array` of `Card*`, (in memory only for now, serialize later)
+- [ ] a savedBaize is a header (checksum, state) and an `Array` of `savedPile`
+- [ ] undo stack an `Array` of `savedBaize`
+
+- [ ] don't like passing Baize->L around, now have ->owner
+- [ ] state
+- [ ] MoveCard(STOCK, pile, prone) YAGNI
 - [ ] CanAcceptTail should return an error string for toasting later
 - [ ] baize dragging
-- [ ] draw recycle
+- [ ] draw recycle symbol
 - [ ] why does LoadFont cause a segmentation fault?
 - [ ] toast update/draw (error return from some functions could be a string)
 - [ ] CardSetPos() problem
+- [ ] title bar
+- [ ] status bar
+- [x] CardToString, LOGCARD
+- [x] CardId
+- [x] Klondike (CardTapped deal from Stock to Waste, PileTapped recycle from Waste to Stock)
+- [x] The empty tableau can only accept a 13, not a 11 (dragging KQJ to empty tab)
+- [x] Waste fanning
 - [x] Card flipping
 - [x] conformant functions in Lua? Register a conformant function from inside Lua Build RegisterConformantFunction("Tableau", TableauFn) and then call it from C with two Card args cPrev cNext, each arg is a table with {ord=3,suit=S,prone=false}
 - [x] can remove a lot of Pile functions from the vtables
@@ -30,6 +41,8 @@
 
 ## Conventions
 
+YAGNI, minimalist
+
 No typedefs on structs or enums.
 
 Functions names are in PascalCase, ObjectVerb.
@@ -46,9 +59,9 @@ Position (Vector2) functions and members refer to the Baize position of the Card
 
 Use "AC", "2H", "XD", "KS" shorthand for cards.
 
-Any card or cards can be dragged anywhere, anytime. If the move breaks the rules, csol puts the cards back.
+Any card or cards can be dragged anywhere, anytime. If the move breaks the rules, csol puts the cards back. Implies no need for card shaking.
 
-Some behaviour is baked into each pyle subtype (eg cells only hold one card, foundations can only accept one card at a time, accept rules (which are set from Lua)), everyting else is configured by *variant.lua*.
+Some behaviour is baked into each pyle subtype (eg cells only hold one card, foundations can only accept one card at a time, accept rules (which are set from Lua), Stock and Waste behaviour), everything else is configured by *variant.lua*.
 
 ## Makefile
 

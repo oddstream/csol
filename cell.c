@@ -14,6 +14,7 @@ static struct PileVtable cellVtable = {
     &CellPileTapped,
     &CellCanAcceptTail,
     &CellSetAccept,
+    &CellSetRecycles,
 
     &PileUpdate,
     &PileDraw,
@@ -30,15 +31,13 @@ struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const
     return self;
 }
 
-void CellCardTapped(lua_State *L, struct Card *c)
+void CellCardTapped(struct Card *c)
 {
-    (void)L;
     (void)c;
 }
 
-void CellPileTapped(lua_State *L, struct Pile *p)
+void CellPileTapped(struct Pile *p)
 {
-    (void)L;
     (void)p;
 }
 
@@ -61,4 +60,11 @@ void CellSetAccept(struct Pile *const self, enum CardOrdinal ord)
     // we don't do that here
     (void)self;
     (void)ord;
+}
+
+void CellSetRecycles(struct Pile *const self, int r)
+{
+    // we don't do that here
+    (void)self;
+    (void)r;
 }

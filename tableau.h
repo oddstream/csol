@@ -16,10 +16,11 @@ struct Tableau {
 };
 
 struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
-void TableauCardTapped(lua_State *L, struct Card *c);
-void TableauPileTapped(lua_State *L, struct Pile *p);
+void TableauCardTapped(struct Card *c);
+void TableauPileTapped(struct Pile *p);
 bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
+void TableauSetRecycles(struct Pile *const self, int r);
 void TableauDraw(struct Pile *const self);
 
 #endif

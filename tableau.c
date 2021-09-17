@@ -13,6 +13,7 @@ static struct PileVtable tableauVtable = {
     &TableauPileTapped,
     &TableauCanAcceptTail,
     &TableauSetAccept,
+    &TableauSetRecycles,
 
     &PileUpdate,
     &TableauDraw,
@@ -30,15 +31,13 @@ struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc,
     return self;
 }
 
-void TableauCardTapped(lua_State *L, struct Card *c)
+void TableauCardTapped(struct Card *c)
 {
-    (void)L;
     (void)c;
 }
 
-void TableauPileTapped(lua_State *L, struct Pile *p)
+void TableauPileTapped(struct Pile *p)
 {
-    (void)L;
     (void)p;
 }
 
@@ -47,9 +46,9 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
     if ( ArrayLen(self->cards) == 0 ) {
         struct Tableau *t = (struct Tableau*)self;
         if ( t->accept != 0 ) {
-            struct Card* c = ArrayPeek(tail);
-            if ( c->ord != t->accept ) {
-                fprintf(stderr, "The empty tableau can only accept a %d, not a %d\n", t->accept, c->ord);
+            struct Card* c = ArrayGet(tail, 0);
+            if ( c->id.ordinal != t->accept ) {
+                fprintf(stderr, "The empty tableau can only accept a %d, not a %d\n", t->accept, c->id.ordinal);
                 return false;
             }
         }
@@ -61,6 +60,13 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)
 {
     ((struct Tableau*)self)->accept = ord;
+}
+
+void TableauSetRecycles(struct Pile *const self, int r)
+{
+    // we don't do that here
+    (void)self;
+    (void)r;
 }
 
 void TableauDraw(struct Pile *const self)

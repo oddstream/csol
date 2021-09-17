@@ -14,6 +14,7 @@ static struct PileVtable wasteVtable = {
     &WastePileTapped,
     &WasteCanAcceptTail,
     &WasteSetAccept,
+    &WasteSetRecycles,
 
     &PileUpdate,
     &PileDraw,
@@ -30,15 +31,13 @@ struct Waste* WasteNew(Vector2 pos, enum FanType fan, const char* buildfunc, con
     return self;
 }
 
-void WasteCardTapped(lua_State *L, struct Card *c)
+void WasteCardTapped(struct Card *c)
 {
-    (void)L;
     (void)c;
 }
 
-void WastePileTapped(lua_State *L, struct Pile *p)
+void WastePileTapped(struct Pile *p)
 {
-    (void)L;
     (void)p;
 }
 
@@ -56,4 +55,11 @@ void WasteSetAccept(struct Pile *const self, enum CardOrdinal ord)
     // we don't do that here
     (void)self;
     (void)ord;
+}
+
+void WasteSetRecycles(struct Pile *const self, int r)
+{
+    // we don't do that here
+    (void)self;
+    (void)r;
 }

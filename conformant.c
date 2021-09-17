@@ -29,16 +29,16 @@ static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
         while ( c ) {
             lua_createtable(L, 0, 4);       // create and push new 4-element table
             
-            lua_pushinteger(L, c->ord);
+            lua_pushinteger(L, c->id.ordinal);
             lua_setfield(L, -2, "ordinal"); // table["ordinal"] = c->ord, pops key value
 
-            lua_pushinteger(L, c->suit);
+            lua_pushinteger(L, c->id.suit);
             lua_setfield(L, -2, "suit");    // table["suit"] = c->suit, pops key value
 
-            lua_pushinteger(L, c->suit == DIAMOND || c->suit == HEART ? 1 : 0);
+            lua_pushinteger(L, c->id.suit == DIAMOND || c->id.suit == HEART ? 1 : 0);
             lua_setfield(L, -2, "color");   // table["color"] == [0|1], pops key value
 
-            lua_pushboolean(L, c->prone);
+            lua_pushboolean(L, c->id.prone);
             lua_setfield(L, -2, "prone");   // table["prone"] = c->prone, pops key value
 
             lua_seti(L, -2, index + 1);

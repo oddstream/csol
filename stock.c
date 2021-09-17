@@ -13,6 +13,7 @@ static struct PileVtable stockVtable = {
     &StockPileTapped,
     &StockCanAcceptTail,
     &StockSetAccept,
+    &StockSetRecycles,
 
     &PileUpdate,
     &StockDraw,
@@ -25,12 +26,12 @@ struct Stock* StockNew(Vector2 pos, enum FanType fan, const char* buildfunc, con
     if ( self ) {
         PileCtor((struct Pile*)self, "Stock", pos, fan, buildfunc, dragfunc);
         self->super.vtable = &stockVtable;
-        self->recycles = 0;
+        self->recycles = 9999;  // infinite by default
     }
     return self;
 }
 
-void StockCardTapped(lua_State *L, struct Card *c)
+void StockCardTapped(struct Card *c)
 {
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR Card is not valid\n");
@@ -47,21 +48,29 @@ void StockCardTapped(lua_State *L, struct Card *c)
         return;
     }
     // TODO transfer 1-3 cards to Waste
-    fprintf(stdout, "Stock card tapped\n");
+    // fprintf(stdout, "Stock card tapped\n");
     struct Pile *w = BaizeFindPile(baize, "Waste", 1);
     if ( w ) {
-        fprintf(stdout, "Found Waste\n");
         PileMoveCards(w, c);
     }
-    (void)L;
 }
 
-void StockPileTapped(lua_State *L, struct Pile *p)
+void StockPileTapped(struct Pile *p)
 {
-    // TODO recycle
-    fprintf(stderr, "Stock pile tapped\n");
-    (void)L;
-    (void)p;
+    // fprintf(stderr, "Stock pile tapped\n");
+    struct Stock *s = (struct Stock*)p;
+    if ( s->recycles > 0 ) {
+        struct Pile* w = BaizeFindPile(p->owner, "Waste", 1);
+        if ( w ) {
+            while ( PileLen(w) > 0 ) {
+                struct Card *c = PilePopCard(w);
+                PilePushCard(p, c);
+            }
+        }
+        s->recycles--;
+    } else {
+        fprintf(stdout, "No more recycles\n");
+    }
 }
 
 bool StockCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
@@ -78,8 +87,26 @@ void StockSetAccept(struct Pile *const self, enum CardOrdinal ord)
     (void)ord;
 }
 
+void StockSetRecycles(struct Pile *const self, int r)
+{
+    struct Stock *s = (struct Stock *)self;
+    s->recycles = r;
+}
+
 void StockDraw(struct Pile *const self)
 {
     PileDraw(self);
-    // TODO draw recycle symbol
+
+    struct Stock* s = (struct Stock*)self;
+    if ( s->recycles < 10 ) {
+        // TODO draw recycle symbol
+        char z[16];
+        sprintf(z, "%d", s->recycles);
+        // extern Font fontAcme;
+        Vector2 pos = PileGetPos(self);
+        pos.x += 10;
+        pos.y += 10;
+        // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});
+        DrawText(z, (int)pos.x, (int)pos.y, 24, (Color){255,255,255,31});
+    }
 }

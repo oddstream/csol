@@ -26,14 +26,20 @@ enum CardSuit {
     SPADE = 3,
 };
 
+struct CardId {
+    unsigned int pack:4;
+    unsigned int ordinal:4;
+    unsigned int suit:4;
+    unsigned int prone:1;
+};
+
 struct Card /* tag */ {
     unsigned magic;
-    int frame;
-    enum CardOrdinal ord;
-    enum CardSuit suit;
-    bool prone;
+    struct CardId id;
     Vector2 pos;
     struct Pile* owner;
+
+    int frame;  // spritesheet frame
 
     bool dragging;
     Vector2 dragStartPos;
@@ -44,12 +50,13 @@ struct Card /* tag */ {
 } /* variable definition */;
 
 #define FLIPSTEPAMOUNT (0.075f)
+#define LOGCARD(c)              { char z[64]; CardToString(c, z); fprintf(stdout, "%s\n", z); }
 
-struct Card CardNew(enum CardOrdinal ord, enum CardSuit suit);
+struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit);
 bool CardValid(struct Card *const self);
+void CardToString(struct Card *const self, char* z);
 struct Pile* CardGetOwner(struct Card *const self);
 void CardSetOwner(struct Card *const self, struct Pile* p);
-void CardShorthand(struct Card *const self, char* z);
 Rectangle CardGetRect(struct Card *const self);
 Vector2 CardGetPos(struct Card *const self);
 void CardSetPos(struct Card *const self, Vector2 pos);

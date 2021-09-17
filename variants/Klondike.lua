@@ -22,7 +22,8 @@ function Build()
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     MovePileTo(STOCK, 100, 50)
-
+    SetRecycles(STOCK, 1)
+  
     local pile
 
     pile = AddPile("Waste", 200, 50, FAN_WASTERIGHT, "ChkFalse", "ChkFalse")

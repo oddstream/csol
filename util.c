@@ -35,4 +35,14 @@ char* UtilOrdToLongString(int ord) {
     return ords[ord];
 }
 
+char* UtilSuitToShortString(int suit) {
+    static char* suits[4] = {"C", "D", "H", "S"};
+    return suits[suit];
+}
+
+char* UtilSuitToLongString(int suit) {
+    static char* suits[4] = {"Club", "Diamond", "Heart", "Spade"};
+    return suits[suit];
+}
+
 #endif

@@ -30,8 +30,6 @@ struct Spritesheet *ssFace, *ssBack;
 
 float cardWidth = 71.0, cardHeight = 96.0;
 
-Color baizeColor;   // pedantically, can't initialize with a struct in C, because initializer element is not constant [-Werror=pedantic]
-
 Font fontAcme = {0};
 
 // int main(int argc, char* argv[], char* envp[]);
@@ -41,7 +39,6 @@ int main(void)
 {
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
 
-    baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
 #if 0
     {
         int fontSizes[128-32];
@@ -91,14 +88,15 @@ int main(void)
     ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
     
     struct Baize* baize = BaizeNew("Klondike");
+    if ( BaizeValid(baize) ) {
+        while (!WindowShouldClose())    // Detect window close button or ESC key
+        {
+            BaizeUpdate(baize);
+            BaizeDraw(baize);
+        }
 
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
-        BaizeUpdate(baize);
-        BaizeDraw(baize);
+        BaizeFree(baize);
     }
-
-    BaizeFree(baize);
 
     SpritesheetFree(ssFace);
     SpritesheetFree(ssBack);

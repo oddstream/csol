@@ -13,9 +13,9 @@
 
 extern struct Spritesheet *ssFace, *ssBack;
 
-struct Card CardNew(enum CardOrdinal ord, enum CardSuit suit)
+struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
-    struct Card self = {.magic = MAGIC, .ord = ord, .suit = suit, .prone = true, .dragging = false};
+    struct Card self = {.magic = MAGIC, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .id.prone = 1, .dragging = false};
     self.frame = (suit * 13) + (ord - 1);   // TODO specific to retro spritesheet
     self.pos = (Vector2){0};
     self.flipWidth = 1.0f;
@@ -28,14 +28,10 @@ bool CardValid(struct Card *const self)
     return self && self->magic == MAGIC;
 }
 
-void CardShorthand(struct Card *const self, char* z)
+void CardToString(struct Card *const self, char* z)
 {
-    static char ord[] = "0A23456789XJQK";
-    static char suit[] = "CHDS";
-
-    z[0] = ord[self->ord];
-    z[1] = suit[self->suit];
-    z[2] = '\0';
+    unsigned dw = *((unsigned*)(&self->id));
+    sprintf(z, "{%x: p=%u o=%s s=%s p=%u}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->id.prone);
 }
 
 struct Pile* CardGetOwner(struct Card *const self)
@@ -151,7 +147,7 @@ void CardDraw(struct Card *const self)
 
     // card prone has already been set to destination state
     if ( self->flipStep < 0.0f ) {
-        if ( self->prone ) {
+        if ( self->id.prone ) {
             // card is getting narrower, and it's going to show face down, but show face up
             showFace = true;
         } else {
@@ -159,7 +155,7 @@ void CardDraw(struct Card *const self)
             showFace = false;
         }
     } else {
-        if ( self->prone ) {
+        if ( self->id.prone ) {
             showFace = false;
         } else {
             showFace = true;
@@ -176,16 +172,16 @@ void CardDraw(struct Card *const self)
 // void CardDrawRect(struct Card *const self, int x, int y)
 // {
 //     extern float cardWidth, cardHeight;
-//     char z[4], buf[104];
-//     CardShorthand(self, z);
+//     char z[64], buf[104];
+//     CardToString(self, z);
 //     sprintf(buf, "%s %f,%f,%f,%f", z, self->pos.x, self->pos.y, cardWidth, cardHeight);
 //     DrawText(buf, x, y, 24, WHITE);
 // }
 
 void CardFlipUp(struct Card *const self)
 {
-    if ( self->prone ) {
-        self->prone = false;
+    if ( self->id.prone ) {
+        self->id.prone = false;
         self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower
         self->flipWidth = 1.0f;             // ... from it's full width
     }
@@ -193,8 +189,8 @@ void CardFlipUp(struct Card *const self)
 
 void CardFlipDown(struct Card *const self)
 {
-    if ( !self->prone ) {
-        self->prone = true;
+    if ( !self->id.prone ) {
+        self->id.prone = true;
         self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
         self->flipWidth = 1.0f;             // ... from it's full width
     }

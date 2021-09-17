@@ -16,6 +16,7 @@ static struct PileVtable foundationVtable = {
     &FoundationPileTapped,
     &FoundationCanAcceptTail,
     &FoundationSetAccept,
+    &FoundationSetRecycles,
 
     &PileUpdate,
     &FoundationDraw,
@@ -32,13 +33,11 @@ struct Foundation* FoundationNew(Vector2 pos, enum FanType fan, const char* buil
     return self;
 }
 
-void FoundationCardTapped(lua_State *L, struct Card *c) {
-    (void)L;
+void FoundationCardTapped(struct Card *c) {
     (void)c;
 }
 
-void FoundationPileTapped(lua_State *L, struct Pile *p) {
-    (void)L;
+void FoundationPileTapped(struct Pile *p) {
     (void)p;
 }
 
@@ -55,8 +54,8 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
         struct Foundation *f = (struct Foundation*)self;
         if ( f->accept != 0 ) {
             struct Card* c = ArrayPeek(tail);
-            if ( c->ord != f->accept ) {
-                fprintf(stderr, "The foundation can only accept a %d, not a %d\n", f->accept, c->ord);
+            if ( c->id.ordinal != f->accept ) {
+                fprintf(stderr, "The foundation can only accept a %d, not a %d\n", f->accept, c->id.ordinal);
                 return false;
             }
         }
@@ -67,6 +66,12 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord) {
     ((struct Foundation*)self)->accept = ord;
+}
+
+void FoundationSetRecycles(struct Pile *const self, int r)
+{
+    (void)self;
+    (void)r;
 }
 
 void FoundationDraw(struct Pile *const self) {

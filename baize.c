@@ -19,11 +19,19 @@
 
 struct Baize* BaizeNew(const char* variantName) {
 
+    // fprintf(stdout, "CardID is %lu bytes\n", sizeof(struct CardId));    // 4
+    // fprintf(stdout, "Card is %lu bytes\n", sizeof(struct Card));    // 72 (2021.09.17)
+    // fprintf(stdout, "unsigned is %lu bytes\n", sizeof(unsigned));   4
+    // fprintf(stdout, "unsigned long is %lu bytes\n", sizeof(unsigned long)); // 8
+    // fprintf(stdout, "void* is %lu bytes\n", sizeof(void*)); // 8
+
     char fname[64];
-    int packs = 1;
+    unsigned packs = 1;
 
     struct Baize* self = malloc(sizeof(struct Baize));
     self->magic = MAGIC;
+
+    self->backgroundColor = (Color){.r=0, .g=63, .b=0, .a=255};
 
     self->L = luaL_newstate();
     luaL_openlibs(self->L);
@@ -47,16 +55,16 @@ struct Baize* BaizeNew(const char* variantName) {
         fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
         lua_pop(self->L, 1);
     } else {
-        // TODO read baizeColor &c
+        // TODO read backgroundColor &c
         packs = MoonGetGlobalInt(self->L, "PACKS", 1);
     }
 
     self->cardLibrary = calloc(packs * 52, sizeof(struct Card));
-    for ( int pack = 0; pack < packs; pack++ ) {
+    for ( unsigned pack = 0; pack < packs; pack++ ) {
         int i = 0;
         for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
             for ( enum CardSuit s = CLUB; s <= SPADE; s++ ) {
-                self->cardLibrary[i++] = CardNew(o, s);
+                self->cardLibrary[i++] = CardNew(pack, o, s);
             }
         }
     }
@@ -69,7 +77,7 @@ struct Baize* BaizeNew(const char* variantName) {
     if ( PileValid(self->stock) ) {
         self->stock->owner = self;
         ArrayPush(self->piles, self->stock);
-        for ( int i=0; i<packs*52; i++ ) {
+        for ( unsigned i=0; i<packs*52; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
         // Knuth-Fisher–Yates shuffle
@@ -81,7 +89,7 @@ struct Baize* BaizeNew(const char* variantName) {
         }
     }
 
-    fprintf(stderr, "stock now has %lu cards\n", PileLen(self->stock));
+    fprintf(stderr, "stock has %lu cards\n", PileLen(self->stock));
 
     int typ = lua_getglobal(self->L, "Build");  // push value of Build onto the stack
     if ( typ != LUA_TFUNCTION ) {
@@ -211,6 +219,7 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
         BaizeMakeTail(self, c);
         if ( self->tail ) {
             ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
+            // LOGCARD(c);
         }
         self->lastTouch = touchPosition;
     } else {
@@ -267,19 +276,16 @@ void BaizeTouchStop(struct Baize *const self)
                 }
             }
         } else {
-            // char z[4];
-            // CardShorthand(c, z);
-            // fprintf(stdout, "Card %s tapped\n", z);
             while ( c ) {
                 CardStopDrag(c);    // CardCancelDrag() would use CardTransitionTo(), and we know the card didn't move
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
-            cHeadOfTail->owner->vtable->CardTapped(self->L, cHeadOfTail);
+            cHeadOfTail->owner->vtable->CardTapped(cHeadOfTail);
         }
         ArrayFree(self->tail);
         self->tail = NULL;
     } else if ( self->touchedPile ) {
-        self->touchedPile->vtable->PileTapped(self->L, self->touchedPile);
+        self->touchedPile->vtable->PileTapped(self->touchedPile);
         self->touchedPile = NULL;
     } else {
         // TODO finish dragging baize
@@ -318,9 +324,7 @@ void BaizeUpdate(struct Baize *const self)
 
 void BaizeDraw(struct Baize *const self)
 {
-    extern Color baizeColor;
-
-    ClearBackground(baizeColor);
+    ClearBackground(self->backgroundColor);
     BeginDrawing();
 
     struct Card* c;

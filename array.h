@@ -29,6 +29,8 @@ void* ArrayPeek(struct Array *const self);
 void* ArrayPop(struct Array *const self);
 void ArrayForeach(struct Array *self, ArrayIterFunc f);
 void ArrayCopyTail(struct Array *const dst, struct Array *const src, size_t first);
+struct Array* ArrayClone(struct Array *const self);
+void ArrayReset(struct Array *const dst);
 void ArrayFree(struct Array *const self);
 
 #endif

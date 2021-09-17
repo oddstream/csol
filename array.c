@@ -81,26 +81,44 @@ void* ArrayPeek(struct Array *const self) {
     return self->data[self->used - 1];
 }
 
-void* ArrayPop(struct Array *const self) {
+void* ArrayPop(struct Array *const self)
+{
     if ( self->used == 0 ) {
         return NULL;
     }
     return self->data[self->used-- - 1];
 }
 
-void ArrayForeach(struct Array *const self, ArrayIterFunc f) {
+void ArrayForeach(struct Array *const self, ArrayIterFunc f)
+{
     for ( size_t i = 0; i<self->used; i++ ) {
         f(self->data[i]);
     }
 }
 
-void ArrayCopyTail(struct Array *const dst, struct Array *const src, size_t first) {
+void ArrayCopyTail(struct Array *const dst, struct Array *const src, size_t first)
+{
     size_t entries = src->used - first;
     memcpy(dst->data, &src->data[first], entries * sizeof(void*));
     dst->used = entries;
 }
 
-void ArrayFree(struct Array *const self) {
+struct Array* ArrayClone(struct Array *const self)
+{
+    struct Array *clone = ArrayNew(self->size);
+    memcpy(clone->data, self->data, sizeof(void*) * self->size);
+    clone->size = self->size;
+    clone->used = self->used;
+    return clone;
+}
+
+void ArrayReset(struct Array *const self)
+{
+    self->used = 0;
+}
+
+void ArrayFree(struct Array *const self)
+{
     if ( self ) {
         free(self->data);
         free(self);

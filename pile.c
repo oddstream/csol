@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <raylib.h>
+#include <baize.h>
 #include "pile.h"
 #include "array.h"
 
@@ -55,14 +56,15 @@ size_t PileLen(struct Pile *const self)
 
 void PilePushCard(struct Pile *const self, struct Card* c)
 {
-    if ( strncmp(self->category, "Stock", 5) == 0 ) {
+    // if ( strncmp(self->category, "Stock", 5) == 0 ) {
+    if ( PileIsStock(self) ) {
         CardFlipDown(c);
     }
     CardSetOwner(c, self);
     Vector2 fannedPos = PileGetPushedFannedPos(self); // get this *before* pushing card to pile
-    if ( strcmp(self->category, "Waste") == 0 ) {
-        fprintf(stdout, "Push from %.0f, %.0f to %.0f, %.0f\n", c->pos.x, c->pos.y, fannedPos.x, fannedPos.y);
-    }
+    // if ( strcmp(self->category, "Waste") == 0 ) {
+    //     fprintf(stdout, "Push from %.0f, %.0f to %.0f, %.0f\n", c->pos.x, c->pos.y, fannedPos.x, fannedPos.y);
+    // }
     CardTransitionTo(c, fannedPos);
     // CardSetPos(c, fannedPos);
     ArrayPush(self->cards, c);
@@ -81,6 +83,17 @@ struct Card* PilePopCard(struct Pile *const self)
 struct Card* PilePeekCard(struct Pile *const self)
 {
     return (struct Card*)ArrayPeek(self->cards);
+}
+
+bool PileIsStock(struct Pile *const self)
+{
+    struct Baize* baize = self->owner;
+    if ( !BaizeValid(baize) )
+    {
+        fprintf(stderr, "Pile Baize pointer is not valid\n");
+        return false;
+    }
+    return self == baize->stock;
 }
 
 Vector2 PileGetPos(struct Pile *const self)
@@ -146,7 +159,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.x += c->prone ? backDelta : faceDelta;
+                pos.x += c->id.prone ? backDelta : faceDelta;
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
@@ -155,7 +168,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.x -= c->prone ? backDelta : faceDelta;
+                pos.x -= c->id.prone ? backDelta : faceDelta;
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
@@ -164,12 +177,12 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
             backDelta = cardHeight / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.y += c->prone ? backDelta : faceDelta;
+                pos.y += c->id.prone ? backDelta : faceDelta;
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
         case WASTE_RIGHT:
-            fprintf(stdout, "Waste Right before %.0f,%.0f\n", pos.x, pos.y);
+            // fprintf(stdout, "Waste Right before %.0f,%.0f\n", pos.x, pos.y);
             {
                 float x0 = pos.x;
                 float y0 = pos.y;
@@ -201,7 +214,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
                         break;
                 }
             }
-            fprintf(stdout, "Waste Right after  %.0f,%.0f\n", pos.x, pos.y);
+            // fprintf(stdout, "Waste Right after  %.0f,%.0f\n", pos.x, pos.y);
             break;
         case WASTE_LEFT:
             break;
@@ -249,7 +262,8 @@ void PileMoveCards(struct Pile *const self, struct Card* c)
     // fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
 
     // flip up an exposed source card, if src pile is not Stock*
-    if ( strncmp(src->category, "Stock", 5) ) {
+    // if ( strncmp(src->category, "Stock", 5) ) {
+    if ( !PileIsStock(src) ) {
         struct Card* tc = PilePeekCard(src);
         if ( tc ) {
             CardFlipUp(tc);
@@ -258,7 +272,7 @@ void PileMoveCards(struct Pile *const self, struct Card* c)
 
     // special case: waste may need refanning if we took a card from it
     if ( src->fan == WASTE_DOWN || src->fan == WASTE_LEFT || src->fan == WASTE_RIGHT ) {
-        // TODO PileRepushAllCards(src);
+        PileRepushAllCards(src);
     }
 
     // TODO scrunch
@@ -269,6 +283,44 @@ bool PileIsAt(struct Pile *const self, Vector2 point)
     extern float cardWidth, cardHeight;
     Rectangle rect = {.x=self->pos.x, .y=self->pos.y, .width=cardWidth, .height=cardHeight};
     return CheckCollisionPointRec(point, rect);
+}
+
+void PileRepushAllCards(struct Pile *const self)
+{
+    if ( ArrayLen(self->cards) == 0 ) {
+        return;
+    }
+    struct Array *tmp = ArrayClone(self->cards);
+    ArrayReset(self->cards);
+
+    size_t index;
+    for ( struct Card *c = ArrayFirst(tmp, &index); c; c = ArrayNext(tmp, &index) ) {
+        PilePushCard(self, c);
+    }
+    ArrayFree(tmp);
+}
+
+struct SavedPileHeader* PileNewSaved(struct Pile *const self) {
+    struct SavedPileHeader *sph = malloc(sizeof(struct SavedPileHeader));
+    // TODO need subtype fields (accept, recycle)
+    if  ( sph )  {
+        // sph->accept = self->vtable->GetAccept(self);
+        // sph->recycles = self->vtable->GetRecycles(self);
+        sph->savedCards = ArrayNew(ArrayLen(self->cards));
+        size_t index;
+        for ( struct Card *c = ArrayFirst(self->cards, &index); c; c = ArrayNext(self->cards, &index) ) {
+            ArrayPush(sph->savedCards, c);  // a pointer into the cardLibrary
+        }
+    }
+    return sph;
+}
+
+void PileFreeSaved(struct SavedPileHeader *sph)
+{
+    if ( sph ) {
+        ArrayFree(sph->savedCards);
+        free(sph);
+    }
 }
 
 void PileUpdate(struct Pile *const self)

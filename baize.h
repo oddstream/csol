@@ -8,15 +8,28 @@
 #include "array.h"
 #include "pile.h"
 
+enum GameState {
+    VIRGIN = 0,
+    STARTED,
+    COMPLETE,
+};
+
 struct Baize {
     unsigned magic;
-    struct Card* cardLibrary;
+    Color backgroundColor;
+    struct Card *cardLibrary;
     lua_State *L;
-    struct Array* piles;
-    struct Pile* stock;     // actuall a struct Stock*
-    struct Array* tail;
+    struct Array *piles;
+    struct Pile *stock;     // actually a struct Stock*
+    struct Array *tail;
     Vector2 lastTouch;
-    struct Pile* touchedPile;
+    struct Pile *touchedPile;
+};
+
+struct SavedBaizeHeader {
+    enum GameState state;
+    unsigned checksum;
+    struct Array *savedPiles;
 };
 
 struct Baize* BaizeNew(const char* variantName);
