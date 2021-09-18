@@ -10,13 +10,13 @@
 #include "card.h"
 
 enum FanType {
-    NONE = 0,
-    DOWN,
-    LEFT,
-    RIGHT,
-    WASTE_DOWN,
-    WASTE_LEFT,
-    WASTE_RIGHT,
+    FAN_NONE = 0,
+    FAN_DOWN,
+    FAN_LEFT,
+    FAN_RIGHT,
+    FAN_DOWN3,
+    FAN_LEFT3,
+    FAN_RIGHT3,
 };
 
 struct PileVtable;  // forward declaration
@@ -26,8 +26,9 @@ struct Pile {
     struct PileVtable *vtable;
     struct Baize *owner;
     char category[16];
-    enum FanType fan;
+    Vector2 slot;
     Vector2 pos;
+    enum FanType fan;
     char buildfunc[16];
     char dragfunc[16];
     struct Array *cards;
@@ -50,7 +51,7 @@ struct SavedPileHeader {
     struct Array *savedCards;
 };
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc);
 bool PileValid(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);
@@ -59,7 +60,7 @@ struct Card* PilePeekCard(struct Pile *const self);
 bool PileIsStock(struct Pile *const self);
 Rectangle PileGetRect(struct Pile *const self);
 Vector2 PileGetPos(struct Pile *const self);
-void PileSetPos(struct Pile *const self, Vector2 pos);
+Vector2 PileCalculatePosFromSlot(struct Pile *const self);
 Rectangle PileGetFannedRect(struct Pile *const self);
 Vector2 PileGetPushedFannedPos(struct Pile *const self);
 void PileMoveCards(struct Pile *const self, struct Card* c);

@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include <lua.h>
 
+#include "baize.h"
 #include "pile.h"
 #include "array.h"
 #include "waste.h"
@@ -21,11 +22,11 @@ static struct PileVtable wasteVtable = {
     &PileFree,
 };
 
-struct Waste* WasteNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Waste* WasteNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
     struct Waste* self = malloc(sizeof(struct Waste));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Waste", pos, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Waste", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &wasteVtable;
     }
     return self;
@@ -43,10 +44,14 @@ void WastePileTapped(struct Pile *p)
 
 bool WasteCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
 {
-    // only allow cards moved from Stock
-    (void)self;
+    // TODO maybe move three cards
+    if ( ArrayLen(tail) == 1 ) {
+        struct Card *c = ArrayGet(tail, 0);
+        if ( c && c->owner == self->owner->stock ) {
+            return true;
+        }
+    }
     (void)L;
-    (void)tail;
     return false;
 }
 

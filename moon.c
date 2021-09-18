@@ -103,8 +103,9 @@ int MoonAddPile(lua_State* L)
     }
 
     const char* category = lua_tostring(L, 1); // doesn't alter stack
-    float x = lua_tonumber(L, 2); // doesn't alter stack
-    float y = lua_tonumber(L, 3); // doesn't alter stack
+    // the slot numbers in Lua start from 1, and start from 0 in C
+    float x = lua_tonumber(L, 2) - 1; // doesn't alter stack
+    float y = lua_tonumber(L, 3) - 1; // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
     const char* buildfunc = lua_tostring(L, 5);
     const char* dragfunc = lua_tostring(L, 6);
@@ -213,21 +214,21 @@ int MoonFindPile(lua_State* L)
 int MoonMovePileTo(lua_State* L)
 {
     struct Pile* p = lua_touserdata(L, 1);
-    float x = lua_tonumber(L, 2);
-    float y = lua_tonumber(L, 3);
+    float x = lua_tonumber(L, 2) - 1;
+    float y = lua_tonumber(L, 3) - 1;
 
     if ( PileValid(p) ) {
-        Vector2 oldPos = PileGetPos(p);
-        Vector2 newPos = (Vector2){.x=x, .y=y};
-        float dx = newPos.x - oldPos.x;
-        float dy = newPos.y - oldPos.y;
-        PileSetPos(p, newPos);
-        size_t index;
-        for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
-            Vector2 oldCardPos = CardGetPos(c);
-            Vector2 newCardPos = (Vector2){.x = oldCardPos.x + dx, .y = oldCardPos.y + dy};
-            CardSetPos(c, newCardPos);
-        }
+        p->slot = (Vector2){.x=x, .y=y};
+        p->pos = PileCalculatePosFromSlot(p);
+        PileRepushAllCards(p);
+        // float dx = newPos.x - oldPos.x;
+        // float dy = newPos.y - oldPos.y;
+        // size_t index;
+        // for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
+        //     Vector2 oldCardPos = CardGetPos(c);
+        //     Vector2 newCardPos = (Vector2){.x = oldCardPos.x + dx, .y = oldCardPos.y + dy};
+        //     CardSetPos(c, newCardPos);
+        // }
     }
 
     return 0;

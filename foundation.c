@@ -23,10 +23,10 @@ static struct PileVtable foundationVtable = {
     &PileFree,
 };
 
-struct Foundation* FoundationNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc) {
+struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc) {
     struct Foundation* self = malloc(sizeof(struct Foundation));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Foundation", pos, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Foundation", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &foundationVtable;
         self->accept = 0; // accept any by default
     }

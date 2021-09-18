@@ -25,11 +25,11 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc)
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
     self->magic = MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
-    self->pos = pos;
+    self->slot = slot;
     self->fan = fan;
     if ( buildfunc ) {
         strncpy(self->buildfunc, buildfunc, sizeof self->buildfunc - 1);
@@ -107,9 +107,14 @@ Rectangle PileGetRect(struct Pile *const self)
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
 }
 
-void PileSetPos(struct Pile *const self, Vector2 pos)
+Vector2 PileCalculatePosFromSlot(struct Pile *const self)
 {
-    self->pos = pos;
+    extern float leftMargin, topMargin, pilePaddingX, pilePaddingY, cardWidth, cardHeight;
+
+    return (Vector2){
+                .x = leftMargin + (self->slot.x * (cardWidth + pilePaddingX)),
+                .y = topMargin + (self->slot.y * (cardHeight + pilePaddingY)),
+            };
 }
 
 Rectangle PileGetFannedRect(struct Pile *const self)
@@ -124,19 +129,19 @@ Rectangle PileGetFannedRect(struct Pile *const self)
         }
         Vector2 cPos = CardGetPos(c);
         switch ( self->fan ) {
-            case NONE:
+            case FAN_NONE:
                 // do nothing
                 break;
-            case RIGHT:
-            case WASTE_RIGHT:
+            case FAN_RIGHT:
+            case FAN_RIGHT3:
                 r.width = cPos.x + cardWidth - r.x;
                 break;
-            case LEFT:
-            case WASTE_LEFT:
+            case FAN_LEFT:
+            case FAN_LEFT3:
                 r.width = cPos.x - cardWidth - r.x;
                 break;
-            case DOWN:
-            case WASTE_DOWN:
+            case FAN_DOWN:
+            case FAN_DOWN3:
                 r.height = cPos.y + cardHeight - r.y;
                 break;
         }
@@ -154,10 +159,10 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
     size_t index = 0;
 
     switch ( self->fan ) {
-        case NONE:
+        case FAN_NONE:
             // do nothing
             break;
-        case RIGHT:
+        case FAN_RIGHT:
             faceDelta = cardWidth / CARD_FACE_FAN_FACTOR;
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
@@ -166,7 +171,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
-        case LEFT:
+        case FAN_LEFT:
             faceDelta = cardWidth / CARD_FACE_FAN_FACTOR;
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
@@ -175,7 +180,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
-        case DOWN:
+        case FAN_DOWN:
             faceDelta = cardHeight / CARD_FACE_FAN_FACTOR;
             backDelta = cardHeight / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
@@ -184,7 +189,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
-        case WASTE_RIGHT:
+        case FAN_RIGHT3:
             // fprintf(stdout, "Waste Right before %.0f,%.0f\n", pos.x, pos.y);
             {
                 float x0 = pos.x;
@@ -219,9 +224,9 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
             }
             // fprintf(stdout, "Waste Right after  %.0f,%.0f\n", pos.x, pos.y);
             break;
-        case WASTE_LEFT:
+        case FAN_LEFT3:
             break;
-        case WASTE_DOWN:
+        case FAN_DOWN3:
             break;
     }
     return pos;
@@ -274,7 +279,7 @@ void PileMoveCards(struct Pile *const self, struct Card* c)
     }
 
     // special case: waste may need refanning if we took a card from it
-    if ( src->fan == WASTE_DOWN || src->fan == WASTE_LEFT || src->fan == WASTE_RIGHT ) {
+    if ( src->fan == FAN_DOWN3 || src->fan == FAN_LEFT3 || src->fan == FAN_RIGHT3 ) {
         PileRepushAllCards(src);
     }
 

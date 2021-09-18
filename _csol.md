@@ -2,7 +2,10 @@
 
 ## Next
 
+- [ ] retire info width & height
+- [ ] baize and card scale, uses slots in .lua files
 - [ ] _Generic
+- [ ] drag card from Stock to Waste, so chk functions need to know where a card is coming from?
 - [ ] a savedPile is (`Pile` subtype members) and an `Array` of `Card*`, (in memory only for now, serialize later)
 - [ ] a savedBaize is a header (checksum, state) and an `Array` of `savedPile`
 - [ ] undo stack an `Array` of `savedBaize`
@@ -18,6 +21,8 @@
 - [ ] CardSetPos() problem
 - [ ] title bar
 - [ ] status bar
+- [x] kenney.nl playing card spritesheet
+- [x] starting to drag a card that's transitioning, ends up displaced rather than finding it's way back to the pile
 - [x] CardToString, LOGCARD
 - [x] CardId (easy to serialize)
 - [x] Klondike (CardTapped deal from Stock to Waste, PileTapped recycle from Waste to Stock)

@@ -10,25 +10,111 @@
 #include "spritesheet.h"
 #include "card.h"
 
-struct Rectangle retroBackInfo[13] = {
-    {.x = 5, .y = 4, .width = 71, .height = 96},
-    {.x = 85, .y = 4, .width = 71, .height = 96},
-    {.x = 185, .y = 4, .width = 71, .height = 96},
-    {.x = 245, .y = 4, .width = 71, .height = 96},
-    {.x = 325, .y = 4, .width = 71, .height = 96},
-    {.x = 405, .y = 4, .width = 71, .height = 96},
-    {.x = 485, .y = 4, .width = 71, .height = 96},
-    {.x = 5, .y = 140, .width = 71, .height = 96},
-    {.x = 85, .y = 140, .width = 71, .height = 96},
-    {.x = 185, .y = 140, .width = 71, .height = 96},
-    {.x = 245, .y = 140, .width = 71, .height = 96},
-    {.x = 325, .y = 140, .width = 71, .height = 96},
-    {.x = 405, .y = 140, .width = 71, .height = 96},
+struct Vector2 retroBackInfo[13] = {
+    {.x = 5, .y = 4},
+    {.x = 85, .y = 4},
+    {.x = 185, .y = 4},
+    {.x = 245, .y = 4},
+    {.x = 325, .y = 4},
+    {.x = 405, .y = 4},
+    {.x = 485, .y = 4},
+    {.x = 5, .y = 140},
+    {.x = 85, .y = 140},
+    {.x = 185, .y = 140},
+    {.x = 245, .y = 140},
+    {.x = 325, .y = 140},
+    {.x = 405, .y = 140},
+};
+
+struct Vector2 kenneyFaceInfo[52] = {
+    // Club
+    {.x=560, .y=570},  // Ace
+    {.x=280, .y=1140}, // 2
+    {.x=700, .y=190},  // 3
+    {.x=700, .y=0},    // 4
+    {.x=560, .y=1710}, // 5
+    {.x=560, .y=1520}, // 6
+    {.x=560, .y=1330}, // 7
+    {.x=560, .y=1140}, // 8
+    {.x=560, .y=950},  // 9
+    {.x=560, .y=760},  // 10
+    {.x=560, .y=380},  // J
+    {.x=560, .y=0},    // Q
+    {.x=560, .y=190},  // K
+    // Diamond
+    {.x=420, .y=0},    // Ace
+    {.x=420, .y=1710}, // 2
+    {.x=420, .y=1520}, // 3
+    {.x=420, .y=1330}, // 4
+    {.x=420, .y=1140}, // 5
+    {.x=420, .y=950},  // 6
+    {.x=420, .y=760},  // 7
+    {.x=420, .y=570},  // 8
+    {.x=420, .y=380},  // 9
+    {.x=420, .y=190},  // 10
+    {.x=280, .y=1710}, // J
+    {.x=280, .y=1330}, // Q
+    {.x=280, .y=1520}, // K
+    // Heart
+    {.x=140, .y=1330}, // Ace
+    {.x=700, .y=380},  // 2
+    {.x=280, .y=950},  // 3
+    {.x=280, .y=760},  // 4
+    {.x=280, .y=570},  // 5
+    {.x=280, .y=380},  // 6
+    {.x=280, .y=190},  // 7
+    {.x=280, .y=0},    // 8
+    {.x=140, .y=1710}, // 9
+    {.x=140, .y=1520}, // 10
+    {.x=140, .y=1140}, // J
+    {.x=140, .y=760},  // Q
+    {.x=140, .y=950},  // K
+    // Spade
+    {.x=0, .y=570},    // Ace
+    {.x=140, .y=380},  // 2
+    {.x=140, .y=190},  // 3
+    {.x=140, .y=0},    // 4
+    {.x=0, .y=1710},   // 5
+    {.x=0, .y=1520},   // 6
+    {.x=0, .y=1330},   // 7
+    {.x=0, .y=1140},   // 8
+    {.x=0, .y=950},    // 9
+    {.x=0, .y=760},    // 10
+    {.x=0, .y=380},    // J
+    {.x=0, .y=00},     // Q
+    {.x=0, .y=190},    // K
+};
+
+struct Vector2 kenneyBackInfo[15] = {
+    {.x=0, .y=0},
+    {.x=140, .y=0},
+    {.x=280, .y=0},
+
+    {.x=0, .y=190},
+    {.x=140, .y=190},
+    {.x=280, .y=190},
+
+    {.x=0, .y=380},
+    {.x=140, .y=380},
+    {.x=280, .y=380},
+
+    {.x=0, .y=570},
+    {.x=140, .y=570},
+    {.x=280, .y=570},
+
+    {.x=0, .y=760},
+    {.x=140, .y=760},
+    {.x=280, .y=760},
 };
 
 struct Spritesheet *ssFace, *ssBack;
 
-float cardWidth = 71.0, cardHeight = 96.0;
+int windowWidth = 1400, windowHeight = 1000;
+
+//float cardWidth = 71.0f, cardHeight = 96.0f;
+float cardWidth = 140.0f, cardHeight = 190.0f;
+
+float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
 Font fontAcme = {0};
 
@@ -50,8 +136,6 @@ int main(void)
         // fontAcme = LoadFontEx("assets/Roboto-Regular.ttf", 8, 0, 255);
     }
 #endif
-
-    int windowWidth = 1300, windowHeight = 1000;
 
 #if 0
     {
@@ -81,13 +165,15 @@ int main(void)
     }
 #endif
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
-
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
-    ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
-    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
+    // ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
+    // ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
+    ssFace = SpritesheetNewInfo("assets/playingCards.png", kenneyFaceInfo, 52);
+    ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo, 15);
     
-    struct Baize* baize = BaizeNew("Limited");
+    struct Baize* baize = BaizeNew("Klondike");
     if ( BaizeValid(baize) ) {
         while (!WindowShouldClose())    // Detect window close button or ESC key
         {

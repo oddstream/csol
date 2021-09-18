@@ -194,9 +194,14 @@ endif
 #  -Wall                turns on most, but not all, compiler warnings
 #  -std=c99             defines C language mode (standard C from 1999 revision)
 #  -std=gnu99           defines C language mode (GNU C from 1999 revision)
-#  -Wno-missing-braces  ignore invalid warning (GCC bug 53119)
+#  -Wno-missing-braces  ignore invalid warning (GCC bug 53119) (wrongly warns about using {0})
 #  -D_DEFAULT_SOURCE    use with -std=c99 on Linux and PLATFORM_WEB, required for timespec
-CFLAGS += -Wall -Wextra -Werror -Wpedantic -Wshadow -Wstrict-prototypes -Wsign-compare -Wformat=2 -std=c99 -D_DEFAULT_SOURCE -Wno-missing-braces
+#  -Wformat=2           Enable -Wformat plus additional format checks.
+#                       Currently equivalent to -Wformat -Wformat-nonliteral -Wformat-security -Wformat-y2k.
+#
+#  https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+
+CFLAGS += -Wall -Wextra -Werror -Wpedantic -Wshadow -Wstrict-prototypes -Wsign-compare -Wformat=2 -std=c99 -D_DEFAULT_SOURCE
 
 ifeq ($(BUILD_MODE),DEBUG)
     CFLAGS += -g -O0

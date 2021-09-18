@@ -68,6 +68,7 @@ void CardMovePositionBy(struct Card *const self, Vector2 delta)
 
 void CardTransitionTo(struct Card *const self, Vector2 pos)
 {
+    const float speed = 15.0f;
     if ( pos.x == self->pos.x && pos.y == self->pos.y ) {
         self->lerpStep = 1.0f;    // stop any current lerp
         return;
@@ -75,7 +76,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpSrc = self->pos;
     self->lerpDst = pos;
     float dist = UtilDistance(self->lerpSrc, self->lerpDst);
-    self->lerpStepAmount = fminf(0.025f, 15.0f*(1.0f/dist));
+    self->lerpStepAmount = fminf(0.025f, speed*(1.0f/dist));
     self->lerpStep = 0.0;       // trigger a lerp
 }
 
@@ -86,7 +87,10 @@ bool CardTransitioning(struct Card *const self)
 
 void CardStartDrag(struct Card *const self)
 {
-    self->dragStartPos = self->pos;
+    if ( !CardTransitioning(self) ) {
+        self->dragStartPos = self->pos;
+    }
+    // if grabbing a transitioning card, the start position should be the original position, not the in-flight one
     self->dragging = true;
 }
 
@@ -165,7 +169,8 @@ void CardDraw(struct Card *const self)
     if ( showFace ) {
         SpritesheetDraw(ssFace, self->frame, self->flipWidth, self->pos);
     } else {
-        SpritesheetDraw(ssBack, 6, self->flipWidth, self->pos);
+        // SpritesheetDraw(ssBack, 6, self->flipWidth, self->pos);
+        SpritesheetDraw(ssBack, 5, self->flipWidth, self->pos);
     }
 }
 

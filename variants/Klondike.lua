@@ -21,48 +21,48 @@ function Build()
     -- end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 100, 50)
+    MovePileTo(STOCK, 1, 1)
     SetRecycles(STOCK, 9999)
   
     local pile
 
-    pile = AddPile("Waste", 200, 50, FAN_WASTERIGHT, "ChkFalse", "ChkFalse")
+    pile = AddPile("Waste", 2, 1, FAN_RIGHT3, "ChkFalse", "ChkFalse")
 
-    for x = 400, 700, 100 do
-        pile = AddPile("Foundation", x, 50, FAN_NONE, "ChkFoundation", "ChkFalse")
+    for x = 4, 7 do
+        pile = AddPile("Foundation", x, 1, FAN_NONE, "ChkFoundation", "ChkFalse")
         SetAccept(pile, 1)
     end
 
-    pile = AddPile("Tableau", 100, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 1, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 200, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 2, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 1)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 300, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 3, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 2)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 400, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 4, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 3)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 500, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 5, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 4)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 600, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 6, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 5)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 700, 200, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 7, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 6)
     DealUp(pile, 1)

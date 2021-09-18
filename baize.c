@@ -41,13 +41,13 @@ struct Baize* BaizeNew(const char* variantName) {
     // create a handle to this Baize inside Lua TODO maybe not needed
     lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
 
-    lua_pushinteger(self->L, NONE);         lua_setglobal(self->L, "FAN_NONE");
-    lua_pushinteger(self->L, DOWN);         lua_setglobal(self->L, "FAN_DOWN");
-    lua_pushinteger(self->L, LEFT);         lua_setglobal(self->L, "FAN_LEFT");
-    lua_pushinteger(self->L, RIGHT);        lua_setglobal(self->L, "FAN_RIGHT");
-    lua_pushinteger(self->L, WASTE_DOWN);   lua_setglobal(self->L, "FAN_WASTEDOWN");
-    lua_pushinteger(self->L, WASTE_LEFT);   lua_setglobal(self->L, "FAN_WASTELEFT");
-    lua_pushinteger(self->L, WASTE_RIGHT);  lua_setglobal(self->L, "FAN_WASTERIGHT");
+    lua_pushinteger(self->L, FAN_NONE);         lua_setglobal(self->L, "FAN_NONE");
+    lua_pushinteger(self->L, FAN_DOWN);         lua_setglobal(self->L, "FAN_DOWN");
+    lua_pushinteger(self->L, FAN_LEFT);         lua_setglobal(self->L, "FAN_LEFT");
+    lua_pushinteger(self->L, FAN_RIGHT);        lua_setglobal(self->L, "FAN_RIGHT");
+    lua_pushinteger(self->L, FAN_DOWN3);   lua_setglobal(self->L, "FAN_DOWN3");
+    lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
+    lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
 
     sprintf(fname, "variants/%s.lua", variantName);
 
@@ -74,7 +74,7 @@ struct Baize* BaizeNew(const char* variantName) {
     self->piles = ArrayNew(8);
 
     // always create a stock pile, and fill it
-    self->stock = (struct Pile*)StockNew((Vector2){0,0}, NONE, NULL, NULL);
+    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE, NULL, NULL);
     lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
     if ( PileValid(self->stock) ) {
         self->stock->owner = self;
@@ -107,6 +107,9 @@ struct Baize* BaizeNew(const char* variantName) {
 
     fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
+    // now the piles know their slots, calculate and set their positions
+    BaizePositionPiles(self);
+
     self->tail = NULL;
     self->touchedPile = NULL;
 
@@ -118,6 +121,32 @@ struct Baize* BaizeNew(const char* variantName) {
 bool BaizeValid(struct Baize *const self)
 {
     return self && self->magic == MAGIC;
+}
+
+void BaizePositionPiles(struct Baize *const self)
+{
+    extern int windowWidth;
+    extern float cardWidth, cardHeight, pilePaddingX, pilePaddingY, topMargin, leftMargin;
+
+    float maxX = 0.0f;
+    size_t index;
+    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        if ( p->slot.x > maxX ) {
+            maxX = p->slot.x;
+        }
+    }
+
+    pilePaddingX = cardWidth / 10.0f;
+    pilePaddingY = cardHeight / 10.0f;
+    float w = pilePaddingX + cardWidth * (maxX + 1);
+    leftMargin = ((float)windowWidth - w) / 2.0f;
+    topMargin = 48.0f + (cardHeight / 3.0f);
+
+    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        p->pos = PileCalculatePosFromSlot(p);
+        // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
+        PileRepushAllCards(p);
+    }
 }
 
 struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
@@ -217,11 +246,10 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
         // record the distance from the card's origin to the tap point
         // dx = touchPosition.x - c->pos.x;
         // dy = touchPosition.y - c->pos.y;
-
+        // LOGCARD(c);
         BaizeMakeTail(self, c);
         if ( self->tail ) {
             ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
-            // LOGCARD(c);
         }
         self->lastTouch = touchPosition;
     } else {
@@ -283,6 +311,7 @@ void BaizeTouchStop(struct Baize *const self)
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
             cHeadOfTail->owner->vtable->CardTapped(cHeadOfTail);
+            // needs -C11
             // char *pt = _Generic(cHeadOfTail->owner,
             //                 struct Pile* : "Pile",
             //                 struct Tableau* : "Tableau",

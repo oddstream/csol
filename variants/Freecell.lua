@@ -21,26 +21,26 @@ function Build()
     -- end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 10, 10)
+    MovePileTo(STOCK, 5, -5)  -- hide the stock off screen
 
     local pile
 
-    for x = 100, 400, 100 do
-        pile = AddPile("Cell", x, 100, FAN_NONE, "ChkTrue", "ChkTrue")
+    for x = 1, 4 do
+        pile = AddPile("Cell", x, 1, FAN_NONE, "ChkTrue", "ChkTrue")
     end
 
-    for x = 500, 800, 100 do
-        pile = AddPile("Foundation", x, 100, FAN_NONE, "ChkFoundation", "ChkFalse")
+    for x = 5, 8 do
+        pile = AddPile("Foundation", x, 1, FAN_NONE, "ChkFoundation", "ChkFalse")
         SetAccept(pile, 1)
     end
 
-    for x = 100, 400, 100 do
-        pile = AddPile("Tableau", x, 300, FAN_DOWN, "ChkTableau", "ChkTableau")
+    for x = 1, 4 do
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
         DealUp(pile, 7)
     end
 
-    for x = 500, 800, 100 do
-        pile = AddPile("Tableau", x, 300, FAN_DOWN, "ChkTableau", "ChkTableau")
+    for x = 5, 8 do
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
         DealUp(pile, 6)
     end
 
