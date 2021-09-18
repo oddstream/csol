@@ -20,11 +20,11 @@ static struct PileVtable stockVtable = {
     &PileFree,
 };
 
-struct Stock* StockNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Stock* StockNew(Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
 {
     struct Stock* self = malloc(sizeof(struct Stock));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Stock", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Stock", slot, fan, drag, buildfunc, dragfunc);
         self->super.vtable = &stockVtable;
         self->recycles = 9999;  // infinite by default
     }

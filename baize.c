@@ -10,6 +10,7 @@
 #include <lualib.h>
 
 #include "moon.h"
+#include "conformant.h"
 #include "baize.h"
 #include "stock.h"
 #include "card.h"
@@ -41,13 +42,18 @@ struct Baize* BaizeNew(const char* variantName) {
     // create a handle to this Baize inside Lua TODO maybe not needed
     lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
 
-    lua_pushinteger(self->L, FAN_NONE);         lua_setglobal(self->L, "FAN_NONE");
-    lua_pushinteger(self->L, FAN_DOWN);         lua_setglobal(self->L, "FAN_DOWN");
-    lua_pushinteger(self->L, FAN_LEFT);         lua_setglobal(self->L, "FAN_LEFT");
-    lua_pushinteger(self->L, FAN_RIGHT);        lua_setglobal(self->L, "FAN_RIGHT");
+    lua_pushinteger(self->L, FAN_NONE);    lua_setglobal(self->L, "FAN_NONE");
+    lua_pushinteger(self->L, FAN_DOWN);    lua_setglobal(self->L, "FAN_DOWN");
+    lua_pushinteger(self->L, FAN_LEFT);    lua_setglobal(self->L, "FAN_LEFT");
+    lua_pushinteger(self->L, FAN_RIGHT);   lua_setglobal(self->L, "FAN_RIGHT");
     lua_pushinteger(self->L, FAN_DOWN3);   lua_setglobal(self->L, "FAN_DOWN3");
     lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
     lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
+
+    lua_pushinteger(self->L, DRAG_NONE);            lua_setglobal(self->L, "DRAG_NONE");
+    lua_pushinteger(self->L, DRAG_SINGLE);          lua_setglobal(self->L, "DRAG_SINGLE");
+    lua_pushinteger(self->L, DRAG_SINGLEORPILE);    lua_setglobal(self->L, "DRAG_SINGLEORPILE");
+    lua_pushinteger(self->L, DRAG_MANY);            lua_setglobal(self->L, "DRAG_MANY");
 
     sprintf(fname, "variants/%s.lua", variantName);
 
@@ -74,7 +80,7 @@ struct Baize* BaizeNew(const char* variantName) {
     self->piles = ArrayNew(8);
 
     // always create a stock pile, and fill it
-    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE, NULL, NULL);
+    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE, DRAG_SINGLE, NULL, NULL);
     lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
     if ( PileValid(self->stock) ) {
         self->stock->owner = self;
@@ -285,7 +291,7 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
+                if ( CheckDrag(self->tail) && p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);

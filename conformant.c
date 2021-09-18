@@ -19,7 +19,11 @@ static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "%s is not a function\n", func);
     } else {
-        // build table on stack
+        // push source pile catagory as first arg
+        struct Card* c0 = ArrayGet(tail, 0);
+        lua_pushstring(L, c0->owner->category);
+
+        // build table on stack as second arg
         // outer table is an array/sequence, same length as tail
         // each inner table is a record of each card eg {ordinal=1, suit=SPADE, color=0, prone=false}
         lua_createtable(L, ArrayLen(tail), 0);  // create and push tail table
@@ -45,8 +49,8 @@ static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
         
             c = ArrayNext(tail, &index);
         }
-        // one arg (table of card tables), one return (boolean)
-        if ( lua_pcall(L, 1, 1, 0) != LUA_OK ) {
+        // two args (source pile, table of card tables), one return (boolean)
+        if ( lua_pcall(L, 2, 1, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
@@ -117,4 +121,25 @@ bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array* tai
     }
 
     return ConformantTail(L, pile->dragfunc, tail);
+}
+
+bool CheckDrag(struct Array* tail)
+{
+    struct Card* c0 = ArrayGet(tail, 0);
+    switch ( c0->owner->dragType ) {
+        case DRAG_NONE:
+            fprintf(stdout, "No dragging from %s\n", c0->owner->category);
+            return false;
+        case DRAG_SINGLE:
+            if ( ArrayLen(tail) != 1 ) {
+                fprintf(stdout, "Can only drag a single card from %s\n", c0->owner->category);
+                return false;
+            }
+        case DRAG_SINGLEORPILE:
+            // TODO
+            break;
+        case DRAG_MANY:
+            break;
+    }
+    return true;
 }

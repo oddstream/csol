@@ -10,5 +10,6 @@
 bool ConformantBuildTail(lua_State *L, struct Pile *const pile, struct Array *tail);
 bool ConformantBuildAppend(lua_State *L, struct Pile *const pile, struct Array *tail);
 bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array *tail);
+bool CheckDrag(struct Array* tail);
 
 #endif

@@ -2,14 +2,13 @@
 
 ## Next
 
-- [ ] retire info width & height
-- [ ] baize and card scale, uses slots in .lua files
+- [ ] need drag none/drag single/drag single or pile/drag many flags, set from Lua
+- [ ] dragging 4 and 5 separatly after they'd been DragCancelled
 - [ ] _Generic
 - [ ] drag card from Stock to Waste, so chk functions need to know where a card is coming from?
 - [ ] a savedPile is (`Pile` subtype members) and an `Array` of `Card*`, (in memory only for now, serialize later)
 - [ ] a savedBaize is a header (checksum, state) and an `Array` of `savedPile`
 - [ ] undo stack an `Array` of `savedBaize`
-
 - [ ] don't like passing Baize->L around, now have ->owner
 - [ ] state
 - [ ] MoveCard(STOCK, pile, prone) YAGNI
@@ -17,10 +16,12 @@
 - [ ] baize dragging
 - [ ] draw recycle symbol
 - [ ] why does LoadFont cause a segmentation fault?
-- [ ] toast update/draw (error return from some functions could be a string)
 - [ ] CardSetPos() problem
-- [ ] title bar
-- [ ] status bar
+- [ ] title bar (hamburger : variant : collect undo)
+- [ ] toast update/draw (error return from some functions could be a string)
+- [ ] status bar (stock waste : moves : complete)
+- [x] baize and card scale, uses slots in .lua files
+- [x] retire info width & height
 - [x] kenney.nl playing card spritesheet
 - [x] starting to drag a card that's transitioning, ends up displaced rather than finding it's way back to the pile
 - [x] CardToString, LOGCARD

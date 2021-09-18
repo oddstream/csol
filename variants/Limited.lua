@@ -21,26 +21,30 @@ function Build()
     -- end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 100, 100)
+    MovePileTo(STOCK, 1, 1)
     SetRecycles(STOCK, 0)
 
 
-    AddPile("Waste", 200, 100, FAN_WASTERIGHT, "ChkFalse", "ChkFalse")
+    AddPile("Waste", 2, 1, FAN_RIGHT3, DRAG_SINGLE, "ChkFalse", "ChkFalse")
 
-    for x = 500, 1200, 100 do
-        local pile = AddPile("Foundation", x, 100, FAN_NONE, "ChkFoundation", "ChkFalse")
+    for x = 5, 12 do
+        local pile = AddPile("Foundation", x, 1, FAN_NONE, DRAG_NONE, "ChkFoundation", "ChkFalse")
         SetAccept(pile, 1)
     end
 
-    for x = 100, 1200, 100 do
-        local pile = AddPile("Tableau", x, 300, FAN_DOWN, "ChkTableau", "ChkTableau")
+    for x = 1, 12 do
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN, DRAG_SINGLE, "ChkTableau", "ChkTableau")
         DealUp(pile, 3)
     end
 
 end
 
-function ChkFoundation(cards)
-    io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards\n")
+function ChkFoundation(source, cards)
+    io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards from " .. source .. "\n")
+    for n=1, #cards do
+        io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
+    end
+
     if #cards == 0 then
       io.stderr:write("ChkFoundation passed an empty tail\n")
       return false
@@ -66,15 +70,22 @@ function ChkFoundation(cards)
     return true
 end
 
-function ChkTableau(cards)
-    -- io.stderr:write("ChkTableau passed a tail of " .. tostring(#cards) .. " cards\n")
-    -- for n=1, #cards do
-    --     io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
+function ChkTableau(source, cards)
+    io.stderr:write("ChkTableau passed a tail of " .. tostring(#cards) .. " cards from " .. source .. "\n")
+    for n=1, #cards do
+        io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
+    end
+
+    -- remember <dst card><tail> construction
+    -- if #cards > 1 then
+    --     io.stderr:write("ChkTableau tail length fail\n")
+    --     return false
     -- end
-    if #cards > 2 then
-        io.stderr:write("ChkTableau tail length fail\n")
+    if source == "Foundation" then
+        io.stderr:write("ChkTableau coming from Foundation fail\n")
         return false
     end
+
     local cPrev = cards[1]
     for n=2, #cards do
       local cThis = cards[n]
@@ -95,12 +106,12 @@ function ChkTableau(cards)
     return true
 end
 
-function ChkFalse(cards)
+function ChkFalse(source, cards)
     io.stderr:write("ChkFalse\n")
     return false
 end
 
-function ChkTrue(cards)
+function ChkTrue(source, cards)
     io.stderr:write("ChkTrue\n")
     return true
 end

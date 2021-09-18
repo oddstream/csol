@@ -20,11 +20,11 @@ static struct PileVtable tableauVtable = {
     &PileFree,
 };
 
-struct Tableau* TableauNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Tableau* TableauNew(Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
 {
     struct Tableau* self = malloc(sizeof(struct Tableau));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Tableau", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Tableau", slot, fan, drag, buildfunc, dragfunc);
         self->super.vtable = &tableauVtable;
         self->accept = 0;   // accept any by default
     }

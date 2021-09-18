@@ -25,12 +25,13 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
 {
     self->magic = MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->slot = slot;
-    self->fan = fan;
+    self->fanType = fan;
+    self->dragType = drag;
     if ( buildfunc ) {
         strncpy(self->buildfunc, buildfunc, sizeof self->buildfunc - 1);
     } else {
@@ -128,7 +129,7 @@ Rectangle PileGetFannedRect(struct Pile *const self)
             return r;   // this and the rest are meaningless
         }
         Vector2 cPos = CardGetPos(c);
-        switch ( self->fan ) {
+        switch ( self->fanType ) {
             case FAN_NONE:
                 // do nothing
                 break;
@@ -158,7 +159,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
     struct Card* c;
     size_t index = 0;
 
-    switch ( self->fan ) {
+    switch ( self->fanType ) {
         case FAN_NONE:
             // do nothing
             break;
@@ -279,7 +280,7 @@ void PileMoveCards(struct Pile *const self, struct Card* c)
     }
 
     // special case: waste may need refanning if we took a card from it
-    if ( src->fan == FAN_DOWN3 || src->fan == FAN_LEFT3 || src->fan == FAN_RIGHT3 ) {
+    if ( src->fanType == FAN_DOWN3 || src->fanType == FAN_LEFT3 || src->fanType == FAN_RIGHT3 ) {
         PileRepushAllCards(src);
     }
 

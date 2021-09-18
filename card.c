@@ -170,7 +170,7 @@ void CardDraw(struct Card *const self)
         SpritesheetDraw(ssFace, self->frame, self->flipWidth, self->pos);
     } else {
         // SpritesheetDraw(ssBack, 6, self->flipWidth, self->pos);
-        SpritesheetDraw(ssBack, 5, self->flipWidth, self->pos);
+        SpritesheetDraw(ssBack, 2, self->flipWidth, self->pos);
     }
 }
 

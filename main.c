@@ -109,7 +109,7 @@ struct Vector2 kenneyBackInfo[15] = {
 
 struct Spritesheet *ssFace, *ssBack;
 
-int windowWidth = 1400, windowHeight = 1000;
+int windowWidth = 1800, windowHeight = 1100;
 
 //float cardWidth = 71.0f, cardHeight = 96.0f;
 float cardWidth = 140.0f, cardHeight = 190.0f;
@@ -173,7 +173,7 @@ int main(void)
     ssFace = SpritesheetNewInfo("assets/playingCards.png", kenneyFaceInfo, 52);
     ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo, 15);
     
-    struct Baize* baize = BaizeNew("Klondike");
+    struct Baize* baize = BaizeNew("Limited");
     if ( BaizeValid(baize) ) {
         while (!WindowShouldClose())    // Detect window close button or ESC key
         {

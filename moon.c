@@ -107,22 +107,23 @@ int MoonAddPile(lua_State* L)
     float x = lua_tonumber(L, 2) - 1; // doesn't alter stack
     float y = lua_tonumber(L, 3) - 1; // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
-    const char* buildfunc = lua_tostring(L, 5);
-    const char* dragfunc = lua_tostring(L, 6);
+    enum DragType drag = lua_tointeger(L, 5);
+    const char* buildfunc = lua_tostring(L, 6);
+    const char* dragfunc = lua_tostring(L, 7);
 
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
 
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-        p = (struct Pile*)StockNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)StockNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Cell") == 0 ) {
-        p = (struct Pile*)CellNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)CellNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
     } else if ( strcmp(category, "Foundation") == 0 ) {
-        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Tableau") == 0 ) {
-        p = (struct Pile*)TableauNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)TableauNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Waste") == 0 ) {
-        p = (struct Pile*)WasteNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)WasteNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);
     }

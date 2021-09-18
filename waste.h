@@ -14,7 +14,7 @@ struct Waste {
     struct Pile super;
 };
 
-struct Waste* WasteNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+struct Waste* WasteNew(Vector2 pos, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc);
 void WasteCardTapped(struct Card *c);
 void WastePileTapped(struct Pile *p);
 bool WasteCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);

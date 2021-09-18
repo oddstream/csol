@@ -26,50 +26,50 @@ function Build()
   
     local pile
 
-    pile = AddPile("Waste", 2, 1, FAN_RIGHT3, "ChkFalse", "ChkFalse")
+    pile = AddPile("Waste", 2, 1, FAN_RIGHT3, DRAG_SINGLE, "ChkFalse", "ChkFalse")
 
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE, "ChkFoundation", "ChkFalse")
+        pile = AddPile("Foundation", x, 1, FAN_NONE, DRAG_NONE, "ChkFoundation", "ChkFalse")
         SetAccept(pile, 1)
     end
 
-    pile = AddPile("Tableau", 1, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 1, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 2, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 2, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 1)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 3, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 3, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 2)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 4, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 4, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 3)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 5, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 5, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 4)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 6, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 6, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 5)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 7, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
+    pile = AddPile("Tableau", 7, 2, FAN_DOWN, DRAG_MANY, "ChkTableau", "ChkTableau")
     SetAccept(pile, 13)
     DealDown(pile, 6)
     DealUp(pile, 1)
 
 end
 
-function ChkFoundation(cards)
+function ChkFoundation(source, cards)
     io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards\n")
     if #cards == 0 then
       io.stderr:write("ChkFoundation passed an empty tail\n")
@@ -96,11 +96,15 @@ function ChkFoundation(cards)
     return true
 end
 
-function ChkTableau(cards)
+function ChkTableau(source, cards)
     -- io.stderr:write("ChkTableau passed a tail of " .. tostring(#cards) .. " cards\n")
     -- for n=1, #cards do
     --     io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
     -- end
+    if source == "Foundation" then
+      io.stderr:write("ChkTableau coming from Foundation fail\n")
+      return false
+    end
     local cPrev = cards[1]
     for n=2, #cards do
       local cThis = cards[n]
@@ -121,12 +125,12 @@ function ChkTableau(cards)
     return true
 end
 
-function ChkFalse(cards)
+function ChkFalse(source, cards)
     io.stderr:write("ChkFalse\n")
     return false
 end
 
-function ChkTrue(cards)
+function ChkTrue(source, cards)
     io.stderr:write("ChkTrue\n")
     return true
 end

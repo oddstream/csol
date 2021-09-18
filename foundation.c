@@ -23,25 +23,29 @@ static struct PileVtable foundationVtable = {
     &PileFree,
 };
 
-struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc) {
+struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
+{
     struct Foundation* self = malloc(sizeof(struct Foundation));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Foundation", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Foundation", slot, fan, drag, buildfunc, dragfunc);
         self->super.vtable = &foundationVtable;
         self->accept = 0; // accept any by default
     }
     return self;
 }
 
-void FoundationCardTapped(struct Card *c) {
+void FoundationCardTapped(struct Card *c)
+{
     (void)c;
 }
 
-void FoundationPileTapped(struct Pile *p) {
+void FoundationPileTapped(struct Pile *p)
+{
     (void)p;
 }
 
-bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail) {
+bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+{
     if ( ArrayLen(tail) != 1 ) {
         fprintf(stderr, "Can only move single cards to a foundation\n");
         return false;
@@ -64,7 +68,8 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
     return ConformantBuildAppend(L, self, tail);
 }
 
-void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord) {
+void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)
+{
     ((struct Foundation*)self)->accept = ord;
 }
 
@@ -74,7 +79,8 @@ void FoundationSetRecycles(struct Pile *const self, int r)
     (void)r;
 }
 
-void FoundationDraw(struct Pile *const self) {
+void FoundationDraw(struct Pile *const self)
+{
     PileDraw(self);
 
     struct Foundation* f = (struct Foundation*)self;
