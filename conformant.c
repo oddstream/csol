@@ -6,6 +6,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "baize.h"
 #include "conformant.h"
 #include "array.h"
 #include "pile.h"
@@ -126,13 +127,16 @@ bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array* tai
 bool CheckDrag(struct Array* tail)
 {
     struct Card* c0 = ArrayGet(tail, 0);
+    struct Baize *baize = c0->owner->owner;
+    baize->errorString[0] = '\0';
+
     switch ( c0->owner->dragType ) {
         case DRAG_NONE:
-            fprintf(stdout, "No dragging from %s\n", c0->owner->category);
+            sprintf(baize->errorString, "No dragging from %s", c0->owner->category);
             return false;
         case DRAG_SINGLE:
             if ( ArrayLen(tail) != 1 ) {
-                fprintf(stdout, "Can only drag a single card from %s\n", c0->owner->category);
+                sprintf(baize->errorString, "Can only drag a single card from %s", c0->owner->category);
                 return false;
             }
         case DRAG_SINGLEORPILE:

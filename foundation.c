@@ -2,9 +2,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <raylib.h>
 #include <lua.h>
 
+#include "baize.h"
 #include "pile.h"
 #include "array.h"
 #include "foundation.h"
@@ -34,24 +36,26 @@ struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, enum DragType d
     return self;
 }
 
-void FoundationCardTapped(struct Card *c)
+bool FoundationCardTapped(struct Card *c)
 {
-    (void)c;
+    c->owner->owner->errorString[0] = '\0';
+    return false;
 }
 
-void FoundationPileTapped(struct Pile *p)
+bool FoundationPileTapped(struct Pile *p)
 {
-    (void)p;
+    p->owner->errorString[0] = '\0';
+    return false;
 }
 
 bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
 {
     if ( ArrayLen(tail) != 1 ) {
-        fprintf(stderr, "Can only move single cards to a foundation\n");
+        strcpy(self->owner->errorString, "Can only move single cards to a foundation");
         return false;
     }
     if ( ArrayLen(self->cards) == 13 ) {
-        fprintf(stderr, "The foundation is full\n");
+        strcpy(self->owner->errorString, "The foundation is full");
         return false;
     }
     if ( ArrayLen(self->cards) == 0 ) {
@@ -59,7 +63,7 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
         if ( f->accept != 0 ) {
             struct Card* c = ArrayPeek(tail);
             if ( c->id.ordinal != f->accept ) {
-                fprintf(stderr, "The foundation can only accept a %d, not a %d\n", f->accept, c->id.ordinal);
+                sprintf(self->owner->errorString, "The foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
                 return false;
             }
         }
@@ -86,7 +90,7 @@ void FoundationDraw(struct Pile *const self)
     struct Foundation* f = (struct Foundation*)self;
     if ( f->accept != 0 ) {
         // extern Font fontAcme;
-        Vector2 pos = PileGetPos(self);
+        Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
         // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});

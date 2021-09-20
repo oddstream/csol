@@ -1,25 +1,40 @@
-# csol
+# Csol
+
+## Undo
+
+saved baize is an array (of Pile*) of array (of Card* in each pile)
+
+don't store baize state, it can be calculated
+
+don't store a crc
+
+don't store - for the moment - stock.recycles or pile.accept
+
+so no need for a saved baize header, or saved pile header
+
+serialize later
 
 ## Next
 
-- [ ] need drag none/drag single/drag single or pile/drag many flags, set from Lua
-- [ ] dragging 4 and 5 separatly after they'd been DragCancelled
+- [ ] window size, window color, card scale, card set, last variant in Lua settings file (simple, writable) LoadSettings(), SaveSettings()
+- [ ] dragging 4 and 5 separately after they'd been DragCancelled
 - [ ] _Generic
-- [ ] drag card from Stock to Waste, so chk functions need to know where a card is coming from?
-- [ ] a savedPile is (`Pile` subtype members) and an `Array` of `Card*`, (in memory only for now, serialize later)
-- [ ] a savedBaize is a header (checksum, state) and an `Array` of `savedPile`
-- [ ] undo stack an `Array` of `savedBaize`
+- [ ] undo stack of `Array` of `Array` of `Card*`
 - [ ] don't like passing Baize->L around, now have ->owner
-- [ ] state
 - [ ] MoveCard(STOCK, pile, prone) YAGNI
-- [ ] CanAcceptTail should return an error string for toasting later
-- [ ] baize dragging
 - [ ] draw recycle symbol
-- [ ] why does LoadFont cause a segmentation fault?
 - [ ] CardSetPos() problem
 - [ ] title bar (hamburger : variant : collect undo)
-- [ ] toast update/draw (error return from some functions could be a string)
+- [ ] toast
 - [ ] status bar (stock waste : moves : complete)
+- [ ] card scaling
+- [x] CheckDrag, CanAcceptTail should return an error string for toasting later
+- [x] state (no, can be calculated)
+- [x] more cardsMoved++ (eg PileMoveCards)
+- [x] error return from some functions could be a toastable string; return bool then get last error
+- [x] baize dragging
+- [x] drag card from Stock to Waste, so chk functions need to know where a card is coming from?
+- [x] need drag none/drag single/drag single or pile/drag many flags, set from Lua
 - [x] baize and card scale, uses slots in .lua files
 - [x] retire info width & height
 - [x] kenney.nl playing card spritesheet
@@ -44,6 +59,19 @@
 - deal cards DealUp(p, n)/DealDown(p, n)/DealCard(p, "AC")
 - build only task
 - minimal Makefile
+
+## Problems
+
+- [ ] why does LoadFont cause a segmentation fault?
+- [ ] no GetWindowWidth, Height, making resize useless
+
+## Backup
+
+```bash
+gilbert@iMac:/media/gilbert/GREENTHUMB$ git clone /home/gilbert/projects/csol csol
+```
+
+`git bundle`
 
 ## Conventions
 

@@ -4,18 +4,21 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "raylib.h"
+#include <raylib.h>
+
+#include "baize.h"
+#include "pile.h"
 #include "spritesheet.h"
 #include "card.h"
 #include "util.h"
 
-#define MAGIC (0x29041962)
+#define CARD_MAGIC (0x29041962)
 
 extern struct Spritesheet *ssFace, *ssBack;
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
-    struct Card self = {.magic = MAGIC, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .id.prone = 1, .dragging = false};
+    struct Card self = {.magic = CARD_MAGIC, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .id.prone = 1, .dragging = false};
     self.frame = (suit * 13) + (ord - 1);   // TODO specific to retro spritesheet
     self.pos = (Vector2){0};
     self.flipWidth = 1.0f;
@@ -25,7 +28,7 @@ struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 
 bool CardValid(struct Card *const self)
 {
-    return self && self->magic == MAGIC;
+    return self && self->magic == CARD_MAGIC;
 }
 
 void CardToString(struct Card *const self, char* z)
@@ -50,9 +53,14 @@ Rectangle CardGetRect(struct Card *const self)
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
 }
 
-Vector2 CardGetPos(struct Card *const self)
+Vector2 CardGetBaizePos(struct Card *const self)
 {
     return self->pos;
+}
+
+Vector2 CardGetScreenPos(struct Card *const self)
+{
+    return (Vector2){.x = self->pos.x + self->owner->owner->dragOffset.x, .y = self->pos.y + self->owner->owner->dragOffset.y};
 }
 
 void CardSetPos(struct Card *const self, Vector2 pos)
@@ -62,6 +70,7 @@ void CardSetPos(struct Card *const self, Vector2 pos)
 
 void CardMovePositionBy(struct Card *const self, Vector2 delta)
 {
+    // fprintf(stdout, "CardDragBy %.0f, %.0f\n", delta.x, delta.y);
     self->pos.x += delta.x;
     self->pos.y += delta.y;
 }
@@ -118,7 +127,8 @@ bool CardDragging(struct Card *const self)
 bool CardIsAt(struct Card *const self, Vector2 point)
 {
     extern float cardWidth, cardHeight;
-    Rectangle rect = {.x=self->pos.x, .y=self->pos.y, .width=cardWidth, .height=cardHeight};
+    Vector2 r = CardGetScreenPos(self);
+    Rectangle rect = {.x=r.x, .y=r.y, .width=cardWidth, .height=cardHeight};
     return CheckCollisionPointRec(point, rect);
 }
 
@@ -167,10 +177,10 @@ void CardDraw(struct Card *const self)
     }
 
     if ( showFace ) {
-        SpritesheetDraw(ssFace, self->frame, self->flipWidth, self->pos);
+        SpritesheetDraw(ssFace, self->frame, self->flipWidth, CardGetScreenPos(self));
     } else {
         // SpritesheetDraw(ssBack, 6, self->flipWidth, self->pos);
-        SpritesheetDraw(ssBack, 2, self->flipWidth, self->pos);
+        SpritesheetDraw(ssBack, 2, self->flipWidth, CardGetScreenPos(self));
     }
 }
 

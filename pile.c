@@ -8,7 +8,7 @@
 #include "pile.h"
 #include "array.h"
 
-#define MAGIC (0xdeadbeef)
+#define PILE_MAGIC (0xdeadbeef)
 
 #define CARD_FACE_FAN_FACTOR (3.0f)
 #define CARD_BACK_FAN_FACTOR (5.0f)
@@ -16,7 +16,7 @@
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
 //     struct Pile* self = malloc(sizeof(struct Pile));
 //     if ( self ) {
-//         self->magic = MAGIC;
+//         self->magic = PILE_MAGIC;
 //         strncpy(self->category, category, sizeof self->category - 1);
 //         self->pos = pos;
 //         self->fan = fan;
@@ -27,7 +27,7 @@
 
 void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
 {
-    self->magic = MAGIC;
+    self->magic = PILE_MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->slot = slot;
     self->fanType = fan;
@@ -47,7 +47,7 @@ void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum 
 
 bool PileValid(struct Pile *const self)
 {
-    return self && self->magic == MAGIC;
+    return self && self->magic == PILE_MAGIC;
 }
 
 size_t PileLen(struct Pile *const self)
@@ -97,12 +97,17 @@ bool PileIsStock(struct Pile *const self)
     return self == baize->stock;
 }
 
-Vector2 PileGetPos(struct Pile *const self)
+Vector2 PileGetBaizePos(struct Pile *const self)
 {
     return self->pos;
 }
 
-Rectangle PileGetRect(struct Pile *const self)
+Vector2 PileGetScreenPos(struct Pile *const self)
+{
+    return (Vector2){.x = self->pos.x + self->owner->dragOffset.x, .y = self->pos.y + self->owner->dragOffset.y};
+}
+
+Rectangle PileGetBaizeRect(struct Pile *const self)
 {
     extern float cardWidth, cardHeight;
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
@@ -118,17 +123,17 @@ Vector2 PileCalculatePosFromSlot(struct Pile *const self)
             };
 }
 
-Rectangle PileGetFannedRect(struct Pile *const self)
+Rectangle PileGetFannedBaizeRect(struct Pile *const self)
 {
     // cannot use position of top card, in case it's being dragged
     extern float cardWidth, cardHeight;
-    Rectangle r = PileGetRect(self);
+    Rectangle r = PileGetBaizeRect(self);
     if ( ArrayLen(self->cards) > 2 ) {
         struct Card* c = ArrayPeek(self->cards);
         if ( CardDragging(c) ) {
             return r;   // this and the rest are meaningless
         }
-        Vector2 cPos = CardGetPos(c);
+        Vector2 cPos = CardGetBaizePos(c);
         switch ( self->fanType ) {
             case FAN_NONE:
                 // do nothing
@@ -147,6 +152,13 @@ Rectangle PileGetFannedRect(struct Pile *const self)
                 break;
         }
     }
+    return r;
+}
+
+Rectangle PileGetFannedScreenRect(struct Pile *const self) {
+    Rectangle r = PileGetFannedBaizeRect(self);
+    r.x += self->owner->dragOffset.x;
+    r.y += self->owner->dragOffset.y;
     return r;
 }
 
@@ -233,12 +245,12 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self)
     return pos;
 }
 
-void PileMoveCards(struct Pile *const self, struct Card* c)
+bool PileMoveCards(struct Pile *const self, struct Card* c)
 {
     // move cards to this pile
 
     struct Pile* src = CardGetOwner(c);
-    // size_t oldSrcLen = PileLen(src);
+    size_t oldSrcLen = PileLen(src);
 
     // find the new length of the source pile
     size_t newSrcLen = 0, index;
@@ -285,12 +297,15 @@ void PileMoveCards(struct Pile *const self, struct Card* c)
     }
 
     // TODO scrunch
+
+    return newSrcLen != oldSrcLen;
 }
 
 bool PileIsAt(struct Pile *const self, Vector2 point)
 {
     extern float cardWidth, cardHeight;
-    Rectangle rect = {.x=self->pos.x, .y=self->pos.y, .width=cardWidth, .height=cardHeight};
+    Vector2 r = PileGetScreenPos(self);
+    Rectangle rect = {.x=r.x, .y=r.y, .width=cardWidth, .height=cardHeight};
     return CheckCollisionPointRec(point, rect);
 }
 
@@ -309,29 +324,6 @@ void PileRepushAllCards(struct Pile *const self)
     ArrayFree(tmp);
 }
 
-struct SavedPileHeader* PileNewSaved(struct Pile *const self) {
-    struct SavedPileHeader *sph = malloc(sizeof(struct SavedPileHeader));
-    // TODO need subtype fields (accept, recycle)
-    if  ( sph )  {
-        // sph->accept = self->vtable->GetAccept(self);
-        // sph->recycles = self->vtable->GetRecycles(self);
-        sph->savedCards = ArrayNew(ArrayLen(self->cards));
-        size_t index;
-        for ( struct Card *c = ArrayFirst(self->cards, &index); c; c = ArrayNext(self->cards, &index) ) {
-            ArrayPush(sph->savedCards, c);  // a pointer into the cardLibrary
-        }
-    }
-    return sph;
-}
-
-void PileFreeSaved(struct SavedPileHeader *sph)
-{
-    if ( sph ) {
-        ArrayFree(sph->savedCards);
-        free(sph);
-    }
-}
-
 void PileUpdate(struct Pile *const self)
 {
     ArrayForeach(self->cards, (ArrayIterFunc)CardUpdate);
@@ -340,8 +332,8 @@ void PileUpdate(struct Pile *const self)
 void PileDraw(struct Pile *const self)
 {
     // BeginDrawing() has been called by BaizeDraw()
-    Rectangle r = PileGetFannedRect(self);
-    DrawRectangleRoundedLines(r, 0.1, 4, 2.0, (Color){255,255,255,31});
+    Rectangle r = PileGetFannedScreenRect(self);
+    DrawRectangleRoundedLines(r, 0.05, 9, 2.0, (Color){255,255,255,31});
 }
 
 void PileFree(struct Pile *const self)

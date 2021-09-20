@@ -9,14 +9,9 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "moon.h"
-#include "conformant.h"
-#include "baize.h"
-#include "stock.h"
-#include "card.h"
-#include "util.h"
+#include "csol.h"
 
-#define MAGIC (0x19910920)
+#define BAIZE_MAGIC (0x19910920)
 
 struct Baize* BaizeNew(const char* variantName) {
 
@@ -30,7 +25,10 @@ struct Baize* BaizeNew(const char* variantName) {
     unsigned packs = 1;
 
     struct Baize* self = malloc(sizeof(struct Baize));
-    self->magic = MAGIC;
+    if ( !self ) {
+        return NULL;
+    }
+    self->magic = BAIZE_MAGIC;
 
     self->backgroundColor = (Color){.r=0, .g=63, .b=0, .a=255};
 
@@ -117,7 +115,12 @@ struct Baize* BaizeNew(const char* variantName) {
     BaizePositionPiles(self);
 
     self->tail = NULL;
+    self->undoStack = UndoStackNew();
+
     self->touchedPile = NULL;
+
+    self->dragOffset = (Vector2){0};
+    self->dragging = false;
 
     SetWindowTitle(variantName);
 
@@ -126,7 +129,7 @@ struct Baize* BaizeNew(const char* variantName) {
 
 bool BaizeValid(struct Baize *const self)
 {
-    return self && self->magic == MAGIC;
+    return self && self->magic == BAIZE_MAGIC;
 }
 
 void BaizePositionPiles(struct Baize *const self)
@@ -144,7 +147,7 @@ void BaizePositionPiles(struct Baize *const self)
 
     pilePaddingX = cardWidth / 10.0f;
     pilePaddingY = cardHeight / 10.0f;
-    float w = pilePaddingX + cardWidth * (maxX + 1);
+    float w = pilePaddingX + cardWidth * (maxX + 2);
     leftMargin = ((float)windowWidth - w) / 2.0f;
     topMargin = 48.0f + (cardHeight / 3.0f);
 
@@ -181,11 +184,6 @@ static struct Card* findCardAt(struct Baize *const self, Vector2 pos)
             if ( CardIsAt(c, pos) ) {
                 return c;
             }
-            // extern float cardWidth, cardHeight;
-            // Rectangle rect = {.x=c->pos.x, .y=c->pos.y, .width=cardWidth, .height=cardHeight};
-            // if ( CheckCollisionPointRec(pos, rect) ) {
-            //     return c;
-            // }
             c = (struct Card*)ArrayPrev(p->cards, &cindex);
         }
         p = (struct Pile*)ArrayNext(self->piles, &pindex);
@@ -216,7 +214,7 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
         if ( p == CardGetOwner(c) ) {
             continue;
         }
-        Rectangle rectPile = PileGetFannedRect(p);
+        Rectangle rectPile = PileGetFannedBaizeRect(p);
         float area = UtilOverlapArea(rectCard, rectPile);
         if ( area > largestArea ) {
             largestArea = area;
@@ -245,6 +243,34 @@ void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     }
 }
 
+bool BaizeDragging(struct Baize *const self) {
+    return !(self->dragOffset.x == 0.0f && self->dragOffset.y == 0.0f);
+}
+
+void BaizeStartDrag(struct Baize *const self) {
+    // fprintf(stdout, "BaizeStartDrag\n");
+    self->dragging = true;
+}
+
+void BaizeDragBy(struct Baize *const self, Vector2 delta) {
+    // delta is the differnce between the point now, and what it was previously
+    // (in gosol, delta is the difference between the point now and where the drag started)
+    // fprintf(stdout, "BaizeDragBy %.0f, %.0f\n", delta.x, delta.y);
+    self->dragOffset.x = self->dragOffset.x + delta.x;
+    if ( self->dragOffset.x > 0.0f ) {
+        self->dragOffset.x = 0.0f;
+    }
+    self->dragOffset.y = self->dragOffset.y + delta.y;
+    if ( self->dragOffset.y > 0.0f ) {
+        self->dragOffset.y = 0.0f;
+    }
+}
+
+void BaizeStopDrag(struct Baize *const self) {
+    // fprintf(stdout, "BaizeStopDrag\n");
+    self->dragging = false;
+}
+
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
 {
     struct Card* c = findCardAt(self, touchPosition);
@@ -257,27 +283,34 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
         if ( self->tail ) {
             ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
         }
-        self->lastTouch = touchPosition;
     } else {
         self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
     }
+
+    if ( self->tail == NULL && self->touchedPile == NULL ) {
+        BaizeStartDrag(self);
+    }
+    
+    self->lastTouch = touchPosition;
 }
 
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
 {
+    Vector2 delta = {.x = touchPosition.x - self->lastTouch.x, .y = touchPosition.y - self->lastTouch.y};
+
     if ( self->tail ) {
         size_t index;
         struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
         while ( c ) {
-            Vector2 delta = {.x = touchPosition.x - self->lastTouch.x, .y = touchPosition.y - self->lastTouch.y};
             CardMovePositionBy(c, delta);
             c = (struct Card*)ArrayNext(self->tail, &index);
         }
     } else if ( self->touchedPile ) {
         // do nothing, can't drag a pile
-    } else {
-        // TODO drag the baize
+    } else if ( self->dragging ) {
+        BaizeDragBy(self, delta);
     }
+
     self->lastTouch = touchPosition;
 }
 
@@ -296,9 +329,14 @@ void BaizeTouchStop(struct Baize *const self)
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
                     }
-                    PileMoveCards(p, cHeadOfTail);
+                    // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three)
+                    if ( PileMoveCards(p, cHeadOfTail) ) {
+                        BaizeAfterUserMove(self);
+                    }
                 } else {
-                    // fprintf(stderr, "cannot move cards there\n");
+                    if ( self->errorString[0] ) {
+                        fprintf(stderr, "*** %s ***\n", self->errorString);
+                    }
                     while ( c ) {
                         CardCancelDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
@@ -316,7 +354,13 @@ void BaizeTouchStop(struct Baize *const self)
                 CardStopDrag(c);    // CardCancelDrag() would use CardTransitionTo(), and we know the card didn't move
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
-            cHeadOfTail->owner->vtable->CardTapped(cHeadOfTail);
+            if ( cHeadOfTail->owner->vtable->CardTapped(cHeadOfTail) ) {
+                BaizeAfterUserMove(self);
+            } else {
+                if ( self->errorString[0] ) {
+                    fprintf(stderr, "*** %s ***\n", self->errorString);
+                }
+            }
             // needs -C11
             // char *pt = _Generic(cHeadOfTail->owner,
             //                 struct Pile* : "Pile",
@@ -327,30 +371,39 @@ void BaizeTouchStop(struct Baize *const self)
         ArrayFree(self->tail);
         self->tail = NULL;
     } else if ( self->touchedPile ) {
-        self->touchedPile->vtable->PileTapped(self->touchedPile);
+        if ( self->touchedPile->vtable->PileTapped(self->touchedPile) ) {
+            BaizeAfterUserMove(self);
+        }
         self->touchedPile = NULL;
-    } else {
-        // TODO finish dragging baize
+    } else if ( self->dragging ) {
+        BaizeStopDrag(self);
     }
+}
+
+void BaizeAfterUserMove(struct Baize *const self)
+{
+    // TODO automoves (in Lua)
+    // TODO test started/complete/conformant
+
+    UndoPush(self);
 }
 
 void BaizeUpdate(struct Baize *const self)
 {
-    // static float dx, dy;
-
     Vector2 touchPosition = GetTouchPosition(0);
     int gesture = GetGestureDetected();
 
     if ( gesture == GESTURE_TAP && !self->tail ) {
         BaizeTouchStart(self, touchPosition);
     }
-    if ( gesture == GESTURE_DRAG && (self->tail || self->touchedPile) ) {
+    if ( gesture == GESTURE_DRAG ) {
         BaizeTouchMove(self, touchPosition);
     }
-    if ( gesture == GESTURE_NONE && (self->tail || self->touchedPile) ) {
+    if ( gesture == GESTURE_NONE && (self->tail || self->touchedPile || self->dragging) ) {
         BaizeTouchStop(self);
     }
 
+    // static float dx, dy;
     // int dx = c.rect.x - touchPosition.x;
     // int dy = c.rect.y - touchPosition.y;
     // {
@@ -361,7 +414,6 @@ void BaizeUpdate(struct Baize *const self)
     // CardSetPos((struct Card*)ArrayGet(self->tail, 0), (Vector2){touchPosition.x - dx, touchPosition.y - dy});
 
     ArrayForeach(self->piles, (ArrayIterFunc)PileUpdate);
-
 }
 
 void BaizeDraw(struct Baize *const self)
@@ -373,7 +425,6 @@ void BaizeDraw(struct Baize *const self)
     size_t pindex, cindex;
     struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &pindex);
     while ( p ) {
-        // PileDraw(p);
         p->vtable->Draw(p);
         c = (struct Card*)ArrayFirst(p->cards, &cindex);
         while ( c ) {
@@ -389,7 +440,7 @@ void BaizeDraw(struct Baize *const self)
     while ( p ) {
         c = (struct Card*)ArrayFirst(p->cards, &cindex);
         while ( c ) {
-            if ( CardTransitioning(c) || CardDragging(c) ) {
+            if ( CardTransitioning(c) ) {
                 CardDraw(c);
             }
             c = (struct Card*)ArrayNext(p->cards, &cindex);
@@ -397,6 +448,23 @@ void BaizeDraw(struct Baize *const self)
         p = (struct Pile*)ArrayNext(self->piles, &pindex);
     }
 
+    p = (struct Pile*)ArrayFirst(self->piles, &pindex);
+    while ( p ) {
+        c = (struct Card*)ArrayFirst(p->cards, &cindex);
+        while ( c ) {
+            if ( CardDragging(c) ) {
+                CardDraw(c);
+            }
+            c = (struct Card*)ArrayNext(p->cards, &cindex);
+        }
+        p = (struct Pile*)ArrayNext(self->piles, &pindex);
+    }
+
+    // {
+    //     char z[128];
+    //     sprintf(z, "%.0f, %.0f", self->dragOffset.x, self->dragOffset.y);
+    //     DrawText(z, 10, 100, 24, WHITE);
+    // }
     // {
     //     Vector2 touchPosition = GetTouchPosition(0);
     //     c = findCardAt(self, touchPosition);
@@ -410,11 +478,12 @@ void BaizeDraw(struct Baize *const self)
 
 void BaizeFree(struct Baize *const self)
 {
+    self->magic = 0;
+    UndoStackFree(self->undoStack);
     ArrayFree(self->tail);
     ArrayForeach(self->piles, (ArrayIterFunc)PileFree);
     ArrayFree(self->piles);
     free(self->cardLibrary);
     lua_close(self->L);
-    self->magic = 0;
     free(self);
 }

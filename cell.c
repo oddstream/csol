@@ -2,9 +2,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <raylib.h>
 #include <lua.h>
 
+#include "baize.h"
 #include "pile.h"
 #include "array.h"
 #include "cell.h"
@@ -31,25 +33,27 @@ struct Cell* CellNew(Vector2 slot, enum FanType fan, enum DragType drag, const c
     return self;
 }
 
-void CellCardTapped(struct Card *c)
+bool CellCardTapped(struct Card *c)
 {
-    (void)c;
+    c->owner->owner->errorString[0] = '\0';
+    return false;
 }
 
-void CellPileTapped(struct Pile *p)
+bool CellPileTapped(struct Pile *p)
 {
-    (void)p;
+    p->owner->errorString[0] = '\0';
+    return false;
 }
 
 bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
 {
     (void)L;
     if ( ArrayLen(tail) != 1 ) {
-        fprintf(stderr, "Can only move single cards to a cell\n");
+        strcpy(self->owner->errorString, "Can only move single cards to a cell");
         return false;
     }
     if ( PileLen(self) > 0 ) {
-        fprintf(stderr, "Can only move a card to an empty cell\n");
+        strcpy(self->owner->errorString, "Can only move a card to an empty cell");
         return false;
     }
     return true;

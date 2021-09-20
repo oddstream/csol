@@ -13,6 +13,7 @@
 		"*.tcc": "c",
 		"fstream": "c",
 		"array.h": "c",
-		"stock.h": "c"
+		"stock.h": "c",
+		"inttypes.h": "c"
 	}
 }

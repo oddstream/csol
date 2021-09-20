@@ -10,22 +10,25 @@
 #include "spritesheet.h"
 #include "card.h"
 
-struct Vector2 retroBackInfo[13] = {
-    {.x = 5, .y = 4},
-    {.x = 85, .y = 4},
-    {.x = 185, .y = 4},
-    {.x = 245, .y = 4},
-    {.x = 325, .y = 4},
-    {.x = 405, .y = 4},
-    {.x = 485, .y = 4},
-    {.x = 5, .y = 140},
-    {.x = 85, .y = 140},
-    {.x = 185, .y = 140},
-    {.x = 245, .y = 140},
-    {.x = 325, .y = 140},
-    {.x = 405, .y = 140},
-};
+#define RETROCARDS 0
 
+#if RETROCARDS
+struct Vector2 retroBackInfo[13] = {
+    {.x = 5, .y = 4},       // Aquarium
+    {.x = 85, .y = 4},      // CardHand
+    {.x = 165, .y = 4},     // Castle
+    {.x = 245, .y = 4},     // Empty / JazzCup
+    {.x = 325, .y = 4},     // Fishes
+    {.x = 405, .y = 4},     // FlowerBlack
+    {.x = 485, .y = 4},     // FlowerBlue
+    {.x = 5, .y = 140},     // PalmBeach
+    {.x = 85, .y = 140},    // Pattern1
+    {.x = 165, .y = 140},   // Pattern2
+    {.x = 245, .y = 140},   // Robot
+    {.x = 325, .y = 140},   // Roses
+    {.x = 405, .y = 140},   // Shell
+};
+#else
 struct Vector2 kenneyFaceInfo[52] = {
     // Club
     {.x=560, .y=570},  // Ace
@@ -106,17 +109,23 @@ struct Vector2 kenneyBackInfo[15] = {
     {.x=140, .y=760},
     {.x=280, .y=760},
 };
+#endif
 
 struct Spritesheet *ssFace, *ssBack;
 
-int windowWidth = 1800, windowHeight = 1100;
+int windowWidth = 2000, windowHeight = 1000;
 
-//float cardWidth = 71.0f, cardHeight = 96.0f;
-float cardWidth = 140.0f, cardHeight = 190.0f;
+#if RETROCARDS
+float originalCardWidth = 71.0f, originalCardHeight = 96.0f;
+#else
+float originalCardWidth = 140.0f, originalCardHeight = 190.0f;
+#endif
 
+float cardScale = 1.0f;
+float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
-Font fontAcme = {0};
+// Font fontAcme = {0};
 
 // int main(int argc, char* argv[], char* envp[]);
 
@@ -125,6 +134,8 @@ int main(void)
 {
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
 
+    cardWidth = originalCardWidth * cardScale;
+    cardHeight = originalCardHeight * cardScale;
 #if 0
     {
         int fontSizes[128-32];
@@ -164,23 +175,41 @@ int main(void)
         lua_close(L);
     }
 #endif
+    // {
+    //     int n = GetCurrentMonitor();
+    //     int w = GetMonitorWidth(0);
+    //     int h = GetMonitorHeight(0);
+    //     fprintf(stderr, "%d:%d,%d\n", n, w, h);
+    // }
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
+#if 0
+    {
+        int n = GetCurrentMonitor();
+        int w = GetMonitorWidth(n);
+        int h = GetMonitorHeight(n);
+        windowWidth =  w / 3 * 2;
+        windowHeight =  h / 3 * 2;
+        SetWindowSize(windowWidth, windowHeight);
+        SetWindowPosition((w/2)-(windowWidth/2), (h/2)-(windowHeight/2));
+    }
+#endif
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
-    // ssFace = SpritesheetNew("assets/cards71x96.png", 71, 96, 52, 13);
-    // ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo, 13);
-    ssFace = SpritesheetNewInfo("assets/playingCards.png", kenneyFaceInfo, 52);
-    ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo, 15);
-    
-    struct Baize* baize = BaizeNew("Limited");
+#if RETROCARDS
+    ssFace = SpritesheetNew("assets/cards71x96.png", originalCardWidth, originalCardHeight, 13);
+    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo);
+#else
+    ssFace = SpritesheetNewInfo("assets/playingCards.png", kenneyFaceInfo);
+    ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo);
+#endif
+
+    struct Baize* baize = BaizeNew("Klondike");
     if ( BaizeValid(baize) ) {
-        while (!WindowShouldClose())    // Detect window close button or ESC key
-        {
+        while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeUpdate(baize);
             BaizeDraw(baize);
         }
-
         BaizeFree(baize);
     }
 

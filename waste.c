@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <raylib.h>
 #include <lua.h>
 
@@ -32,14 +33,16 @@ struct Waste* WasteNew(Vector2 slot, enum FanType fan, enum DragType drag, const
     return self;
 }
 
-void WasteCardTapped(struct Card *c)
+bool WasteCardTapped(struct Card *c)
 {
-    (void)c;
+    c->owner->owner->errorString[0] = '\0';
+    return false;
 }
 
-void WastePileTapped(struct Pile *p)
+bool WastePileTapped(struct Pile *p)
 {
-    (void)p;
+    p->owner->errorString[0] = '\0';
+    return false;
 }
 
 bool WasteCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
@@ -49,7 +52,11 @@ bool WasteCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *con
         struct Card *c = ArrayGet(tail, 0);
         if ( c && c->owner == self->owner->stock ) {
             return true;
+        } else {
+            strcpy(self->owner->errorString, "You can only move cards to a Waste pile from the Stock");
         }
+    } else {
+        strcpy(self->owner->errorString, "You can only move one card to a Waste pile");
     }
     (void)L;
     return false;

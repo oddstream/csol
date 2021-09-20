@@ -2,7 +2,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <raylib.h>
+
 #include "baize.h"
 #include "pile.h"
 #include "array.h"
@@ -31,32 +33,38 @@ struct Stock* StockNew(Vector2 slot, enum FanType fan, enum DragType drag, const
     return self;
 }
 
-void StockCardTapped(struct Card *c)
+bool StockCardTapped(struct Card *c)
 {
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR Card is not valid\n");
-        return;
+        return false;
     }
     struct Pile *p = c->owner;
     if ( !PileValid(p) ) {
         fprintf(stderr, "ERROR Pile is not valid\n");
-        return;
+        return false;
     }
     struct Baize *baize = p->owner;
     if ( !BaizeValid(baize) ) {
         fprintf(stderr, "ERROR Baize is not valid\n");
-        return;
+        return false;
     }
+    baize->errorString[0] = '\0';
     // TODO transfer 1-3 cards to Waste
     // fprintf(stdout, "Stock card tapped\n");
     struct Pile *w = BaizeFindPile(baize, "Waste", 1);
     if ( w ) {
-        PileMoveCards(w, c);
+        if ( PileMoveCards(w, c) ) {
+            return true;
+        }
     }
+    return false;
 }
 
-void StockPileTapped(struct Pile *p)
+bool StockPileTapped(struct Pile *p)
 {
+    p->owner->errorString[0] = '\0';
+    size_t cardsMoved = 0;
     // fprintf(stderr, "Stock pile tapped\n");
     struct Stock *s = (struct Stock*)p;
     if ( s->recycles > 0 ) {
@@ -65,12 +73,14 @@ void StockPileTapped(struct Pile *p)
             while ( PileLen(w) > 0 ) {
                 struct Card *c = PilePopCard(w);
                 PilePushCard(p, c);
+                cardsMoved++;
             }
         }
         s->recycles--;
     } else {
-        fprintf(stdout, "No more recycles\n");
+        strcpy(p->owner->errorString, "No more recycles");
     }
+    return cardsMoved > 0;
 }
 
 bool StockCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
@@ -103,7 +113,7 @@ void StockDraw(struct Pile *const self)
         char z[16];
         sprintf(z, "%d", s->recycles);
         // extern Font fontAcme;
-        Vector2 pos = PileGetPos(self);
+        Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
         // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});

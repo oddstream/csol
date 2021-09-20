@@ -226,7 +226,7 @@ int MoonMovePileTo(lua_State* L)
         // float dy = newPos.y - oldPos.y;
         // size_t index;
         // for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
-        //     Vector2 oldCardPos = CardGetPos(c);
+        //     Vector2 oldCardPos = CardGetBaizePos(c);
         //     Vector2 newCardPos = (Vector2){.x = oldCardPos.x + dx, .y = oldCardPos.y + dy};
         //     CardSetPos(c, newCardPos);
         // }

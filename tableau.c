@@ -1,7 +1,10 @@
 /* tableau.c */
 
 #include <stdlib.h>
+#include <string.h>
 #include <raylib.h>
+
+#include "baize.h"
 #include "pile.h"
 #include "array.h"
 #include "tableau.h"
@@ -31,14 +34,16 @@ struct Tableau* TableauNew(Vector2 slot, enum FanType fan, enum DragType drag, c
     return self;
 }
 
-void TableauCardTapped(struct Card *c)
+bool TableauCardTapped(struct Card *c)
 {
-    (void)c;
+    c->owner->owner->errorString[0] = '\0';
+    return false;
 }
 
-void TableauPileTapped(struct Pile *p)
+bool TableauPileTapped(struct Pile *p)
 {
-    (void)p;
+    p->owner->errorString[0] = '\0';
+    return false;
 }
 
 bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
@@ -48,7 +53,7 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
         if ( t->accept != 0 ) {
             struct Card* c = ArrayGet(tail, 0);
             if ( c->id.ordinal != t->accept ) {
-                fprintf(stderr, "The empty tableau can only accept a %d, not a %d\n", t->accept, c->id.ordinal);
+                sprintf(self->owner->errorString, "The empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
                 return false;
             }
         }
@@ -76,7 +81,7 @@ void TableauDraw(struct Pile *const self)
     struct Tableau* t = (struct Tableau*)self;
     if ( t->accept != 0 ) {
         // extern Font fontAcme;
-        Vector2 pos = PileGetPos(self);
+        Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
         // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});

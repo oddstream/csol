@@ -15,8 +15,8 @@ struct Foundation {
 };
 
 struct Foundation* FoundationNew(Vector2 pos, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc);
-void FoundationCardTapped(struct Card *c);
-void FoundationPileTapped(struct Pile *p);
+bool FoundationCardTapped(struct Card *c);
+bool FoundationPileTapped(struct Pile *p);
 bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void FoundationSetRecycles(struct Pile *const self, int r);

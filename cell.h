@@ -15,8 +15,8 @@ struct Cell {
 };
 
 struct Cell* CellNew(Vector2 pos, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc);
-void CellCardTapped(struct Card *c);
-void CellPileTapped(struct Pile *p);
+bool CellCardTapped(struct Card *c);
+bool CellPileTapped(struct Pile *p);
 bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
 void CellSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void CellSetRecycles(struct Pile *const self, int r);
