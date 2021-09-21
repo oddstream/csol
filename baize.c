@@ -15,6 +15,8 @@
 
 struct Baize* BaizeNew(const char* variantName) {
 
+    extern Color baizeColor;
+
     // fprintf(stdout, "CardID is %lu bytes\n", sizeof(struct CardId));    // 4
     // fprintf(stdout, "Card is %lu bytes\n", sizeof(struct Card));    // 72 (2021.09.17)
     // fprintf(stdout, "unsigned is %lu bytes\n", sizeof(unsigned));   4
@@ -30,7 +32,7 @@ struct Baize* BaizeNew(const char* variantName) {
     }
     self->magic = BAIZE_MAGIC;
 
-    self->backgroundColor = (Color){.r=0, .g=63, .b=0, .a=255};
+    self->backgroundColor = baizeColor; //(Color){.r=0, .g=63, .b=0, .a=255};
 
     self->L = luaL_newstate();
     luaL_openlibs(self->L);
@@ -111,6 +113,23 @@ struct Baize* BaizeNew(const char* variantName) {
 
     fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
+    // create handy shortcuts for waste, foundations and tableau
+    {
+        self->waste = NULL;
+        self->foundations = ArrayNew(8);
+        self->tableaux = ArrayNew(8);
+        size_t index;
+        for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+            if ( strcmp(p->category, "Waste") == 0 ) {
+                self->waste = p;
+            } else if ( strncmp("Foundation", p->category, 10) == 0 ) {
+                ArrayPush(self->foundations, p);
+            } else if ( strncmp("Tableau", p->category, 7) == 0 ) {
+                ArrayPush(self->tableaux, p);
+            }
+        }
+    }
+
     // now the piles know their slots, calculate and set their positions
     BaizePositionPiles(self);
 
@@ -121,6 +140,8 @@ struct Baize* BaizeNew(const char* variantName) {
 
     self->dragOffset = (Vector2){0};
     self->dragging = false;
+
+    BaizeUndoPush(self);
 
     SetWindowTitle(variantName);
 
@@ -385,7 +406,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     // TODO automoves (in Lua)
     // TODO test started/complete/conformant
 
-    UndoPush(self);
+    BaizeUndoPush(self);
 }
 
 void BaizeUpdate(struct Baize *const self)
@@ -414,6 +435,10 @@ void BaizeUpdate(struct Baize *const self)
     // CardSetPos((struct Card*)ArrayGet(self->tail, 0), (Vector2){touchPosition.x - dx, touchPosition.y - dy});
 
     ArrayForeach(self->piles, (ArrayIterFunc)PileUpdate);
+
+    if ( IsKeyReleased(KEY_U) ) {
+        BaizeUndoCommand(self);
+    }
 }
 
 void BaizeDraw(struct Baize *const self)
@@ -479,6 +504,8 @@ void BaizeDraw(struct Baize *const self)
 void BaizeFree(struct Baize *const self)
 {
     self->magic = 0;
+    ArrayFree(self->tableaux);
+    ArrayFree(self->foundations);
     UndoStackFree(self->undoStack);
     ArrayFree(self->tail);
     ArrayForeach(self->piles, (ArrayIterFunc)PileFree);

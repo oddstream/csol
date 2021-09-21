@@ -1,5 +1,7 @@
 /* undo.c */
 
+#include <stdio.h>
+
 #include "baize.h"
 #include "array.h"
 
@@ -40,7 +42,7 @@ void UndoStackFree(struct Array *stack) {
     ArrayFree(stack);
 }
 
-void UndoPush(struct Baize *const self) {
+void BaizeUndoPush(struct Baize *const self) {
     struct Array* savedPiles = SnapshotNew(self);
     ArrayPush(self->undoStack, savedPiles);
     // mark movable
@@ -48,10 +50,68 @@ void UndoPush(struct Baize *const self) {
     // update UI (stock, waste, moves, percent)
 }   
 
-struct Array* UndoPop(struct Baize *const self) {
+struct Array* BaizeUndoPop(struct Baize *const self) {
     if ( ArrayLen(self->undoStack) > 0 ) {
         struct Array* savedPiles = ArrayPop(self->undoStack);
         return savedPiles;
     }
     return NULL;
+}
+
+void PileUpdateFromCardArray(struct Pile *const self, struct Array *cards)
+{
+    ArrayReset(self->cards);
+    size_t cindex;
+    for ( struct Card *c = (struct Card*)ArrayFirst(cards, &cindex); c; c = (struct Card*)ArrayNext(cards, &cindex) ) {
+        PilePushCard(self, c);
+        if ( c->id.prone ) {
+            CardFlipDown(c);
+        } else {
+            CardFlipUp(c);
+        }
+    }
+    // TODO scrunch this pile
+}
+
+void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
+{
+    if ( ArrayLen(self->piles) != ArrayLen(savedPiles) ) {
+        fprintf(stderr, "Bad snapshot\n");
+    } else {
+        for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
+            struct Array* pSrc = ArrayGet(savedPiles, i);
+            struct Pile* pDst = ArrayGet(self->piles, i);
+            PileUpdateFromCardArray(pDst, pSrc);
+        }
+    }
+}
+
+void BaizeUndoCommand(struct Baize *const self)
+{
+    if ( ArrayLen(self->undoStack) < 2 ) {
+        fprintf(stderr, "*** Nothing to undo ***\n");
+        return;
+    }
+
+    // if ( BaizeComplete(self) ) {
+    //     fprintf(stderr, "*** Cannot undo a completed game ***");
+    //     return;
+    // }
+
+    struct Array* snapshot = BaizeUndoPop(self);    // removes current state
+    if ( NULL == snapshot ) {
+        fprintf(stderr, "*** Error popping from undo stack (1) ***\n");
+        return;
+    }
+    SnapshotFree(snapshot);  // discard this one, it's the same as the current baize
+
+    snapshot = BaizeUndoPop(self);    // removes current state
+    if ( NULL == snapshot ) {
+        fprintf(stderr, "*** Error popping from undo stack (2) ***\n");
+        return;
+    }
+    BaizeUpdateFromSnapshot(self, snapshot);
+    SnapshotFree(snapshot);
+
+    BaizeUndoPush(self);    // replace current state
 }

@@ -6,6 +6,8 @@
 void MoonRegisterFunctions(lua_State* L);
 
 int MoonGetGlobalInt(lua_State* L, const char* var, const int def);
+float MoonGetGlobalFloat(lua_State* L, const char* var, const float def);
+const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def);
 float MoonGetFieldNumber(lua_State* L, const char* key, const float def);
 
 int MoonAddPile(lua_State* L);

@@ -1,14 +1,15 @@
 /* main.c */
 
 #include <stdio.h>
+#include <string.h>
+
 #include <raylib.h>
 #include <lua.h>
 #include <lauxlib.h>
 
-#include "moon.h"
 #include "baize.h"
 #include "spritesheet.h"
-#include "card.h"
+#include "settings.h"
 
 #define RETROCARDS 0
 
@@ -124,6 +125,9 @@ float originalCardWidth = 140.0f, originalCardHeight = 190.0f;
 float cardScale = 1.0f;
 float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
+char variant[64];
+
+Color baizeColor;
 
 // Font fontAcme = {0};
 
@@ -133,6 +137,11 @@ float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 int main(void) 
 {
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
+
+    baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
+    strncpy(variant, "Klondike", sizeof(variant)-1);
+    LoadSettings();
+    // fprintf(stderr, "cardScale %f\n", cardScale);
 
     cardWidth = originalCardWidth * cardScale;
     cardHeight = originalCardHeight * cardScale;
@@ -148,33 +157,6 @@ int main(void)
     }
 #endif
 
-#if 0
-    {
-        lua_State *L = luaL_newstate();
-
-        if ( luaL_loadfile(L, "csol.settings.lua") || lua_pcall(L, 0, 0, 0) ) {
-            fprintf(stderr, "%s\n", lua_tostring(L, -1));
-            lua_pop(L, 1);
-        } else {
-            windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);
-            windowHeight = MoonGetGlobalInt(L, "WindowHeight", 480);
-            int typ = lua_getglobal(L, "BaizeColor");
-            if ( typ == LUA_TTABLE ) {
-                float r, g, b, a;
-                r = MoonGetFieldNumber(L, "red", 1);
-                g = MoonGetFieldNumber(L, "green", 1);
-                b = MoonGetFieldNumber(L, "blue", 1);
-                a = MoonGetFieldNumber(L, "alpha", 1);
-                baizeColor = (Color){.r=r*255, .g=g*255, .b=b*255, .a=a*255};
-            } else {
-                baizeColor = DARKGREEN;
-            }
-            lua_pop(L, 1);  // remove global (table)
-        }
-
-        lua_close(L);
-    }
-#endif
     // {
     //     int n = GetCurrentMonitor();
     //     int w = GetMonitorWidth(0);
@@ -204,7 +186,7 @@ int main(void)
     ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo);
 #endif
 
-    struct Baize* baize = BaizeNew("Klondike");
+    struct Baize* baize = BaizeNew(variant);
     if ( BaizeValid(baize) ) {
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeUpdate(baize);

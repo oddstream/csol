@@ -14,6 +14,7 @@
 		"fstream": "c",
 		"array.h": "c",
 		"stock.h": "c",
-		"inttypes.h": "c"
+		"inttypes.h": "c",
+		"raylib.h": "c"
 	}
 }

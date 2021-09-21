@@ -13,8 +13,13 @@ struct Baize {
     Color backgroundColor;
     struct Card *cardLibrary;
     lua_State *L;
+
     struct Array *piles;
     struct Pile *stock;     // actually a struct Stock*
+    struct Pile *waste;
+    struct Array* foundations;
+    struct Array* tableaux;
+
     struct Array *tail;
     struct Array *undoStack;
     Vector2 lastTouch;
