@@ -26,32 +26,32 @@ function Build()
     local pile
 
     for x = 1, 4 do
-        pile = AddPile("Cell", x, 1, FAN_NONE, DRAG_SINGLE, "ChkTrue", "ChkTrue")
+        pile = AddPile("Cell", x, 1, FAN_NONE, "ChkTrue", "ChkTrue")
     end
 
     for x = 5, 8 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE, DRAG_NONE, "ChkFoundation", "ChkFalse")
+        pile = AddPile("Foundation", x, 1, FAN_NONE, "ChkFoundation", "ChkFalse")
         SetAccept(pile, 1)
     end
 
     for x = 1, 4 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, DRAG_SINGLE, "ChkTableau", "ChkTableau")
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
         DealUp(pile, 7)
     end
 
     for x = 5, 8 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, DRAG_SINGLE, "ChkTableau", "ChkTableau")
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
         DealUp(pile, 6)
     end
 
 end
 
 function ChkFoundation(source, cards)
-    io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards\n")
-    if #cards == 0 then
-      io.stderr:write("ChkFoundation passed an empty tail\n")
-      return false
-    end
+    -- io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards\n")
+    -- if #cards == 0 then
+    --   io.stderr:write("ChkFoundation passed an empty tail\n")
+    --   return false
+    -- end
 
     local cPrev = cards[1]
     for n=2, #cards do

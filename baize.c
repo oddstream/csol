@@ -13,9 +13,9 @@
 
 #define BAIZE_MAGIC (0x19910920)
 
-struct Baize* BaizeNew(const char* variantName) {
+struct Baize* BaizeNew() {
 
-    extern Color baizeColor;
+    // extern char variantName[64];
 
     // fprintf(stdout, "CardID is %lu bytes\n", sizeof(struct CardId));    // 4
     // fprintf(stdout, "Card is %lu bytes\n", sizeof(struct Card));    // 72 (2021.09.17)
@@ -23,16 +23,14 @@ struct Baize* BaizeNew(const char* variantName) {
     // fprintf(stdout, "unsigned long is %lu bytes\n", sizeof(unsigned long)); // 8
     // fprintf(stdout, "void* is %lu bytes\n", sizeof(void*)); // 8
 
-    char fname[64];
-    unsigned packs = 1;
+    // char fname[128];
+    // unsigned packs = 1;
 
-    struct Baize* self = malloc(sizeof(struct Baize));
+    struct Baize* self = calloc(1, sizeof(struct Baize));
     if ( !self ) {
         return NULL;
     }
     self->magic = BAIZE_MAGIC;
-
-    self->backgroundColor = baizeColor; //(Color){.r=0, .g=63, .b=0, .a=255};
 
     self->L = luaL_newstate();
     luaL_openlibs(self->L);
@@ -50,25 +48,47 @@ struct Baize* BaizeNew(const char* variantName) {
     lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
     lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
 
-    lua_pushinteger(self->L, DRAG_NONE);            lua_setglobal(self->L, "DRAG_NONE");
-    lua_pushinteger(self->L, DRAG_SINGLE);          lua_setglobal(self->L, "DRAG_SINGLE");
-    lua_pushinteger(self->L, DRAG_SINGLEORPILE);    lua_setglobal(self->L, "DRAG_SINGLEORPILE");
-    lua_pushinteger(self->L, DRAG_MANY);            lua_setglobal(self->L, "DRAG_MANY");
+    return self;
+}
 
-    sprintf(fname, "variants/%s.lua", variantName);
+bool BaizeValid(struct Baize *const self)
+{
+    return self && self->magic == BAIZE_MAGIC;
+}
 
-    if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
-        fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
-        lua_pop(self->L, 1);
-    } else {
-        // TODO read backgroundColor &c
-        packs = MoonGetGlobalInt(self->L, "PACKS", 1);
+void BaizeCreateCards(struct Baize *const self)
+{
+    // the Baize object has been created by BaizeNew
+    // or has been used to play another variant
+    // reset/create piles Array
+    // open variant.lua, get PACKS, create cardLibrary
+
+    // TODO record lost game if current game started
+
+    // Lua global PACKS will still be set from first run of variant.lua
+
+    { // scope for fname
+        extern char variantName[64];
+
+        char fname[128];
+
+        snprintf(fname, 127, "variants/%s.lua", variantName);
+
+        if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
+            fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);
+            return;
+        }
+
+        SetWindowTitle(variantName);
     }
 
-    {   // scope for i
-        self->cardLibrary = calloc(packs * 52, sizeof(struct Card));
-        int i = 0;
-        for ( unsigned pack = 0; pack < packs; pack++ ) {
+    {   // scope for packs, i
+        size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
+        self->cardsInLibrary = packs * 52;
+        self->cardLibrary = calloc(self->cardsInLibrary, sizeof(struct Card));
+        size_t i = 0;
+        for ( size_t pack = 0; pack < packs; pack++ ) {
             for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
                 for ( enum CardSuit s = CLUB; s <= SPADE; s++ ) {
                     self->cardLibrary[i++] = CardNew(pack, o, s);
@@ -76,16 +96,27 @@ struct Baize* BaizeNew(const char* variantName) {
             }
         }
     }
+}
 
-    self->piles = ArrayNew(8);
+void BaizeCreatePiles(struct Baize *const self)
+{
+    // reset the old piles
+    if ( self->piles ) {
+        size_t pindex;
+        for ( struct Pile* p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
+            PileFree(p);
+        }
+        ArrayReset(self->piles);
+    } else {
+        self->piles = ArrayNew(8);
+    }
 
-    // always create a stock pile, and fill it
-    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE, DRAG_SINGLE, NULL, NULL);
-    lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
+    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE, NULL, NULL);
     if ( PileValid(self->stock) ) {
+        lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
         self->stock->owner = self;
         ArrayPush(self->piles, self->stock);
-        for ( unsigned i=0; i<packs*52; i++ ) {
+        for ( size_t i = 0; i < self->cardsInLibrary; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
         // Knuth-Fisher–Yates shuffle
@@ -116,10 +147,18 @@ struct Baize* BaizeNew(const char* variantName) {
     // create handy shortcuts for waste, foundations and tableau
     {
         self->waste = NULL;
-        self->foundations = ArrayNew(8);
-        self->tableaux = ArrayNew(8);
-        size_t index;
-        for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        if ( self->foundations ) {
+            ArrayReset(self->foundations);
+        } else {
+            self->foundations = ArrayNew(8);
+        }
+        if ( self->tableaux ) {
+            ArrayReset(self->tableaux);
+        } else {
+            self->tableaux = ArrayNew(8);
+        }
+        size_t pindex;
+        for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
             if ( strcmp(p->category, "Waste") == 0 ) {
                 self->waste = p;
             } else if ( strncmp("Foundation", p->category, 10) == 0 ) {
@@ -132,25 +171,28 @@ struct Baize* BaizeNew(const char* variantName) {
 
     // now the piles know their slots, calculate and set their positions
     BaizePositionPiles(self);
+}
 
+void BaizeResetState(struct Baize *const self)
+{
+    if ( self->tail ) {
+        ArrayFree(self->tail);
+    }
     self->tail = NULL;
+
+    if ( self->undoStack ) {
+        UndoStackFree(self->undoStack);
+    }
     self->undoStack = UndoStackNew();
+
+    self->savedPosition = 0;
 
     self->touchedPile = NULL;
 
-    self->dragOffset = (Vector2){0};
+    self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
     self->dragging = false;
 
     BaizeUndoPush(self);
-
-    SetWindowTitle(variantName);
-
-    return self;
-}
-
-bool BaizeValid(struct Baize *const self)
-{
-    return self && self->magic == BAIZE_MAGIC;
 }
 
 void BaizePositionPiles(struct Baize *const self)
@@ -177,6 +219,14 @@ void BaizePositionPiles(struct Baize *const self)
         // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
         PileRepushAllCards(p);
     }
+}
+
+void BaizeNewDealCommand(struct Baize *const self)
+{
+    // TODO record lost game if this one started
+
+    BaizeCreatePiles(self);
+    BaizeResetState(self);
 }
 
 struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
@@ -300,9 +350,11 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
         // dx = touchPosition.x - c->pos.x;
         // dy = touchPosition.y - c->pos.y;
         // LOGCARD(c);
-        BaizeMakeTail(self, c);
-        if ( self->tail ) {
-            ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
+        if ( !CardTransitioning(c) ) {
+            BaizeMakeTail(self, c);
+            if ( self->tail ) {
+                ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
+            }
         }
     } else {
         self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
@@ -345,7 +397,7 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( CheckDrag(self->tail) && p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
+                if ( ConformantDragTail(self->L, c->owner, self->tail) && p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
@@ -414,14 +466,29 @@ void BaizeUpdate(struct Baize *const self)
     Vector2 touchPosition = GetTouchPosition(0);
     int gesture = GetGestureDetected();
 
-    if ( gesture == GESTURE_TAP && !self->tail ) {
-        BaizeTouchStart(self, touchPosition);
-    }
-    if ( gesture == GESTURE_DRAG ) {
-        BaizeTouchMove(self, touchPosition);
-    }
-    if ( gesture == GESTURE_NONE && (self->tail || self->touchedPile || self->dragging) ) {
-        BaizeTouchStop(self);
+    switch ( gesture ) {
+        case GESTURE_TAP:
+            if ( !self->tail ) {
+                BaizeTouchStart(self, touchPosition);
+            }
+            break;
+        case GESTURE_DRAG:
+            BaizeTouchMove(self, touchPosition);
+            break;
+        case GESTURE_NONE:
+            if ( self->tail || self->touchedPile || self->dragging ) {
+                BaizeTouchStop(self);
+            } else {
+                if ( IsWindowResized() ) {
+                    extern int windowWidth;
+                    if ( windowWidth != GetScreenWidth() ) {
+                        windowWidth = GetScreenWidth();
+                        BaizePositionPiles(self);
+                        return;
+                    }
+                }
+            }
+            break;
     }
 
     // static float dx, dy;
@@ -439,11 +506,25 @@ void BaizeUpdate(struct Baize *const self)
     if ( IsKeyReleased(KEY_U) ) {
         BaizeUndoCommand(self);
     }
+    if ( IsKeyReleased(KEY_S) ) {
+        BaizeSavePositionCommand(self);
+    }
+    if ( IsKeyReleased(KEY_L) ) {
+        BaizeLoadPositionCommand(self);
+    }
+    if ( IsKeyReleased(KEY_N) ) {
+        BaizeNewDealCommand(self);
+    }
+    if ( IsKeyReleased(KEY_R) ) {
+        BaizeRestartDealCommand(self);
+    }
 }
 
 void BaizeDraw(struct Baize *const self)
 {
-    ClearBackground(self->backgroundColor);
+    extern Color baizeColor;
+
+    ClearBackground(baizeColor);
     BeginDrawing();
 
     struct Card* c;

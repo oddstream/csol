@@ -11,6 +11,9 @@ void BaizeUndoPush(struct Baize *const self);
 struct Array* BaizeUndoPop(struct Baize *const self);
 void PileUpdateFromCardArray(struct Pile *const self, struct Array *cards);
 void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles);
+void BaizeSavePositionCommand(struct Baize *const self);
+void BaizeLoadPositionCommand(struct Baize *const self);
+void BaizeRestartDealCommand(struct Baize *const self);
 void BaizeUndoCommand(struct Baize *const);
 
 #endif

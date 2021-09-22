@@ -5,7 +5,8 @@
 
 #include "array.h"
 
-struct Array* ArrayNew(size_t initialSize) {
+struct Array* ArrayNew(size_t initialSize)
+{
     struct Array* self = malloc(sizeof(struct Array));
     self->used = 0;
     self->size = initialSize;
@@ -13,26 +14,30 @@ struct Array* ArrayNew(size_t initialSize) {
     return self;
 }
 
-size_t ArrayLen(struct Array *const self) {
+size_t ArrayLen(struct Array *const self)
+{
     return self->used;
 }
 
-size_t ArrayCap(struct Array *const self) {
+size_t ArrayCap(struct Array *const self)
+{
     return self->size;
 }
 
-void ArraySwap(struct Array *const self, int i, int j) {
+void ArraySwap(struct Array *const self, int i, int j)
+{
     void* tmp = self->data[i];
     self->data[i] = self->data[j];
     self->data[j] = tmp;
 }
 
-void* ArrayGet(struct Array *const self, int pos) {
-    // deprecated
+void* ArrayGet(struct Array *const self, int pos)
+{
     return self->data[pos];
 }
 
-void* ArrayFirst(struct Array *const self, size_t *index) {
+void* ArrayFirst(struct Array *const self, size_t *index)
+{
     if ( self->used == 0 ) {
         return NULL;
     }
@@ -40,7 +45,8 @@ void* ArrayFirst(struct Array *const self, size_t *index) {
     return self->data[0];
 }
 
-void* ArrayNext(struct Array *const self, size_t *index) {
+void* ArrayNext(struct Array *const self, size_t *index)
+{
     *index += 1;
     if ( *index >= self->used ) {
         return NULL;
@@ -48,7 +54,8 @@ void* ArrayNext(struct Array *const self, size_t *index) {
     return self->data[*index];
 }
 
-void* ArrayPrev(struct Array *const self, size_t *index) {
+void* ArrayPrev(struct Array *const self, size_t *index)
+{
     if ( *index == 0 ) {
         return NULL;
     }
@@ -56,7 +63,8 @@ void* ArrayPrev(struct Array *const self, size_t *index) {
     return self->data[*index];
 }
 
-void* ArrayLast(struct Array *const self, size_t *index) {
+void* ArrayLast(struct Array *const self, size_t *index)
+{
     if ( self->used == 0 ) {
         return NULL;
     }
@@ -64,7 +72,8 @@ void* ArrayLast(struct Array *const self, size_t *index) {
     return self->data[*index];
 }
 
-void ArrayPush(struct Array *const self, void* element) {
+void ArrayPush(struct Array *const self, void* element)
+{
     // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
     // Therefore a->used can go up to a->size 
     if ( self->used == self->size ) {
@@ -74,7 +83,8 @@ void ArrayPush(struct Array *const self, void* element) {
     self->data[self->used++] = element;
 }
 
-void* ArrayPeek(struct Array *const self) {
+void* ArrayPeek(struct Array *const self)
+{
     if ( self->used == 0 ) {
         return NULL;
     }

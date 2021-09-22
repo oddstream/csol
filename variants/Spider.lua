@@ -1,4 +1,4 @@
--- Limited
+-- Spider
 
 PACKS = 2
 
@@ -24,45 +24,57 @@ function Build()
     MovePileTo(STOCK, 1, 1)
     SetRecycles(STOCK, 0)
 
-
-    AddPile("Waste", 2, 1, FAN_RIGHT3, "ChkFalse", "ChkFalse")
-
-    for x = 5, 12 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE, "ChkFoundation", "ChkFalse")
-        SetAccept(pile, 1)
+    for x = 3, 10 do
+        local pile = AddPile("Foundation", x, 1, FAN_NONE, "BuildFoundation", "ChkFalse")
     end
 
-    for x = 1, 12 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN, "ChkTableau", "ChkTableau")
-        DealUp(pile, 3)
+    for x = 1, 4 do
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN, "BuildTableau", "DragTableau")
+        DealDown(pile, 5)
+        DealUp(pile, 1)
     end
 
+    for x = 5, 10 do
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN, "BuildTableau", "DragTableau")
+        DealDown(pile, 4)
+        DealUp(pile, 1)
+    end
 end
 
-function ChkFoundation(source, cards)
-    -- io.stderr:write("ChkFoundation passed a tail of " .. tostring(#cards) .. " cards from " .. source .. "\n")
+function BuildFoundation(source, cards)
+    -- io.stderr:write("BuildFoundation passed a tail of " .. tostring(#cards) .. " cards from " .. source .. "\n")
     -- for n=1, #cards do
     --     io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
     -- end
 
     if #cards == 0 then
-      io.stderr:write("ChkFoundation passed an empty tail\n")
+      io.stderr:write("BuildFoundation passed an empty tail\n")
       return false
     end
 
+    if #cards ~= 13 then
+        io.stderr:write("BuildFoundation tail needs to be 13 cards long\n")
+        return false
+    end
+
+    if cards[1].ordinal ~= 13 then
+      io.stderr:write("BuildFoundation tail needs to start with a K\n")
+      return false
+  end
+  
     local cPrev = cards[1]
     for n=2, #cards do
       local cThis = cards[n]
       if cPrev.prone or cThis.prone then
-        io.stderr:write("ChkFoundation prone fail\n")
+        io.stderr:write("BuildFoundation prone fail\n")
         return false
       end
       if cPrev.suit ~= cThis.suit then
-        io.stderr:write("ChkFoundation suit fail\n")
+        io.stderr:write("BuildFoundation suit fail\n")
         return false
       end
       if cPrev.ordinal + 1 ~= cThis.ordinal then
-        io.stderr:write("ChkFoundation ordinal fail\n")
+        io.stderr:write("BuildFoundation ordinal fail\n")
         return false
       end
       cPrev = cThis
@@ -70,19 +82,19 @@ function ChkFoundation(source, cards)
     return true
 end
 
-function ChkTableau(source, cards)
-    -- io.stderr:write("ChkTableau passed a tail of " .. tostring(#cards) .. " cards from " .. source .. "\n")
+function BuildTableau(source, cards)
+    -- io.stderr:write("BuildTableau passed a tail of " .. tostring(#cards) .. " cards from " .. source .. "\n")
     -- for n=1, #cards do
     --     io.stderr:write(tostring(n) .. " ordinal " .. cards[n].ordinal .. " suit " .. cards[n].suit .. " color " .. cards[n].color .. "\n")
     -- end
 
     -- remember <dst card><tail> construction
     -- if #cards > 1 then
-    --     io.stderr:write("ChkTableau tail length fail\n")
+    --     io.stderr:write("DragTableau tail length fail\n")
     --     return false
     -- end
     if source == "Foundation" then
-        io.stderr:write("ChkTableau coming from Foundation fail\n")
+        io.stderr:write("DragTableau coming from Foundation fail\n")
         return false
     end
 
@@ -90,15 +102,32 @@ function ChkTableau(source, cards)
     for n=2, #cards do
       local cThis = cards[n]
       if cPrev.prone or cThis.prone then
-        io.stderr:write("ChkTableau prone fail\n")
-        return false
-      end
-      if cPrev.suit ~= cThis.suit then
-        io.stderr:write("ChkTableau color fail\n")
+        io.stderr:write("DragTableau prone fail\n")
         return false
       end
       if cPrev.ordinal ~= cThis.ordinal + 1 then
-        io.stderr:write("ChkTableau ordinal fail\n")
+        io.stderr:write("DragTableau ordinal fail\n")
+        return false
+      end
+      cPrev = cThis
+    end
+    return true
+end
+
+function DragTableau(source, cards)
+    local cPrev = cards[1]
+    for n=2, #cards do
+      local cThis = cards[n]
+      if cPrev.prone or cThis.prone then
+        io.stderr:write("DragTableau prone fail\n")
+        return false
+      end
+      if cPrev.ordinal ~= cThis.ordinal + 1 then
+        io.stderr:write("DragTableau ordinal fail\n")
+        return false
+      end
+      if cPrev.suit ~= cThis.suit then
+        io.stderr:write("DragTableau suit fail\n")
         return false
       end
       cPrev = cThis

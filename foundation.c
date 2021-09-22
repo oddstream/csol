@@ -25,11 +25,11 @@ static struct PileVtable foundationVtable = {
     &PileFree,
 };
 
-struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
+struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
     struct Foundation* self = malloc(sizeof(struct Foundation));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Foundation", slot, fan, drag, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Foundation", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &foundationVtable;
         self->accept = 0; // accept any by default
     }
@@ -50,10 +50,11 @@ bool FoundationPileTapped(struct Pile *p)
 
 bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
 {
-    if ( ArrayLen(tail) != 1 ) {
-        strcpy(self->owner->errorString, "Can only move single cards to a foundation");
-        return false;
-    }
+    // not true for Spider!
+    // if ( ArrayLen(tail) != 1 ) {
+    //     strcpy(self->owner->errorString, "Can only move single cards to a foundation");
+    //     return false;
+    // }
     if ( ArrayLen(self->cards) == 13 ) {
         strcpy(self->owner->errorString, "The foundation is full");
         return false;
@@ -63,11 +64,11 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
         if ( f->accept != 0 ) {
             struct Card* c = ArrayPeek(tail);
             if ( c->id.ordinal != f->accept ) {
-                sprintf(self->owner->errorString, "The foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
+                snprintf(self->owner->errorString, 127, "The foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
                 return false;
             }
         }
-        return true;
+        return ConformantBuildTail(L, self, tail);
     }
     return ConformantBuildAppend(L, self, tail);
 }

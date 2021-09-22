@@ -25,13 +25,12 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
     self->magic = PILE_MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->slot = slot;
     self->fanType = fan;
-    self->dragType = drag;
     if ( buildfunc ) {
         strncpy(self->buildfunc, buildfunc, sizeof self->buildfunc - 1);
     } else {

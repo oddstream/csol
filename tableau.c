@@ -23,11 +23,11 @@ static struct PileVtable tableauVtable = {
     &PileFree,
 };
 
-struct Tableau* TableauNew(Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
+struct Tableau* TableauNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
     struct Tableau* self = malloc(sizeof(struct Tableau));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Tableau", slot, fan, drag, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Tableau", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &tableauVtable;
         self->accept = 0;   // accept any by default
     }
@@ -53,7 +53,7 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
         if ( t->accept != 0 ) {
             struct Card* c = ArrayGet(tail, 0);
             if ( c->id.ordinal != t->accept ) {
-                sprintf(self->owner->errorString, "The empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
+                snprintf(self->owner->errorString, 127, "The empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
                 return false;
             }
         }

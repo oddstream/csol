@@ -10,7 +10,7 @@
 
 struct Baize {
     unsigned magic;
-    Color backgroundColor;
+    size_t cardsInLibrary;
     struct Card *cardLibrary;
     lua_State *L;
 
@@ -22,6 +22,7 @@ struct Baize {
 
     struct Array *tail;
     struct Array *undoStack;
+    size_t savedPosition;
     Vector2 lastTouch;
     struct Pile *touchedPile;
 
@@ -31,9 +32,13 @@ struct Baize {
     char errorString[128];
 };
 
-struct Baize* BaizeNew(const char* variantName);
+struct Baize* BaizeNew(void);
 bool BaizeValid(struct Baize *const self);
+void BaizeCreateCards(struct Baize *const self);
+void BaizeCreatePiles(struct Baize *const self);
+void BaizeResetState(struct Baize *const self);
 void BaizePositionPiles(struct Baize *const self);
+void BaizeNewDealCommand(struct Baize *const self);
 struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
 bool BaizeDragging(struct Baize *const self);

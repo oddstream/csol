@@ -36,9 +36,10 @@ struct Array* UndoStackNew(void) {
 }
 
 void UndoStackFree(struct Array *stack) {
-    for ( struct Array* item = (struct Array*)ArrayPop(stack); item; item = (struct Array*)ArrayPop(stack) ) {
-        SnapshotFree(item);
-    }
+    // for ( struct Array* item = (struct Array*)ArrayPop(stack); item; item = (struct Array*)ArrayPop(stack) ) {
+    //     SnapshotFree(item);
+    // }
+    ArrayForeach(stack, (ArrayIterFunc)ArrayFree);
     ArrayFree(stack);
 }
 
@@ -84,6 +85,61 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
             PileUpdateFromCardArray(pDst, pSrc);
         }
     }
+}
+
+void BaizeSavePositionCommand(struct Baize *const self)
+{
+    // if ( BaizeComplete(self) ) {
+    //     fprintf(stderr, "*** Cannot bookmark a completed game ***\n");
+    //     return;
+    // }
+    self->savedPosition = ArrayLen(self->undoStack);
+    fprintf(stderr, "*** Position bookmarked ***\n");
+    fprintf(stderr, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
+}
+
+void BaizeLoadPositionCommand(struct Baize *const self)
+{
+    fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
+
+    if ( self->savedPosition == 0 || self->savedPosition > ArrayLen(self->undoStack) ) {
+        fprintf(stderr, "*** No bookmark ***\n");
+        return;
+    }
+    // if ( BaizeComplete(self) ) {
+    //     fprintf(stderr, "*** Cannot undo a completed game ***\n");
+    //     return;
+    // }
+    struct Array *snapshot = NULL;
+    while ( ArrayLen(self->undoStack) + 1 > self->savedPosition ) {
+        if ( snapshot ) {
+            SnapshotFree(snapshot);
+        }
+        snapshot = ArrayPop(self->undoStack);
+    }
+    if ( snapshot ) {
+        BaizeUpdateFromSnapshot(self, snapshot);
+        SnapshotFree(snapshot);
+    }
+    BaizeUndoPush(self);    // replace current state
+    fprintf(stderr, "undoStack 2 %lu\n", ArrayLen(self->undoStack));
+}
+
+void BaizeRestartDealCommand(struct Baize *const self)
+{
+    struct Array *snapshot = NULL;
+    while ( ArrayLen(self->undoStack) > 0 ) {
+        if ( snapshot ) {
+            SnapshotFree(snapshot);
+        }
+        snapshot = ArrayPop(self->undoStack);
+    }
+    if ( snapshot ) {
+        BaizeUpdateFromSnapshot(self, snapshot);
+        SnapshotFree(snapshot);
+    }
+    self->savedPosition = 0;
+    BaizeUndoPush(self);    // replace current state
 }
 
 void BaizeUndoCommand(struct Baize *const self)

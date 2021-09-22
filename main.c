@@ -125,7 +125,7 @@ float originalCardWidth = 140.0f, originalCardHeight = 190.0f;
 float cardScale = 1.0f;
 float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
-char variant[64];
+char variantName[64];
 
 Color baizeColor;
 
@@ -139,7 +139,7 @@ int main(void)
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
-    strncpy(variant, "Klondike", sizeof(variant)-1);
+    strncpy(variantName, "Klondike", sizeof(variantName)-1);
     LoadSettings();
     // fprintf(stderr, "cardScale %f\n", cardScale);
 
@@ -186,8 +186,16 @@ int main(void)
     ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo);
 #endif
 
-    struct Baize* baize = BaizeNew(variant);
+    {
+        fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
+        fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());
+        fprintf(stdout, "Window %d,%d\n", windowWidth, windowHeight);
+    }
+    struct Baize* baize = BaizeNew();
     if ( BaizeValid(baize) ) {
+        BaizeCreateCards(baize);
+        BaizeCreatePiles(baize);
+        BaizeResetState(baize);
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeUpdate(baize);
             BaizeDraw(baize);

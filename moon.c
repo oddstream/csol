@@ -55,7 +55,10 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def)
     int result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     int typ = lua_getglobal(L, var);    // pushes value onto stack
-    if ( typ != LUA_TNUMBER ) {
+    if ( typ == LUA_TNIL ) {
+        fprintf(stderr, "%s is nil\n", var);
+        result = def;
+    } else if ( typ != LUA_TNUMBER ) {
         fprintf(stderr, "%s is not a number\n", var);
         result = def;
     } else {
@@ -81,7 +84,10 @@ float MoonGetGlobalFloat(lua_State* L, const char* var, const float def)
     float result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     int typ = lua_getglobal(L, var);    // pushes value onto stack
-    if ( typ != LUA_TNUMBER ) {
+    if ( typ == LUA_TNIL ) {
+        fprintf(stderr, "%s is nil\n", var);
+        result = def;
+    } else if ( typ != LUA_TNUMBER ) {
         fprintf(stderr, "%s is not a number\n", var);
         result = def;
     } else {
@@ -125,12 +131,16 @@ float MoonGetFieldNumber(lua_State* L, const char* key, const float def)
     float result = def;
     int isnum;
     int  typ = lua_getfield(L, -1, key);    // pushes onto the stack the value t[k], where t is the value at the given index
-    if ( typ != LUA_TNUMBER ) {
+    if ( typ == LUA_TNIL ) {
+        fprintf(stderr, "%s is nil\n", key);
+        result = def;
+    } else if ( typ != LUA_TNUMBER ) {
         fprintf(stderr, "%s is not a number\n", key);
+        result = def;
     } else {
         result = (float)lua_tonumberx(L, -1, &isnum);    // returns a lua_Number
         if ( !isnum ) {
-            fprintf(stderr, "%s is not a number\n", key);
+            fprintf(stderr, "%s cannot be converted to a number\n", key);
             result = def;
         }
     }
@@ -150,23 +160,22 @@ int MoonAddPile(lua_State* L)
     float x = lua_tonumber(L, 2) - 1; // doesn't alter stack
     float y = lua_tonumber(L, 3) - 1; // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
-    enum DragType drag = lua_tointeger(L, 5);
-    const char* buildfunc = lua_tostring(L, 6);
-    const char* dragfunc = lua_tostring(L, 7);
+    const char* buildfunc = lua_tostring(L, 5);
+    const char* dragfunc = lua_tostring(L, 6);
 
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
 
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-        p = (struct Pile*)StockNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
+        p = (struct Pile*)StockNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Cell") == 0 ) {
-        p = (struct Pile*)CellNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
+        p = (struct Pile*)CellNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if ( strcmp(category, "Foundation") == 0 ) {
-        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
+        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Tableau") == 0 ) {
-        p = (struct Pile*)TableauNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
+        p = (struct Pile*)TableauNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else if  ( strcmp(category, "Waste") == 0 ) {
-        p = (struct Pile*)WasteNew((Vector2){x, y}, fan, drag, buildfunc, dragfunc);
+        p = (struct Pile*)WasteNew((Vector2){x, y}, fan, buildfunc, dragfunc);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);
     }

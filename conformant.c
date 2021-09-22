@@ -20,7 +20,7 @@ static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "%s is not a function\n", func);
     } else {
-        // push source pile catagory as first arg
+        // push source pile category as first arg
         struct Card* c0 = ArrayGet(tail, 0);
         lua_pushstring(L, c0->owner->category);
 
@@ -110,6 +110,8 @@ bool ConformantBuildAppend(lua_State *L, struct Pile *const pile, struct Array *
 
 bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array* tail)
 {
+    // fprintf(stderr, "ConformantDragTail %s\n", pile->category);
+
     if ( pile->dragfunc[0] == '\0' ) {
         return false;
     }
@@ -124,26 +126,26 @@ bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array* tai
     return ConformantTail(L, pile->dragfunc, tail);
 }
 
-bool CheckDrag(struct Array* tail)
-{
-    struct Card* c0 = ArrayGet(tail, 0);
-    struct Baize *baize = c0->owner->owner;
-    baize->errorString[0] = '\0';
+// bool CheckDrag(struct Array* tail)
+// {
+//     struct Card* c0 = ArrayGet(tail, 0);
+//     struct Baize *baize = c0->owner->owner;
+//     baize->errorString[0] = '\0';
 
-    switch ( c0->owner->dragType ) {
-        case DRAG_NONE:
-            sprintf(baize->errorString, "No dragging from %s", c0->owner->category);
-            return false;
-        case DRAG_SINGLE:
-            if ( ArrayLen(tail) != 1 ) {
-                sprintf(baize->errorString, "Can only drag a single card from %s", c0->owner->category);
-                return false;
-            }
-        case DRAG_SINGLEORPILE:
-            // TODO
-            break;
-        case DRAG_MANY:
-            break;
-    }
-    return true;
-}
+//     switch ( c0->owner->dragType ) {
+//         case DRAG_NONE:
+//             snprintf(baize->errorString, 127, "No dragging from %s", c0->owner->category);
+//             return false;
+//         case DRAG_SINGLE:
+//             if ( ArrayLen(tail) != 1 ) {
+//                 snprintf(baize->errorString, 127, "Can only drag a single card from %s", c0->owner->category);
+//                 return false;
+//             }
+//         case DRAG_SINGLEORPILE:
+//             // TODO
+//             break;
+//         case DRAG_MANY:
+//             break;
+//     }
+//     return true;
+// }

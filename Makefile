@@ -204,7 +204,7 @@ endif
 CFLAGS += -Wall -Wextra -Werror -Wpedantic -Wshadow -Wstrict-prototypes -Wsign-compare -Wformat=2 -std=c99 -D_DEFAULT_SOURCE
 
 ifeq ($(BUILD_MODE),DEBUG)
-    CFLAGS += -g -O0
+    CFLAGS += -ggdb3 -O0
 else
     CFLAGS += -s -O1
 endif

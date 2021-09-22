@@ -19,13 +19,6 @@ enum FanType {
     FAN_RIGHT3,
 };
 
-enum DragType {
-    DRAG_NONE = 0,
-    DRAG_SINGLE,
-    DRAG_SINGLEORPILE,
-    DRAG_MANY,
-};
-
 struct PileVtable;  // forward declaration
 
 struct Pile {
@@ -36,9 +29,8 @@ struct Pile {
     Vector2 slot;
     Vector2 pos;
     enum FanType fanType;
-    enum DragType dragType;
-    char buildfunc[16];
-    char dragfunc[16];
+    char buildfunc[32];
+    char dragfunc[32];
     struct Array *cards;
 };
 
@@ -54,7 +46,7 @@ struct PileVtable {
     void (*Free)(struct Pile *const self);
 };
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc);
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc);
 bool PileValid(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);

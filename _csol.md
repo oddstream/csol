@@ -16,18 +16,33 @@ serialize later
 
 ## Next
 
-- [ ] window size, window color, card scale, card set, last variant in Lua settings file (simple, writable) LoadSettings(), SaveSettings()
-- [ ] dragging 4 and 5 separately after they'd been DragCancelled
+Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycles?
+
+- [ ] C - BaizeCollect()
+- [ ] PowerMoves
+- [ ] Spider
+        [x] Lua to okay if tail can be dragged
+        [ ] Click on stock
+        [ ] suit filter CDHS
+        [ ] foundation accept
+- [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
-- [ ] undo stack of `Array` of `Array` of `Card*`
 - [ ] don't like passing Baize->L around, now have ->owner
 - [ ] MoveCard(STOCK, pile, prone) YAGNI
 - [ ] draw recycle symbol
 - [ ] CardSetPos() problem
+- [ ] ttf Font problem - try a raylib font
 - [ ] title bar (hamburger : variant : collect undo)
 - [ ] toast
 - [ ] status bar (stock waste : moves : complete)
-- [ ] card scaling
+- [ ] refuse to start dragging a transitioning card
+- [x] N - BaizeNewDeal()
+- [x] R - BaizeRestartDeal()
+- [x] S - BaizeSavePosition()
+- [x] L - BaizeLoadPosition()
+- [x] undo stack of `Array` of `Array` of `Card*`
+- [x] window size, window color, card scale, card set, last variant in Lua settings file (simple, writable) LoadSettings(), SaveSettings()
+- [x] card scaling
 - [x] CheckDrag, CanAcceptTail should return an error string for toasting later
 - [x] state (no, can be calculated)
 - [x] more cardsMoved++ (eg PileMoveCards)

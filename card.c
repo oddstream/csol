@@ -18,12 +18,15 @@ extern struct Spritesheet *ssFace, *ssBack;
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
-    struct Card self = {.magic = CARD_MAGIC, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .id.prone = 1, .dragging = false};
+    struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .id.prone = 1, .dragging = false};
     self.frame = (suit * 13) + (ord - 1);   // TODO specific to retro spritesheet
-    self.pos = (Vector2){0};
+    self.pos = (Vector2){.x=0.0f,.y=0.0f};
     self.flipWidth = 1.0f;
     self.flipStep = 0.0f;
-    return self;    // return whole struct by value, gets copied into cardLibrary[]
+    self.dragStartPos = self.pos;
+    self.lerpSrc = self.pos;
+    self.lerpDst = self.pos;
+    return self;    // return whole struct by value, gets saved into cardLibrary[]
 }
 
 bool CardValid(struct Card *const self)

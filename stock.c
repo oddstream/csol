@@ -22,11 +22,11 @@ static struct PileVtable stockVtable = {
     &PileFree,
 };
 
-struct Stock* StockNew(Vector2 slot, enum FanType fan, enum DragType drag, const char* buildfunc, const char* dragfunc)
+struct Stock* StockNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
     struct Stock* self = malloc(sizeof(struct Stock));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Stock", slot, fan, drag, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Stock", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &stockVtable;
         self->recycles = 9999;  // infinite by default
     }
@@ -52,9 +52,8 @@ bool StockCardTapped(struct Card *c)
     baize->errorString[0] = '\0';
     // TODO transfer 1-3 cards to Waste
     // fprintf(stdout, "Stock card tapped\n");
-    struct Pile *w = BaizeFindPile(baize, "Waste", 1);
-    if ( w ) {
-        if ( PileMoveCards(w, c) ) {
+    if ( baize->waste ) {
+        if ( PileMoveCards(baize->waste, c) ) {
             return true;
         }
     }
@@ -68,10 +67,9 @@ bool StockPileTapped(struct Pile *p)
     // fprintf(stderr, "Stock pile tapped\n");
     struct Stock *s = (struct Stock*)p;
     if ( s->recycles > 0 ) {
-        struct Pile* w = BaizeFindPile(p->owner, "Waste", 1);
-        if ( w ) {
-            while ( PileLen(w) > 0 ) {
-                struct Card *c = PilePopCard(w);
+        if ( p->owner->waste ) {
+            while ( PileLen(p->owner->waste) > 0 ) {
+                struct Card *c = PilePopCard(p->owner->waste);
                 PilePushCard(p, c);
                 cardsMoved++;
             }
