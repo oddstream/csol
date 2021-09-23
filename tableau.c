@@ -53,13 +53,13 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
         if ( t->accept != 0 ) {
             struct Card* c = ArrayGet(tail, 0);
             if ( c->id.ordinal != t->accept ) {
-                snprintf(self->owner->errorString, 127, "The empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
+                snprintf(self->owner->errorString, 127, "This empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
                 return false;
             }
         }
-        return ConformantBuildTail(L, self, tail);
+        return ConformantBuild(L, self, NULL, tail);
     }
-    return ConformantBuildAppend(L, self, tail);
+    return ConformantBuild(L, self, PilePeekCard(self), tail);
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)

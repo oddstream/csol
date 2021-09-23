@@ -59,18 +59,22 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
         strcpy(self->owner->errorString, "The foundation is full");
         return false;
     }
+    if ( ArrayLen(self->cards) + ArrayLen(tail) > 13 ) {
+        strcpy(self->owner->errorString, "That would make the foundation over full");
+        return false;
+    }
     if ( ArrayLen(self->cards) == 0 ) {
         struct Foundation *f = (struct Foundation*)self;
         if ( f->accept != 0 ) {
-            struct Card* c = ArrayPeek(tail);
+            struct Card* c = ArrayGet(tail, 0);
             if ( c->id.ordinal != f->accept ) {
-                snprintf(self->owner->errorString, 127, "The foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
+                snprintf(self->owner->errorString, 127, "This foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
                 return false;
             }
         }
-        return ConformantBuildTail(L, self, tail);
+        return ConformantBuild(L, self, NULL, tail);
     }
-    return ConformantBuildAppend(L, self, tail);
+    return ConformantBuild(L, self, PilePeekCard(self), tail);
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)

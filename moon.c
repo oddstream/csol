@@ -8,6 +8,7 @@
 
 #include "baize.h"
 #include "array.h"
+#include "pile.h"
 #include "stock.h"
 #include "cell.h"
 #include "foundation.h"
@@ -24,8 +25,10 @@ static const struct FunctionToRegister {
     {"DealDown", MoonDealDown},
     {"FindPile", MoonFindPile},
     {"MovePileTo", MoonMovePileTo},
+    {"Category", MoonGetCategory},
     {"SetAccept", MoonSetAccept},
     {"SetRecycles", MoonSetRecycles},
+    {"MoveCard", MoonMoveCard},
 };
 
 static struct Baize* getBaize(lua_State* L)
@@ -33,6 +36,7 @@ static struct Baize* getBaize(lua_State* L)
     int typ = lua_getglobal(L, "BAIZE");    // push light userdata on the stack
     if ( typ != LUA_TLIGHTUSERDATA ) {
         fprintf(stderr, "global BAIZE is not light userdata\n");
+        lua_pop(L, 1);  // remove "BAIZE" from stack
     }
     struct Baize* baize = lua_touserdata(L, -1); // doesn't alter stack
     lua_pop(L, 1);  // pop light userdata
@@ -146,6 +150,50 @@ float MoonGetFieldNumber(lua_State* L, const char* key, const float def)
     }
     lua_pop(L, 1);  // remove number
     return result;
+}
+
+void MoonPushCard(lua_State *L, struct Card *const c)
+{
+    if ( c ) {
+        lua_createtable(L, 0, 5);       // create and push new 4-element table
+        
+        lua_pushinteger(L, c->id.ordinal);
+        lua_setfield(L, -2, "ordinal"); // table["ordinal"] = c->ord, pops key value
+
+        lua_pushinteger(L, c->id.suit);
+        lua_setfield(L, -2, "suit");    // table["suit"] = c->suit, pops key value
+
+        lua_pushinteger(L, c->id.suit == DIAMOND || c->id.suit == HEART ? 1 : 0);
+        lua_setfield(L, -2, "color");   // table["color"] == [0|1], pops key value
+
+        lua_pushboolean(L, c->id.prone);
+        lua_setfield(L, -2, "prone");   // table["prone"] = c->prone, pops key value
+
+        lua_pushlightuserdata(L, c->owner);
+        lua_setfield(L, -2, "owner");   // table["owner"] = c->owner, pops key value
+    } else {
+        lua_pushnil(L);
+    }
+}
+
+void MoonPushTail(lua_State *L, struct Array *const tail)
+{
+    // fprintf(stdout, "MoonPushTail Lua stack in  %d\n", lua_gettop(L));
+
+    // build table on stack
+    // outer table is an array/sequence, same length as tail
+    // each inner table is a record of each card eg {ordinal=1, suit=SPADE, color=0, prone=false}
+    lua_createtable(L, ArrayLen(tail), 0);  // create and push tail table
+
+    size_t index;
+    struct Card* c = ArrayFirst(tail, &index);
+    while ( c ) {
+        MoonPushCard(L, c);
+        lua_seti(L, -2, index + 1);     // add the card-table to the underlying table
+        c = ArrayNext(tail, &index);
+    }
+
+    // fprintf(stdout, "MoonPushTail Lua stack out %d\n", lua_gettop(L));
 }
 
 int MoonAddPile(lua_State* L)
@@ -287,7 +335,18 @@ int MoonMovePileTo(lua_State* L)
     return 0;
 }
 
-int MoonSetAccept(lua_State* L)
+int MoonGetCategory(lua_State *L)
+{
+    struct Pile* p = lua_touserdata(L, 1);
+    if ( PileValid(p) ) {
+        lua_pushstring(L, p->category);
+    } else {
+        lua_pushstring(L, "INVALID PILE");
+    }
+    return 1;
+}
+
+int MoonSetAccept(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     enum CardOrdinal ord = lua_tointeger(L, 2);
@@ -299,7 +358,7 @@ int MoonSetAccept(lua_State* L)
     return 0;
 }
 
-int MoonSetRecycles(lua_State* L)
+int MoonSetRecycles(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     int r = lua_tointeger(L, 2);
@@ -309,4 +368,34 @@ int MoonSetRecycles(lua_State* L)
     }
 
     return 0;
+}
+
+int MoonMoveCard(lua_State *L)
+{
+    struct Pile *src = lua_touserdata(L, 1);
+    struct Pile* dst = lua_touserdata(L, 2);
+
+    bool cardsMoved = false;
+
+    if ( !PileValid(src) ) {
+        fprintf(stderr, "MoonMoveCards source pile not valid\n");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    if ( !PileValid(dst) ) {
+        fprintf(stderr, "MoonMoveCards destination pile not valid\n");
+        lua_pushboolean(L, false);
+        return 1;
+    }
+
+    struct Card *c = PilePeekCard(src);
+    if ( c ) {
+        if ( PileMoveCards(dst, c) ) {
+            cardsMoved = true;
+        }
+    }
+
+    lua_pushboolean(L, cardsMoved);
+    return 1;
 }

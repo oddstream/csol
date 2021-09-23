@@ -18,13 +18,22 @@ serialize later
 
 Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycles?
 
+Remove CardTapped from vtable, all actions are in Lua
+Keep PileTapped because that Stock recycle (it's only use) is baked in
+CanAcceptTail is still in vtable because some pile behaviour is baked in:
+        Waste can only accept cards from stock,
+        Cells can only have one card,
+        Foundations can only have 13 cards,
+        Stock can never accept a card,
+
+- [ ] check stack height before and after
 - [ ] C - BaizeCollect()
 - [ ] PowerMoves
 - [ ] Spider
         [x] Lua to okay if tail can be dragged
-        [ ] Click on stock
-        [ ] suit filter CDHS
-        [ ] foundation accept
+        [ ] CardTapped on stock
+        [x] suit filter 1-4
+        [x] foundation accept
 - [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
 - [ ] don't like passing Baize->L around, now have ->owner
@@ -36,6 +45,10 @@ Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycle
 - [ ] toast
 - [ ] status bar (stock waste : moves : complete)
 - [ ] refuse to start dragging a transitioning card
+- [x] CardTapped(pileCategory, tail)
+        Lua function called by C
+        returns true/false if cards moved, error string
+        MoveCards(SOURCE, DEST, cards) function callable from Lua
 - [x] N - BaizeNewDeal()
 - [x] R - BaizeRestartDeal()
 - [x] S - BaizeSavePosition()

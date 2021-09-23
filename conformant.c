@@ -6,51 +6,31 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "array.h"
 #include "baize.h"
 #include "conformant.h"
-#include "array.h"
-#include "pile.h"
+#include "moon.h"
 
-static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
+static bool Conformant(lua_State *L, const char* func, struct Card *c, struct Array* tail)
 {
+    // fprintf(stdout, "Conformant Lua stack in  %d\n", lua_gettop(L));
+
+    fprintf(stdout, "Conformant func %s\n", func);
+
     if ( func == NULL || func[0] == '\0' ) return false;
 
     bool result = true;
-    int typ = lua_getglobal(L, func);  // push value of Build onto the stack
+    int typ = lua_getglobal(L, func);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "%s is not a function\n", func);
+        lua_pop(L, 1);  // remove func from stack
     } else {
-        // push source pile category as first arg
-        struct Card* c0 = ArrayGet(tail, 0);
-        lua_pushstring(L, c0->owner->category);
-
+        // card we are building on as first arg (may be nil/NULL)
+        MoonPushCard(L, c);
         // build table on stack as second arg
-        // outer table is an array/sequence, same length as tail
-        // each inner table is a record of each card eg {ordinal=1, suit=SPADE, color=0, prone=false}
-        lua_createtable(L, ArrayLen(tail), 0);  // create and push tail table
+        MoonPushTail(L, tail);
 
-        size_t index;
-        struct Card* c = ArrayFirst(tail, &index);
-        while ( c ) {
-            lua_createtable(L, 0, 4);       // create and push new 4-element table
-            
-            lua_pushinteger(L, c->id.ordinal);
-            lua_setfield(L, -2, "ordinal"); // table["ordinal"] = c->ord, pops key value
-
-            lua_pushinteger(L, c->id.suit);
-            lua_setfield(L, -2, "suit");    // table["suit"] = c->suit, pops key value
-
-            lua_pushinteger(L, c->id.suit == DIAMOND || c->id.suit == HEART ? 1 : 0);
-            lua_setfield(L, -2, "color");   // table["color"] == [0|1], pops key value
-
-            lua_pushboolean(L, c->id.prone);
-            lua_setfield(L, -2, "prone");   // table["prone"] = c->prone, pops key value
-
-            lua_seti(L, -2, index + 1);
-        
-            c = ArrayNext(tail, &index);
-        }
-        // two args (source pile, table of card tables), one return (boolean)
+        // one arg (card-as-a-table), one return (boolean)
         if ( lua_pcall(L, 2, 1, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
@@ -66,86 +46,36 @@ static bool ConformantTail(lua_State *L, const char* func, struct Array* tail)
         }
     }
 
+    // fprintf(stdout, "ConformantTail Lua stack out %d\n", lua_gettop(L));
+
     return result;
 }
 
-bool ConformantBuildTail(lua_State *L, struct Pile *const pile, struct Array *tail)
+bool ConformantBuild(lua_State *L, struct Pile *const pile, struct Card* c, struct Array *tail)
 {
+    fprintf(stderr, "ConformantBuild '%s' '%s'\n", pile->category, pile->buildfunc);
+
     if ( pile->buildfunc[0] == '\0' ) {
         return false;
     }
     if ( ArrayLen(tail) == 0 ) {
-        fprintf(stderr, "WARNING: ConformantBuildTail passed empty tail\n");
+        fprintf(stderr, "WARNING: ConformantBuild passed empty tail\n");
         return false;
     }
-    return ConformantTail(L, pile->buildfunc, tail);
+    return Conformant(L, pile->buildfunc, c, tail);
 }
 
-bool ConformantBuildAppend(lua_State *L, struct Pile *const pile, struct Array *tail)
+bool ConformantDrag(lua_State *L, struct Pile *const pile, struct Array* tail)
 {
-    if ( ArrayLen(tail) == 0 ) {
-        fprintf(stderr, "WARNING: empty tail passed to ConformantBuildAppend\n");
-        return false;
-    }
-    struct Card *c = PilePeekCard(pile);
-    if ( !c ) {
-        fprintf(stderr, "WARNING: ConformantBuildAppend onto an empty pile\n");
-        return false;
-    }
-
-    struct Array *t2 = ArrayNew(1 + ArrayLen(tail));
-    ArrayPush(t2, c);
-
-    size_t index;
-    c = ArrayFirst(tail, &index);
-    while ( c ) {
-        ArrayPush(t2, c);
-        c = ArrayNext(tail, &index);
-    }
-
-    bool result = ConformantTail(L, pile->buildfunc, t2);
-    ArrayFree(t2);
-    return result;
-}
-
-bool ConformantDragTail(lua_State *L, struct Pile *const pile, struct Array* tail)
-{
-    // fprintf(stderr, "ConformantDragTail %s\n", pile->category);
+    fprintf(stderr, "ConformantDrag '%s' '%s'\n", pile->category, pile->dragfunc);
 
     if ( pile->dragfunc[0] == '\0' ) {
-        return false;
+        return pile == pile->owner->stock;
     }
     if ( ArrayLen(tail) == 0 ) {
-        fprintf(stderr, "WARNING: ConformantDragTail passed empty tail\n");
+        fprintf(stderr, "WARNING: ConformantDrag passed empty tail\n");
         return false;
     }
-    if ( ArrayLen(tail) == 1 ) {
-        return true;
-    }
 
-    return ConformantTail(L, pile->dragfunc, tail);
+    return Conformant(L, pile->dragfunc, NULL, tail);
 }
-
-// bool CheckDrag(struct Array* tail)
-// {
-//     struct Card* c0 = ArrayGet(tail, 0);
-//     struct Baize *baize = c0->owner->owner;
-//     baize->errorString[0] = '\0';
-
-//     switch ( c0->owner->dragType ) {
-//         case DRAG_NONE:
-//             snprintf(baize->errorString, 127, "No dragging from %s", c0->owner->category);
-//             return false;
-//         case DRAG_SINGLE:
-//             if ( ArrayLen(tail) != 1 ) {
-//                 snprintf(baize->errorString, 127, "Can only drag a single card from %s", c0->owner->category);
-//                 return false;
-//             }
-//         case DRAG_SINGLEORPILE:
-//             // TODO
-//             break;
-//         case DRAG_MANY:
-//             break;
-//     }
-//     return true;
-// }

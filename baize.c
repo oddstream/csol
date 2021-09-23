@@ -83,14 +83,15 @@ void BaizeCreateCards(struct Baize *const self)
         SetWindowTitle(variantName);
     }
 
-    {   // scope for packs, i
+    {   // scope for packs, suits, i
         size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
-        self->cardsInLibrary = packs * 52;
+        size_t suits = MoonGetGlobalInt(self->L, "SUITS", 4);
+        self->cardsInLibrary = packs * suits * 13;
         self->cardLibrary = calloc(self->cardsInLibrary, sizeof(struct Card));
         size_t i = 0;
         for ( size_t pack = 0; pack < packs; pack++ ) {
             for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
-                for ( enum CardSuit s = CLUB; s <= SPADE; s++ ) {
+                for ( enum CardSuit s = 0; s < suits; s++ ) {
                     self->cardLibrary[i++] = CardNew(pack, o, s);
                 }
             }
@@ -133,6 +134,7 @@ void BaizeCreatePiles(struct Baize *const self)
     int typ = lua_getglobal(self->L, "Build");  // push value of Build onto the stack
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "Build is not a function\n");
+        lua_pop(self->L, 1);    // remove "Build" from stack
     } else {
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
@@ -161,6 +163,7 @@ void BaizeCreatePiles(struct Baize *const self)
         for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
             if ( strcmp(p->category, "Waste") == 0 ) {
                 self->waste = p;
+                lua_pushlightuserdata(self->L, self->waste);   lua_setglobal(self->L, "WASTE");
             } else if ( strncmp("Foundation", p->category, 10) == 0 ) {
                 ArrayPush(self->foundations, p);
             } else if ( strncmp("Tableau", p->category, 7) == 0 ) {
@@ -397,7 +400,7 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( ConformantDragTail(self->L, c->owner, self->tail) && p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
+                if ( ConformantDrag(self->L, c->owner, self->tail) && p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
@@ -427,7 +430,7 @@ void BaizeTouchStop(struct Baize *const self)
                 CardStopDrag(c);    // CardCancelDrag() would use CardTransitionTo(), and we know the card didn't move
                 c = (struct Card*)ArrayNext(self->tail, &index);
             }
-            if ( cHeadOfTail->owner->vtable->CardTapped(cHeadOfTail) ) {
+            if ( BaizeCardTapped(self, cHeadOfTail) ) {
                 BaizeAfterUserMove(self);
             } else {
                 if ( self->errorString[0] ) {

@@ -53,4 +53,6 @@ void BaizeUpdate(struct Baize *const self);
 void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
 
+bool BaizeCardTapped(struct Baize *const self, struct Card* c);
+
 #endif
