@@ -17,3 +17,4 @@
 #include "undo.h"
 #include "util.h"
 
+#include "ui.h"

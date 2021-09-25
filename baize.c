@@ -48,6 +48,8 @@ struct Baize* BaizeNew() {
     lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
     lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
 
+    self->ui = UiNew();
+
     return self;
 }
 
@@ -400,7 +402,7 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( ConformantDrag(self->L, c->owner, self->tail) && p->vtable->CanAcceptTail(p, self->L, self->tail) ) {
+                if ( ConformantDrag(self, c->owner, self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
@@ -411,7 +413,7 @@ void BaizeTouchStop(struct Baize *const self)
                     }
                 } else {
                     if ( self->errorString[0] ) {
-                        fprintf(stderr, "*** %s ***\n", self->errorString);
+                        UiToast(self->ui, self->errorString);
                     }
                     while ( c ) {
                         CardCancelDrag(c);
@@ -425,7 +427,7 @@ void BaizeTouchStop(struct Baize *const self)
                     c = (struct Card*)ArrayNext(self->tail, &index);
                 }
             }
-        } else {
+        } else {    // card was not dragged
             while ( c ) {
                 CardStopDrag(c);    // CardCancelDrag() would use CardTransitionTo(), and we know the card didn't move
                 c = (struct Card*)ArrayNext(self->tail, &index);
@@ -434,7 +436,7 @@ void BaizeTouchStop(struct Baize *const self)
                 BaizeAfterUserMove(self);
             } else {
                 if ( self->errorString[0] ) {
-                    fprintf(stderr, "*** %s ***\n", self->errorString);
+                    UiToast(self->ui, self->errorString);
                 }
             }
             // needs -C11
@@ -521,6 +523,8 @@ void BaizeUpdate(struct Baize *const self)
     if ( IsKeyReleased(KEY_R) ) {
         BaizeRestartDealCommand(self);
     }
+
+    UiUpdate(self->ui);
 }
 
 void BaizeDraw(struct Baize *const self)
@@ -582,6 +586,9 @@ void BaizeDraw(struct Baize *const self)
     //     }
     // }
     // DrawFPS(10, 10);
+
+    UiDraw(self->ui);
+
     EndDrawing();
 }
 
@@ -595,6 +602,7 @@ void BaizeFree(struct Baize *const self)
     ArrayForeach(self->piles, (ArrayIterFunc)PileFree);
     ArrayFree(self->piles);
     free(self->cardLibrary);
+    UiFree(self->ui);
     lua_close(self->L);
     free(self);
 }

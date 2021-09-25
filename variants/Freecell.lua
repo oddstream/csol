@@ -63,15 +63,15 @@ end
 function ChkF(cPrev, cThis)
   if cPrev.prone or cThis.prone then
     io.stderr:write("ChkFoundation prone fail\n")
-    return false
+    return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
     io.stderr:write("ChkFoundation suit fail\n")
-    return false
+    return false, "Incorrect suit"
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
     io.stderr:write("ChkFoundation ordinal fail\n")
-    return false
+    return false, "Incorrect value"
   end
   return true
 end
@@ -86,36 +86,40 @@ function ChkFoundation(cTop, cards)
     return false
   end
 
+  local ok, err
+
   if cTop then
-    if not ChkF(cTop, cards[1]) then
-      return false
+    ok, err = ChkF(cTop, cards[1])
+    if not ok then
+      return false, err
     end
   end
 
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    if not ChkF(cPrev, cThis) then
-      return false
+    ok, err = ChkF(cPrev, cThis)
+    if not ok then
+      return false, err
     end
     cPrev = cThis
   end
 
-  return true
+  return true, nil
 end
 
 function ChkT(cPrev, cThis)
   if cPrev.prone or cThis.prone then
     io.stderr:write("ChkTableau prone fail\n")
-    return false
+    return false, "Cannot move a face down card"
   end
   if cPrev.color == cThis.color then
     io.stderr:write("ChkTableau color fail\n")
-    return false
+    return false, "Incorrect suit"
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
     io.stderr:write("ChkTableau ordinal fail\n")
-    return false
+    return false, "Incorrect value"
   end
   return true
 end
@@ -127,25 +131,29 @@ function ChkTableau(cTop, cards)
     
     if #cards > 1 then
       io.stderr:write("ChkTableau tail length fail\n")
-      return false
+      return false, "Can only move a single card"
     end
 
+    local ok, err
+  
     if cTop then
-      if not ChkT(cTop, cards[1]) then
-        return false
+      ok, err = ChkT(cTop, cards[1])
+      if not ok then
+        return false, err
       end
     end
 
     local cPrev = cards[1]
     for n=2, #cards do
       local cThis = cards[n]
-      if not ChkT(cPrev, cThis) then
-        return false
+      ok, err = ChkT(cPrev, cThis)
+      if not ok then
+        return false, err
       end
       cPrev = cThis
     end
 
-    return true
+    return true, nil
 end
 
 function ChkWaste(cTop, cards)
@@ -157,8 +165,8 @@ end
 function ChkFalse(cTop, cards)
   LogCard("ChkFalse card", cTop)
   LogTail("ChkFalse tail", cards)
-  return false
-end
+  return false, "You cannot do that"
+  end
 
 function ChkTrue(cTop, cards)
   LogCard("ChkTrue card", cTop)

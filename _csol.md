@@ -14,11 +14,25 @@ so no need for a saved baize header, or saved pile header
 
 serialize later
 
+## UI
+
+copy gosol UI (it was hard-won, and it works)
+
+Array of Containers
+
 ## Next
 
 Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycles?
 
-Remove CardTapped from vtable, all actions are in Lua
+CanAcceptTail
+        if the tail is conformant, then only need to check card pair (pile peek, c0) conformant
+
+Remove CardTapped from vtable, all actions are in Lua:
+        Send card(s) to waste
+        Send cards to tableaux
+        Recall and redeal tableaux
+        Send card to foundation
+
 Keep PileTapped because that Stock recycle (it's only use) is baked in
 CanAcceptTail is still in vtable because some pile behaviour is baked in:
         Waste can only accept cards from stock,
@@ -29,22 +43,23 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
 - [ ] check stack height before and after
 - [ ] C - BaizeCollect()
 - [ ] PowerMoves
-- [ ] Spider
-        [x] Lua to okay if tail can be dragged
-        [ ] CardTapped on stock
-        [x] suit filter 1-4
-        [x] foundation accept
 - [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
 - [ ] don't like passing Baize->L around, now have ->owner
-- [ ] MoveCard(STOCK, pile, prone) YAGNI
 - [ ] draw recycle symbol
 - [ ] CardSetPos() problem
 - [ ] ttf Font problem - try a raylib font
 - [ ] title bar (hamburger : variant : collect undo)
 - [ ] toast
 - [ ] status bar (stock waste : moves : complete)
-- [ ] refuse to start dragging a transitioning card
+- [x] Spider
+        [x] empty piles check
+        [x] Lua to okay if tail can be dragged
+        [x] CardTapped on stock
+        [x] suit filter 1-4
+        [x] foundation accept
+- [x] refuse to start dragging a transitioning card
+- [x] MoveCard(STOCK, pile, prone)
 - [x] CardTapped(pileCategory, tail)
         Lua function called by C
         returns true/false if cards moved, error string

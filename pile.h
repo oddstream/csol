@@ -37,7 +37,7 @@ struct Pile {
 struct PileVtable {
     bool (*CardTapped)(struct Card *c);
     bool (*PileTapped)(struct Pile *p);
-    bool (*CanAcceptTail)(struct Pile *const self, lua_State *L, struct Array *const tail);
+    bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
     void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
     void (*SetRecycles)(struct Pile *const self, int r);
 

@@ -46,7 +46,7 @@ bool TableauPileTapped(struct Pile *p)
     return false;
 }
 
-bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( ArrayLen(self->cards) == 0 ) {
         struct Tableau *t = (struct Tableau*)self;
@@ -57,9 +57,9 @@ bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *c
                 return false;
             }
         }
-        return ConformantBuild(L, self, NULL, tail);
+        return ConformantBuild(baize, self, NULL, tail);
     }
-    return ConformantBuild(L, self, PilePeekCard(self), tail);
+    return ConformantBuild(baize, self, PilePeekCard(self), tail);
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)

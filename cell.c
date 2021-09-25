@@ -45,15 +45,14 @@ bool CellPileTapped(struct Pile *p)
     return false;
 }
 
-bool CellCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    (void)L;
     if ( ArrayLen(tail) != 1 ) {
-        strcpy(self->owner->errorString, "Can only move single cards to a cell");
+        strncpy(baize->errorString, "Can only move single cards to a cell", MAX_BAIZEERRORSTRING);
         return false;
     }
     if ( PileLen(self) > 0 ) {
-        strcpy(self->owner->errorString, "Can only move a card to an empty cell");
+        strncpy(baize->errorString, "Can only move a card to an empty cell", MAX_BAIZEERRORSTRING);
         return false;
     }
     return true;

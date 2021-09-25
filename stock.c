@@ -81,10 +81,10 @@ bool StockPileTapped(struct Pile *p)
     return cardsMoved > 0;
 }
 
-bool StockCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
+    (void)baize;
     (void)self;
-    (void)L;
     (void)tail;
     return false;
 }

@@ -5,6 +5,8 @@
 #include "baize.h"
 #include "array.h"
 
+#include "ui.h"
+
 /*
     A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays of card pointers
     (same as the Pile->cards)
@@ -94,6 +96,7 @@ void BaizeSavePositionCommand(struct Baize *const self)
     //     return;
     // }
     self->savedPosition = ArrayLen(self->undoStack);
+    UiToast(self->ui, "Position bookmarked");
     fprintf(stderr, "*** Position bookmarked ***\n");
     fprintf(stderr, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
 }
@@ -103,6 +106,7 @@ void BaizeLoadPositionCommand(struct Baize *const self)
     fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
 
     if ( self->savedPosition == 0 || self->savedPosition > ArrayLen(self->undoStack) ) {
+        UiToast(self->ui, "No bookmark");
         fprintf(stderr, "*** No bookmark ***\n");
         return;
     }

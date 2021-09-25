@@ -1,6 +1,7 @@
 /* conformant.c */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -11,15 +12,19 @@
 #include "conformant.h"
 #include "moon.h"
 
-static bool Conformant(lua_State *L, const char* func, struct Card *c, struct Array* tail)
+static bool Conformant(struct Baize *const baize, const char* func, struct Card *c, struct Array* tail)
 {
     // fprintf(stdout, "Conformant Lua stack in  %d\n", lua_gettop(L));
 
     fprintf(stdout, "Conformant func %s\n", func);
 
+    lua_State *L = baize->L;
+    baize->errorString[0] = '\0';
+
     if ( func == NULL || func[0] == '\0' ) return false;
 
     bool result = true;
+
     int typ = lua_getglobal(L, func);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "%s is not a function\n", func);
@@ -30,8 +35,8 @@ static bool Conformant(lua_State *L, const char* func, struct Card *c, struct Ar
         // build table on stack as second arg
         MoonPushTail(L, tail);
 
-        // one arg (card-as-a-table), one return (boolean)
-        if ( lua_pcall(L, 2, 1, 0) != LUA_OK ) {
+        // one arg (card-as-a-table), two returns (boolean, error string)
+        if ( lua_pcall(L, 2, 2, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
@@ -42,7 +47,14 @@ static bool Conformant(lua_State *L, const char* func, struct Card *c, struct Ar
                 fprintf(stderr, "WARNING: expecting boolean return from %s\n", func);
                 result = false;
             }
-            lua_pop(L, 1);  // remove returned boolean from stack
+            if ( lua_isnil(L, 2) ) {
+                baize->errorString[0] = '\0';
+            } else if ( lua_isstring(L, 2) ) {
+                strncpy(baize->errorString, lua_tostring(L, 2), MAX_BAIZEERRORSTRING);
+            } else {
+                fprintf(stderr, "WARNING: expecting string ir nil return from %s\n", func);
+            }
+            lua_pop(L, 2);  // remove returned boolean, string from stack
         }
     }
 
@@ -51,7 +63,7 @@ static bool Conformant(lua_State *L, const char* func, struct Card *c, struct Ar
     return result;
 }
 
-bool ConformantBuild(lua_State *L, struct Pile *const pile, struct Card* c, struct Array *tail)
+bool ConformantBuild(struct Baize *const baize, struct Pile *const pile, struct Card* c, struct Array *tail)
 {
     fprintf(stderr, "ConformantBuild '%s' '%s'\n", pile->category, pile->buildfunc);
 
@@ -62,10 +74,10 @@ bool ConformantBuild(lua_State *L, struct Pile *const pile, struct Card* c, stru
         fprintf(stderr, "WARNING: ConformantBuild passed empty tail\n");
         return false;
     }
-    return Conformant(L, pile->buildfunc, c, tail);
+    return Conformant(baize, pile->buildfunc, c, tail);
 }
 
-bool ConformantDrag(lua_State *L, struct Pile *const pile, struct Array* tail)
+bool ConformantDrag(struct Baize *const baize, struct Pile *const pile, struct Array* tail)
 {
     fprintf(stderr, "ConformantDrag '%s' '%s'\n", pile->category, pile->dragfunc);
 
@@ -77,5 +89,5 @@ bool ConformantDrag(lua_State *L, struct Pile *const pile, struct Array* tail)
         return false;
     }
 
-    return Conformant(L, pile->dragfunc, NULL, tail);
+    return Conformant(baize, pile->dragfunc, NULL, tail);
 }

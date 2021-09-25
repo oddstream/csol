@@ -7,7 +7,7 @@
 #include "array.h"
 #include "pile.h"
 
-bool ConformantBuild(lua_State *L, struct Pile *const pile, struct Card *c, struct Array *tail);
-bool ConformantDrag(lua_State *L, struct Pile *const pile, struct Array *tail);
+bool ConformantBuild(struct Baize *const baize, struct Pile *const pile, struct Card *c, struct Array *tail);
+bool ConformantDrag(struct Baize *const baize, struct Pile *const pile, struct Array *tail);
 
 #endif

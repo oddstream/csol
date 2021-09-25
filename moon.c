@@ -26,6 +26,7 @@ static const struct FunctionToRegister {
     {"FindPile", MoonFindPile},
     {"MovePileTo", MoonMovePileTo},
     {"Category", MoonGetCategory},
+    {"CardCount", MoonGetCardCount},
     {"SetAccept", MoonSetAccept},
     {"SetRecycles", MoonSetRecycles},
     {"MoveCard", MoonMoveCard},
@@ -251,7 +252,6 @@ int MoonDealUp(lua_State* L)
     }
     
     int n = lua_tointeger(L, 2);
-
     while ( n-- ) {
         struct Card* c = PilePopCard(baize->stock);
         if ( c ) {
@@ -279,7 +279,6 @@ int MoonDealDown(lua_State* L)
     }
     
     int n = lua_tointeger(L, 2);
-
     while ( n-- ) {
         struct Card* c = PilePopCard(baize->stock);
         if ( c ) {
@@ -342,6 +341,17 @@ int MoonGetCategory(lua_State *L)
         lua_pushstring(L, p->category);
     } else {
         lua_pushstring(L, "INVALID PILE");
+    }
+    return 1;
+}
+
+int MoonGetCardCount(lua_State *L)
+{
+    struct Pile* p = lua_touserdata(L, 1);
+    if ( PileValid(p) ) {
+        lua_pushinteger(L, ArrayLen(p->cards));
+    } else {
+        lua_pushinteger(L, 0);
     }
     return 1;
 }

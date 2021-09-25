@@ -6,6 +6,9 @@
 PACKS = 4
 SUITS = 2
 
+-- PACKS = 2
+-- SUITS = 4
+
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
@@ -74,28 +77,30 @@ function BuildFoundation(cTop, cards)
 
   if #cards ~= 13 then
       io.stderr:write("BuildFoundation tail needs to be 13 cards long\n")
-      return false
+      return false, "Needs to be 13 cards"
   end
 
   if cards[1].ordinal ~= 13 then
     io.stderr:write("BuildFoundation tail needs to start with a K\n")
-    return false
+    return false, "Needs to start with a King"
   end
   
+  local ok, err
+
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
     if cPrev.prone or cThis.prone then
       io.stderr:write("BuildFoundation prone fail\n")
-      return false
+      return false, "Cannot move a face down card"
     end
     if cPrev.suit ~= cThis.suit then
       io.stderr:write("BuildFoundation suit fail\n")
-      return false
+      return false, "Incorrect suit"
     end
     if cPrev.ordinal ~= cThis.ordinal + 1 then
       io.stderr:write("BuildFoundation ordinal fail\n")
-      return false
+      return false, "Incorrect value"
     end
     cPrev = cThis
   end
@@ -106,11 +111,11 @@ end
 function ChkTBuild(cPrev, cThis)
   if cPrev.prone or cThis.prone then
     io.stderr:write("ChkT prone fail\n")
-    return false
+    return false, "Cannot move a face down card"
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
     io.stderr:write("ChkT ordinal fail\n")
-    return false
+    return false, "Incorrect value"
   end
   return true
 end
@@ -118,15 +123,15 @@ end
 function ChkTDrag(cPrev, cThis)
   if cPrev.prone or cThis.prone then
     io.stderr:write("ChkT prone fail\n")
-    return false
+    return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
     io.stderr:write("ChkT suit fail\n")
-    return false
+    return false, "Incorrect suit"
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
     io.stderr:write("ChkT ordinal fail\n")
-    return false
+    return false, "Incorrect value"
   end
   return true
 end
@@ -136,17 +141,21 @@ function BuildTableau(cTop, cards)
   LogCard("BuildTableau card", cTop)
   LogTail("BuildTableau tail", cards)
   
+  local ok, err
+
   if cTop then
-    if not ChkTBuild(cTop, cards[1]) then
-      return false
+    ok, err = ChkTBuild(cTop, cards[1])
+      if not ok then
+      return false, err
     end
   end
 
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    if not ChkTBuild(cPrev, cThis) then
-      return false
+    ok, err = ChkTBuild(cPrev, cThis)
+    if not ok then
+      return false, err
     end
     cPrev = cThis
   end
@@ -156,11 +165,13 @@ end
 
 function DragTableau(cTop, cards)
   -- ignore cTop
+  local ok, err
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    if not ChkTDrag(cPrev, cThis) then
-      return false
+    ok, err = ChkTDrag(cPrev, cThis)
+    if not ok then
+      return false, err
     end
     cPrev = cThis
   end
@@ -170,8 +181,8 @@ end
 function ChkFalse(cTop, cards)
   LogCard("ChkFalse card", cTop)
   LogTail("ChkFalse tail", cards)
-  return false
-end
+  return false, "You cannot do that"
+  end
 
 function ChkTrue(cTop, cards)
   LogCard("ChkTrue card", cTop)
@@ -183,12 +194,26 @@ function CardTapped(card)
     LogCard("CardTapped", card)
 
     local cardsMoved = false
+    local errMsg = ""
+    local tabCards = 0
+    local emptyTabs = 0
     if card.owner == STOCK then
       for _, tab in ipairs(TABLEAU) do
-        DealUp(tab, 1)
-        cardsMoved = true
+        if CardCount(tab) == 0 then
+          emptyTabs = emptyTabs + 1
+        else
+          tabCards = tabCards + CardCount(tab)
+        end
+      end
+      if emptyTabs > 0 and tabCards >= #TABLEAU then
+        errMsg = "All empty tableaux must be filled before dealing a new row"
+      else
+        for _, tab in ipairs(TABLEAU) do
+          DealUp(tab, 1)
+          cardsMoved = true
+        end
       end
     end
 
-    return cardsMoved, ""
+    return cardsMoved, errMsg
 end

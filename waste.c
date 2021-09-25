@@ -45,20 +45,19 @@ bool WastePileTapped(struct Pile *p)
     return false;
 }
 
-bool WasteCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     // TODO maybe move three cards
     if ( ArrayLen(tail) == 1 ) {
         struct Card *c = ArrayGet(tail, 0);
-        if ( c && c->owner == self->owner->stock ) {
+        if ( c && c->owner == baize->stock ) {
             return true;
         } else {
-            strcpy(self->owner->errorString, "You can only move cards to a Waste pile from the Stock");
+            strncpy(baize->errorString, "You can only move cards to a Waste pile from the Stock", MAX_BAIZEERRORSTRING);
         }
     } else {
-        strcpy(self->owner->errorString, "You can only move one card to a Waste pile");
+        strncpy(self->owner->errorString, "You can only move one card to a Waste pile", MAX_BAIZEERRORSTRING);
     }
-    (void)L;
     return false;
 }
 

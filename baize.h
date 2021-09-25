@@ -8,6 +8,8 @@
 #include "array.h"
 #include "pile.h"
 
+#define MAX_BAIZEERRORSTRING (127)
+
 struct Baize {
     unsigned magic;
     size_t cardsInLibrary;
@@ -29,7 +31,9 @@ struct Baize {
     bool dragging;
     Vector2 dragOffset;
 
-    char errorString[128];
+    struct UI* ui;
+
+    char errorString[MAX_BAIZEERRORSTRING+1];
 };
 
 struct Baize* BaizeNew(void);

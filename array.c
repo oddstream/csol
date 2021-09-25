@@ -24,6 +24,21 @@ size_t ArrayCap(struct Array *const self)
     return self->size;
 }
 
+void ArrayDeleteFirst(struct Array *const self, ArrayFreeFunc f)
+{
+    if ( self->used == 0 ) {
+        return;
+    }
+    void *item = self->data[0];
+    if ( f ) {
+        f(item);
+    }
+    for ( size_t i = 1; i<self->used; i++ ) {
+        self->data[i-1] = self->data[i];
+    }
+    self->used -= 1;
+}
+
 void ArraySwap(struct Array *const self, int i, int j)
 {
     void* tmp = self->data[i];

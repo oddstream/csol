@@ -13,7 +13,7 @@
 bool BaizeCardTapped(struct Baize *const self, struct Card* c)
 {
     lua_State *L = self->L;
-    bool cardsMoved = true;
+    bool cardsMoved = false;
     self->errorString[0] = '\0';
 
     int typ = lua_getglobal(L, "CardTapped");  // push function name onto the stack
@@ -46,7 +46,7 @@ bool BaizeCardTapped(struct Baize *const self, struct Card* c)
                 strncpy(self->errorString, str, sizeof(self->errorString) - 1);
             }
         } else {
-            fprintf(stderr, "WARNING: expecting string return from CardTapped\n");
+            fprintf(stderr, "WARNING: expecting string or nil return from CardTapped\n");
             cardsMoved = false;
         }
         lua_pop(L, 2);  // remove returned boolean, string from stack

@@ -18,7 +18,7 @@ struct Tableau {
 struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
 bool TableauCardTapped(struct Card *c);
 bool TableauPileTapped(struct Pile *p);
-bool TableauCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
+bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void TableauSetRecycles(struct Pile *const self, int r);
 void TableauDraw(struct Pile *const self);

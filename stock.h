@@ -17,7 +17,7 @@ struct Stock {
 struct Stock* StockNew(Vector2 pos, enum FanType fanType, const char* buildfunc, const char* dragfunc);
 bool StockCardTapped(struct Card *c);
 bool StockPileTapped(struct Pile *p);
-bool StockCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail);
+bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void StockSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void StockSetRecycles(struct Pile *const self, int r);
 void StockDraw(struct Pile *const self);

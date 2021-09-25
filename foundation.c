@@ -48,7 +48,7 @@ bool FoundationPileTapped(struct Pile *p)
     return false;
 }
 
-bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array *const tail)
+bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     // not true for Spider!
     // if ( ArrayLen(tail) != 1 ) {
@@ -72,9 +72,9 @@ bool FoundationCanAcceptTail(struct Pile *const self, lua_State *L, struct Array
                 return false;
             }
         }
-        return ConformantBuild(L, self, NULL, tail);
+        return ConformantBuild(baize, self, NULL, tail);
     }
-    return ConformantBuild(L, self, PilePeekCard(self), tail);
+    return ConformantBuild(baize, self, PilePeekCard(self), tail);
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)
