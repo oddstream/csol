@@ -34,25 +34,26 @@ struct Cell* CellNew(Vector2 slot, enum FanType fan, const char* buildfunc, cons
 }
 
 bool CellCardTapped(struct Card *c)
-{
-    c->owner->owner->errorString[0] = '\0';
+{   // not used
+    BaizeResetError(c->owner->owner);
     return false;
 }
 
 bool CellPileTapped(struct Pile *p)
 {
-    p->owner->errorString[0] = '\0';
+    BaizeResetError(p->owner);
     return false;
 }
 
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
+    BaizeResetError(baize);
     if ( ArrayLen(tail) != 1 ) {
-        strncpy(baize->errorString, "Can only move single cards to a cell", MAX_BAIZEERRORSTRING);
+        BaizeSetError(baize, "Can only move single cards to a cell");
         return false;
     }
     if ( PileLen(self) > 0 ) {
-        strncpy(baize->errorString, "Can only move a card to an empty cell", MAX_BAIZEERRORSTRING);
+        BaizeSetError(baize, "Can only move a card to an empty cell");
         return false;
     }
     return true;

@@ -58,6 +58,20 @@ bool BaizeValid(struct Baize *const self)
     return self && self->magic == BAIZE_MAGIC;
 }
 
+void BaizeSetError(struct Baize *const self, const char *str)
+{
+    BaizeResetError(self);
+    self->errorString = strdup(str);
+}
+
+void BaizeResetError(struct Baize *const self)
+{
+    if ( self->errorString ) {
+        free(self->errorString);
+        self->errorString = NULL;
+    }
+}
+
 void BaizeCreateCards(struct Baize *const self)
 {
     // the Baize object has been created by BaizeNew
@@ -412,7 +426,7 @@ void BaizeTouchStop(struct Baize *const self)
                         BaizeAfterUserMove(self);
                     }
                 } else {
-                    if ( self->errorString[0] ) {
+                    if ( self->errorString ) {
                         UiToast(self->ui, self->errorString);
                     }
                     while ( c ) {
@@ -435,7 +449,7 @@ void BaizeTouchStop(struct Baize *const self)
             if ( BaizeCardTapped(self, cHeadOfTail) ) {
                 BaizeAfterUserMove(self);
             } else {
-                if ( self->errorString[0] ) {
+                if ( self->errorString ) {
                     UiToast(self->ui, self->errorString);
                 }
             }
@@ -595,6 +609,7 @@ void BaizeDraw(struct Baize *const self)
 void BaizeFree(struct Baize *const self)
 {
     self->magic = 0;
+    BaizeResetError(self);
     ArrayFree(self->tableaux);
     ArrayFree(self->foundations);
     UndoStackFree(self->undoStack);

@@ -37,30 +37,31 @@ struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, const char* bui
 }
 
 bool FoundationCardTapped(struct Card *c)
-{
-    c->owner->owner->errorString[0] = '\0';
+{   // not used
+    BaizeResetError(c->owner->owner);
     return false;
 }
 
 bool FoundationPileTapped(struct Pile *p)
 {
-    p->owner->errorString[0] = '\0';
+    BaizeResetError(p->owner);
     return false;
 }
 
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
+    BaizeResetError(baize);
     // not true for Spider!
     // if ( ArrayLen(tail) != 1 ) {
     //     strcpy(self->owner->errorString, "Can only move single cards to a foundation");
     //     return false;
     // }
     if ( ArrayLen(self->cards) == 13 ) {
-        strcpy(self->owner->errorString, "The foundation is full");
+        BaizeSetError(baize, "The foundation is full");
         return false;
     }
     if ( ArrayLen(self->cards) + ArrayLen(tail) > 13 ) {
-        strcpy(self->owner->errorString, "That would make the foundation over full");
+        BaizeSetError(baize, "That would make the foundation over full");
         return false;
     }
     if ( ArrayLen(self->cards) == 0 ) {
@@ -68,7 +69,9 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
         if ( f->accept != 0 ) {
             struct Card* c = ArrayGet(tail, 0);
             if ( c->id.ordinal != f->accept ) {
-                snprintf(self->owner->errorString, 127, "This foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
+                char z[128];
+                sprintf(z, "This foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
+                BaizeSetError(baize, z);
                 return false;
             }
         }

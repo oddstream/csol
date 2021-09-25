@@ -1,10 +1,10 @@
 -- Spider
 
--- PACKS = 8
--- SUITS = 1
+PACKS = 8
+SUITS = 1
 
-PACKS = 4
-SUITS = 2
+-- PACKS = 4
+-- SUITS = 2
 
 -- PACKS = 2
 -- SUITS = 4

@@ -76,12 +76,12 @@ void ToastManagerDraw(struct ToastManager *const self)
 
     const float xpadding = 24.0;
     const float ypadding = 10.0f;
-    const int fontSize = 24;
+    const int fontSize = 32;
 
     int baizeWidth = GetScreenWidth();
     int baizeHeight = GetScreenHeight();
 
-    float ty = (float)(baizeHeight - 20 - 24);  // 20 padding, 24 height of statusbar
+    float ty = (float)(baizeHeight - fontSize - 24);  // 24 height of statusbar
     size_t index;
     for ( struct Toast *t = ArrayFirst(self->toasts, &index); t; t = ArrayNext(self->toasts, &index) ) {
         float twidth = (float)MeasureText(t->message, fontSize) + xpadding;

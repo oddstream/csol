@@ -35,14 +35,14 @@ struct Tableau* TableauNew(Vector2 slot, enum FanType fan, const char* buildfunc
 }
 
 bool TableauCardTapped(struct Card *c)
-{
-    c->owner->owner->errorString[0] = '\0';
+{   // not used
+    BaizeResetError(c->owner->owner);
     return false;
 }
 
 bool TableauPileTapped(struct Pile *p)
 {
-    p->owner->errorString[0] = '\0';
+    BaizeResetError(p->owner);
     return false;
 }
 
@@ -53,7 +53,9 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         if ( t->accept != 0 ) {
             struct Card* c = ArrayGet(tail, 0);
             if ( c->id.ordinal != t->accept ) {
-                snprintf(self->owner->errorString, 127, "This empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
+                char z[128];
+                sprintf(z, "This empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
+                BaizeSetError(self->owner, z);
                 return false;
             }
         }
@@ -85,6 +87,6 @@ void TableauDraw(struct Pile *const self)
         pos.x += 10;
         pos.y += 10;
         // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});
-        DrawText(UtilOrdToShortString(t->accept), (int)pos.x, (int)pos.y, 24, (Color){255,255,255,31});
+        DrawText(UtilOrdToShortString(t->accept), (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
     }
 }

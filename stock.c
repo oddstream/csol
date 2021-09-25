@@ -34,7 +34,7 @@ struct Stock* StockNew(Vector2 slot, enum FanType fan, const char* buildfunc, co
 }
 
 bool StockCardTapped(struct Card *c)
-{
+{   // not used
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR Card is not valid\n");
         return false;
@@ -49,7 +49,7 @@ bool StockCardTapped(struct Card *c)
         fprintf(stderr, "ERROR Baize is not valid\n");
         return false;
     }
-    baize->errorString[0] = '\0';
+    BaizeResetError(baize);
     // TODO transfer 1-3 cards to Waste
     // fprintf(stdout, "Stock card tapped\n");
     if ( baize->waste ) {
@@ -62,7 +62,7 @@ bool StockCardTapped(struct Card *c)
 
 bool StockPileTapped(struct Pile *p)
 {
-    p->owner->errorString[0] = '\0';
+    BaizeResetError(p->owner);
     size_t cardsMoved = 0;
     // fprintf(stderr, "Stock pile tapped\n");
     struct Stock *s = (struct Stock*)p;
@@ -76,7 +76,7 @@ bool StockPileTapped(struct Pile *p)
         }
         s->recycles--;
     } else {
-        strcpy(p->owner->errorString, "No more recycles");
+        BaizeSetError(p->owner, "No more recycles");
     }
     return cardsMoved > 0;
 }
@@ -115,6 +115,6 @@ void StockDraw(struct Pile *const self)
         pos.x += 10;
         pos.y += 10;
         // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});
-        DrawText(z, (int)pos.x, (int)pos.y, 24, (Color){255,255,255,31});
+        DrawText(z, (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
     }
 }

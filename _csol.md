@@ -22,6 +22,13 @@ Array of Containers
 
 ## Next
 
+==323103==    by 0x1136A2: ArrayNew (array.c:10)
+==323103==    by 0x113B7F: ArrayClone (array.c:133)
+==323103==    by 0x11A3B2: SnapshotNew (undo.c:20)
+==323103==    by 0x11A4EF: BaizeUndoPush (undo.c:49)
+==323103==    by 0x11477B: BaizeResetState (baize.c:214)
+==323103==    by 0x116D13: main (main.c:198)
+
 Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycles?
 
 CanAcceptTail
@@ -50,8 +57,8 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
 - [ ] CardSetPos() problem
 - [ ] ttf Font problem - try a raylib font
 - [ ] title bar (hamburger : variant : collect undo)
-- [ ] toast
 - [ ] status bar (stock waste : moves : complete)
+- [x] toast
 - [x] Spider
         [x] empty piles check
         [x] Lua to okay if tail can be dragged

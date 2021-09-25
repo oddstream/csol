@@ -90,11 +90,11 @@ function ChkF(cPrev, cThis)
   end
   if cPrev.suit ~= cThis.suit then
     io.stderr:write("ChkFoundation suit fail\n")
-    return false, "Incorrect suit"
+    return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
     io.stderr:write("ChkFoundation ordinal fail\n")
-    return false, "Incorrect value"
+    return false, nil
   end
   return true
 end
@@ -138,11 +138,11 @@ function ChkT(cPrev, cThis)
   end
   if cPrev.color == cThis.color then
     io.stderr:write("ChkTableau color fail\n")
-    return false, "Incorrect color"
+    return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
     io.stderr:write("ChkTableau ordinal fail\n")
-    return false, "Incorrect value"
+    return false, nil
   end
   return true
 end

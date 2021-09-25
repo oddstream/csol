@@ -8,8 +8,6 @@
 #include "array.h"
 #include "pile.h"
 
-#define MAX_BAIZEERRORSTRING (127)
-
 struct Baize {
     unsigned magic;
     size_t cardsInLibrary;
@@ -33,11 +31,13 @@ struct Baize {
 
     struct UI* ui;
 
-    char errorString[MAX_BAIZEERRORSTRING+1];
+    char* errorString;
 };
 
 struct Baize* BaizeNew(void);
 bool BaizeValid(struct Baize *const self);
+void BaizeResetError(struct Baize *const self);
+void BaizeSetError(struct Baize *const self, const char *str);
 void BaizeCreateCards(struct Baize *const self);
 void BaizeCreatePiles(struct Baize *const self);
 void BaizeResetState(struct Baize *const self);

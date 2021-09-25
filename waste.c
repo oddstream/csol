@@ -34,29 +34,32 @@ struct Waste* WasteNew(Vector2 slot, enum FanType fan, const char* buildfunc, co
 }
 
 bool WasteCardTapped(struct Card *c)
-{
-    c->owner->owner->errorString[0] = '\0';
+{   // not used
+    BaizeResetError(c->owner->owner);
     return false;
 }
 
 bool WastePileTapped(struct Pile *p)
 {
-    p->owner->errorString[0] = '\0';
+    BaizeResetError(p->owner);
     return false;
 }
 
 bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
+    (void)self;
+
+    BaizeResetError(baize);
     // TODO maybe move three cards
     if ( ArrayLen(tail) == 1 ) {
         struct Card *c = ArrayGet(tail, 0);
         if ( c && c->owner == baize->stock ) {
             return true;
         } else {
-            strncpy(baize->errorString, "You can only move cards to a Waste pile from the Stock", MAX_BAIZEERRORSTRING);
+            BaizeSetError(baize, "You can only move cards to a Waste pile from the Stock");
         }
     } else {
-        strncpy(self->owner->errorString, "You can only move one card to a Waste pile", MAX_BAIZEERRORSTRING);
+        BaizeSetError(baize, "You can only move one card to a Waste pile");
     }
     return false;
 }

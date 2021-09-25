@@ -19,7 +19,7 @@ static bool Conformant(struct Baize *const baize, const char* func, struct Card 
     fprintf(stdout, "Conformant func %s\n", func);
 
     lua_State *L = baize->L;
-    baize->errorString[0] = '\0';
+    BaizeResetError(baize);
 
     if ( func == NULL || func[0] == '\0' ) return false;
 
@@ -48,9 +48,9 @@ static bool Conformant(struct Baize *const baize, const char* func, struct Card 
                 result = false;
             }
             if ( lua_isnil(L, 2) ) {
-                baize->errorString[0] = '\0';
+                ;
             } else if ( lua_isstring(L, 2) ) {
-                strncpy(baize->errorString, lua_tostring(L, 2), MAX_BAIZEERRORSTRING);
+                BaizeSetError(baize, lua_tostring(L, 2));
             } else {
                 fprintf(stderr, "WARNING: expecting string ir nil return from %s\n", func);
             }

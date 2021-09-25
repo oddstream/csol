@@ -38,10 +38,11 @@ struct Array* UndoStackNew(void) {
 }
 
 void UndoStackFree(struct Array *stack) {
-    // for ( struct Array* item = (struct Array*)ArrayPop(stack); item; item = (struct Array*)ArrayPop(stack) ) {
-    //     SnapshotFree(item);
-    // }
-    ArrayForeach(stack, (ArrayIterFunc)ArrayFree);
+    for ( struct Array* item = (struct Array*)ArrayPop(stack); item; item = (struct Array*)ArrayPop(stack) ) {
+        SnapshotFree(item);
+    }
+    // this would free the piles, but not the cards, so would leak (thank you valgrind)
+    // ArrayForeach(stack, (ArrayIterFunc)ArrayFree);
     ArrayFree(stack);
 }
 
