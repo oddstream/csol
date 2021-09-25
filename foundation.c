@@ -93,15 +93,16 @@ void FoundationSetRecycles(struct Pile *const self, int r)
 
 void FoundationDraw(struct Pile *const self)
 {
+    extern Font fontAcme24;
+
     PileDraw(self);
 
     struct Foundation* f = (struct Foundation*)self;
     if ( f->accept != 0 ) {
-        // extern Font fontAcme;
         Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});
-        DrawText(UtilOrdToShortString(f->accept), (int)pos.x, (int)pos.y, 24, (Color){255,255,255,31});
+        DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, 24, 0, (Color){255,255,255,127});
+        // DrawText(UtilOrdToShortString(f->accept), (int)pos.x, (int)pos.y, 24, (Color){255,255,255,31});
     }
 }

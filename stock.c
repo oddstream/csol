@@ -103,6 +103,8 @@ void StockSetRecycles(struct Pile *const self, int r)
 
 void StockDraw(struct Pile *const self)
 {
+    extern Font fontAcme24;
+
     PileDraw(self);
 
     struct Stock* s = (struct Stock*)self;
@@ -114,7 +116,7 @@ void StockDraw(struct Pile *const self)
         Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});
-        DrawText(z, (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
+        DrawTextEx(fontAcme24, z, pos, 24, 0, (Color){255,255,255,127});
+        // DrawText(z, (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
     }
 }

@@ -22,13 +22,6 @@ Array of Containers
 
 ## Next
 
-==323103==    by 0x1136A2: ArrayNew (array.c:10)
-==323103==    by 0x113B7F: ArrayClone (array.c:133)
-==323103==    by 0x11A3B2: SnapshotNew (undo.c:20)
-==323103==    by 0x11A4EF: BaizeUndoPush (undo.c:49)
-==323103==    by 0x11477B: BaizeResetState (baize.c:214)
-==323103==    by 0x116D13: main (main.c:198)
-
 Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycles?
 
 CanAcceptTail
@@ -47,17 +40,18 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
         Foundations can only have 13 cards,
         Stock can never accept a card,
 
+- [ ] status bar (stock waste : moves : complete)
 - [ ] check stack height before and after
 - [ ] C - BaizeCollect()
 - [ ] PowerMoves
 - [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
-- [ ] don't like passing Baize->L around, now have ->owner
 - [ ] draw recycle symbol
 - [ ] CardSetPos() problem
 - [ ] ttf Font problem - try a raylib font
 - [ ] title bar (hamburger : variant : collect undo)
-- [ ] status bar (stock waste : moves : complete)
+        ui icon spritesheet
+- [x] don't like passing Baize->L around, now have ->owner
 - [x] toast
 - [x] Spider
         [x] empty piles check

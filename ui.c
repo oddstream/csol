@@ -7,6 +7,16 @@
 
 #include "ui.h"
 
+/*
+ https://material.io/archive/guidelines/components/snackbars-toasts.html
+
+	Single-line snackbar height: 48dp
+	Multi-line snackbar height: 80dp
+	Text: Roboto Regular 14sp
+	Action button: Roboto Medium 14sp, all-caps text
+	Default background fill: #323232 100%
+*/
+
 // Toast
 
 struct Toast* ToastNew(const char* message, int ticks)
@@ -62,36 +72,47 @@ void ToastManagerUpdate(struct ToastManager *const self)
     }
 }
 
-static void DrawCenteredText(Rectangle r, int fontSize, const char* text)
+static void DrawCenteredText(Rectangle r, const char* text, Vector2 mte)
 {
-    int textWidth = MeasureText(text, fontSize);
-    int x = ((int)(r.width / 2.0f)) - (textWidth / 2);
-    int y = fontSize / 4;
-    DrawText(text, (int)r.x + x, (int)r.y + y, fontSize, WHITE);
+    extern Font fontRoboto14;
+    extern Color uiTextColor;
+
+    Vector2 pos;
+    pos.x = r.x + (r.width / 2.0f) - (mte.x / 2.0f);
+    pos.y = r.y + (r.height / 2.0f) - (mte.y / 2.0f);
+    DrawTextEx(fontRoboto14, text, pos, 14.0f, 1.0f, uiTextColor);
 }
 
 void ToastManagerDraw(struct ToastManager *const self)
 {
     // ToastManager draws all the Toasts, rather than handing it down to the Toast object, because we know position in queue
-
-    const float xpadding = 24.0;
-    const float ypadding = 10.0f;
-    const int fontSize = 32;
+    extern Color uiBackgroundColor;
+    extern Font fontRoboto14;
 
     int baizeWidth = GetScreenWidth();
     int baizeHeight = GetScreenHeight();
 
-    float ty = (float)(baizeHeight - fontSize - 24);  // 24 height of statusbar
+    float rY = (float)(baizeHeight - 14 - 14 - 24);  // 24 height of statusbar
     size_t index;
     for ( struct Toast *t = ArrayFirst(self->toasts, &index); t; t = ArrayNext(self->toasts, &index) ) {
-        float twidth = (float)MeasureText(t->message, fontSize) + xpadding;
-        float theight = (float)fontSize * 1.5f;
-        float tx = (baizeWidth / 2.0f) - (twidth / 2.0f);
-        Rectangle r = {.x=tx, .y=ty, .width=twidth, .height=theight};
-        DrawRectangleRounded(r, 0.05, 9, BLACK);
-        DrawCenteredText(r, fontSize, t->message);
+        Vector2 mte = MeasureTextEx(fontRoboto14, t->message, 14.0f, 1.0f);
+        // mte.x += 24.0f;
+        // mte.y += 14.0f;
 
-        ty = ty - r.height - ypadding;
+        float tX = (baizeWidth / 2.0f) - (mte.x / 2.0f);
+        float tY = rY + (14.0f / 2.0f);
+        Rectangle rText = {.x=tX, .y=tY, .width=mte.x, .height=mte.y};
+
+        float rWidth = rText.width + 24;
+        float rHeight = rText.height + 14;
+        float rX = (baizeWidth / 2.0f) - (rWidth / 2.0f);
+
+        Rectangle rRect = {.x=rX, .y=rY, .width=rWidth, .height=rHeight};
+
+        DrawRectangleRounded(rRect, 0.05, 9, uiBackgroundColor);
+        DrawCenteredText(rText, t->message, mte);
+
+        rY = rY - rRect.height - 14.0f;
     }
 }
 

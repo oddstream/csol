@@ -78,15 +78,15 @@ void TableauSetRecycles(struct Pile *const self, int r)
 
 void TableauDraw(struct Pile *const self)
 {
+    extern Font fontAcme24 ;
     PileDraw(self);
 
     struct Tableau* t = (struct Tableau*)self;
     if ( t->accept != 0 ) {
-        // extern Font fontAcme;
         Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        // DrawTextEx(fontAcme, ords[f->accept], pos, 16, 0, (Color){255,255,255,127});
-        DrawText(UtilOrdToShortString(t->accept), (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
+        DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, 24, 0, (Color){255,255,255,127});
+        // DrawText(UtilOrdToShortString(t->accept), (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
     }
 }

@@ -127,9 +127,10 @@ float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 char variantName[64];
 
-Color baizeColor;
+Color baizeColor, uiBackgroundColor, uiTextColor;
 
-// Font fontAcme = {0};
+Font fontAcme24 = {0};
+Font fontRoboto14 = {0};
 
 // int main(int argc, char* argv[], char* envp[]);
 
@@ -139,23 +140,27 @@ int main(void)
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
+    uiBackgroundColor = (Color){.r=0x24, .g=0x24, .b=0x24, .a=0xff};
+    uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
+
     strncpy(variantName, "Klondike", sizeof(variantName)-1);
     LoadSettings();
     // fprintf(stderr, "cardScale %f\n", cardScale);
 
     cardWidth = originalCardWidth * cardScale;
     cardHeight = originalCardHeight * cardScale;
-#if 0
+
     {
-        int fontSizes[128-32];
-        for ( int i=32; i<128; i++ ) {
-            fontSizes[i] = i;
-        }
-        fontAcme = LoadFontEx("assets/Acme-Regular.ttf", 8, fontSizes, 128-32);
+        // int fontSizes[128-32];
+        // for ( int i=32; i<128; i++ ) {
+        //     fontSizes[i] = i;
+        // }
+        // fontAcme = LoadFontEx("assets/KAISG.ttf", 96, 0, 0);
+        // fontAcme = LoadFontEx("assets/Acme-Regular.ttf", 8, fontSizes, 128-32);
         // fontAcme = LoadFontEx("assets/DejaVuSans-Bold.ttf", 8, 0, 255);
         // fontAcme = LoadFontEx("assets/Roboto-Regular.ttf", 8, 0, 255);
     }
-#endif
+
 
     // {
     //     int n = GetCurrentMonitor();
@@ -164,6 +169,11 @@ int main(void)
     //     fprintf(stderr, "%d:%d,%d\n", n, w, h);
     // }
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
+
+    // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
+    fontAcme24 = LoadFontEx("assets/Acme-Regular.ttf", 24, 0, 0);
+    fontRoboto14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
+
 #if 0
     {
         int n = GetCurrentMonitor();
@@ -206,7 +216,8 @@ int main(void)
     SpritesheetFree(ssFace);
     SpritesheetFree(ssBack);
 
-    // UnloadFont(fontAcme);
+    UnloadFont(fontAcme24);
+    UnloadFont(fontRoboto14);
 
     CloseWindow();        // Close window and OpenGL context
 
