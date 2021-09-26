@@ -141,7 +141,7 @@ int main(void)
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     baizeHighlightColor = (Color){255,255,255,31};
-    uiBackgroundColor = (Color){.r=0x24, .g=0x24, .b=0x24, .a=0xff};
+    uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xff};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
     strncpy(variantName, "Klondike", sizeof(variantName)-1);

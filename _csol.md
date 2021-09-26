@@ -22,7 +22,11 @@ Array of Containers
 
 ## Next
 
-Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Spider, Accept/Recycles?
+```bash
+valgrind --track-origins=yes --leak-check=full ./csol
+```
+
+Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Accept/Recycles?
 
 CanAcceptTail
         if the tail is conformant, then only need to check card pair (pile peek, c0) conformant
@@ -40,10 +44,10 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
         Foundations can only have 13 cards,
         Stock can never accept a card,
 
+- [ ] Widget, TextWidget
 - [ ] status bar (stock waste : moves : complete)
-- [ ] check stack height before and after
+- [ ] check lua stack height before and after
 - [ ] C - BaizeCollect()
-- [ ] PowerMoves
 - [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
 - [ ] draw recycle symbol
@@ -51,6 +55,7 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
 - [ ] ttf Font problem - try a raylib font
 - [ ] title bar (hamburger : variant : collect undo)
         ui icon spritesheet
+- [x] PowerMoves
 - [x] don't like passing Baize->L around, now have ->owner
 - [x] toast
 - [x] Spider
@@ -140,6 +145,8 @@ Use "AC", "2H", "XD", "KS" shorthand for cards.
 Any card or cards can be dragged anywhere, anytime. If the move breaks the rules, csol puts the cards back. Implies no need for card shaking.
 
 Some behaviour is baked into each pyle subtype (eg cells only hold one card, foundations can only accept one card at a time, accept rules (which are set from Lua), Stock and Waste behaviour), everything else is configured by *variant.lua*.
+
+To name a procedure, use a strong verb followed by an object, *eg* PeekCard, MoveCard.
 
 ## Makefile
 

@@ -31,7 +31,12 @@ static bool Conformant(struct Baize *const baize, struct Pile* pileDst, const ch
         lua_pop(L, 1);  // remove func from stack
     } else {
         // pile we are building on as first arg (may be nil/NULL)
-        lua_pushlightuserdata(L, pileDst);
+        if ( pileDst ) {
+            // pushing a NULL as lightuserdata creates some weird object that doesn't appear in Lua as nil
+            lua_pushlightuserdata(L, pileDst);
+        } else {
+            lua_pushnil(L);
+        }
         // build table on stack as second arg
         MoonPushTail(L, tail);
 

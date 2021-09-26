@@ -1,19 +1,19 @@
 -- Spider
 
-PACKS = 8
-SUITS = 1
+-- PACKS = 8
+-- SUITS = 1
 
--- PACKS = 4
--- SUITS = 2
+PACKS = 4
+SUITS = 2
 
 -- PACKS = 2
 -- SUITS = 4
 
--- C sets variable 'BAIZE', 'STOCK', FAN_*
+-- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
   if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. Category(card.owner) .. "}\n")
+    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileCategory(card.owner) .. "}\n")
   else
     io.stderr:write(title .. " {nil}\n")
   end
@@ -31,15 +31,6 @@ function Build()
         io.stderr:write("Build cannot find function AddPile\n")
         return
     end
-
-    -- local s = FindPile("Stock", 1)
-    -- if s == nil then
-    --     io.stderr:write("Build cannot find Stock pile\n")
-    --     return
-    -- else
-    --     io.stderr:write("Build found a pile\n")
-    --     MovePileTo(s, 10, 100)
-    -- end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     MovePileTo(STOCK, 1, 1)
@@ -66,7 +57,7 @@ function Build()
     end
 end
 
-function BuildFoundation(cTop, cards)
+function BuildFoundation(pile, cards)
 
   -- ignore cTop
 
@@ -96,11 +87,11 @@ function BuildFoundation(cTop, cards)
     end
     if cPrev.suit ~= cThis.suit then
       io.stderr:write("BuildFoundation suit fail\n")
-      return false, "Incorrect suit"
+      return false, nil
     end
     if cPrev.ordinal ~= cThis.ordinal + 1 then
       io.stderr:write("BuildFoundation ordinal fail\n")
-      return false, "Incorrect value"
+      return false, nil
     end
     cPrev = cThis
   end
@@ -108,52 +99,54 @@ function BuildFoundation(cTop, cards)
   return true
 end
 
-function ChkTBuild(cPrev, cThis)
+function TwoCardsBuildT(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("ChkT prone fail\n")
+    io.stderr:write("TwoCardsBuildT prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("ChkT ordinal fail\n")
-    return false, "Incorrect value"
+    io.stderr:write("TwoCardsBuildT ordinal fail\n")
+    return false, nil
   end
   return true
 end
 
-function ChkTDrag(cPrev, cThis)
+function TwoCardsDragT(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("ChkT prone fail\n")
+    io.stderr:write("TwoCardsDragT prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("ChkT suit fail\n")
-    return false, "Incorrect suit"
+    io.stderr:write("TwoCardsDragT suit fail\n")
+    return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("ChkT ordinal fail\n")
-    return false, "Incorrect value"
+    io.stderr:write("TwoCardsDragT ordinal fail\n")
+    return false, nil
   end
   return true
 end
 
-function BuildTableau(cTop, cards)
+function BuildTableau(pile, cards)
 
-  LogCard("BuildTableau card", cTop)
   LogTail("BuildTableau tail", cards)
   
   local ok, err
 
-  if cTop then
-    ok, err = ChkTBuild(cTop, cards[1])
+  if pile then
+    local cTop = PeekCard(pile)
+    if cTop then
+      ok, err = TwoCardsBuildT(cTop, cards[1])
       if not ok then
-      return false, err
+        return false, err
+      end
     end
   end
 
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    ok, err = ChkTBuild(cPrev, cThis)
+    ok, err = TwoCardsBuildT(cPrev, cThis)
     if not ok then
       return false, err
     end
@@ -163,13 +156,12 @@ function BuildTableau(cTop, cards)
   return true
 end
 
-function DragTableau(cTop, cards)
-  -- ignore cTop
+function DragTableau(pile, cards)
   local ok, err
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    ok, err = ChkTDrag(cPrev, cThis)
+    ok, err = TwoCardsDragT(cPrev, cThis)
     if not ok then
       return false, err
     end
@@ -178,14 +170,12 @@ function DragTableau(cTop, cards)
   return true
 end
 
-function ChkFalse(cTop, cards)
-  LogCard("ChkFalse card", cTop)
+function ChkFalse(pile, cards)
   LogTail("ChkFalse tail", cards)
   return false, "You cannot do that"
   end
 
-function ChkTrue(cTop, cards)
-  LogCard("ChkTrue card", cTop)
+function ChkTrue(pile, cards)
   LogTail("ChkTrue tail", cards)
   return true
 end

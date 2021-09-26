@@ -2,7 +2,7 @@
 
 PACKS = 2
 
--- C sets variable 'BAIZE', 'STOCK', FAN_*
+-- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
   if card then
@@ -24,15 +24,6 @@ function Build()
         io.stderr:write("Build cannot find function AddPile\n")
         return
     end
-
-    -- local s = FindPile("Stock", 1)
-    -- if s == nil then
-    --     io.stderr:write("Build cannot find Stock pile\n")
-    --     return
-    -- else
-    --     io.stderr:write("Build found a pile\n")
-    --     MovePileTo(s, 10, 100)
-    -- end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     MovePileTo(STOCK, 1, 1)
@@ -159,11 +150,6 @@ function ConformantT(pile, cards)
     end
 
     return true, nil
-end
-
-function ConformantW(pile, cards)
-  LogTail("ConformantW tail", cards)
-  return cards[1].owner == STOCK
 end
 
 function ChkFalse(pile, cards)

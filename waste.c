@@ -25,7 +25,7 @@ static struct PileVtable wasteVtable = {
 
 struct Waste* WasteNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
-    struct Waste* self = malloc(sizeof(struct Waste));
+    struct Waste* self = calloc(1, sizeof(struct Waste));
     if ( self ) {
         PileCtor((struct Pile*)self, "Waste", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &wasteVtable;
