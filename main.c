@@ -127,7 +127,7 @@ float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 char variantName[64];
 
-Color baizeColor, uiBackgroundColor, uiTextColor;
+Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
 Font fontAcme24 = {0};
 Font fontRoboto14 = {0};
@@ -140,6 +140,7 @@ int main(void)
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
+    baizeHighlightColor = (Color){255,255,255,31};
     uiBackgroundColor = (Color){.r=0x24, .g=0x24, .b=0x24, .a=0xff};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 

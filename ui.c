@@ -80,7 +80,7 @@ static void DrawCenteredText(Rectangle r, const char* text, Vector2 mte)
     Vector2 pos;
     pos.x = r.x + (r.width / 2.0f) - (mte.x / 2.0f);
     pos.y = r.y + (r.height / 2.0f) - (mte.y / 2.0f);
-    DrawTextEx(fontRoboto14, text, pos, 14.0f, 1.0f, uiTextColor);
+    DrawTextEx(fontRoboto14, text, pos, 14.0f, 1.2f, uiTextColor);
 }
 
 void ToastManagerDraw(struct ToastManager *const self)
@@ -95,7 +95,7 @@ void ToastManagerDraw(struct ToastManager *const self)
     float rY = (float)(baizeHeight - 14 - 14 - 24);  // 24 height of statusbar
     size_t index;
     for ( struct Toast *t = ArrayFirst(self->toasts, &index); t; t = ArrayNext(self->toasts, &index) ) {
-        Vector2 mte = MeasureTextEx(fontRoboto14, t->message, 14.0f, 1.0f);
+        Vector2 mte = MeasureTextEx(fontRoboto14, t->message, 14.0f, 1.2f);
         // mte.x += 24.0f;
         // mte.y += 14.0f;
 

@@ -20,10 +20,13 @@ int MoonDealUp(lua_State* L);
 int MoonDealDown(lua_State* L);
 int MoonFindPile(lua_State* L);
 int MoonMovePileTo(lua_State* L);
-int MoonGetCategory(lua_State* L);
+int MoonGetPileCategory(lua_State* L);
 int MoonGetCardCount(lua_State *L);
+int MoonGetCardOwner(lua_State* L);
+int MoonGetPowerMoves(lua_State* L);
 int MoonSetAccept(lua_State* L);
 int MoonSetRecycles(lua_State* L);
+int MoonPeekCard(lua_State* L);
 int MoonMoveCard(lua_State* L);
 
 #endif

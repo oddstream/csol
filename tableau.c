@@ -59,9 +59,9 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
                 return false;
             }
         }
-        return ConformantBuild(baize, self, NULL, tail);
+        return ConformantBuild(baize, self, tail);
     }
-    return ConformantBuild(baize, self, PilePeekCard(self), tail);
+    return ConformantBuild(baize, self, tail);
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)
@@ -79,6 +79,8 @@ void TableauSetRecycles(struct Pile *const self, int r)
 void TableauDraw(struct Pile *const self)
 {
     extern Font fontAcme24 ;
+    extern Color baizeHighlightColor;
+
     PileDraw(self);
 
     struct Tableau* t = (struct Tableau*)self;
@@ -86,7 +88,6 @@ void TableauDraw(struct Pile *const self)
         Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, 24, 0, (Color){255,255,255,127});
-        // DrawText(UtilOrdToShortString(t->accept), (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
+        DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, 24, 0, baizeHighlightColor);
     }
 }

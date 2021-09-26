@@ -104,6 +104,7 @@ void StockSetRecycles(struct Pile *const self, int r)
 void StockDraw(struct Pile *const self)
 {
     extern Font fontAcme24;
+    extern Color baizeHighlightColor;
 
     PileDraw(self);
 
@@ -112,11 +113,9 @@ void StockDraw(struct Pile *const self)
         // TODO draw recycle symbol
         char z[16];
         sprintf(z, "%d", s->recycles);
-        // extern Font fontAcme;
         Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        DrawTextEx(fontAcme24, z, pos, 24, 0, (Color){255,255,255,127});
-        // DrawText(z, (int)pos.x, (int)pos.y, 32, (Color){255,255,255,31});
+        DrawTextEx(fontAcme24, z, pos, 24, 0, baizeHighlightColor);
     }
 }

@@ -330,9 +330,11 @@ void PileUpdate(struct Pile *const self)
 
 void PileDraw(struct Pile *const self)
 {
+    extern Color baizeHighlightColor;
+
     // BeginDrawing() has been called by BaizeDraw()
     Rectangle r = PileGetFannedScreenRect(self);
-    DrawRectangleRoundedLines(r, 0.05, 9, 2.0, (Color){255,255,255,31});
+    DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
 }
 
 void PileFree(struct Pile *const self)

@@ -75,9 +75,9 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
                 return false;
             }
         }
-        return ConformantBuild(baize, self, NULL, tail);
+        return ConformantBuild(baize, self, tail);
     }
-    return ConformantBuild(baize, self, PilePeekCard(self), tail);
+    return ConformantBuild(baize, self, tail);
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)
@@ -93,6 +93,7 @@ void FoundationSetRecycles(struct Pile *const self, int r)
 
 void FoundationDraw(struct Pile *const self)
 {
+    extern Color baizeHighlightColor;
     extern Font fontAcme24;
 
     PileDraw(self);
@@ -102,7 +103,6 @@ void FoundationDraw(struct Pile *const self)
         Vector2 pos = PileGetScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, 24, 0, (Color){255,255,255,127});
-        // DrawText(UtilOrdToShortString(f->accept), (int)pos.x, (int)pos.y, 24, (Color){255,255,255,31});
+        DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, 24, 0, baizeHighlightColor);
     }
 }

@@ -1,6 +1,7 @@
 /* moon.c */
 
 #include <stdio.h>
+#include <math.h>
 #include <string.h>
 #include <raylib.h>
 #include <lua.h>
@@ -25,10 +26,13 @@ static const struct FunctionToRegister {
     {"DealDown", MoonDealDown},
     {"FindPile", MoonFindPile},
     {"MovePileTo", MoonMovePileTo},
-    {"Category", MoonGetCategory},
+    {"PileCategory", MoonGetPileCategory},
     {"CardCount", MoonGetCardCount},
+    {"CardOwner", MoonGetCardOwner},
+    {"PowerMoves", MoonGetPowerMoves},
     {"SetAccept", MoonSetAccept},
     {"SetRecycles", MoonSetRecycles},
+    {"PeekCard", MoonPeekCard},
     {"MoveCard", MoonMoveCard},
 };
 
@@ -334,13 +338,14 @@ int MoonMovePileTo(lua_State* L)
     return 0;
 }
 
-int MoonGetCategory(lua_State *L)
+int MoonGetPileCategory(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
-    if ( PileValid(p) ) {
-        lua_pushstring(L, p->category);
+    if ( !PileValid(p) ) {
+        fprintf(stderr, "WARNING: PileCategory: invalid pile\n");
+        lua_pushnil(L);
     } else {
-        lua_pushstring(L, "INVALID PILE");
+        lua_pushstring(L, p->category);
     }
     return 1;
 }
@@ -353,6 +358,53 @@ int MoonGetCardCount(lua_State *L)
     } else {
         lua_pushinteger(L, 0);
     }
+    return 1;
+}
+
+int MoonGetCardOwner(lua_State *L)
+{
+    struct Card* c = lua_touserdata(L, 1);
+    if ( !CardValid(c) ) {
+        fprintf(stderr, "WARNING: CardOwner: invalid card\n");
+        return 0;
+    }
+    lua_pushlightuserdata(L, c->owner);
+    return 1;
+}
+
+int MoonGetPowerMoves(lua_State *L)
+{
+    struct Baize *baize = lua_touserdata(L, 1);
+    struct Pile *dstPile = lua_touserdata(L, 2);
+
+    if ( !BaizeValid(baize) ) {
+        fprintf(stderr, "WARNING: PowerMoves: invalid baize\n");
+        return 0;
+    }
+    if ( dstPile != NULL && !PileValid(dstPile) ) {
+        fprintf(stderr, "WARNING: PowerMoves: invalid pile\n");
+        return 0;
+    }
+
+    double emptyCells = 0.0;
+    double emptyCols = 0.0;
+    size_t index;
+    for ( struct Pile *p=ArrayFirst(baize->piles, &index); p; p=ArrayNext(baize->piles, &index) ) {
+        if ( ArrayLen(p->cards) == 0 ) {
+            if ( strcmp(p->category, "Cell") == 0 ) {
+                emptyCells++;
+            } else if ( strcmp(p->category, "Tableau") == 0 ) {
+                // 'If you are moving into an empty column, then the column you are moving into does not count as empty column.'
+                struct Tableau *t = (struct Tableau*)p;
+                if ( t->accept == 0 && p != dstPile ) {
+                    emptyCols++;
+                }
+            }
+        }
+    }
+
+    double n = (1.0 + emptyCells) * pow(2.0, emptyCols);
+    lua_pushinteger(L, (int)n);
     return 1;
 }
 
@@ -378,6 +430,20 @@ int MoonSetRecycles(lua_State *L)
     }
 
     return 0;
+}
+
+int MoonPeekCard(lua_State *L)
+{
+    struct Pile *p = lua_touserdata(L, 1);
+
+    if ( !PileValid(p) ) {
+        fprintf(stderr, "MoonPeekCard pile not valid\n");
+        lua_pushnil(L);
+        return 1;
+    }
+
+    MoonPushCard(L, PilePeekCard(p));    // may be NULL if pile empty
+    return 1;
 }
 
 int MoonMoveCard(lua_State *L)

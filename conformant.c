@@ -12,7 +12,7 @@
 #include "conformant.h"
 #include "moon.h"
 
-static bool Conformant(struct Baize *const baize, const char* func, struct Card *c, struct Array* tail)
+static bool Conformant(struct Baize *const baize, struct Pile* pileDst, const char* func, struct Array* tail)
 {
     // fprintf(stdout, "Conformant Lua stack in  %d\n", lua_gettop(L));
 
@@ -30,8 +30,8 @@ static bool Conformant(struct Baize *const baize, const char* func, struct Card 
         fprintf(stderr, "%s is not a function\n", func);
         lua_pop(L, 1);  // remove func from stack
     } else {
-        // card we are building on as first arg (may be nil/NULL)
-        MoonPushCard(L, c);
+        // pile we are building on as first arg (may be nil/NULL)
+        lua_pushlightuserdata(L, pileDst);
         // build table on stack as second arg
         MoonPushTail(L, tail);
 
@@ -63,31 +63,33 @@ static bool Conformant(struct Baize *const baize, const char* func, struct Card 
     return result;
 }
 
-bool ConformantBuild(struct Baize *const baize, struct Pile *const pile, struct Card* c, struct Array *tail)
+bool ConformantBuild(struct Baize *const baize, struct Pile *const pileDst, struct Array *tail)
 {
-    fprintf(stderr, "ConformantBuild '%s' '%s'\n", pile->category, pile->buildfunc);
+    fprintf(stderr, "ConformantBuild '%s' '%s'\n", pileDst->category, pileDst->buildfunc);
 
-    if ( pile->buildfunc[0] == '\0' ) {
+    if ( pileDst->buildfunc[0] == '\0' ) {
         return false;
     }
     if ( ArrayLen(tail) == 0 ) {
         fprintf(stderr, "WARNING: ConformantBuild passed empty tail\n");
         return false;
     }
-    return Conformant(baize, pile->buildfunc, c, tail);
+    return Conformant(baize, pileDst, pileDst->buildfunc, tail);
 }
 
-bool ConformantDrag(struct Baize *const baize, struct Pile *const pile, struct Array* tail)
+bool ConformantDrag(struct Baize *const baize, struct Array* tail)
 {
-    fprintf(stderr, "ConformantDrag '%s' '%s'\n", pile->category, pile->dragfunc);
-
-    if ( pile->dragfunc[0] == '\0' ) {
-        return pile == pile->owner->stock;
-    }
     if ( ArrayLen(tail) == 0 ) {
         fprintf(stderr, "WARNING: ConformantDrag passed empty tail\n");
         return false;
     }
 
-    return Conformant(baize, pile->dragfunc, NULL, tail);
+    struct Card * c0 = ArrayGet(tail, 0);
+    struct Pile *pile = c0->owner;
+
+    if ( pile->dragfunc[0] == '\0' ) {
+        return pile == pile->owner->stock && ArrayLen(tail) == 1;
+    }
+
+    return Conformant(baize, NULL, pile->dragfunc, tail);
 }

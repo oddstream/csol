@@ -416,7 +416,7 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( ConformantDrag(self, c->owner, self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
+                if ( ConformantDrag(self, self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
