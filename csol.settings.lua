@@ -8,4 +8,4 @@ WindowWidth = 2000
 WindowHeight = 1000
 -- CardScale = 0.5
 BaizeColor = {red=0.1, green=0.2, blue=0, alpha=1}
-Variant = "Freecell"
+Variant = "Limited"

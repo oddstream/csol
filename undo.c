@@ -51,7 +51,14 @@ void BaizeUndoPush(struct Baize *const self) {
     ArrayPush(self->undoStack, savedPiles);
     // mark movable
     // recalc percent complete
-    // update UI (stock, waste, moves, percent)
+    char zLeft[64], zCenter[64];
+    if ( self->waste ) {
+        sprintf(zLeft, "STOCK: %lu WASTE: %lu", PileLen(self->stock), PileLen(self->waste));
+    } else {
+        sprintf(zLeft, "STOCK: %lu", PileLen(self->stock));
+    }
+    sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
+    UiUpdateStatusBar(self->ui, zLeft, zCenter, "COMPLETE: 0%");
 }   
 
 struct Array* BaizeUndoPop(struct Baize *const self) {

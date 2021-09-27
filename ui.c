@@ -7,7 +7,28 @@ struct UI* UiNew(void)
     struct UI *self = calloc(sizeof(struct UI), 1);
     if ( self ) {
         self->containers = ArrayNew(8);
-        ArrayPush(self->containers, StatusBarNew());
+
+        struct StatusBar *sb = StatusBarNew();
+        if ( sb ) {
+            struct TextWidget *tw = TextWidgetNew((struct Container*)sb, -1);
+            if ( tw ) {
+                TextWidgetSetText(tw, "STOCK:");
+                ArrayPush(((struct Container*)sb)->widgets, tw);
+            }
+            tw = TextWidgetNew((struct Container*)sb, 0);
+            if ( tw ) {
+                TextWidgetSetText(tw, "MOVES");
+                ArrayPush(((struct Container*)sb)->widgets, tw);
+            }
+            tw = TextWidgetNew((struct Container*)sb, 1);
+            if ( tw ) {
+                TextWidgetSetText(tw, "PERCENT COMPLETE");
+                ArrayPush(((struct Container*)sb)->widgets, tw);
+            }
+
+            ArrayPush(self->containers, sb);
+            StatusBarLayoutWidgets((struct Container*)sb);
+        }
         self->toastManager = ToastManagerNew();
     }
     return self;
@@ -19,6 +40,17 @@ void UiToast(struct UI *const self, const char* message)
     if ( t ) {
         ToastManagerAdd(self->toastManager, t);
     }
+}
+
+void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right)
+{
+    struct Container *sb = ArrayGet(self->containers, 0);
+    struct TextWidget *tw = ArrayGet(sb->widgets, 0);
+    TextWidgetSetText(tw, left);
+    tw = ArrayGet(sb->widgets, 1);
+    TextWidgetSetText(tw, center);
+    tw = ArrayGet(sb->widgets, 2);
+    TextWidgetSetText(tw, right);
 }
 
 void UiUpdate(struct UI *const self)

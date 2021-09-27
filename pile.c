@@ -338,7 +338,7 @@ int PileGenericCollect(struct Pile *const self)
                 // this pile is empty
                 return cardsMoved;
             }
-            struct Array *tail = ArrayNew(4);
+            struct Array *tail = ArrayNew(1);   // TODO not efficient
             ArrayPush(tail, c);
             bool ok = fp->vtable->CanAcceptTail(baize, fp, tail);
             ArrayFree(tail);

@@ -89,7 +89,7 @@ void ToastManagerDraw(struct ToastManager *const self)
     int baizeWidth = GetScreenWidth();
     int baizeHeight = GetScreenHeight();
 
-    float rY = (float)(baizeHeight - 14 - 14 - 24);  // 24 height of statusbar
+    float rY = (float)(baizeHeight - 14 - 14 - 14 - 24);  // 24 height of statusbar
     size_t index;
     for ( struct Toast *t = ArrayFirst(self->toasts, &index); t; t = ArrayNext(self->toasts, &index) ) {
         Vector2 mte = MeasureTextEx(fontRoboto14, t->message, 14.0f, 1.2f);
