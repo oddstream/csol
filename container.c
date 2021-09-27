@@ -8,11 +8,6 @@ void ContainerCtor(struct Container *const self, Rectangle r)
     self->widgets = ArrayNew(8);
 }
 
-Rectangle ContainerRect(struct Container *const self)
-{
-    return self->rect;
-}
-
 void ContainerLayoutWidgets(struct Container *const self)
 {
     (void)self; // all laying out will be done by subclasses
@@ -42,6 +37,7 @@ void ContainerFree(struct Container *const self)
         for ( struct Widget *w = ArrayFirst(self->widgets, &index); w; w = ArrayNext(self->widgets, &index) ) {
             w->vtable->Free(w);
         }
+        ArrayFree(self->widgets);
         free(self);
     }
 }

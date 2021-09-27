@@ -24,6 +24,16 @@ Array of Containers
 
 ```bash
 valgrind --track-origins=yes --leak-check=full ./csol
+
+==531280==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==531280==    by 0x1136A2: ArrayNew (array.c:10)
+==531280==    by 0x116A05: ContainerCtor (container.c:8)
+==531280==    by 0x119F9B: StatusBarNew (statusbar.c:21)
+==531280==    by 0x11B332: UiNew (ui.c:11)
+==531280==    by 0x113DF0: BaizeNew (baize.c:51)
+==531280==    by 0x11726F: main (main.c:205)
+
+
 ```
 
 Do more in Lua. AutoMoves(AcceptFirstPush, AutoFillFrom), Accept/Recycles?

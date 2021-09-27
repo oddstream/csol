@@ -5,10 +5,6 @@
 #include "ui.h"
 
 static struct WidgetVtable textWidgetVtable = {
-    &WidgetParent,  // use super parent
-    &WidgetRect,    // use super rect
-    &WidgetSetPosition, // use super set position
-    &WidgetAlign,   // use super align
     &WidgetUpdate,  // nothing to update, so use super update
     &TextWidgetDraw,
     &TextWidgetFree,
@@ -46,12 +42,15 @@ void TextWidgetDraw(struct Widget *const self)
     extern Font fontRoboto14;
     extern Color uiTextColor;
 
-    struct TextWidget *tw = (struct TextWidget*)self;
+    struct TextWidget *const tw = (struct TextWidget*)self;
     if ( tw->text == NULL ) {
         return;
     }
 
-    Rectangle rect = ContainerRect(self->parent);   // get the container's screen rect
+    // get the container's screen rect
+    struct Container *const con = self->parent;
+    Rectangle rect = con->rect;
+    // add our x,y to the container's x,y to get screen position
     Vector2 pos;
     pos.x = rect.x + self->rect.x;
     pos.y = rect.y + self->rect.y;
@@ -61,7 +60,7 @@ void TextWidgetDraw(struct Widget *const self)
 void TextWidgetFree(struct Widget *const self)
 {
     if ( self ) {
-        struct TextWidget *tw = (struct TextWidget*)self;
+        struct TextWidget *const tw = (struct TextWidget*)self;
         if ( tw->text ) {
             free(tw->text);
         }

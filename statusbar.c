@@ -5,7 +5,6 @@
 #define HEIGHT (24.0f)
 
 static struct ContainerVtable statusBarVtable = {
-    &StatusBarRect,
     &StatusBarLayoutWidgets,
     &StatusBarUpdate,
     &ContainerDraw,     // no extra stuff
@@ -25,31 +24,24 @@ struct StatusBar* StatusBarNew(void)
     return self;
 }
 
-Rectangle StatusBarRect(struct Container *const self)
-{
-    return ContainerRect(self);
-}
-
 void StatusBarLayoutWidgets(struct Container *const self)
 {
     const float padding = (14.0f);
 
     size_t index;
     for ( struct Widget *w = ArrayFirst(self->widgets, &index); w; w = ArrayNext(self->widgets, &index) ) {
-        Vector2 pos;
         switch ( w->align ) {
             case -1:
-                pos.x = 0.0f + padding;
+                w->rect.x = 0.0f + padding;
                 break;
             case 0:
-                pos.x = (self->rect.width / 2.0f) - (w->rect.width / 2.0f);
+                w->rect.x = (self->rect.width / 2.0f) - (w->rect.width / 2.0f);
                 break;
             case 1:
-                pos.x = self->rect.width - w->rect.width - padding;
+                w->rect.x = self->rect.width - w->rect.width - padding;
                 break;
         }
-        pos.y = (self->rect.height / 2.0f) - (w->rect.height / 2.0f);
-        WidgetSetPosition(w, pos);
+        w->rect.y = (self->rect.height / 2.0f) - (w->rect.height / 2.0f);
     }
 }
 

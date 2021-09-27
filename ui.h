@@ -14,11 +14,6 @@ struct Widget;
 struct UI;
 
 struct WidgetVtable {
-    struct Container* (*Parent)(struct Widget *const self);  // returns Container this widget belongs to
-    Rectangle (*Rect)(struct Widget *const self);  // returns x,y (relative to parent), width, height
-    // Rectangle (*OffsetRect)(struct Widget *const self);  // gives the screen position in relation to parent's position
-    void (*SetPosition)(struct Widget *const self, Vector2); // sets position rleative to parent
-    int (*Align)(struct Widget *const self); // returns alignment (-1, 0, 1)
     void (*Update)(struct Widget *const self);
     void (*Draw)(struct Widget *const self);
     void (*Free)(struct Widget *const self);
@@ -34,10 +29,6 @@ struct Widget {
 };
 
 void WidgetCtor(struct Widget *const self, struct Container* parent, int align);
-struct Container* WidgetParent(struct Widget *const self);
-struct Rectangle WidgetRect(struct Widget *const self);
-void WidgetSetPosition(struct Widget *const self, Vector2 pos);
-int WidgetAlign(struct Widget *const self);
 void WidgetUpdate(struct Widget *const self);
 void WidgetDraw(struct Widget *const self);
 void WidgetFree(struct Widget *const self);
@@ -53,7 +44,7 @@ void TextWidgetDraw(struct Widget *const self);
 void TextWidgetFree(struct Widget *const self);
 
 struct ContainerVtable {
-    Rectangle (*Rect)(struct Container *const self);  // screen coords
+    // Rectangle (*Rect)(struct Container *const self);  // screen coords
     // struct Widget* (*FindWidgetAt)(struct Container *const self, Vector2 pos);
     // bool (*StartDrag)(struct Container *const self, Vector2 pos);
     // void (*DragBy)(struct Container *const self, Vector2 delta);
@@ -74,7 +65,6 @@ struct Container {
 };
 
 void ContainerCtor(struct Container *const self, Rectangle r);
-Rectangle ContainerRect(struct Container *const self);
 void ContainerLayoutWidgets(struct Container *const self);
 void ContainerUpdate(struct Container *const self);
 void ContainerDraw(struct Container *const self);

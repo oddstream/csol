@@ -36,7 +36,7 @@ struct UI* UiNew(void)
 
 void UiToast(struct UI *const self, const char* message)
 {
-    struct Toast *t = ToastNew(message, 60 * (6 + ArrayLen(self->toastManager->toasts)));
+    struct Toast *const t = ToastNew(message, 60 * (6 + ArrayLen(self->toastManager->toasts)));
     if ( t ) {
         ToastManagerAdd(self->toastManager, t);
     }
@@ -44,12 +44,12 @@ void UiToast(struct UI *const self, const char* message)
 
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right)
 {
-    struct Container *sb = ArrayGet(self->containers, 0);
-    struct TextWidget *tw = ArrayGet(sb->widgets, 0);
+    struct Container *const sb = ArrayGet(self->containers, 0); // TODO parameterize
+    struct TextWidget *tw = ArrayGet(sb->widgets, 0); // TODO parameterize
     TextWidgetSetText(tw, left);
-    tw = ArrayGet(sb->widgets, 1);
+    tw = ArrayGet(sb->widgets, 1); // TODO parameterize
     TextWidgetSetText(tw, center);
-    tw = ArrayGet(sb->widgets, 2);
+    tw = ArrayGet(sb->widgets, 2); // TODO parameterize
     TextWidgetSetText(tw, right);
 }
 

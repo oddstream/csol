@@ -58,8 +58,8 @@ void BaizeUndoPush(struct Baize *const self) {
         sprintf(zLeft, "STOCK: %lu", PileLen(self->stock));
     }
     sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
-    UiUpdateStatusBar(self->ui, zLeft, zCenter, "COMPLETE: 0%");
-}   
+    UiUpdateStatusBar(self->ui, zLeft, zCenter, "COMPLETE: 0%%");
+}
 
 struct Array* BaizeUndoPop(struct Baize *const self) {
     if ( ArrayLen(self->undoStack) > 0 ) {
