@@ -15,6 +15,9 @@ static struct PileVtable wasteVtable = {
     &WasteCardTapped,
     &WastePileTapped,
     &WasteCanAcceptTail,
+    &WasteCollect,
+    &WasteComplete,
+    &WasteConformant,
     &WasteSetAccept,
     &WasteSetRecycles,
 
@@ -61,6 +64,23 @@ bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
     } else {
         BaizeSetError(baize, "You can only move one card to a Waste pile");
     }
+    return false;
+}
+
+int WasteCollect(struct Pile *const self)
+{
+    return PileGenericCollect(self);
+}
+
+bool WasteComplete(struct Pile *const self)
+{
+    (void)self;
+    return false;
+}
+
+bool WasteConformant(struct Pile *const self)
+{
+    (void)self;
     return false;
 }
 

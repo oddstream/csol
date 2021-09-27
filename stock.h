@@ -18,6 +18,9 @@ struct Stock* StockNew(Vector2 pos, enum FanType fanType, const char* buildfunc,
 bool StockCardTapped(struct Card *c);
 bool StockPileTapped(struct Pile *p);
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+int StockCollect(struct Pile *const self);
+bool StockComplete(struct Pile *const self);
+bool StockConformant(struct Pile *const self);
 void StockSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void StockSetRecycles(struct Pile *const self, int r);
 void StockDraw(struct Pile *const self);

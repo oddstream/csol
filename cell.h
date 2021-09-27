@@ -18,6 +18,9 @@ struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const
 bool CellCardTapped(struct Card *c);
 bool CellPileTapped(struct Pile *p);
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+int CellCollect(struct Pile *const self);
+bool CellComplete(struct Pile *const self);
+bool CellConformant(struct Pile *const self);
 void CellSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void CellSetRecycles(struct Pile *const self, int r);
 void CellDraw(struct Pile *const self);

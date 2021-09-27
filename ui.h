@@ -14,16 +14,14 @@ struct Widget;
 struct UI;
 
 struct WidgetVtable {
-    struct Container (*Parent)(struct Widget *const self);
-    Rectangle (*Rect)(struct Widget *const self);
+    struct Container* (*Parent)(struct Widget *const self);  // returns Container this widget belongs to
+    Rectangle (*Rect)(struct Widget *const self);  // returns x,y (relative to parent), width, height
     // Rectangle (*OffsetRect)(struct Widget *const self);  // gives the screen position in relation to parent's position
-    void (*SetPosition)(struct Widget *const self, Vector2);
-    int (*Align)(struct Widget *const self);
-    // bool (*Disabled)(struct Widget *const self);
-    // void (*Activate)(struct Widget *const self);
-    // void (*Deactivate)(struct Widget *const self);
+    void (*SetPosition)(struct Widget *const self, Vector2); // sets position rleative to parent
+    int (*Align)(struct Widget *const self); // returns alignment (-1, 0, 1)
     void (*Update)(struct Widget *const self);
     void (*Draw)(struct Widget *const self);
+    void (*Free)(struct Widget *const self);
     // NotifyCallback
 };
 
@@ -31,11 +29,18 @@ struct Widget {
     struct WidgetVtable *vtable;
     struct Container *parent;
     int align;  // alignment in parent container: left=-1, center=0, right=+1
-    bool disabled;
+    // bool disabled;
     Rectangle rect;    // x, y relative to parent
 };
 
-void WidgetCtor(struct Widget *const self);
+void WidgetCtor(struct Widget *const self, struct Container* parent, int align);
+struct Container* WidgetParent(struct Widget *const self);
+struct Rectangle WidgetRect(struct Widget *const self);
+void WidgetSetPosition(struct Widget *const self, Vector2 pos);
+int WidgetAlign(struct Widget *const self);
+void WidgetUpdate(struct Widget *const self);
+void WidgetDraw(struct Widget *const self);
+void WidgetFree(struct Widget *const self);
 
 struct TextWidget {
     struct Widget super;

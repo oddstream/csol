@@ -472,6 +472,47 @@ void BaizeTouchStop(struct Baize *const self)
     }
 }
 
+void BaizeCollectCommand(struct Baize *const self)
+{
+    int count, totalCount = 0;
+    for (;;) {
+        count = 0;
+        size_t index;
+        for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+            count += p->vtable->Collect(p);
+        }
+        if ( count == 0 ) {
+            break;
+        }
+        totalCount += count;
+    }
+    if ( totalCount > 0 ) {
+        BaizeAfterUserMove(self);
+    }
+}
+
+bool BaizeComplete(struct Baize *const self)
+{
+    size_t index;
+    for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        if ( !p->vtable->Complete(p) ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool BaizeConformant(struct Baize *const self)
+{
+    size_t index;
+    for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        if ( !p->vtable->Conformant(p) ) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void BaizeAfterUserMove(struct Baize *const self)
 {
     // TODO automoves (in Lua)
@@ -536,6 +577,9 @@ void BaizeUpdate(struct Baize *const self)
     }
     if ( IsKeyReleased(KEY_R) ) {
         BaizeRestartDealCommand(self);
+    }
+    if ( IsKeyReleased(KEY_C) ) {
+        BaizeCollectCommand(self);
     }
 
     UiUpdate(self->ui);

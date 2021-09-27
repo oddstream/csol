@@ -15,6 +15,9 @@ static struct PileVtable tableauVtable = {
     &TableauCardTapped,
     &TableauPileTapped,
     &TableauCanAcceptTail,
+    &TableauCollect,
+    &TableauComplete,
+    &TableauConformant,
     &TableauSetAccept,
     &TableauSetRecycles,
 
@@ -62,6 +65,23 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         return ConformantBuild(baize, self, tail);
     }
     return ConformantBuild(baize, self, tail);
+}
+
+int TableauCollect(struct Pile *const self)
+{
+    return PileGenericCollect(self);
+}
+
+bool TableauComplete(struct Pile *const self)
+{
+    (void)self;
+    return false;
+}
+
+bool TableauConformant(struct Pile *const self)
+{
+    (void)self;
+    return false;
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)

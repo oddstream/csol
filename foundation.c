@@ -17,6 +17,9 @@ static struct PileVtable foundationVtable = {
     &FoundationCardTapped,
     &FoundationPileTapped,
     &FoundationCanAcceptTail,
+    &FoundationCollect,
+    &FoundationComplete,
+    &FoundationConformant,
     &FoundationSetAccept,
     &FoundationSetRecycles,
 
@@ -78,6 +81,24 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
         return ConformantBuild(baize, self, tail);
     }
     return ConformantBuild(baize, self, tail);
+}
+
+int FoundationCollect(struct Pile *const self)
+{
+    (void)self;
+    return 0;
+}
+
+bool FoundationComplete(struct Pile *const self)
+{
+    (void)self;
+    return false;
+}
+
+bool FoundationConformant(struct Pile *const self)
+{
+    (void)self;
+    return false;
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)

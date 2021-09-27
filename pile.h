@@ -38,6 +38,9 @@ struct PileVtable {
     bool (*CardTapped)(struct Card *c);
     bool (*PileTapped)(struct Pile *p);
     bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+    int (*Collect)(struct Pile *p);
+    bool (*Complete)(struct Pile *p);
+    bool (*Conformant)(struct Pile *p);
     void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
     void (*SetRecycles)(struct Pile *const self, int r);
 
@@ -63,6 +66,7 @@ Vector2 PileGetPushedFannedPos(struct Pile *const self);
 bool PileMoveCards(struct Pile *const self, struct Card* c);
 bool PileIsAt(struct Pile *const self, Vector2 point);
 void PileRepushAllCards(struct Pile *const self);
+int PileGenericCollect(struct Pile *const self);
 void PileUpdate(struct Pile *const self);
 void PileDraw(struct Pile *const self);
 void PileFree(struct Pile *const self);

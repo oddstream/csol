@@ -323,6 +323,38 @@ void PileRepushAllCards(struct Pile *const self)
     ArrayFree(tmp);
 }
 
+int PileGenericCollect(struct Pile *const self)
+{
+    // Collect is like tapping on the top card of each pile (except Stock), or on a K in a Spider pile
+    // prefer to collect a run of cards from one pile to one foundation
+    struct Baize* baize = self->owner;
+    int cardsMoved = 0;
+    size_t index;
+    for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
+
+        for (;;) {
+            struct Card *c = PilePeekCard(self);
+            if ( c == NULL ) {
+                // this pile is empty
+                return cardsMoved;
+            }
+            struct Array *tail = ArrayNew(4);
+            ArrayPush(tail, c);
+            bool ok = fp->vtable->CanAcceptTail(baize, fp, tail);
+            ArrayFree(tail);
+
+            if ( !ok ) {
+                // onto the next foundation
+                break;
+            }
+            if ( PileMoveCards(fp, c) ) {
+                cardsMoved++;
+            }
+        }
+    }
+    return cardsMoved;
+}
+
 void PileUpdate(struct Pile *const self)
 {
     ArrayForeach(self->cards, (ArrayIterFunc)CardUpdate);

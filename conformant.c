@@ -40,7 +40,7 @@ static bool Conformant(struct Baize *const baize, struct Pile* pileDst, const ch
         // build table on stack as second arg
         MoonPushTail(L, tail);
 
-        // one arg (card-as-a-table), two returns (boolean, error string)
+        // two args (destination pile, tail of card-as-a-table), two returns (boolean, error string)
         if ( lua_pcall(L, 2, 2, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
@@ -57,7 +57,7 @@ static bool Conformant(struct Baize *const baize, struct Pile* pileDst, const ch
             } else if ( lua_isstring(L, 2) ) {
                 BaizeSetError(baize, lua_tostring(L, 2));
             } else {
-                fprintf(stderr, "WARNING: expecting string ir nil return from %s\n", func);
+                fprintf(stderr, "WARNING: expecting string or nil return from %s\n", func);
             }
             lua_pop(L, 2);  // remove returned boolean, string from stack
         }

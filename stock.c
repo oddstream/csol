@@ -14,6 +14,9 @@ static struct PileVtable stockVtable = {
     &StockCardTapped,
     &StockPileTapped,
     &StockCanAcceptTail,
+    &StockCollect,
+    &StockComplete,
+    &StockConformant,
     &StockSetAccept,
     &StockSetRecycles,
 
@@ -86,6 +89,24 @@ bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
     (void)baize;
     (void)self;
     (void)tail;
+    return false;
+}
+
+int StockCollect(struct Pile *const self)
+{
+    (void)self;
+    return 0;
+}
+
+bool StockComplete(struct Pile *const self)
+{
+    (void)self;
+    return false;
+}
+
+bool StockConformant(struct Pile *const self)
+{
+    (void)self;
     return false;
 }
 
