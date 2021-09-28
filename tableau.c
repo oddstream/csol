@@ -105,7 +105,7 @@ void TableauDraw(struct Pile *const self)
 
     struct Tableau* t = (struct Tableau*)self;
     if ( t->accept != 0 ) {
-        Vector2 pos = PileGetScreenPos(self);
+        Vector2 pos = PileScreenPos(self);
         pos.x += 10;
         pos.y += 10;
         DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, 24, 0, baizeHighlightColor);

@@ -49,6 +49,11 @@ bool PileValid(struct Pile *const self)
     return self && self->magic == PILE_MAGIC;
 }
 
+bool PileHidden(struct Pile *const self)
+{
+    return self->slot.x < 0.0f || self->slot.y < 0.0f;
+}
+
 size_t PileLen(struct Pile *const self)
 {
     return ArrayLen(self->cards);
@@ -60,8 +65,8 @@ void PilePushCard(struct Pile *const self, struct Card* c)
     if ( PileIsStock(self) ) {
         CardFlipDown(c);
     }
-    CardSetOwner(c, self);
-    Vector2 fannedPos = PileGetPushedFannedPos(self); // get this *before* pushing card to pile
+    c->owner = self;
+    Vector2 fannedPos = PilePushedFannedPos(self); // get this *before* pushing card to pile
     // if ( strcmp(self->category, "Waste") == 0 ) {
     //     fprintf(stdout, "Push from %.0f, %.0f to %.0f, %.0f\n", c->pos.x, c->pos.y, fannedPos.x, fannedPos.y);
     // }
@@ -74,7 +79,7 @@ struct Card* PilePopCard(struct Pile *const self)
 {
     struct Card* c = (struct Card*)ArrayPop(self->cards);
     if ( CardValid(c) ) {
-        CardSetOwner(c, NULL);
+        c->owner = NULL;
         CardFlipUp(c);
     }
     return c;
@@ -96,17 +101,17 @@ bool PileIsStock(struct Pile *const self)
     return self == baize->stock;
 }
 
-Vector2 PileGetBaizePos(struct Pile *const self)
+Vector2 PileBaizePos(struct Pile *const self)
 {
     return self->pos;
 }
 
-Vector2 PileGetScreenPos(struct Pile *const self)
+Vector2 PileScreenPos(struct Pile *const self)
 {
     return (Vector2){.x = self->pos.x + self->owner->dragOffset.x, .y = self->pos.y + self->owner->dragOffset.y};
 }
 
-Rectangle PileGetBaizeRect(struct Pile *const self)
+Rectangle PileBaizeRect(struct Pile *const self)
 {
     extern float cardWidth, cardHeight;
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
@@ -122,17 +127,17 @@ Vector2 PileCalculatePosFromSlot(struct Pile *const self)
             };
 }
 
-Rectangle PileGetFannedBaizeRect(struct Pile *const self)
+Rectangle PileFannedBaizeRect(struct Pile *const self)
 {
     // cannot use position of top card, in case it's being dragged
     extern float cardWidth, cardHeight;
-    Rectangle r = PileGetBaizeRect(self);
+    Rectangle r = PileBaizeRect(self);
     if ( ArrayLen(self->cards) > 2 ) {
         struct Card* c = ArrayPeek(self->cards);
         if ( CardDragging(c) ) {
             return r;   // this and the rest are meaningless
         }
-        Vector2 cPos = CardGetBaizePos(c);
+        Vector2 cPos = CardBaizePos(c);
         switch ( self->fanType ) {
             case FAN_NONE:
                 // do nothing
@@ -154,14 +159,14 @@ Rectangle PileGetFannedBaizeRect(struct Pile *const self)
     return r;
 }
 
-Rectangle PileGetFannedScreenRect(struct Pile *const self) {
-    Rectangle r = PileGetFannedBaizeRect(self);
+Rectangle PileFannedScreenRect(struct Pile *const self) {
+    Rectangle r = PileFannedBaizeRect(self);
     r.x += self->owner->dragOffset.x;
     r.y += self->owner->dragOffset.y;
     return r;
 }
 
-Vector2 PileGetPushedFannedPos(struct Pile *const self)
+Vector2 PilePushedFannedPos(struct Pile *const self)
 {
     extern float cardWidth, cardHeight;
 
@@ -248,7 +253,7 @@ bool PileMoveCards(struct Pile *const self, struct Card* c)
 {
     // move cards to this pile
 
-    struct Pile* src = CardGetOwner(c);
+    struct Pile* src = c->owner;
     size_t oldSrcLen = PileLen(src);
 
     // find the new length of the source pile
@@ -303,7 +308,7 @@ bool PileMoveCards(struct Pile *const self, struct Card* c)
 bool PileIsAt(struct Pile *const self, Vector2 point)
 {
     extern float cardWidth, cardHeight;
-    Vector2 r = PileGetScreenPos(self);
+    Vector2 r = PileScreenPos(self);
     Rectangle rect = {.x=r.x, .y=r.y, .width=cardWidth, .height=cardHeight};
     return CheckCollisionPointRec(point, rect);
 }
@@ -365,7 +370,7 @@ void PileDraw(struct Pile *const self)
     extern Color baizeHighlightColor;
 
     // BeginDrawing() has been called by BaizeDraw()
-    Rectangle r = PileGetFannedScreenRect(self);
+    Rectangle r = PileFannedScreenRect(self);
     DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
 }
 

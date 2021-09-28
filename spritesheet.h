@@ -3,11 +3,13 @@
 #ifndef SPRITESHEET_H
 #define SPRITESHEET_H
 
+#include <raylib.h>
+
 struct Spritesheet;
 
 struct Spritesheet* SpritesheetNew(const char * fname, float x, float y, int framesWide);
-struct Spritesheet* SpritesheetNewInfo(const char * fname, Vector2 *coords);
+struct Spritesheet* SpritesheetNewInfo(const char * fname, float x, float y, Vector2 *coords);
 void SpritesheetFree(struct Spritesheet *const self);
-void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Vector2 pos);
+void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Rectangle r);
 
 #endif

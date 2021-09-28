@@ -134,7 +134,7 @@ void StockDraw(struct Pile *const self)
         // TODO draw recycle symbol
         char z[16];
         sprintf(z, "%d", s->recycles);
-        Vector2 pos = PileGetScreenPos(self);
+        Vector2 pos = PileScreenPos(self);
         pos.x += 10;
         pos.y += 10;
         DrawTextEx(fontAcme24, z, pos, 24, 0, baizeHighlightColor);

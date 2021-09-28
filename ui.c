@@ -8,6 +8,25 @@ struct UI* UiNew(void)
     if ( self ) {
         self->containers = ArrayNew(8);
 
+        struct TitleBar *tb = TitleBarNew();
+        if ( tb ) {
+            struct IconWidget *iw = IconWidgetNew((struct Container*)tb, -1, MENU);
+            if ( iw ) {
+                ArrayPush(((struct Container*)tb)->widgets, iw);
+            }
+            struct TextWidget *tw = TextWidgetNew((struct Container*)tb, 0);
+            if ( tw ) {
+                TextWidgetSetText(tw, "Variant Title");
+                ArrayPush(((struct Container*)tb)->widgets, tw);
+            }
+            iw = IconWidgetNew((struct Container*)tb, 1, UNDO);
+            if ( iw ) {
+                ArrayPush(((struct Container*)tb)->widgets, iw);
+            }
+            ArrayPush(self->containers, tb);
+            TitleBarLayoutWidgets((struct Container*)tb);
+        }
+
         struct StatusBar *sb = StatusBarNew();
         if ( sb ) {
             struct TextWidget *tw = TextWidgetNew((struct Container*)sb, -1);
@@ -42,15 +61,30 @@ void UiToast(struct UI *const self, const char* message)
     }
 }
 
+void UiUpdateTitleBar(struct UI *const self, const char* center)
+{
+    struct Container *const tb = ArrayGet(self->containers, 0); // TODO parameterize
+    struct TextWidget *tw = ArrayGet(tb->widgets, 1); // TODO parameterize
+    TextWidgetSetText(tw, center);
+}
+
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right)
 {
-    struct Container *const sb = ArrayGet(self->containers, 0); // TODO parameterize
+    struct Container *const sb = ArrayGet(self->containers, 1); // TODO parameterize
     struct TextWidget *tw = ArrayGet(sb->widgets, 0); // TODO parameterize
     TextWidgetSetText(tw, left);
     tw = ArrayGet(sb->widgets, 1); // TODO parameterize
     TextWidgetSetText(tw, center);
     tw = ArrayGet(sb->widgets, 2); // TODO parameterize
     TextWidgetSetText(tw, right);
+}
+
+void UiLayout(struct UI *const self, const int windowWidth, const int windowHeight)
+{
+    size_t index;
+    for ( struct Container *con = ArrayFirst(self->containers, &index); con; con = ArrayNext(self->containers, &index) ) {
+        con->vtable->Layout(con, windowWidth, windowHeight);
+    }
 }
 
 void UiUpdate(struct UI *const self)

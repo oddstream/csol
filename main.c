@@ -112,9 +112,7 @@ struct Vector2 kenneyBackInfo[15] = {
 };
 #endif
 
-struct Spritesheet *ssFace, *ssBack;
-
-int windowWidth = 2000, windowHeight = 1000;
+struct Spritesheet *ssFace, *ssBack, *ssIcons;
 
 #if RETROCARDS
 float originalCardWidth = 71.0f, originalCardHeight = 96.0f;
@@ -137,6 +135,8 @@ Font fontRoboto14 = {0};
 // int main(int argc, char* argv[], char* envp[]) 
 int main(void) 
 {
+    int windowWidth = 640, windowHeight = 480;
+
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
@@ -145,7 +145,7 @@ int main(void)
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
     strncpy(variantName, "Klondike", sizeof(variantName)-1);
-    LoadSettings();
+    LoadSettings(&windowWidth, &windowHeight);
     // fprintf(stderr, "cardScale %f\n", cardScale);
 
     cardWidth = originalCardWidth * cardScale;
@@ -175,32 +175,23 @@ int main(void)
     fontAcme24 = LoadFontEx("assets/Acme-Regular.ttf", 24, 0, 0);
     fontRoboto14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
-#if 0
-    {
-        int n = GetCurrentMonitor();
-        int w = GetMonitorWidth(n);
-        int h = GetMonitorHeight(n);
-        windowWidth =  w / 3 * 2;
-        windowHeight =  h / 3 * 2;
-        SetWindowSize(windowWidth, windowHeight);
-        SetWindowPosition((w/2)-(windowWidth/2), (h/2)-(windowHeight/2));
-    }
-#endif
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
+    // https://draeton.github.io/stitches/
+    ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
+
 #if RETROCARDS
     ssFace = SpritesheetNew("assets/cards71x96.png", originalCardWidth, originalCardHeight, 13);
-    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", retroBackInfo);
+    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", originalCardWidth, originalCardHeight, retroBackInfo);
 #else
-    ssFace = SpritesheetNewInfo("assets/playingCards.png", kenneyFaceInfo);
-    ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", kenneyBackInfo);
+    ssFace = SpritesheetNewInfo("assets/playingCards.png", originalCardWidth, originalCardHeight, kenneyFaceInfo);
+    ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", originalCardWidth, originalCardHeight, kenneyBackInfo);
 #endif
 
     {
         fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
         fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());
-        fprintf(stdout, "Window %d,%d\n", windowWidth, windowHeight);
     }
     struct Baize* baize = BaizeNew();
     if ( BaizeValid(baize) ) {
@@ -208,6 +199,7 @@ int main(void)
         BaizeCreatePiles(baize);
         BaizeResetState(baize);
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
+            BaizeLayout(baize, GetScreenWidth(), GetScreenHeight());
             BaizeUpdate(baize);
             BaizeDraw(baize);
         }
@@ -216,6 +208,7 @@ int main(void)
 
     SpritesheetFree(ssFace);
     SpritesheetFree(ssBack);
+    SpritesheetFree(ssIcons);
 
     UnloadFont(fontAcme24);
     UnloadFont(fontRoboto14);

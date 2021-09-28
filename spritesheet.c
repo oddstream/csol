@@ -43,13 +43,15 @@ struct Spritesheet* SpritesheetNew(const char * fname, float x, float y, int fra
     return self;
 }
 
-struct Spritesheet* SpritesheetNewInfo(const char* fname, Vector2 *coords)
+struct Spritesheet* SpritesheetNewInfo(const char* fname, float x, float y, Vector2 *coords)
 {
     struct Spritesheet* self = malloc(sizeof(struct Spritesheet));
     if ( !self ) {
         return NULL;
     }
     self->texture = LoadTexture(fname);
+    self->frameSize.x = x;
+    self->frameSize.y = y;
     self->coords = coords;
     return self;
 }
@@ -63,27 +65,25 @@ void SpritesheetFree(struct Spritesheet *const self)
     free(self);
 }
 
-void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Vector2 pos)
+void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Rectangle r)
 {
-    extern float originalCardWidth, originalCardHeight, cardWidth, cardHeight;
-
     Rectangle rSrc, rDst;
     const float yScale = 1.0f;
     const float ang = 0.0f;
     const Color c = WHITE;
 
     if ( self->coords ) {
-        rSrc = (Rectangle){.x=self->coords[frame].x, .y=self->coords[frame].y, .width=originalCardWidth, .height=originalCardHeight};
+        rSrc = (Rectangle){.x=self->coords[frame].x, .y=self->coords[frame].y, .width=self->frameSize.x, .height=self->frameSize.y};
         // card dimensions are already scaled
     } else {
         float sx = (frame % self->framesWide) * self->frameSize.x;
         float sy = (frame / self->framesWide) * self->frameSize.y;
         rSrc = (Rectangle){.x=sx, .y=sy, .width=self->frameSize.x, .height=self->frameSize.y};
     }
-    float dstWidth = cardWidth * xScale;
-    float dstHeight = cardHeight * yScale;
-    float xOffset = (cardWidth / 2.0f) - (dstWidth / 2.0f);
-    rDst = (Rectangle){.x = pos.x + xOffset, .y = pos.y, .width = dstWidth, .height = dstHeight};
+    float dstWidth = r.width * xScale;
+    float dstHeight = r.height * yScale;
+    float xOffset = (r.width / 2.0f) - (dstWidth / 2.0f);
+    rDst = (Rectangle){.x = r.x + xOffset, .y = r.y, .width = dstWidth, .height = dstHeight};
     DrawTexturePro(
             self->texture,
             rSrc,

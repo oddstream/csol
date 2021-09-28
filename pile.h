@@ -51,18 +51,19 @@ struct PileVtable {
 
 void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc);
 bool PileValid(struct Pile *const self);
+bool PileHidden(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);
 struct Card* PilePopCard(struct Pile *const self);
 struct Card* PilePeekCard(struct Pile *const self);
 bool PileIsStock(struct Pile *const self);
-Rectangle PileGetBaizeRect(struct Pile *const self);
-Vector2 PileGetBaizePos(struct Pile *const self);
-Vector2 PileGetScreenPos(struct Pile *const self);
+Rectangle PileBaizeRect(struct Pile *const self);
+Vector2 PileBaizePos(struct Pile *const self);
+Vector2 PileScreenPos(struct Pile *const self);
 Vector2 PileCalculatePosFromSlot(struct Pile *const self);
-Rectangle PileGetFannedBaizeRect(struct Pile *const self);
-Rectangle PileGetFannedScreenRect(struct Pile *const self);
-Vector2 PileGetPushedFannedPos(struct Pile *const self);
+Rectangle PileFannedBaizeRect(struct Pile *const self);
+Rectangle PileFannedScreenRect(struct Pile *const self);
+Vector2 PilePushedFannedPos(struct Pile *const self);
 bool PileMoveCards(struct Pile *const self, struct Card* c);
 bool PileIsAt(struct Pile *const self, Vector2 point);
 void PileRepushAllCards(struct Pile *const self);

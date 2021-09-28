@@ -6,6 +6,7 @@
 
 static struct ContainerVtable statusBarVtable = {
     &StatusBarLayoutWidgets,
+    &StatusBarLayout,
     &StatusBarUpdate,
     &ContainerDraw,     // no extra stuff
     &StatusBarFree,
@@ -45,18 +46,17 @@ void StatusBarLayoutWidgets(struct Container *const self)
     }
 }
 
+void StatusBarLayout(struct Container *const self, const int windowWidth, const int windowHeight)
+{
+    struct StatusBar* s = (struct StatusBar*)self;
+    s->super.rect = (Rectangle){.x=0, .y=(float)windowHeight-HEIGHT, .width=(float)windowWidth, .height=HEIGHT};
+
+    StatusBarLayoutWidgets(self);
+}
+
 void StatusBarUpdate(struct Container *const self)
 {
-    // ContainerUpdate(self);
-    if ( IsWindowResized() )
-    {
-        float w = (float)GetScreenWidth();
-        float h = (float)GetScreenHeight();
-        struct StatusBar* s = (struct StatusBar*)self;
-        s->super.rect = (Rectangle){.x=0, .y=h-HEIGHT, .width=w, .height=HEIGHT};
-
-        StatusBarLayoutWidgets(self);
-    }
+    (void)self;
 }
 
 void StatusBarFree(struct Container *const self)

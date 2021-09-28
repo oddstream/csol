@@ -3,7 +3,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-void LoadSettings(void);
+void LoadSettings(int *windowWidth, int *windowHeight);
 void SaveSettings(void);
 
 #endif

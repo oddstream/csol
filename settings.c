@@ -10,12 +10,11 @@
 
 #include "moon.h"
 
-extern int windowWidth, windowHeight;
 extern float cardScale;
 extern Color baizeColor;
 extern char variantName[64];
 
-void LoadSettings(void)
+void LoadSettings(int *windowWidth, int *windowHeight)
 {
     lua_State *L = luaL_newstate();
 
@@ -23,8 +22,8 @@ void LoadSettings(void)
         fprintf(stderr, "%s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
-        windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);
-        windowHeight = MoonGetGlobalInt(L, "WindowHeight", 480);
+        *windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);
+        *windowHeight = MoonGetGlobalInt(L, "WindowHeight", 480);
         cardScale = MoonGetGlobalFloat(L, "CardScale", 1.0f);
         strncpy(variantName, MoonGetGlobalString(L, "Variant", "Klondike"), sizeof(variantName)-1);
         int typ = lua_getglobal(L, "BaizeColor");

@@ -121,7 +121,7 @@ void FoundationDraw(struct Pile *const self)
 
     struct Foundation* f = (struct Foundation*)self;
     if ( f->accept != 0 ) {
-        Vector2 pos = PileGetScreenPos(self);
+        Vector2 pos = PileScreenPos(self);
         pos.x += 10;
         pos.y += 10;
         DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, 24, 0, baizeHighlightColor);

@@ -300,10 +300,10 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
     Rectangle rectCard = CardBaizeRect(c);
     size_t index;
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        if ( p == CardGetOwner(c) ) {
+        if ( p == c->owner ) {
             continue;
         }
-        Rectangle rectPile = PileGetFannedBaizeRect(p);
+        Rectangle rectPile = PileFannedBaizeRect(p);
         float area = UtilOverlapArea(rectCard, rectPile);
         if ( area > largestArea ) {
             largestArea = area;
@@ -320,7 +320,7 @@ void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
         self->tail = NULL;
     }
     size_t index = 0;
-    struct Pile* p = CardGetOwner(cFirst);
+    struct Pile* p = cFirst->owner;
     struct Card* c = (struct Card*)ArrayFirst(p->cards, &index);
     while ( c ) {
         if ( c == cFirst ) {

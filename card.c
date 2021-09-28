@@ -40,35 +40,27 @@ void CardToString(struct Card *const self, char* z)
     sprintf(z, "{%x: p=%u o=%s s=%s p=%u}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->id.prone);
 }
 
-struct Pile* CardGetOwner(struct Card *const self)
+Vector2 CardBaizePos(struct Card *const self)
 {
-    return self->owner;
+    return self->pos;
 }
 
-void CardSetOwner(struct Card *const self, struct Pile* p)
+Vector2 CardScreenPos(struct Card *const self)
 {
-    self->owner = p;
+    return (Vector2){.x = self->pos.x + self->owner->owner->dragOffset.x, .y = self->pos.y + self->owner->owner->dragOffset.y};
 }
 
-Rectangle CardGetRect(struct Card *const self)
+Rectangle CardBaizeRect(struct Card *const self)
 {
     extern float cardWidth, cardHeight;
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
 }
 
-Vector2 CardGetBaizePos(struct Card *const self)
+Rectangle CardScreenRect(struct Card *const self)
 {
-    return self->pos;
-}
-
-Vector2 CardGetScreenPos(struct Card *const self)
-{
-    return (Vector2){.x = self->pos.x + self->owner->owner->dragOffset.x, .y = self->pos.y + self->owner->owner->dragOffset.y};
-}
-
-void CardSetPos(struct Card *const self, Vector2 pos)
-{
-    self->pos = pos;
+    extern float cardWidth, cardHeight;
+    Vector2 csp = CardScreenPos(self);
+    return (Rectangle){.x=csp.x, .y=csp.y, .width=cardWidth, .height=cardHeight}; 
 }
 
 void CardMovePositionBy(struct Card *const self, Vector2 delta)
@@ -127,14 +119,6 @@ bool CardDragging(struct Card *const self)
     return self->dragging;
 }
 
-bool CardIsAt(struct Card *const self, Vector2 point)
-{
-    extern float cardWidth, cardHeight;
-    Vector2 r = CardGetScreenPos(self);
-    Rectangle rect = {.x=r.x, .y=r.y, .width=cardWidth, .height=cardHeight};
-    return CheckCollisionPointRec(point, rect);
-}
-
 void CardUpdate(struct Card *const self)
 {
     if ( CardFlipping(self) ) {
@@ -179,11 +163,12 @@ void CardDraw(struct Card *const self)
         }
     }
 
+    Rectangle rectCard = CardScreenRect(self);
+
     if ( showFace ) {
-        SpritesheetDraw(ssFace, self->frame, self->flipWidth, CardGetScreenPos(self));
+        SpritesheetDraw(ssFace, self->frame, self->flipWidth, rectCard);
     } else {
-        // SpritesheetDraw(ssBack, 6, self->flipWidth, self->pos);
-        SpritesheetDraw(ssBack, 2, self->flipWidth, CardGetScreenPos(self));
+        SpritesheetDraw(ssBack, 2, self->flipWidth, rectCard);
     }
 }
 
