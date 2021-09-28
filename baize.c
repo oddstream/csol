@@ -96,7 +96,7 @@ void BaizeCreateCards(struct Baize *const self)
             return;
         }
 
-        SetWindowTitle(variantName);
+        UiUpdateTitleBar(self->ui, variantName);
     }
 
     {   // scope for packs, suits, i
@@ -189,7 +189,7 @@ void BaizeCreatePiles(struct Baize *const self)
     }
 
     // now the piles know their slots, calculate and set their positions
-    BaizePositionPiles(self);
+    BaizePositionPiles(self, GetScreenWidth());
 }
 
 void BaizeResetState(struct Baize *const self)
@@ -214,9 +214,8 @@ void BaizeResetState(struct Baize *const self)
     BaizeUndoPush(self);
 }
 
-void BaizePositionPiles(struct Baize *const self)
+void BaizePositionPiles(struct Baize *const self, const int windowWidth)
 {
-    extern int windowWidth;
     extern float cardWidth, cardHeight, pilePaddingX, pilePaddingY, topMargin, leftMargin;
 
     float maxX = 0.0f;
@@ -271,7 +270,7 @@ static struct Card* findCardAt(struct Baize *const self, Vector2 pos)
     while ( p ) {
         struct Card* c = (struct Card*)ArrayLast(p->cards, &cindex);
         while ( c ) {
-            if ( CardIsAt(c, pos) ) {
+            if ( CheckCollisionPointRec(pos, CardScreenRect(c)) ) {
                 return c;
             }
             c = (struct Card*)ArrayPrev(p->cards, &cindex);
@@ -298,7 +297,7 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
 {
     float largestArea = 0.0;
     struct Pile *pile = NULL;
-    Rectangle rectCard = CardGetRect(c);
+    Rectangle rectCard = CardBaizeRect(c);
     size_t index;
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         if ( p == CardGetOwner(c) ) {
@@ -521,6 +520,19 @@ void BaizeAfterUserMove(struct Baize *const self)
     BaizeUndoPush(self);
 }
 
+void BaizeLayout(struct Baize *const self, const int windowWidth, const int windowHeight)
+{
+    static int oldWidth = 0;
+    static int oldHeight = 0;
+
+    if ( oldWidth != windowWidth || oldHeight != windowHeight ) {
+        BaizePositionPiles(self, windowWidth);
+        UiLayout(self->ui, windowWidth, windowHeight);
+        oldWidth = windowWidth;
+        oldHeight = windowHeight;
+    }
+}
+
 void BaizeUpdate(struct Baize *const self)
 {
     Vector2 touchPosition = GetTouchPosition(0);
@@ -538,15 +550,6 @@ void BaizeUpdate(struct Baize *const self)
         case GESTURE_NONE:
             if ( self->tail || self->touchedPile || self->dragging ) {
                 BaizeTouchStop(self);
-            } else {
-                if ( IsWindowResized() ) {
-                    extern int windowWidth;
-                    if ( windowWidth != GetScreenWidth() ) {
-                        windowWidth = GetScreenWidth();
-                        BaizePositionPiles(self);
-                        return;
-                    }
-                }
             }
             break;
     }
