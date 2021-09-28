@@ -54,17 +54,22 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
         Foundations can only have 13 cards,
         Stock can never accept a card,
 
-- [ ] Widget, TextWidget
-- [ ] status bar (stock waste : moves : complete)
+- [ ] undo not flipping cards down
+- [ ] scaling and placement of accept
+- [ ] TextWidget font
+- [ ] tap IconWidget
 - [ ] check lua stack height before and after
-- [ ] C - BaizeCollect()
 - [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
 - [ ] draw recycle symbol
 - [ ] CardSetPos() problem
-- [ ] ttf Font problem - try a raylib font
-- [ ] title bar (hamburger : variant : collect undo)
+- [x] C - BaizeCollect()
+- [x] grep PileGet, CardGet
+- [x] ttf Font problem - try a raylib font
+- [x] title bar (hamburger : variant : collect undo)
         ui icon spritesheet
+- [x] Widget, TextWidget
+- [x] status bar (stock waste : moves : complete)
 - [x] PowerMoves
 - [x] don't like passing Baize->L around, now have ->owner
 - [x] toast
@@ -157,6 +162,8 @@ Any card or cards can be dragged anywhere, anytime. If the move breaks the rules
 Some behaviour is baked into each pyle subtype (eg cells only hold one card, foundations can only accept one card at a time, accept rules (which are set from Lua), Stock and Waste behaviour), everything else is configured by *variant.lua*.
 
 To name a procedure, use a strong verb followed by an object, *eg* PeekCard, MoveCard.
+
+... it's neither idiomatic nor necessary to put Get into the getter's name. If you have a field called owner (lower case, unexported), the getter method should be called Owner (upper case, exported), not GetOwner. The use of upper-case names for export provides the hook to discriminate the field from the method. A setter function, if needed, will likely be called SetOwner. Both names read well in practice ...
 
 ## Makefile
 
