@@ -12,6 +12,12 @@
 
 bool BaizeCardTapped(struct Baize *const self, struct Card* c)
 {
+    // {
+    //     char z[64];
+    //     CardToString(c, z);
+    //     fprintf(stdout, "Card %s [%lu] tapped\n", z, (c - self->cardLibrary));
+    //     fprintf(stdout, "sizeof(Card) == %lu\n", sizeof(struct Card));
+    // }
     lua_State *L = self->L;
     bool cardsMoved = false;
     BaizeResetError(self);

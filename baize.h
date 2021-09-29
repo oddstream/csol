@@ -25,6 +25,7 @@ struct Baize {
     size_t savedPosition;
     Vector2 lastTouch;
     struct Pile *touchedPile;
+    struct Widget *touchedWidget;
 
     bool dragging;
     Vector2 dragOffset;
@@ -32,6 +33,14 @@ struct Baize {
     struct UI* ui;
 
     char* errorString;
+};
+
+struct Array* BaizeCommandQueue;
+typedef void (*BaizeCommandFunction)(struct Baize *const);
+struct BaizeCommand {
+    // ISO C forbids conversion of object pointer to function pointer type [-Werror=pedantic]
+    // so we hide our function pointer in a struct
+    BaizeCommandFunction bcf;
 };
 
 struct Baize* BaizeNew(void);

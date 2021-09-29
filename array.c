@@ -7,7 +7,7 @@
 
 struct Array* ArrayNew(size_t initialSize)
 {
-    struct Array* self = malloc(sizeof(struct Array));
+    struct Array* self = calloc(1, sizeof(struct Array));
     self->used = 0;
     self->size = initialSize;
     self->data = calloc(initialSize, sizeof(void*));

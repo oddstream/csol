@@ -31,7 +31,7 @@ struct Spritesheet {
 
 struct Spritesheet* SpritesheetNew(const char * fname, float x, float y, int framesWide)
 {
-    struct Spritesheet* self = malloc(sizeof(struct Spritesheet));
+    struct Spritesheet* self = calloc(1, sizeof(struct Spritesheet));
     if ( !self ) {
         return NULL;
     }
@@ -45,7 +45,7 @@ struct Spritesheet* SpritesheetNew(const char * fname, float x, float y, int fra
 
 struct Spritesheet* SpritesheetNewInfo(const char* fname, float x, float y, Vector2 *coords)
 {
-    struct Spritesheet* self = malloc(sizeof(struct Spritesheet));
+    struct Spritesheet* self = calloc(1, sizeof(struct Spritesheet));
     if ( !self ) {
         return NULL;
     }

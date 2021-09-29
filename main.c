@@ -1,6 +1,7 @@
 /* main.c */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <raylib.h>
@@ -128,7 +129,10 @@ char variantName[64];
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
 Font fontAcme24 = {0};
-Font fontRoboto14 = {0};
+Font fontRobotoMedium24 = {0};
+Font fontRobotoRegular14 = {0};
+
+struct Array* BaizeCommandQueue = {0};
 
 // int main(int argc, char* argv[], char* envp[]);
 
@@ -173,7 +177,8 @@ int main(void)
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
     fontAcme24 = LoadFontEx("assets/Acme-Regular.ttf", 24, 0, 0);
-    fontRoboto14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
+    fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
+    fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
@@ -198,11 +203,25 @@ int main(void)
         BaizeCreateCards(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize);
+        BaizeCommandQueue = ArrayNew(8);
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeLayout(baize, GetScreenWidth(), GetScreenHeight());
             BaizeUpdate(baize);
             BaizeDraw(baize);
+            if ( ArrayLen(BaizeCommandQueue) > 0 ) {
+                // ISO C forbids conversion of object pointer to function pointer type [-Werror=pedantic]
+                struct BaizeCommand *bc = ArrayGet(BaizeCommandQueue, 0);
+                if ( bc ) {
+                    if ( bc->bcf ) {
+                        bc->bcf(baize);
+                    }
+                    ArrayDeleteFirst(BaizeCommandQueue, free);
+                } else {
+                    ArrayDeleteFirst(BaizeCommandQueue, NULL);
+                }
+            }
         }
+        ArrayFree(BaizeCommandQueue);
         BaizeFree(baize);
     }
 
@@ -211,7 +230,8 @@ int main(void)
     SpritesheetFree(ssIcons);
 
     UnloadFont(fontAcme24);
-    UnloadFont(fontRoboto14);
+    UnloadFont(fontRobotoMedium24);
+    UnloadFont(fontRobotoRegular14);
 
     CloseWindow();        // Close window and OpenGL context
 

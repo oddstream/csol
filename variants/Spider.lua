@@ -38,9 +38,9 @@ function Build()
 
     TABLEAU = {}
   
-    for x = 3, 10 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE, "BuildFoundation", "ChkFalse")
-    end
+    -- for x = 3, 10 do
+    --     local pile = AddPile("Foundation", x, 1, FAN_NONE, "BuildFoundation", "ChkFalse")
+    -- end
 
     for x = 1, 4 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN, "BuildTableau", "DragTableau")

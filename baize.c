@@ -207,6 +207,7 @@ void BaizeResetState(struct Baize *const self)
     self->savedPosition = 0;
 
     self->touchedPile = NULL;
+    self->touchedWidget = NULL;
 
     self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
     self->dragging = false;
@@ -362,23 +363,29 @@ void BaizeStopDrag(struct Baize *const self) {
 
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
 {
-    struct Card* c = findCardAt(self, touchPosition);
-    if ( c ) {
-        // record the distance from the card's origin to the tap point
-        // dx = touchPosition.x - c->pos.x;
-        // dy = touchPosition.y - c->pos.y;
-        // LOGCARD(c);
-        if ( !CardTransitioning(c) ) {
-            BaizeMakeTail(self, c);
-            if ( self->tail ) {
-                ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
-            }
-        }
+    // the UI is on top of the baize, so gets first dibs
+    struct Widget *w = UiFindWidgetAt(self->ui, touchPosition);
+    if ( w ) {
+        self->touchedWidget = w;
     } else {
-        self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
+        struct Card* c = findCardAt(self, touchPosition);
+        if ( c ) {
+            // record the distance from the card's origin to the tap point
+            // dx = touchPosition.x - c->pos.x;
+            // dy = touchPosition.y - c->pos.y;
+            // LOGCARD(c);
+            if ( !CardTransitioning(c) ) {
+                BaizeMakeTail(self, c);
+                if ( self->tail ) {
+                    ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
+                }
+            }
+        } else {
+            self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
+        }
     }
 
-    if ( self->tail == NULL && self->touchedPile == NULL ) {
+    if ( self->tail == NULL && self->touchedPile == NULL && self->touchedWidget == NULL ) {
         BaizeStartDrag(self);
     }
     
@@ -398,6 +405,8 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
         }
     } else if ( self->touchedPile ) {
         // do nothing, can't drag a pile
+    } else if ( self->touchedWidget ) {
+        // TODO drag widget (scroll a drawer)
     } else if ( self->dragging ) {
         BaizeDragBy(self, delta);
     }
@@ -461,6 +470,16 @@ void BaizeTouchStop(struct Baize *const self)
         }
         ArrayFree(self->tail);
         self->tail = NULL;
+    } else if ( self->touchedWidget ) {
+        // fprintf(stderr, "Widget Command\n");
+        if ( self->touchedWidget->bcf ) {
+            struct BaizeCommand *bc = calloc(1, sizeof(struct BaizeCommand));
+            if ( bc ) {
+                bc->bcf = self->touchedWidget->bcf;
+                ArrayPush(BaizeCommandQueue, bc);
+            }
+        }
+        self->touchedWidget = NULL;
     } else if ( self->touchedPile ) {
         if ( self->touchedPile->vtable->PileTapped(self->touchedPile) ) {
             BaizeAfterUserMove(self);
@@ -548,7 +567,7 @@ void BaizeUpdate(struct Baize *const self)
             BaizeTouchMove(self, touchPosition);
             break;
         case GESTURE_NONE:
-            if ( self->tail || self->touchedPile || self->dragging ) {
+            if ( self->tail || self->touchedPile || self->touchedWidget || self->dragging ) {
                 BaizeTouchStop(self);
             }
             break;

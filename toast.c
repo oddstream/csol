@@ -18,7 +18,7 @@
 
 struct Toast* ToastNew(const char* message, int ticks)
 {
-    struct Toast *self = calloc(sizeof(struct Toast), 1);
+    struct Toast *self = calloc(1, sizeof(struct Toast));
     if ( self ) {
         self->message = strdup(message);
         self->ticksLeft = ticks;
@@ -40,7 +40,7 @@ void ToastFree(struct Toast *const self)
 
 struct ToastManager* ToastManagerNew()
 {
-    struct ToastManager *self = calloc(sizeof(struct ToastManager), 1);
+    struct ToastManager *self = calloc(1, sizeof(struct ToastManager));
     if ( self ) {
         self->toasts = ArrayNew(8);
     }
@@ -71,20 +71,20 @@ void ToastManagerUpdate(struct ToastManager *const self)
 
 static void DrawCenteredText(Rectangle r, const char* text, Vector2 mte)
 {
-    extern Font fontRoboto14;
+    extern Font fontRobotoRegular14;
     extern Color uiTextColor;
 
     Vector2 pos;
     pos.x = r.x + (r.width / 2.0f) - (mte.x / 2.0f);
     pos.y = r.y + (r.height / 2.0f) - (mte.y / 2.0f);
-    DrawTextEx(fontRoboto14, text, pos, 14.0f, 1.2f, uiTextColor);
+    DrawTextEx(fontRobotoRegular14, text, pos, 14.0f, 1.2f, uiTextColor);
 }
 
 void ToastManagerDraw(struct ToastManager *const self)
 {
     // ToastManager draws all the Toasts, rather than handing it down to the Toast object, because we know position in queue
     extern Color uiBackgroundColor;
-    extern Font fontRoboto14;
+    extern Font fontRobotoRegular14;
 
     int baizeWidth = GetScreenWidth();
     int baizeHeight = GetScreenHeight();
@@ -92,7 +92,7 @@ void ToastManagerDraw(struct ToastManager *const self)
     float rY = (float)(baizeHeight - 14 - 14 - 14 - 24);  // 24 height of statusbar
     size_t index;
     for ( struct Toast *t = ArrayFirst(self->toasts, &index); t; t = ArrayNext(self->toasts, &index) ) {
-        Vector2 mte = MeasureTextEx(fontRoboto14, t->message, 14.0f, 1.2f);
+        Vector2 mte = MeasureTextEx(fontRobotoRegular14, t->message, 14.0f, 1.2f);
         // mte.x += 24.0f;
         // mte.y += 14.0f;
 

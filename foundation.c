@@ -30,7 +30,7 @@ static struct PileVtable foundationVtable = {
 
 struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
-    struct Foundation* self = malloc(sizeof(struct Foundation));
+    struct Foundation* self = calloc(1, sizeof(struct Foundation));
     if ( self ) {
         PileCtor((struct Pile*)self, "Foundation", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &foundationVtable;

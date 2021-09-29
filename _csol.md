@@ -23,7 +23,7 @@ Array of Containers
 ## Next
 
 ```bash
-valgrind --track-origins=yes --leak-check=full ./csol
+valgrind --track-origins=yes --leak-check=full -s ./csol
 
 ==531280==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
 ==531280==    by 0x1136A2: ArrayNew (array.c:10)
@@ -54,15 +54,33 @@ CanAcceptTail is still in vtable because some pile behaviour is baked in:
         Foundations can only have 13 cards,
         Stock can never accept a card,
 
+- [ ] empty toast during CardTapped
+- [ ] >1 right aligned widget in titlebar
+- [ ] Drawer
+        Container > Drawer > Widgets
+- [ ] Icon next to text widgets, implies all widgets have icon, text
+- [ ] Collect not collecting Spider piles
+        Collect has to move to Lua?
+        Or don't collect Spider
 - [ ] undo not flipping cards down
-- [ ] scaling and placement of accept
-- [ ] TextWidget font
-- [ ] tap IconWidget
+        maybe because prone state in CardId is changing
+        should save CardId (including new prone flag), not Card*
+        then find CardId in cardLibrary (masking out prone flag)
+        and update prone flag
+        DON'T STORE PRONE FLAG IN LIBRARY
+        struct SavedCard {
+                Card *card; or int cardLibraryIndex (*Card - cardLibraryIndex)/sizeof(Card)
+                bool prone;
+        }
+- [ ] scaling and placement of accept, "0" being shown
 - [ ] check lua stack height before and after
 - [ ] dragging 4 and 5 separately after they'd been DragCancelled, other dragging confusion
 - [ ] _Generic
 - [ ] draw recycle symbol
 - [ ] CardSetPos() problem
+- [x] Array CmdQ PostCommand() typedef CommandFunc main loop knows baize
+- [x] tap IconWidget
+- [x] TextWidget font RobotoMedium24
 - [x] C - BaizeCollect()
 - [x] grep PileGet, CardGet
 - [x] ttf Font problem - try a raylib font
@@ -139,9 +157,9 @@ gilbert@iMac:/media/gilbert/GREENTHUMB$ git clone /home/gilbert/projects/csol cs
 
 ## Conventions
 
-YAGNI, minimalist
-
 No typedefs on structs or enums.
+
+Do not use malloc(), use calloc() instead (to avoid valgrind -s warnings).
 
 Functions names are in PascalCase, ObjectVerb.
 

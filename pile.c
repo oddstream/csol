@@ -14,7 +14,7 @@
 #define CARD_BACK_FAN_FACTOR (5.0f)
 
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
-//     struct Pile* self = malloc(sizeof(struct Pile));
+//     struct Pile* self = calloc(1, sizeof(struct Pile));
 //     if ( self ) {
 //         self->magic = PILE_MAGIC;
 //         strncpy(self->category, category, sizeof self->category - 1);
@@ -61,7 +61,6 @@ size_t PileLen(struct Pile *const self)
 
 void PilePushCard(struct Pile *const self, struct Card* c)
 {
-    // if ( strncmp(self->category, "Stock", 5) == 0 ) {
     if ( PileIsStock(self) ) {
         CardFlipDown(c);
     }
@@ -336,13 +335,13 @@ int PileGenericCollect(struct Pile *const self)
     int cardsMoved = 0;
     size_t index;
     for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
-
         for (;;) {
             struct Card *c = PilePeekCard(self);
             if ( c == NULL ) {
                 // this pile is empty
                 return cardsMoved;
             }
+            // TODO Spider
             struct Array *tail = ArrayNew(1);   // TODO not efficient
             ArrayPush(tail, c);
             bool ok = fp->vtable->CanAcceptTail(baize, fp, tail);

@@ -8,6 +8,7 @@
 #include <raylib.h>
 
 #include "array.h"
+#include "baize.h"
 
 enum IconName {
     // names taken from google material icon filenames
@@ -46,10 +47,11 @@ struct Widget {
     struct Container *parent;
     int align;  // alignment in parent container: left=-1, center=0, right=+1
     // bool disabled;
+    BaizeCommandFunction bcf;
     Rectangle rect;    // x, y relative to parent
 };
 
-void WidgetCtor(struct Widget *const self, struct Container* parent, int align);
+void WidgetCtor(struct Widget *const self, struct Container* parent, int align, BaizeCommandFunction bcf);
 void WidgetUpdate(struct Widget *const self);
 void WidgetDraw(struct Widget *const self);
 void WidgetFree(struct Widget *const self);
@@ -59,15 +61,17 @@ struct IconWidget {
     enum IconName frame;
 };
 
-struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame);
+struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, BaizeCommandFunction bcf);
 void IconWidgetDraw(struct Widget *const self);
 
 struct TextWidget {
     struct Widget super;
+    Font* font;
+    float fontSize;
     char *text;
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, int align);
+struct TextWidget* TextWidgetNew(struct Container *parent, Font *font, float fontSize, int align);
 void TextWidgetSetText(struct TextWidget *const self, const char *text);
 void TextWidgetDraw(struct Widget *const self);
 void TextWidgetFree(struct Widget *const self);
@@ -145,6 +149,7 @@ struct UI* UiNew(void);
 void UiToast(struct UI *const self, const char* message);
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right);
 void UiUpdateTitleBar(struct UI *const self, const char* center);
+struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos);
 void UiLayout(struct UI *const self, const int windowWidth, const int windowHeight);
 void UiUpdate(struct UI *const self);
 void UiDraw(struct UI *const self);

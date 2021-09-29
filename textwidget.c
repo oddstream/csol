@@ -10,12 +10,14 @@ static struct WidgetVtable textWidgetVtable = {
     &TextWidgetFree,
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, int align)
+struct TextWidget* TextWidgetNew(struct Container *parent, Font *font, float fontSize, int align)
 {
     struct TextWidget* self = calloc(1, sizeof(struct TextWidget));
     if ( self ) {
-        WidgetCtor((struct Widget*)self, parent, align);
+        WidgetCtor((struct Widget*)self, parent, align, NULL);
         self->super.vtable = &textWidgetVtable;
+        self->font = font;
+        self->fontSize = fontSize;
         self->text = NULL;
     }
     return self;
@@ -23,15 +25,13 @@ struct TextWidget* TextWidgetNew(struct Container *parent, int align)
 
 void TextWidgetSetText(struct TextWidget *const self, const char* text)
 {
-    extern Font fontRoboto14;
-
     if ( self->text ) {
         free(self->text);
         self->text = NULL;
     }
     if ( text ) {
         self->text = strdup(text);
-        Vector2 mte = MeasureTextEx(fontRoboto14, text, 14.0f, 1.2f);
+        Vector2 mte = MeasureTextEx(*(self->font), text, self->fontSize, 1.2f);
         self->super.rect.width = mte.x;
         self->super.rect.height = mte.y;
     }
@@ -39,7 +39,6 @@ void TextWidgetSetText(struct TextWidget *const self, const char* text)
 
 void TextWidgetDraw(struct Widget *const self)
 {
-    extern Font fontRoboto14;
     extern Color uiTextColor;
 
     struct TextWidget *const tw = (struct TextWidget*)self;
@@ -54,7 +53,7 @@ void TextWidgetDraw(struct Widget *const self)
     Vector2 pos;
     pos.x = rect.x + self->rect.x;
     pos.y = rect.y + self->rect.y;
-    DrawTextEx(fontRoboto14, tw->text, pos, 14.0f, 1.2f, uiTextColor);
+    DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, 1.2f, uiTextColor);
 }
 
 void TextWidgetFree(struct Widget *const self)

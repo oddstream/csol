@@ -72,15 +72,16 @@ void CardMovePositionBy(struct Card *const self, Vector2 delta)
 
 void CardTransitionTo(struct Card *const self, Vector2 pos)
 {
-    const float speed = 15.0f;
+    // const float speed = 15.0f;
     if ( pos.x == self->pos.x && pos.y == self->pos.y ) {
         self->lerpStep = 1.0f;    // stop any current lerp
         return;
     }
     self->lerpSrc = self->pos;
     self->lerpDst = pos;
-    float dist = UtilDistance(self->lerpSrc, self->lerpDst);
-    self->lerpStepAmount = fminf(0.025f, speed*(1.0f/dist));
+    // float dist = UtilDistance(self->lerpSrc, self->lerpDst);
+    // self->lerpStepAmount = fminf(0.025f, speed*(1.0f/dist));
+    self->lerpStepAmount = 0.025f;
     self->lerpStep = 0.0;       // trigger a lerp
 }
 
@@ -185,7 +186,7 @@ void CardFlipUp(struct Card *const self)
 {
     if ( self->id.prone ) {
         self->id.prone = false;
-        self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower
+        self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
         self->flipWidth = 1.0f;             // ... from it's full width
     }
 }

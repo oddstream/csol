@@ -28,7 +28,7 @@ static struct PileVtable tableauVtable = {
 
 struct Tableau* TableauNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
 {
-    struct Tableau* self = malloc(sizeof(struct Tableau));
+    struct Tableau* self = calloc(1, sizeof(struct Tableau));
     if ( self ) {
         PileCtor((struct Pile*)self, "Tableau", slot, fan, buildfunc, dragfunc);
         self->super.vtable = &tableauVtable;
