@@ -183,7 +183,7 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.x += c->id.prone ? backDelta : faceDelta;
+                pos.x += c->prone ? backDelta : faceDelta;
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
@@ -192,7 +192,7 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.x -= c->id.prone ? backDelta : faceDelta;
+                pos.x -= c->prone ? backDelta : faceDelta;
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
@@ -201,7 +201,7 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
             backDelta = cardHeight / CARD_BACK_FAN_FACTOR;
             c = (struct Card*)ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.y += c->id.prone ? backDelta : faceDelta;
+                pos.y += c->prone ? backDelta : faceDelta;
                 c = (struct Card*)ArrayNext(self->cards, &index);
             }
             break;
@@ -331,6 +331,9 @@ int PileGenericCollect(struct Pile *const self)
 {
     // Collect is like tapping on the top card of each pile (except Stock), or on a K in a Spider pile
     // prefer to collect a run of cards from one pile to one foundation
+
+    // NB Spider piles are not collected because moving them to the 'foundations' is optional according to Morehead and Mott-Smith
+    // compensated for by Spider being complete when a Tableau is either empty or contains 13 conformant cards
     struct Baize* baize = self->owner;
     int cardsMoved = 0;
     size_t index;
@@ -341,7 +344,6 @@ int PileGenericCollect(struct Pile *const self)
                 // this pile is empty
                 return cardsMoved;
             }
-            // TODO Spider
             struct Array *tail = ArrayNew(1);   // TODO not efficient
             ArrayPush(tail, c);
             bool ok = fp->vtable->CanAcceptTail(baize, fp, tail);

@@ -142,6 +142,7 @@ int main(void)
     int windowWidth = 640, windowHeight = 480;
 
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
+    fprintf(stderr, "sizeof(void*) == %lu\n", sizeof(void*));
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     baizeHighlightColor = (Color){255,255,255,31};

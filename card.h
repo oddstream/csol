@@ -3,6 +3,8 @@
 #ifndef CARD_H
 #define CARD_H
 
+#include <stdlib.h>
+
 enum CardOrdinal {
     ACE = 1,
     TWO = 2,
@@ -30,12 +32,12 @@ struct CardId {
     unsigned int pack:4;
     unsigned int ordinal:4;
     unsigned int suit:4;
-    unsigned int prone:1;
 };
 
 struct Card /* tag */ {
     unsigned magic;
     struct CardId id;
+    bool prone;
     Vector2 pos;
     struct Pile* owner;
 

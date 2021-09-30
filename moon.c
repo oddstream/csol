@@ -171,7 +171,7 @@ void MoonPushCard(lua_State *L, struct Card *const c)
         lua_pushinteger(L, c->id.suit == DIAMOND || c->id.suit == HEART ? 1 : 0);
         lua_setfield(L, -2, "color");   // table["color"] == [0|1], pops key value
 
-        lua_pushboolean(L, c->id.prone);
+        lua_pushboolean(L, c->prone);
         lua_setfield(L, -2, "prone");   // table["prone"] = c->prone, pops key value
 
         lua_pushlightuserdata(L, c->owner);

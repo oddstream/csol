@@ -18,7 +18,7 @@ extern struct Spritesheet *ssFace, *ssBack;
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
-    struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .id.prone = 1, .dragging = false};
+    struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .prone = 1, .dragging = false};
     self.frame = (suit * 13) + (ord - 1);   // TODO specific to retro spritesheet
     self.pos = (Vector2){.x=0.0f,.y=0.0f};
     self.flipWidth = 1.0f;
@@ -37,7 +37,7 @@ bool CardValid(struct Card *const self)
 void CardToString(struct Card *const self, char* z)
 {
     unsigned dw = *((unsigned*)(&self->id));
-    sprintf(z, "{%x: p=%u o=%s s=%s p=%u}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->id.prone);
+    sprintf(z, "{%x: p=%u o=%s s=%s p=%u}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->prone);
 }
 
 Vector2 CardBaizePos(struct Card *const self)
@@ -149,7 +149,7 @@ void CardDraw(struct Card *const self)
 
     // card prone has already been set to destination state
     if ( self->flipStep < 0.0f ) {
-        if ( self->id.prone ) {
+        if ( self->prone ) {
             // card is getting narrower, and it's going to show face down, but show face up
             showFace = true;
         } else {
@@ -157,7 +157,7 @@ void CardDraw(struct Card *const self)
             showFace = false;
         }
     } else {
-        if ( self->id.prone ) {
+        if ( self->prone ) {
             showFace = false;
         } else {
             showFace = true;
@@ -184,8 +184,8 @@ void CardDraw(struct Card *const self)
 
 void CardFlipUp(struct Card *const self)
 {
-    if ( self->id.prone ) {
-        self->id.prone = false;
+    if ( self->prone ) {
+        self->prone = false;
         self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
         self->flipWidth = 1.0f;             // ... from it's full width
     }
@@ -193,8 +193,8 @@ void CardFlipUp(struct Card *const self)
 
 void CardFlipDown(struct Card *const self)
 {
-    if ( !self->id.prone ) {
-        self->id.prone = true;
+    if ( !self->prone ) {
+        self->prone = true;
         self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
         self->flipWidth = 1.0f;             // ... from it's full width
     }

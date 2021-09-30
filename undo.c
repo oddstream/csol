@@ -3,42 +3,87 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "baize.h"
 #include "array.h"
+#include "baize.h"
 
 #include "ui.h"
 
+struct SavedCard {
+    unsigned int index:15;
+    unsigned int prone:1;
+};
+
+struct SavedCardArray {
+    size_t len;
+    struct SavedCard sav[];
+};
+
+static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct Array *const cards)
+{
+    struct SavedCardArray* self = calloc(1, sizeof(struct SavedCardArray) + ArrayLen(cards) * sizeof(struct SavedCard));
+    if ( self ) {
+        self->len = 0;
+        size_t index;
+        for ( struct Card *c = (struct Card*)ArrayFirst(cards, &index); c; c = (struct Card*)ArrayNext(cards, &index) ) {
+            self->sav[self->len++] = (struct SavedCard){.index = c - cardLibrary, .prone = c->prone};
+        }
+    }
+    return self;
+}
+
+static void SavedCardArrayPopAll(struct SavedCardArray *const self, struct Card *const cardLibrary, struct Pile *const pile)
+{
+    for ( size_t i=0; i<self->len; i++ ) {
+        struct SavedCard sc = self->sav[i];
+        struct Card* c = &cardLibrary[sc.index];
+        PilePushCard(pile, c);
+        if ( sc.prone ) {
+            CardFlipDown(c);
+        } else {
+            CardFlipUp(c);
+        }
+    }
+}
+
+static void SavedCardArrayFree(struct SavedCardArray *const sca)
+{
+    if ( sca ) {
+        free(sca);
+    }
+}
+
+
 /*
-    A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays of card pointers
-    (same as the Pile->cards)
+    A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays of SavedCard objects
 */
 
-struct Array* SnapshotNew(struct Baize *const self)
+static struct Array* SnapshotNew(struct Baize *const self)
 {
     struct Array *savedPiles = ArrayNew(ArrayLen(self->piles));
-    size_t index;
-    for ( struct Pile *p = (struct Pile*)ArrayFirst(self->piles, &index); p; p = (struct Pile*)ArrayNext(self->piles, &index) ) {
-        struct Array *savedCards = ArrayClone(p->cards);
-        ArrayPush(savedPiles, savedCards);
+    size_t pindex;
+    for ( struct Pile *p = (struct Pile*)ArrayFirst(self->piles, &pindex); p; p = (struct Pile*)ArrayNext(self->piles, &pindex) ) {
+        struct SavedCardArray* sca = SavedCardArrayNew(self->cardLibrary, p->cards);
+        ArrayPush(savedPiles, sca);
     }
     return savedPiles;
 }
 
-void SnapshotFree(struct Array* savedPiles) {
+static void SnapshotFree(struct Array* savedPiles)
+{
     size_t pindex;
-    // *savedPiles is an Array of Pile*
-    for ( struct Array *p = (struct Array*)ArrayFirst(savedPiles, &pindex); p; p = (struct Array*)ArrayNext(savedPiles, &pindex) ) {
-        // *p is an Array of Card*
-        ArrayFree(p);
+    for ( struct SavedCardArray *p = (struct SavedCardArray*)ArrayFirst(savedPiles, &pindex); p; p = (struct SavedCardArray*)ArrayNext(savedPiles, &pindex) ) {
+        SavedCardArrayFree(p);
     }
     ArrayFree(savedPiles);
 }
 
-struct Array* UndoStackNew(void) {
+struct Array* UndoStackNew(void)
+{
     return ArrayNew(32);
 }
 
-void UndoStackFree(struct Array *stack) {
+void UndoStackFree(struct Array *stack)
+{
     for ( struct Array* item = (struct Array*)ArrayPop(stack); item; item = (struct Array*)ArrayPop(stack) ) {
         SnapshotFree(item);
     }
@@ -47,7 +92,8 @@ void UndoStackFree(struct Array *stack) {
     ArrayFree(stack);
 }
 
-void BaizeUndoPush(struct Baize *const self) {
+void BaizeUndoPush(struct Baize *const self)
+{
     struct Array* savedPiles = SnapshotNew(self);
     ArrayPush(self->undoStack, savedPiles);
     // mark movable
@@ -76,18 +122,10 @@ struct Array* BaizeUndoPop(struct Baize *const self) {
     return NULL;
 }
 
-void PileUpdateFromCardArray(struct Pile *const self, struct Array *cards)
+static void UpdateFromSavedCardArray(struct Baize *const baize, struct Pile *const pile, struct SavedCardArray *sca)
 {
-    ArrayReset(self->cards);
-    size_t cindex;
-    for ( struct Card *c = (struct Card*)ArrayFirst(cards, &cindex); c; c = (struct Card*)ArrayNext(cards, &cindex) ) {
-        PilePushCard(self, c);
-        if ( c->id.prone ) {
-            CardFlipDown(c);
-        } else {
-            CardFlipUp(c);
-        }
-    }
+    ArrayReset(pile->cards);
+    SavedCardArrayPopAll(sca, baize->cardLibrary, pile);
     // TODO scrunch this pile
 }
 
@@ -95,12 +133,12 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
 {
     if ( ArrayLen(self->piles) != ArrayLen(savedPiles) ) {
         fprintf(stderr, "Bad snapshot\n");
-    } else {
-        for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
-            struct Array* pSrc = ArrayGet(savedPiles, i);
-            struct Pile* pDst = ArrayGet(self->piles, i);
-            PileUpdateFromCardArray(pDst, pSrc);
-        }
+        return;
+    }
+    for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
+        struct SavedCardArray *sca = ArrayGet(savedPiles, i);
+        struct Pile* pDst = ArrayGet(self->piles, i);
+        UpdateFromSavedCardArray(self, pDst, sca);
     }
 }
 
