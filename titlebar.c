@@ -2,8 +2,6 @@
 
 #include "ui.h"
 
-#define HEIGHT (36.0f)
-
 static struct ContainerVtable titleBarVtable = {
     &TitleBarLayoutWidgets,
     &TitleBarLayout,
@@ -18,7 +16,7 @@ struct TitleBar* TitleBarNew(void)
 
     struct TitleBar* self = calloc(1, sizeof(struct TitleBar));
     if ( self ) {
-        ContainerCtor((struct Container*)self, (Rectangle){.x=0.0f, .y=0.0f, .width=w, .height=HEIGHT});
+        ContainerCtor((struct Container*)self, (Rectangle){.x=0.0f, .y=0.0f, .width=w, .height=TITLEBAR_HEIGHT});
         self->super.vtable = &titleBarVtable;
     }
     return self;
@@ -50,7 +48,7 @@ void TitleBarLayout(struct Container *const self, const int windowWidth, const i
     (void)windowHeight;
 
     struct TitleBar* tb = (struct TitleBar*)self;
-    tb->super.rect = (Rectangle){.x=0, .y=0.0f, .width=(float)windowWidth, .height=HEIGHT};
+    tb->super.rect = (Rectangle){.x=0, .y=0.0f, .width=(float)windowWidth, .height=TITLEBAR_HEIGHT};
 
     TitleBarLayoutWidgets(self);
 }

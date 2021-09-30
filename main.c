@@ -143,6 +143,8 @@ int main(void)
 
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
     fprintf(stderr, "sizeof(void*) == %lu\n", sizeof(void*));
+    fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
+    fprintf(stderr, "sizeof(Card) == %lu\n", sizeof(struct Card));
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     baizeHighlightColor = (Color){255,255,255,31};

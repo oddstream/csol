@@ -31,6 +31,11 @@ enum IconName {
     UNDO = 4,
 };
 
+#define TITLEBAR_HEIGHT (48.0f)
+#define STATUSBAR_HEIGHT (24.0f)
+#define DRAWER_WIDTH (256.0f)
+#define WIDGET_PADDING (14.0f)
+
 struct Container;   // forward declaration
 struct Widget;
 struct UI;
@@ -104,6 +109,35 @@ void ContainerUpdate(struct Container *const self);
 void ContainerDraw(struct Container *const self);
 void ContainerFree(struct Container *const self);
 
+enum DrawerAniState {
+    LEFT = -1,
+    STOP = 0,
+    RIGHT = 1,
+};
+
+struct Drawer {
+    struct Container super;
+    enum DrawerAniState aniState;
+};
+
+void DrawerCtor(struct Drawer *const self, Rectangle r);
+void DrawerLayoutWidgets(struct Container *const self);
+void DrawerLayout(struct Container *const self, const int windowWidth, const int windowHeight);
+void DrawerUpdate(struct Container *const self);
+void DrawerDraw(struct Container *const self);
+void DrawerFree(struct Container *const self);
+
+bool DrawerVisible(struct Drawer *const self);
+void DrawerHide(struct Drawer *const self);
+void DrawerShow(struct Drawer *const self);
+
+struct NavDrawer {
+    struct Drawer super;
+};
+
+struct NavDrawer* NavDrawerNew(void);
+void NavDrawerFree(struct Container *const self);
+
 struct StatusBar {
     struct Container super;
 };
@@ -149,6 +183,7 @@ struct UI* UiNew(void);
 void UiToast(struct UI *const self, const char* message);
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right);
 void UiUpdateTitleBar(struct UI *const self, const char* center);
+void UiToggleNavDrawer(struct UI *const self);
 struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos);
 void UiLayout(struct UI *const self, const int windowWidth, const int windowHeight);
 void UiUpdate(struct UI *const self);
@@ -157,6 +192,12 @@ void UiFree(struct UI *const self);
 
 struct UI {
     struct Array *containers;
+
+    // handy shortcuts to save digging around in container array
+    struct TitleBar *titleBar;
+    struct StatusBar *statusBar;
+    struct NavDrawer *navDrawer;
+
     struct ToastManager *toastManager;
 };
 

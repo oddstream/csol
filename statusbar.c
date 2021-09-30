@@ -2,8 +2,6 @@
 
 #include "ui.h"
 
-#define HEIGHT (24.0f)
-
 static struct ContainerVtable statusBarVtable = {
     &StatusBarLayoutWidgets,
     &StatusBarLayout,
@@ -19,7 +17,7 @@ struct StatusBar* StatusBarNew(void)
 
     struct StatusBar* self = calloc(1, sizeof(struct StatusBar));
     if ( self ) {
-        ContainerCtor((struct Container*)self, (Rectangle){.x=0, .y=h-HEIGHT, .width=w, .height=HEIGHT});
+        ContainerCtor((struct Container*)self, (Rectangle){.x=0, .y=h-STATUSBAR_HEIGHT, .width=w, .height=STATUSBAR_HEIGHT});
         self->super.vtable = &statusBarVtable;
     }
     return self;
@@ -49,7 +47,7 @@ void StatusBarLayoutWidgets(struct Container *const self)
 void StatusBarLayout(struct Container *const self, const int windowWidth, const int windowHeight)
 {
     struct StatusBar* s = (struct StatusBar*)self;
-    s->super.rect = (Rectangle){.x=0, .y=(float)windowHeight-HEIGHT, .width=(float)windowWidth, .height=HEIGHT};
+    s->super.rect = (Rectangle){.x=0, .y=(float)windowHeight-STATUSBAR_HEIGHT, .width=(float)windowWidth, .height=STATUSBAR_HEIGHT};
 
     StatusBarLayoutWidgets(self);
 }

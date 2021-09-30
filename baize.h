@@ -71,5 +71,6 @@ void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
 
 bool BaizeCardTapped(struct Baize *const self, struct Card* c);
+void BaizeToggleNavDrawerCommand(struct Baize *const self);
 
 #endif

@@ -687,3 +687,8 @@ void BaizeFree(struct Baize *const self)
     lua_close(self->L);
     free(self);
 }
+
+void BaizeToggleNavDrawerCommand(struct Baize *const self)
+{
+    UiToggleNavDrawer(self->ui);
+}
