@@ -1,10 +1,10 @@
 -- Spider
 
--- PACKS = 8
--- SUITS = 1
+PACKS = 8
+SUITS = 1
 
-PACKS = 4
-SUITS = 2
+-- PACKS = 4
+-- SUITS = 2
 
 -- PACKS = 2
 -- SUITS = 4
@@ -184,7 +184,7 @@ function CardTapped(card)
     LogCard("CardTapped", card)
 
     local cardsMoved = false
-    local errMsg = ""
+    local errMsg = nil
     local tabCards = 0
     local emptyTabs = 0
     if card.owner == STOCK then

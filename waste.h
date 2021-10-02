@@ -23,6 +23,6 @@ bool WasteComplete(struct Pile *const self);
 bool WasteConformant(struct Pile *const self);
 void WasteSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void WasteSetRecycles(struct Pile *const self, int r);
-void WasteDraw(struct Pile *const self);
+void WasteCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
 #endif

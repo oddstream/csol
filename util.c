@@ -5,6 +5,7 @@
 
 #include "util.h"
 
+// Formula is the square root of (x2 - x1)^2 + (y2 - y1)^2
 float UtilDistance(Vector2 a, Vector2 b)
 {
     double first = pow(b.x - a.x, 2);
@@ -12,12 +13,33 @@ float UtilDistance(Vector2 a, Vector2 b)
     return sqrt(first + second);
 }
 
+// Lerp see https://en.wikipedia.org/wiki/Linear_interpolation
+float UtilLerp(float v0, float v1, float t)
+{
+    return (1-t)*v0 + t*v1;
+}
+
+// Smootherstep see http://sol.gfxile.net/interpolation/
 float UtilSmootherstep(float A, float B, float v)
 {
     v = (v) * (v) * (v) * ((v)*((v) * 6.0f - 15.0f) + 10.0f);
     return (B * v) + (A * (1.0f - v));
 }
 
+// Normalize is the opposite of lerp. Instead of a range and a factor, we give a range and a value to find out the factor.
+float UtilNormalize(float start, float finish, float value)
+{
+    return (value - start) / (finish - start);
+}
+
+// MapValue converts a value from the scale [fromMin, fromMax] to a value from the scale [toMin, toMax].
+// It’s just the normalize and lerp functions working together.
+float UtilMapValue(float value, float fromMin, float fromMax, float toMin, float toMax)
+{
+    return UtilLerp(toMin, toMax, UtilNormalize(fromMin, fromMax, value));
+}
+
+// OverlapArea returns the intersection area of two rectangles
 float UtilOverlapArea(Rectangle a, Rectangle b)
 {
     float x = fmaxf(0, fminf(a.x + a.width, b.x + b.width) - fmaxf(a.x, b.x));

@@ -52,7 +52,6 @@ static void SavedCardArrayFree(struct SavedCardArray *const sca)
     }
 }
 
-
 /*
     A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays of SavedCard objects
 */
@@ -99,8 +98,10 @@ void BaizeUndoPush(struct Baize *const self)
     // mark movable
     // recalc percent complete
     char zLeft[64], zCenter[64], zRight[64];
+
     sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
-    strcpy(zRight, "COMPLETE: tba%");
+
+    sprintf(zRight, "COMPLETE: %d%%", BaizeCalcPercentComplete(self));
 
     if ( PileHidden(self->stock) ) {
         UiUpdateStatusBar(self->ui, NULL, zCenter, zRight);
@@ -144,6 +145,8 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
 
 void BaizeSavePositionCommand(struct Baize *const self)
 {
+    UiHideNavDrawer(self->ui);
+
     // if ( BaizeComplete(self) ) {
     //     fprintf(stderr, "*** Cannot bookmark a completed game ***\n");
     //     return;
@@ -156,6 +159,8 @@ void BaizeSavePositionCommand(struct Baize *const self)
 
 void BaizeLoadPositionCommand(struct Baize *const self)
 {
+    UiHideNavDrawer(self->ui);
+
     fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
 
     if ( self->savedPosition == 0 || self->savedPosition > ArrayLen(self->undoStack) ) {
@@ -184,6 +189,8 @@ void BaizeLoadPositionCommand(struct Baize *const self)
 
 void BaizeRestartDealCommand(struct Baize *const self)
 {
+    UiHideNavDrawer(self->ui);
+
     struct Array *snapshot = NULL;
     while ( ArrayLen(self->undoStack) > 0 ) {
         if ( snapshot ) {
@@ -202,7 +209,7 @@ void BaizeRestartDealCommand(struct Baize *const self)
 void BaizeUndoCommand(struct Baize *const self)
 {
     if ( ArrayLen(self->undoStack) < 2 ) {
-        fprintf(stderr, "*** Nothing to undo ***\n");
+        UiToast(self->ui, "Nothing to undo");
         return;
     }
 

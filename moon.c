@@ -59,6 +59,26 @@ void MoonRegisterFunctions(lua_State* L)
     }
 }
 
+bool MoonGetGlobalBool(lua_State* L, const char* var, const bool def)
+{
+    bool result = def;
+    // fprintf(stderr, "stack %d\n", lua_gettop(L));
+    int typ = lua_getglobal(L, var);    // pushes value onto stack
+    if ( typ == LUA_TNIL ) {
+        fprintf(stderr, "%s is nil\n", var);
+        result = def;
+    } else if ( typ != LUA_TBOOLEAN ) {
+        fprintf(stderr, "%s is not a boolean\n", var);
+        result = def;
+    } else {
+        result = lua_toboolean(L, -1); // does not alter stack
+    }
+    lua_pop(L, 1); // remove boolean from stack
+    fprintf(stderr, "%s=%d\n", var, result);
+    // fprintf(stderr, "stack %d\n", lua_gettop(L));
+    return result;
+}
+
 int MoonGetGlobalInt(lua_State* L, const char* var, const int def)
 {
     int result = def;
@@ -79,10 +99,6 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def)
         }
     }
     lua_pop(L, 1); // remove integer from stack
-    // if ( lua_gettop(L) ) {
-    //     lua_pop(L, 1);
-    // }
-    // lua_settop(L, 0);
     fprintf(stderr, "%s=%d\n", var, result);
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
@@ -160,6 +176,9 @@ float MoonGetFieldNumber(lua_State* L, const char* key, const float def)
 void MoonPushCard(lua_State *L, struct Card *const c)
 {
     if ( c ) {
+        if ( !CardValid(c) ) {
+            fprintf(stderr, "WARNING: Invalid card in %s\n", __func__);
+        }
         lua_createtable(L, 0, 5);       // create and push new 4-element table
         
         lua_pushinteger(L, c->id.ordinal);

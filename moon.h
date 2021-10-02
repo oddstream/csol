@@ -8,6 +8,7 @@
 
 void MoonRegisterFunctions(lua_State* L);
 
+bool MoonGetGlobalBool(lua_State* L, const char* var, const bool def);
 int MoonGetGlobalInt(lua_State* L, const char* var, const int def);
 float MoonGetGlobalFloat(lua_State* L, const char* var, const float def);
 const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def);

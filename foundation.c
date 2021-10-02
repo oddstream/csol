@@ -22,6 +22,7 @@ static struct PileVtable foundationVtable = {
     &FoundationConformant,
     &FoundationSetAccept,
     &FoundationSetRecycles,
+    &FoundationCountSortedAndUnsorted,
 
     &PileUpdate,
     &FoundationDraw,
@@ -112,6 +113,12 @@ void FoundationSetRecycles(struct Pile *const self, int r)
     (void)r;
 }
 
+void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+{
+    (void)unsorted;
+    *sorted += ArrayLen(self->cards);
+}
+
 void FoundationDraw(struct Pile *const self)
 {
     extern Color baizeHighlightColor;
@@ -121,9 +128,11 @@ void FoundationDraw(struct Pile *const self)
 
     struct Foundation* f = (struct Foundation*)self;
     if ( f->accept != 0 ) {
+        extern float cardWidth;
+        float fontSize = cardWidth / 2.0f;
         Vector2 pos = PileScreenPos(self);
-        pos.x += 10;
-        pos.y += 10;
-        DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, 24, 0, baizeHighlightColor);
+        pos.x += cardWidth / 8.0f;
+        pos.y += cardWidth / 16.0f;
+        DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, fontSize, 0, baizeHighlightColor);
     }
 }

@@ -12,6 +12,7 @@
 
 enum IconName {
     // names taken from google material icon filenames
+    NONE = -1,
     BOOKMARK = 0,
     BOOKMARK_ADD = 1,
     CHECK_BOX = 2,
@@ -35,6 +36,7 @@ enum IconName {
 #define STATUSBAR_HEIGHT (24.0f)
 #define DRAWER_WIDTH (256.0f)
 #define WIDGET_PADDING (14.0f)
+#define ICON_SIZE (36.0f)
 
 struct Container;   // forward declaration
 struct Widget;
@@ -71,12 +73,13 @@ void IconWidgetDraw(struct Widget *const self);
 
 struct TextWidget {
     struct Widget super;
-    Font* font;
+    enum IconName frame;
+    Font *font;
     float fontSize;
     char *text;
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, Font *font, float fontSize, int align);
+struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf);
 void TextWidgetSetText(struct TextWidget *const self, const char *text);
 void TextWidgetDraw(struct Widget *const self);
 void TextWidgetFree(struct Widget *const self);
@@ -183,6 +186,7 @@ struct UI* UiNew(void);
 void UiToast(struct UI *const self, const char* message);
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right);
 void UiUpdateTitleBar(struct UI *const self, const char* center);
+void UiHideNavDrawer(struct UI *const self);
 void UiToggleNavDrawer(struct UI *const self);
 struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos);
 void UiLayout(struct UI *const self, const int windowWidth, const int windowHeight);

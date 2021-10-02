@@ -20,6 +20,7 @@ static struct PileVtable cellVtable = {
     &CellConformant,
     &CellSetAccept,
     &CellSetRecycles,
+    &CellCountSortedAndUnsorted,
 
     &PileUpdate,
     &PileDraw,
@@ -55,7 +56,7 @@ bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struc
         BaizeSetError(baize, "Can only move single cards to a cell");
         return false;
     }
-    if ( PileLen(self) > 0 ) {
+    if ( !PileEmpty(self) ) {
         BaizeSetError(baize, "Can only move a card to an empty cell");
         return false;
     }
@@ -91,4 +92,12 @@ void CellSetRecycles(struct Pile *const self, int r)
     // we don't do that here
     (void)self;
     (void)r;
+}
+
+void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+{
+    (void)unsorted;
+    if ( ArrayLen(self->cards) == 1 ) {
+        *sorted += 1;   // one sorted card
+    }
 }

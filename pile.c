@@ -54,6 +54,11 @@ bool PileHidden(struct Pile *const self)
     return self->slot.x < 0.0f || self->slot.y < 0.0f;
 }
 
+bool PileEmpty(struct Pile *const self)
+{
+    return ArrayLen(self->cards) == 0;
+}
+
 size_t PileLen(struct Pile *const self)
 {
     return ArrayLen(self->cards);
@@ -344,7 +349,8 @@ int PileGenericCollect(struct Pile *const self)
                 // this pile is empty
                 return cardsMoved;
             }
-            struct Array *tail = ArrayNew(1);   // TODO not efficient
+            // TODO this has the stench of inefficiency about it
+            struct Array *tail = ArrayNew(1);
             ArrayPush(tail, c);
             bool ok = fp->vtable->CanAcceptTail(baize, fp, tail);
             ArrayFree(tail);

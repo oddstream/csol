@@ -19,7 +19,7 @@ struct UI* UiNew(void)
             if ( iw ) {
                 ArrayPush(((struct Container*)self->titleBar)->widgets, iw);
             }
-            struct TextWidget *tw = TextWidgetNew((struct Container*)self->titleBar, &fontRobotoMedium24, 24.0f, 0);
+            struct TextWidget *tw = TextWidgetNew((struct Container*)self->titleBar, NONE, &fontRobotoMedium24, 24.0f, 0, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "Variant Title");
                 ArrayPush(((struct Container*)self->titleBar)->widgets, tw);
@@ -34,17 +34,17 @@ struct UI* UiNew(void)
 
         self->statusBar = StatusBarNew();
         if ( self->statusBar ) {
-            struct TextWidget *tw = TextWidgetNew((struct Container*)self->statusBar, &fontRobotoRegular14, 14.0f, -1);
+            struct TextWidget *tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, -1, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "STOCK:");
                 ArrayPush(((struct Container*)self->statusBar)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->statusBar, &fontRobotoRegular14, 14.0f, 0);
+            tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 0, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "MOVES");
                 ArrayPush(((struct Container*)self->statusBar)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->statusBar, &fontRobotoRegular14, 14.0f, 1);
+            tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 1, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "PERCENT COMPLETE");
                 ArrayPush(((struct Container*)self->statusBar)->widgets, tw);
@@ -54,16 +54,37 @@ struct UI* UiNew(void)
             StatusBarLayoutWidgets((struct Container*)self->statusBar);
         }
 
+/*
+		NewNavItem(n, "star", "New deal", ebiten.KeyN),
+		NewNavItem(n, "restore", "Restart deal", ebiten.KeyR),
+		NewNavItem(n, "search", "Find game...", ebiten.KeyF),
+		NewNavItem(n, "bookmark_add", "Bookmark", ebiten.KeyS),
+		NewNavItem(n, "bookmark", "Goto bookmark", ebiten.KeyL),
+		NewNavItem(n, "list", "Rules...", ebiten.KeyF1),
+		NewNavItem(n, "info", "Statistics...", ebiten.KeyF4),
+		NewNavItem(n, "settings", "Settings...", ebiten.KeyF3),
+*/
+
         self->navDrawer = NavDrawerNew();
         if ( self->navDrawer ) {
-            struct TextWidget *tw = TextWidgetNew((struct Container*)self->navDrawer, &fontRobotoMedium24, 24.0f, -1);
+            struct TextWidget *tw = TextWidgetNew((struct Container*)self->navDrawer, STAR, &fontRobotoMedium24, 24.0f, -1, BaizeNewDealCommand);
             if ( tw ) {
                 TextWidgetSetText(tw, "New deal");
                 ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->navDrawer, &fontRobotoMedium24, 24.0f, 0);
+            tw = TextWidgetNew((struct Container*)self->navDrawer, RESTORE, &fontRobotoMedium24, 24.0f, -1, BaizeRestartDealCommand);
             if ( tw ) {
                 TextWidgetSetText(tw, "Restart deal");
+                ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
+            }
+            tw = TextWidgetNew((struct Container*)self->navDrawer, BOOKMARK_ADD, &fontRobotoMedium24, 24.0f, -1, BaizeSavePositionCommand);
+            if ( tw ) {
+                TextWidgetSetText(tw, "Bookmark");
+                ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
+            }
+            tw = TextWidgetNew((struct Container*)self->navDrawer, BOOKMARK, &fontRobotoMedium24, 24.0f, -1, BaizeLoadPositionCommand);
+            if ( tw ) {
+                TextWidgetSetText(tw, "Goto bookmark");
                 ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
             }
 
@@ -91,6 +112,13 @@ void UiUpdateTitleBar(struct UI *const self, const char* center)
 {
     struct TextWidget *tw = ArrayGet(((struct Container*)self->titleBar)->widgets, 1); // TODO parameterize
     TextWidgetSetText(tw, center);
+}
+
+void UiHideNavDrawer(struct UI *const self)
+{
+    if ( DrawerVisible((struct Drawer*)self->navDrawer) ) {
+        DrawerHide((struct Drawer*)self->navDrawer);
+    }
 }
 
 void UiToggleNavDrawer(struct UI *const self)

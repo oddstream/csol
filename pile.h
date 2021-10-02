@@ -43,7 +43,7 @@ struct PileVtable {
     bool (*Conformant)(struct Pile *p);
     void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
     void (*SetRecycles)(struct Pile *const self, int r);
-
+    void (*CountSortedAndUnsorted)(struct Pile *const self, int *sorted, int *unsorted);
     void (*Update)(struct Pile *const self);
     void (*Draw)(struct Pile *const self);
     void (*Free)(struct Pile *const self);
@@ -52,6 +52,7 @@ struct PileVtable {
 void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc);
 bool PileValid(struct Pile *const self);
 bool PileHidden(struct Pile *const self);
+bool PileEmpty(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);
 struct Card* PilePopCard(struct Pile *const self);

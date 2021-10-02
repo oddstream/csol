@@ -65,6 +65,7 @@ void CardMovePositionBy(struct Card *const self, Vector2 delta);
 void CardTransitionTo(struct Card *const self, Vector2 pos);
 bool CardTransitioning(struct Card *const self);
 void CardStartDrag(struct Card *const self);
+void CardStartDrag2(struct Card *const self, Vector2 pos);
 void CardStopDrag(struct Card *const self);
 void CardCancelDrag(struct Card *const self);
 bool CardWasDragged(struct Card *const self);

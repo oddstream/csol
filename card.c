@@ -99,6 +99,15 @@ void CardStartDrag(struct Card *const self)
     self->dragging = true;
 }
 
+void CardStartDrag2(struct Card *const self, Vector2 pos)
+{
+    if ( !CardTransitioning(self) ) {
+        self->dragStartPos = pos;
+    }
+    // if grabbing a transitioning card, the start position should be the original position, not the in-flight one
+    self->dragging = true;
+}
+
 void CardStopDrag(struct Card *const self)
 {
     self->dragging = false;

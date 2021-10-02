@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <time.h>
 #include <string.h>
 #include <raylib.h>
@@ -113,6 +114,8 @@ void BaizeCreateCards(struct Baize *const self)
             }
         }
     }
+
+    self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
 }
 
 void BaizeCreatePiles(struct Baize *const self)
@@ -231,7 +234,7 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth)
     pilePaddingY = cardHeight / 10.0f;
     float w = pilePaddingX + cardWidth * (maxX + 2);
     leftMargin = ((float)windowWidth - w) / 2.0f;
-    topMargin = 48.0f + (cardHeight / 3.0f);
+    topMargin = 48.0f + (cardHeight / 10.0f);
 
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         p->pos = PileCalculatePosFromSlot(p);
@@ -244,6 +247,7 @@ void BaizeNewDealCommand(struct Baize *const self)
 {
     // TODO record lost game if this one started
 
+    UiHideNavDrawer(self->ui);
     BaizeCreatePiles(self);
     BaizeResetState(self);
 }
@@ -314,6 +318,16 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
     return pile;
 }
 
+int BaizeCalcPercentComplete(struct Baize *const self)
+{
+    int sorted = 0, unsorted = 0;
+    size_t index;
+    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+    }
+    return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
+}
+
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
 {
     if ( self->tail ) {
@@ -377,6 +391,16 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
             if ( !CardTransitioning(c) ) {
                 BaizeMakeTail(self, c);
                 if ( self->tail ) {
+                    // {
+                    //     size_t cindex;
+                    //     for ( struct Card *cdrag = ArrayFirst(self->tail, &cindex); cdrag; cdrag = ArrayNext(self->tail, &cindex) ) {
+                    //         CardStartDrag2(cdrag, cdrag->pos);
+                    //     }
+                    //     // center the card on the touch position (experimental)
+                    //     extern float cardWidth, cardHeight;
+                    //     c->pos.x = touchPosition.x - (cardWidth / 2.0);
+                    //     c->pos.y = touchPosition.y - (cardHeight / 2.0);
+                    // }
                     ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
                 }
             }
@@ -390,6 +414,7 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
     }
     
     self->lastTouch = touchPosition;
+    UiHideNavDrawer(self->ui);
 }
 
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
@@ -424,7 +449,8 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( ConformantDrag(self, self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
+                // if ( ConformantDrag(self, self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
+                if ( p->vtable->CanAcceptTail(self, p, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
@@ -691,4 +717,26 @@ void BaizeFree(struct Baize *const self)
 void BaizeToggleNavDrawerCommand(struct Baize *const self)
 {
     UiToggleNavDrawer(self->ui);
+}
+
+size_t BaizePowerMoves(struct Baize *const self, struct Pile *const dstPile)
+{
+    double emptyCells = 0.0;
+    double emptyCols = 0.0;
+    size_t index;
+    for ( struct Pile *p=ArrayFirst(self->piles, &index); p; p=ArrayNext(self->piles, &index) ) {
+        if ( ArrayLen(p->cards) == 0 ) {
+            if ( strcmp(p->category, "Cell") == 0 ) {
+                emptyCells++;
+            } else if ( strcmp(p->category, "Tableau") == 0 ) {
+                // 'If you are moving into an empty column, then the column you are moving into does not count as empty column.'
+                struct Tableau *t = (struct Tableau*)p;
+                if ( t->accept == 0 && p != dstPile ) {
+                    emptyCols++;
+                }
+            }
+        }
+    }
+    double n = (1.0 + emptyCells) * pow(2.0, emptyCols);
+    return (size_t)n;
 }

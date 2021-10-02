@@ -2,6 +2,8 @@
 
 PACKS = 1
 
+POWERMOVES = true
+
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
@@ -51,20 +53,44 @@ function Build()
 
 end
 
-function TwoCardsF(cPrev, cThis)
+function CheckCellAccept(cPrev, cThis)
+  return true, nil
+end
+
+function CheckCellBuild(cPrev, cThis)
+  return cPrev == nil, nil
+end
+
+function CheckCellDrag(cPrev, cThis)
+  return true, nil
+end
+
+function CheckFoundationAccept(cThis)
+  if c.ordinal == 1 then
+    return true, nil
+  else
+    return false, "A Foundation can only accept an Ace, not a " .. c.ordinal
+  end
+end
+
+function CheckFoundationBuild(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsF prone fail\n")
+    io.stderr:write("CheckFoundationBuild prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("TwoCardsF suit fail\n")
+    io.stderr:write("CheckFoundationBuild suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("TwoCardsF ordinal fail\n")
+    io.stderr:write("CheckFoundationBuild ordinal fail\n")
     return false, nil
   end
   return true
+end
+
+function CheckFoundationDrag(cPrev, cThis)
+  return false
 end
 
 function ConformantF(pile, cards)
@@ -85,7 +111,7 @@ function ConformantF(pile, cards)
   if pile then
     local cTop = PeekCard(pile)
     if cTop then
-      ok, err = TwoCardsF(cTop, cards[1])
+      ok, err = CheckFoundationBuild(cTop, cards[1])
       if not ok then
         return false, err
       end
@@ -95,7 +121,7 @@ function ConformantF(pile, cards)
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    ok, err = TwoCardsF(cPrev, cThis)
+    ok, err = CheckFoundationBuild(cPrev, cThis)
     if not ok then
       return false, err
     end
@@ -105,20 +131,31 @@ function ConformantF(pile, cards)
   return true, nil
 end
 
-function TwoCardsT(cPrev, cThis)
+function CheckTableauAccept(cThis)
+  return true, nil
+end
+
+function CheckTableauBuild(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsT prone fail\n")
+    io.stderr:write("CheckTableauBuild prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.color == cThis.color then
-    io.stderr:write("TwoCardsT color fail\n")
+    io.stderr:write("CheckTableauBuild color fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("TwoCardsT ordinal fail\n")
+    io.stderr:write("CheckTableauBuild ordinal fail\n")
     return false, nil
   end
+  if PileCategory(cPrev.owner) == "Foundation" then
+    return false, "Cannot move a card from a Foundation to a Tableau"
+  end
   return true
+end
+
+function CheckTableauDrag(cPrev, cThis)
+  return CheckTableauBuild(cPrev, cThis)
 end
 
 function ConformantT(pile, cards)
@@ -140,7 +177,7 @@ function ConformantT(pile, cards)
   if pile then
     local cTop = PeekCard(pile)
     if cTop then
-      ok, err = TwoCardsT(cTop, cards[1])
+      ok, err = CheckTableauBuild(cTop, cards[1])
       if not ok then
         return false, err
       end
@@ -150,7 +187,7 @@ function ConformantT(pile, cards)
   local cPrev = cards[1]
   for n=2, #cards do
     local cThis = cards[n]
-    ok, err = TwoCardsT(cPrev, cThis)
+    ok, err = CheckTableauBuild(cPrev, cThis)
     if not ok then
       return false, err
     end

@@ -20,6 +20,7 @@ static struct PileVtable wasteVtable = {
     &WasteConformant,
     &WasteSetAccept,
     &WasteSetRecycles,
+    &WasteCountSortedAndUnsorted,
 
     &PileUpdate,
     &PileDraw,
@@ -96,4 +97,10 @@ void WasteSetRecycles(struct Pile *const self, int r)
     // we don't do that here
     (void)self;
     (void)r;
+}
+
+void WasteCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+{
+    (void)sorted;
+    *unsorted += ArrayLen(self->cards);
 }

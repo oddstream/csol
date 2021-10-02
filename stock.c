@@ -19,6 +19,7 @@ static struct PileVtable stockVtable = {
     &StockConformant,
     &StockSetAccept,
     &StockSetRecycles,
+    &StockCountSortedAndUnsorted,
 
     &PileUpdate,
     &StockDraw,
@@ -120,6 +121,12 @@ void StockSetRecycles(struct Pile *const self, int r)
 {
     struct Stock *s = (struct Stock *)self;
     s->recycles = r;
+}
+
+void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+{
+    (void)sorted;
+    *unsorted += ArrayLen(self->cards);
 }
 
 void StockDraw(struct Pile *const self)

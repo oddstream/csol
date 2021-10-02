@@ -24,6 +24,7 @@ bool TableauComplete(struct Pile *const self);
 bool TableauConformant(struct Pile *const self);
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void TableauSetRecycles(struct Pile *const self, int r);
+void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 void TableauDraw(struct Pile *const self);
 
 #endif

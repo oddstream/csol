@@ -20,6 +20,7 @@ static struct PileVtable tableauVtable = {
     &TableauConformant,
     &TableauSetAccept,
     &TableauSetRecycles,
+    &TableauCountSortedAndUnsorted,
 
     &PileUpdate,
     &TableauDraw,
@@ -96,6 +97,42 @@ void TableauSetRecycles(struct Pile *const self, int r)
     (void)r;
 }
 
+void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+{
+    // iterate the pile->cards using an unsigned size_t, so make sure there are >2 before doing len-1
+    if ( ArrayLen(self->cards) == 0 ) {
+        return;
+    }
+    if ( ArrayLen(self->cards) == 1 ) {
+        *sorted += 1;
+        return;
+    }
+    // TODO this reeks of inefficiency
+    for ( size_t i = 0; i<ArrayLen(self->cards) - 1; i++ ) {
+        struct Card *c0 = ArrayGet(self->cards, i);
+        if ( !CardValid(c0) ) {
+            fprintf(stderr, "WARNING: Invalid card 0 in %s\n", __func__);
+        }
+        struct Card *c1 = ArrayGet(self->cards, i+1);
+        if ( !CardValid(c1) ) {
+            fprintf(stderr, "WARNING: Invalid card 1 in %s\n", __func__);
+        }
+        if ( c0->prone || c1->prone ) {
+            *unsorted += 1;
+        } else {
+            struct Array *tail = ArrayNew(2);
+            ArrayPush(tail, c0);
+            ArrayPush(tail, c1);
+            if ( Conformant(self->owner, NULL, self->buildfunc, tail) ) {
+                *sorted += 1;
+            } else {
+                *unsorted += 1;
+            }
+            ArrayFree(tail);
+        }
+    }
+}
+
 void TableauDraw(struct Pile *const self)
 {
     extern Font fontAcme24 ;
@@ -105,9 +142,11 @@ void TableauDraw(struct Pile *const self)
 
     struct Tableau* t = (struct Tableau*)self;
     if ( t->accept != 0 ) {
+        extern float cardWidth;
+        float fontSize = cardWidth / 2.0f;
         Vector2 pos = PileScreenPos(self);
-        pos.x += 10;
-        pos.y += 10;
-        DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, 24, 0, baizeHighlightColor);
+        pos.x += cardWidth / 8.0f;
+        pos.y += cardWidth / 16.0f;
+        DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, fontSize, 0, baizeHighlightColor);
     }
 }

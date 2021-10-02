@@ -23,6 +23,6 @@ bool CellComplete(struct Pile *const self);
 bool CellConformant(struct Pile *const self);
 void CellSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void CellSetRecycles(struct Pile *const self, int r);
-void CellDraw(struct Pile *const self);
+void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
 #endif

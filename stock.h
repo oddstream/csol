@@ -23,6 +23,7 @@ bool StockComplete(struct Pile *const self);
 bool StockConformant(struct Pile *const self);
 void StockSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void StockSetRecycles(struct Pile *const self, int r);
+void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 void StockDraw(struct Pile *const self);
 
 #endif
