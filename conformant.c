@@ -61,7 +61,7 @@ static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, s
     return result;
 }
 
-static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext)
+static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext, bool movable)
 {
     lua_State *L = baize->L;
     bool result = false;
@@ -77,9 +77,17 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
         return false;
     }
 
+    if ( cPrev->prone || cNext->prone ) {
+        fprintf(stderr, "WARNING: %s passed a face down card\n", __func__);
+        return false;
+    }
+
     char funcName[64];
     strcpy(funcName, "Check");
     strcat(funcName, cPrev->owner->category);
+    if ( movable ) {
+        strcat(funcName, "Movable");
+    }
 
     int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
@@ -131,7 +139,7 @@ static bool checkTail(struct Baize *const baize, struct Array *const tail)
     size_t i = 1;
     while ( i < ArrayLen(tail) ) {
         struct Card *cNext = ArrayGet(tail, i);
-        if ( !checkPair(baize, cPrev, cNext) ) {
+        if ( !checkPair(baize, cPrev, cNext, true) ) {
             return false;
         }
 
@@ -153,22 +161,22 @@ bool CheckCard(struct Baize *const baize, struct Pile *const dstPile, struct Car
         return checkAccept(baize, dstPile, c);
     } else {
         struct Card *cPrev = PilePeekCard(dstPile);
-        return checkPair(baize, cPrev, c);
+        return checkPair(baize, cPrev, c, false);
     }
 }
 
 bool CheckPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext)
 {
-    return checkPair(baize, cPrev, cNext);
+    return checkPair(baize, cPrev, cNext, false);
 }
 
 bool CheckTail(struct Baize *const baize, struct Pile *const dstPile, struct Array *const tail)
 {
-    if ( PileEmpty(dstPile) ) {
-        if ( !checkAccept(baize, dstPile, ArrayPeek(tail)) ) {
-            return false;
-        }
-    }
-
+    // if ( PileEmpty(dstPile) ) {
+    //     if ( !checkAccept(baize, dstPile, ArrayGet(tail, 0)) ) {
+    //         return false;
+    //     }
+    // }
+    (void)dstPile;  // TODO retire
     return checkTail(baize, tail);
 }

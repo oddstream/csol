@@ -9,6 +9,8 @@ SUITS = 1
 -- PACKS = 2
 -- SUITS = 4
 
+POWERMOVES = false
+
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
@@ -39,144 +41,80 @@ function Build()
     TABLEAU = {}
   
     for x = 3, 10 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE, "BuildFoundation", "ChkFalse")
+        local pile = AddPile("Discard", x, 1, FAN_NONE)
     end
 
     for x = 1, 4 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN, "BuildTableau", "DragTableau")
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealDown(pile, 5)
         DealUp(pile, 1)
         TABLEAU[x] = pile
     end
 
     for x = 5, 10 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN, "BuildTableau", "DragTableau")
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealDown(pile, 4)
         DealUp(pile, 1)
         TABLEAU[x] = pile
     end
 end
 
-function BuildFoundation(pile, cards)
-
-  -- ignore cTop
-
-  if #cards == 0 then
-    io.stderr:write("BuildFoundation passed an empty tail\n")
-    return false
+function CheckDiscardAccept(cThis)
+  if cThis.ordinal == 13 then
+    return true, nil
+  else
+    return false, "An empty Discard can only accept an King, not a " .. cThis.ordinal
   end
-
-  if #cards ~= 13 then
-      io.stderr:write("BuildFoundation tail needs to be 13 cards long\n")
-      return false, "Needs to be 13 cards"
-  end
-
-  if cards[1].ordinal ~= 13 then
-    io.stderr:write("BuildFoundation tail needs to start with a K\n")
-    return false, "Needs to start with a King"
-  end
-  
-  local ok, err
-
-  local cPrev = cards[1]
-  for n=2, #cards do
-    local cThis = cards[n]
-    if cPrev.prone or cThis.prone then
-      io.stderr:write("BuildFoundation prone fail\n")
-      return false, "Cannot move a face down card"
-    end
-    if cPrev.suit ~= cThis.suit then
-      io.stderr:write("BuildFoundation suit fail\n")
-      return false, nil
-    end
-    if cPrev.ordinal ~= cThis.ordinal + 1 then
-      io.stderr:write("BuildFoundation ordinal fail\n")
-      return false, nil
-    end
-    cPrev = cThis
-  end
-
-  return true
 end
 
-function TwoCardsBuildT(cPrev, cThis)
-  if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsBuildT prone fail\n")
-    return false, "Cannot move a face down card"
-  end
-  if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("TwoCardsBuildT ordinal fail\n")
-    return false, nil
-  end
-  return true
-end
-
-function TwoCardsDragT(cPrev, cThis)
-  if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsDragT prone fail\n")
-    return false, "Cannot move a face down card"
-  end
+function CheckDiscard(cPrev, cThis)
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("TwoCardsDragT suit fail\n")
+    io.stderr:write("CheckDiscard suit fail\n")
+    return false, nil
+  end
+  if cPrev.ordinal + 1 ~= cThis.ordinal then
+    io.stderr:write("CheckDiscard ordinal fail\n")
+    return false, nil
+  end
+  return true
+end
+
+function CheckDiscardMovable(cPrev, cThis)
+  if cPrev.suit ~= cThis.suit then
+    io.stderr:write("CheckDiscardMovable suit fail\n")
+    return false, nil
+  end
+  if cPrev.ordinal + 1 ~= cThis.ordinal then
+    io.stderr:write("CheckDiscardMovable ordinal fail\n")
+    return false, nil
+  end
+  return true
+end
+
+function CheckTableauAccept(cThis)
+  return true, nil
+end
+
+function CheckTableau(cPrev, cThis)
+  if cPrev.ordinal ~= cThis.ordinal + 1 then
+    io.stderr:write("CheckTableau ordinal fail\n")
+    return false, nil
+  end
+  if PileCategory(cThis.owner) == "Discard" then
+    return false, "Cannot move a card from a Discard to a Tableau"
+  end
+  return true
+end
+
+function CheckTableauMovable(cPrev, cThis)
+  if cPrev.suit ~= cThis.suit then
+    io.stderr:write("CheckTableauMovable suit fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("TwoCardsDragT ordinal fail\n")
+    io.stderr:write("CheckTableauMovable ordinal fail\n")
     return false, nil
   end
-  return true
-end
-
-function BuildTableau(pile, cards)
-
-  LogTail("BuildTableau tail", cards)
-  
-  local ok, err
-
-  if pile then
-    local cTop = PeekCard(pile)
-    if cTop then
-      ok, err = TwoCardsBuildT(cTop, cards[1])
-      if not ok then
-        return false, err
-      end
-    end
-  end
-
-  local cPrev = cards[1]
-  for n=2, #cards do
-    local cThis = cards[n]
-    ok, err = TwoCardsBuildT(cPrev, cThis)
-    if not ok then
-      return false, err
-    end
-    cPrev = cThis
-  end
-
-  return true
-end
-
-function DragTableau(pile, cards)
-  local ok, err
-  local cPrev = cards[1]
-  for n=2, #cards do
-    local cThis = cards[n]
-    ok, err = TwoCardsDragT(cPrev, cThis)
-    if not ok then
-      return false, err
-    end
-    cPrev = cThis
-  end
-  return true
-end
-
-function ChkFalse(pile, cards)
-  LogTail("ChkFalse tail", cards)
-  return false, "You cannot do that"
-  end
-
-function ChkTrue(pile, cards)
-  LogTail("ChkTrue tail", cards)
   return true
 end
 

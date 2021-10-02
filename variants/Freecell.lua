@@ -65,15 +65,11 @@ function CheckFoundationAccept(cThis)
   if cThis.ordinal == 1 then
     return true, nil
   else
-    return false, "A Foundation can only accept an Ace, not a " .. cThis.ordinal
+    return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
   end
 end
 
 function CheckFoundation(cPrev, cThis)
-  if cPrev.prone or cThis.prone then
-    io.stderr:write("CheckFoundation prone fail\n")
-    return false, "Cannot move a face down card"
-  end
   if cPrev.suit ~= cThis.suit then
     io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
@@ -130,10 +126,6 @@ function CheckTableauAccept(cThis)
 end
 
 function CheckTableau(cPrev, cThis)
-  if cPrev.prone or cThis.prone then
-    io.stderr:write("CheckTableau prone fail\n")
-    return false, "Cannot move a face down card"
-  end
   if cPrev.color == cThis.color then
     io.stderr:write("CheckTableau color fail\n")
     return false, nil
@@ -146,6 +138,10 @@ function CheckTableau(cPrev, cThis)
     return false, "Cannot move a card from a Foundation to a Tableau"
   end
   return true
+end
+
+function CheckTableauMovable(cPrev, cThis)
+  return CheckTableau(cPrev, cThis)
 end
 
 --[[

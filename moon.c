@@ -12,6 +12,7 @@
 #include "pile.h"
 #include "stock.h"
 #include "cell.h"
+#include "discard.h"
 #include "foundation.h"
 #include "tableau.h"
 #include "waste.h"
@@ -237,13 +238,15 @@ int MoonAddPile(lua_State* L)
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
         p = (struct Pile*)StockNew((Vector2){x, y}, fan);
-    } else if  ( strcmp(category, "Cell") == 0 ) {
+    } else if ( strcmp(category, "Cell") == 0 ) {
         p = (struct Pile*)CellNew((Vector2){x, y}, fan);
+    } else if ( strcmp(category, "Discard") == 0 ) {
+        p = (struct Pile*)DiscardNew((Vector2){x, y}, fan);
     } else if ( strcmp(category, "Foundation") == 0 ) {
         p = (struct Pile*)FoundationNew((Vector2){x, y}, fan);
-    } else if  ( strcmp(category, "Tableau") == 0 ) {
+    } else if ( strcmp(category, "Tableau") == 0 ) {
         p = (struct Pile*)TableauNew((Vector2){x, y}, fan);
-    } else if  ( strcmp(category, "Waste") == 0 ) {
+    } else if ( strcmp(category, "Waste") == 0 ) {
         p = (struct Pile*)WasteNew((Vector2){x, y}, fan);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);

@@ -62,7 +62,7 @@ bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, ArrayGet(tail, 0));
+        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
     }
     if ( ArrayLen(tail) == 1 ) {
         return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
@@ -71,7 +71,10 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
             size_t moves = BaizePowerMoves(baize, self);
             if ( ArrayLen(tail) > moves ) {
                 char z[128];
-                sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+                if ( moves == 1 )
+                    sprintf(z, "Only enough space to move 1 card, not %lu", ArrayLen(tail));
+                else
+                    sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
                 BaizeSetError(baize, z);
                 return false;
             }
