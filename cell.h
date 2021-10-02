@@ -14,9 +14,10 @@ struct Cell {
     struct Pile super;
 };
 
-struct Cell* CellNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+struct Cell* CellNew(Vector2 pos, enum FanType fan);
 bool CellCardTapped(struct Card *c);
 bool CellPileTapped(struct Pile *p);
+bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int CellCollect(struct Pile *const self);
 bool CellComplete(struct Pile *const self);

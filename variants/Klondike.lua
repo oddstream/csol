@@ -2,6 +2,8 @@
 
 PACKS = 1
 
+POWERMOVES = false
+
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
@@ -29,67 +31,76 @@ function Build()
     MovePileTo(STOCK, 1, 1)
     SetRecycles(STOCK, 9999)
   
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3, "ChkFalse", "ChkTrue")
+    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
 
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE, "ConformantF", "ChkFalse")
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
     end
 
-    pile = AddPile("Tableau", 1, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 1, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 2, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 2, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealDown(pile, 1)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 3, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 3, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealDown(pile, 2)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 4, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 4, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealDown(pile, 3)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 5, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 5, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealDown(pile, 4)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 6, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 6, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealDown(pile, 5)
     DealUp(pile, 1)
 
-    pile = AddPile("Tableau", 7, 2, FAN_DOWN, "ConformantT", "ConformantT")
+    pile = AddPile("Tableau", 7, 2, FAN_DOWN)
     SetAccept(pile, 13)
     DealDown(pile, 6)
     DealUp(pile, 1)
 
 end
 
-function TwoCardsF(cPrev, cThis)
+function CheckFoundationAccept(cThis)
+  if cThis.ordinal == 1 then
+    return true, nil
+  else
+    return false, "A Foundation can only accept an Ace, not a " .. cThis.ordinal
+  end
+end
+
+function CheckFoundation(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsF prone fail\n")
+    io.stderr:write("CheckFoundation prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("TwoCardsF suit fail\n")
+    io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("TwoCardsF ordinal fail\n")
+    io.stderr:write("CheckFoundation ordinal fail\n")
     return false, nil
   end
   return true
 end
 
+--[[
 function ConformantF(pile, cards)
 
   LogTail("ConformantF tail", cards)
@@ -127,23 +138,36 @@ function ConformantF(pile, cards)
 
   return true, nil
 end
+]]
 
-function TwoCardsT(cPrev, cThis)
+function CheckTableauAccept(cThis)
+  if cThis.ordinal == 13 then
+    return true, nil
+  else
+    return false, "A Tableau can only accept a King, not a " .. cThis.ordinal
+  end
+end
+
+function CheckTableau(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsT prone fail\n")
+    io.stderr:write("CheckTableau prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.color == cThis.color then
-    io.stderr:write("TwoCardsT color fail\n")
+    io.stderr:write("CheckTableau color fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("TwoCardsT ordinal fail\n")
+    io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
+  end
+  if PileCategory(cThis.owner) == "Foundation" then
+    return false, "Cannot move a card from a Foundation to a Tableau"
   end
   return true
 end
 
+--[[
 function ConformantT(pile, cards)
 
     LogTail("ConformantT tail", cards)
@@ -172,16 +196,7 @@ function ConformantT(pile, cards)
 
     return true, nil
 end
-
-function ChkFalse(pile, cards)
-  LogTail("ChkFalse tail", cards)
-  return false, "You cannot do that"
-  end
-
-function ChkTrue(pile, cards)
-  LogTail("ChkTrue tail", cards)
-  return true
-end
+]]
 
 function CardTapped(card)
   LogCard("CardTapped", card)

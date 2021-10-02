@@ -13,6 +13,7 @@
 static struct PileVtable stockVtable = {
     &StockCardTapped,
     &StockPileTapped,
+    &StockCanAcceptCard,
     &StockCanAcceptTail,
     &StockCollect,
     &StockComplete,
@@ -26,11 +27,11 @@ static struct PileVtable stockVtable = {
     &PileFree,
 };
 
-struct Stock* StockNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Stock* StockNew(Vector2 slot, enum FanType fan)
 {
     struct Stock* self = calloc(1, sizeof(struct Stock));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Stock", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Stock", slot, fan);
         self->super.vtable = &stockVtable;
         self->recycles = 9999;  // infinite by default
     }
@@ -85,8 +86,20 @@ bool StockPileTapped(struct Pile *p)
     return cardsMoved > 0;
 }
 
+bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+{
+    BaizeSetError(baize, "You cannot move cards to the Stock");
+
+    (void)baize;
+    (void)self;
+    (void)c;
+    return false;
+}
+
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
+    BaizeSetError(baize, "You cannot move cards to the Stock");
+
     (void)baize;
     (void)self;
     (void)tail;

@@ -14,9 +14,10 @@ struct Waste {
     struct Pile super;
 };
 
-struct Waste* WasteNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+struct Waste* WasteNew(Vector2 pos, enum FanType fan);
 bool WasteCardTapped(struct Card *c);
 bool WastePileTapped(struct Pile *p);
+bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int WasteCollect(struct Pile *const self);
 bool WasteComplete(struct Pile *const self);

@@ -2,6 +2,8 @@
 
 PACKS = 2
 
+POWERMOVES = true
+
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
@@ -29,36 +31,45 @@ function Build()
     MovePileTo(STOCK, 1, 1)
     SetRecycles(STOCK, 0)
 
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3, "ConformantW", "ChkTrue")
+    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     for x = 5, 12 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE, "ConformantF", "ChkFalse")
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
     end
 
     for x = 1, 12 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN, "ConformantT", "ConformantT")
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealUp(pile, 3)
     end
 
 end
 
-function TwoCardsF(cPrev, cThis)
+function CheckFoundationAccept(cThis)
+  if cThis.ordinal == 1 then
+    return true, nil
+  else
+    return false, "A Foundation can only accept an Ace, not a " .. cThis.ordinal
+  end
+end
+
+function CheckFoundation(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsF prone fail\n")
+    io.stderr:write("CheckFoundation prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("TwoCardsF suit fail\n")
+    io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("TwoCardsF ordinal fail\n")
+    io.stderr:write("CheckFoundation ordinal fail\n")
     return false, nil
   end
   return true
 end
 
+--[[
 function ConformantF(pile, cards)
 
   LogTail("ConformantF tail", cards)
@@ -96,23 +107,32 @@ function ConformantF(pile, cards)
 
   return true, nil
 end
+]]
 
-function TwoCardsT(cPrev, cThis)
+function CheckTableauAccept(cThis)
+  return true, nil
+end
+
+function CheckTableau(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("TwoCardsT prone fail\n")
+    io.stderr:write("CheckTableu prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("TwoCardsT suit fail\n")
+    io.stderr:write("CheckTableu suit fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("TwoCardsT ordinal fail\n")
+    io.stderr:write("CheckTableu ordinal fail\n")
     return false, nil
+  end
+  if PileCategory(cThis.owner) == "Foundation" then
+    return false, "Cannot move a card from a Foundation to a Tableau"
   end
   return true
 end
 
+--[[
 function ConformantT(pile, cards)
 
     LogTail("ConformantT tail", cards)
@@ -151,16 +171,7 @@ function ConformantT(pile, cards)
 
     return true, nil
 end
-
-function ChkFalse(pile, cards)
-  LogTail("ChkFalse tail", cards)
-  return false, "You cannot do that"
-end
-
-function ChkTrue(pile, cards)
-  LogTail("ChkTrue tail", cards)
-  return true, nil
-end
+]]
 
 function CardTapped(card)
   LogCard("CardTapped", card)

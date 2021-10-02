@@ -29,14 +29,13 @@ struct Pile {
     Vector2 slot;
     Vector2 pos;
     enum FanType fanType;
-    char buildfunc[32];
-    char dragfunc[32];
     struct Array *cards;
 };
 
 struct PileVtable {
     bool (*CardTapped)(struct Card *c);
     bool (*PileTapped)(struct Pile *p);
+    bool (*CanAcceptCard)(struct Baize *const baize, struct Pile *const self, struct Card *const c);
     bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
     int (*Collect)(struct Pile *p);
     bool (*Complete)(struct Pile *p);
@@ -49,7 +48,7 @@ struct PileVtable {
     void (*Free)(struct Pile *const self);
 };
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc);
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan);
 bool PileValid(struct Pile *const self);
 bool PileHidden(struct Pile *const self);
 bool PileEmpty(struct Pile *const self);

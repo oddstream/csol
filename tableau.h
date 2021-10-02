@@ -15,9 +15,10 @@ struct Tableau {
     enum CardOrdinal accept;
 };
 
-struct Tableau* TableauNew(Vector2 pos, enum FanType fan, const char* buildfunc, const char* dragfunc);
+struct Tableau* TableauNew(Vector2 pos, enum FanType fan);
 bool TableauCardTapped(struct Card *c);
 bool TableauPileTapped(struct Pile *p);
+bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);
 bool TableauComplete(struct Pile *const self);

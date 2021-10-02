@@ -14,6 +14,7 @@
 static struct PileVtable cellVtable = {
     &CellCardTapped,
     &CellPileTapped,
+    &CellCanAcceptCard,
     &CellCanAcceptTail,
     &CellCollect,
     &CellComplete,
@@ -27,11 +28,11 @@ static struct PileVtable cellVtable = {
     &PileFree,
 };
 
-struct Cell* CellNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Cell* CellNew(Vector2 slot, enum FanType fan)
 {
     struct Cell* self = calloc(1, sizeof(struct Cell));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Cell", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Cell", slot, fan);
         self->super.vtable = &cellVtable;
     }
     return self;
@@ -49,15 +50,26 @@ bool CellPileTapped(struct Pile *p)
     return false;
 }
 
+bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+{
+    (void)c;
+    BaizeResetError(baize);
+    if ( !PileEmpty(self) ) {
+        BaizeSetError(baize, "Can only move a card to an empty Cell");
+        return false;
+    }
+    return true;
+}
+
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     BaizeResetError(baize);
     if ( ArrayLen(tail) != 1 ) {
-        BaizeSetError(baize, "Can only move single cards to a cell");
+        BaizeSetError(baize, "Can only move a single card to a Cell");
         return false;
     }
     if ( !PileEmpty(self) ) {
-        BaizeSetError(baize, "Can only move a card to an empty cell");
+        BaizeSetError(baize, "Can only move a card to an empty Cell");
         return false;
     }
     return true;

@@ -25,22 +25,12 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan)
 {
     self->magic = PILE_MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->slot = slot;
     self->fanType = fan;
-    if ( buildfunc ) {
-        strncpy(self->buildfunc, buildfunc, sizeof self->buildfunc - 1);
-    } else {
-        self->buildfunc[0] = '\0';
-    }
-    if ( dragfunc ) {
-        strncpy(self->dragfunc, dragfunc, sizeof self->dragfunc - 1);
-    } else {
-        self->dragfunc[0] = '\0';
-    }
     self->cards = ArrayNew(52);
 }
 
@@ -349,13 +339,7 @@ int PileGenericCollect(struct Pile *const self)
                 // this pile is empty
                 return cardsMoved;
             }
-            // TODO this has the stench of inefficiency about it
-            struct Array *tail = ArrayNew(1);
-            ArrayPush(tail, c);
-            bool ok = fp->vtable->CanAcceptTail(baize, fp, tail);
-            ArrayFree(tail);
-
-            if ( !ok ) {
+            if ( !fp->vtable->CanAcceptCard(baize, fp, c) ) {
                 // onto the next foundation
                 break;
             }

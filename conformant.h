@@ -7,13 +7,9 @@
 #include "array.h"
 #include "pile.h"
 
-bool Conformant(struct Baize *const baize, struct Pile* pileDst, const char* func, struct Array* tail);
-bool ConformantBuild(struct Baize *const baize, struct Pile *const pileDst, struct Array *tail);
-bool ConformantDrag(struct Baize *const baize, struct Array *tail);
-
-bool CheckBuildPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext);
-bool CheckBuildTail(struct Baize *const baize, struct Array *const tail);
-bool CheckDragPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext);
-bool CheckDragTail(struct Baize *const baize, struct Array *const tail);
+bool CheckAccept(struct Baize *const baize, struct Pile *const dstPile, struct Card *const c);
+bool CheckCard(struct Baize *const baize, struct Pile *const dstPile, struct Card *const c);
+bool CheckPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext);
+bool CheckTail(struct Baize *const baize, struct Pile *const dstPile, struct Array *const tail);
 
 #endif

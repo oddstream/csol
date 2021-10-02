@@ -24,7 +24,6 @@ int MoonMovePileTo(lua_State* L);
 int MoonGetPileCategory(lua_State* L);
 int MoonGetCardCount(lua_State *L);
 int MoonGetCardOwner(lua_State* L);
-int MoonGetPowerMoves(lua_State* L);
 int MoonSetAccept(lua_State* L);
 int MoonSetRecycles(lua_State* L);
 int MoonPeekCard(lua_State* L);

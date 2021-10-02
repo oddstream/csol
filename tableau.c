@@ -14,6 +14,7 @@
 static struct PileVtable tableauVtable = {
     &TableauCardTapped,
     &TableauPileTapped,
+    &TableauCanAcceptCard,
     &TableauCanAcceptTail,
     &TableauCollect,
     &TableauComplete,
@@ -27,11 +28,11 @@ static struct PileVtable tableauVtable = {
     &PileFree,
 };
 
-struct Tableau* TableauNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Tableau* TableauNew(Vector2 slot, enum FanType fan)
 {
     struct Tableau* self = calloc(1, sizeof(struct Tableau));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Tableau", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Tableau", slot, fan);
         self->super.vtable = &tableauVtable;
         self->accept = 0;   // accept any by default
     }
@@ -50,22 +51,33 @@ bool TableauPileTapped(struct Pile *p)
     return false;
 }
 
+bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+{
+    if ( PileEmpty(self) ) {
+        return CheckAccept(baize, self, c);
+    }
+    return CheckPair(baize, PilePeekCard(self), c);
+}
+
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    if ( ArrayLen(self->cards) == 0 ) {
-        struct Tableau *t = (struct Tableau*)self;
-        if ( t->accept != 0 ) {
-            struct Card* c = ArrayGet(tail, 0);
-            if ( c->id.ordinal != t->accept ) {
+    if ( PileEmpty(self) ) {
+        return CheckAccept(baize, self, ArrayGet(tail, 0));
+    }
+    if ( ArrayLen(tail) == 1 ) {
+        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
+    } else {
+        if ( baize->powerMoves ) {
+            size_t moves = BaizePowerMoves(baize, self);
+            if ( ArrayLen(tail) > moves ) {
                 char z[128];
-                sprintf(z, "This empty tableau can only accept a %d, not a %d", t->accept, c->id.ordinal);
-                BaizeSetError(self->owner, z);
+                sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+                BaizeSetError(baize, z);
                 return false;
             }
         }
-        return ConformantBuild(baize, self, tail);
+        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
     }
-    return ConformantBuild(baize, self, tail);
 }
 
 int TableauCollect(struct Pile *const self)
@@ -120,15 +132,11 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
         if ( c0->prone || c1->prone ) {
             *unsorted += 1;
         } else {
-            struct Array *tail = ArrayNew(2);
-            ArrayPush(tail, c0);
-            ArrayPush(tail, c1);
-            if ( Conformant(self->owner, NULL, self->buildfunc, tail) ) {
+            if ( CheckPair(self->owner, c0, c1) ) {
                 *sorted += 1;
             } else {
                 *unsorted += 1;
             }
-            ArrayFree(tail);
         }
     }
 }

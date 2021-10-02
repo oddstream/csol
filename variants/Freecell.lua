@@ -33,66 +33,59 @@ function Build()
     local pile
 
     for x = 1, 4 do
-        pile = AddPile("Cell", x, 1, FAN_NONE, "ChkTrue", "ChkTrue")
+        pile = AddPile("Cell", x, 1, FAN_NONE)
     end
 
     for x = 5, 8 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE, "ConformantF", "ChkFalse")
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
     end
 
     for x = 1, 4 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, "ConformantT", "ConformantT")
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealUp(pile, 7)
     end
 
     for x = 5, 8 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, "ConformantT", "ConformantT")
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealUp(pile, 6)
     end
 
 end
 
-function CheckCellAccept(cPrev, cThis)
+function CheckCellAccept(cThis)
   return true, nil
 end
 
-function CheckCellBuild(cPrev, cThis)
+function CheckCell(cPrev, cThis)
   return cPrev == nil, nil
 end
 
-function CheckCellDrag(cPrev, cThis)
-  return true, nil
-end
-
 function CheckFoundationAccept(cThis)
-  if c.ordinal == 1 then
+  if cThis.ordinal == 1 then
     return true, nil
   else
-    return false, "A Foundation can only accept an Ace, not a " .. c.ordinal
+    return false, "A Foundation can only accept an Ace, not a " .. cThis.ordinal
   end
 end
 
-function CheckFoundationBuild(cPrev, cThis)
+function CheckFoundation(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("CheckFoundationBuild prone fail\n")
+    io.stderr:write("CheckFoundation prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckFoundationBuild suit fail\n")
+    io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckFoundationBuild ordinal fail\n")
+    io.stderr:write("CheckFoundation ordinal fail\n")
     return false, nil
   end
   return true
 end
 
-function CheckFoundationDrag(cPrev, cThis)
-  return false
-end
-
+--[[
 function ConformantF(pile, cards)
 
   LogTail("ConformantF tail", cards)
@@ -130,34 +123,32 @@ function ConformantF(pile, cards)
 
   return true, nil
 end
+]]
 
 function CheckTableauAccept(cThis)
   return true, nil
 end
 
-function CheckTableauBuild(cPrev, cThis)
+function CheckTableau(cPrev, cThis)
   if cPrev.prone or cThis.prone then
-    io.stderr:write("CheckTableauBuild prone fail\n")
+    io.stderr:write("CheckTableau prone fail\n")
     return false, "Cannot move a face down card"
   end
   if cPrev.color == cThis.color then
-    io.stderr:write("CheckTableauBuild color fail\n")
+    io.stderr:write("CheckTableau color fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableauBuild ordinal fail\n")
+    io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
-  if PileCategory(cPrev.owner) == "Foundation" then
+  if PileCategory(cThis.owner) == "Foundation" then
     return false, "Cannot move a card from a Foundation to a Tableau"
   end
   return true
 end
 
-function CheckTableauDrag(cPrev, cThis)
-  return CheckTableauBuild(cPrev, cThis)
-end
-
+--[[
 function ConformantT(pile, cards)
 
   LogTail("ConformantT tail", cards)
@@ -196,13 +187,4 @@ function ConformantT(pile, cards)
 
   return true, nil
 end
-
-function ChkFalse(pile, cards)
-  LogTail("ChkFalse tail", cards)
-  return false, "You cannot do that"
-  end
-
-function ChkTrue(pile, cards)
-  LogTail("ChkTrue tail", cards)
-  return true
-end
+]]

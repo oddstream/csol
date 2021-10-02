@@ -14,6 +14,7 @@
 static struct PileVtable wasteVtable = {
     &WasteCardTapped,
     &WastePileTapped,
+    &WasteCanAcceptCard,
     &WasteCanAcceptTail,
     &WasteCollect,
     &WasteComplete,
@@ -27,11 +28,11 @@ static struct PileVtable wasteVtable = {
     &PileFree,
 };
 
-struct Waste* WasteNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Waste* WasteNew(Vector2 slot, enum FanType fan)
 {
     struct Waste* self = calloc(1, sizeof(struct Waste));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Waste", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Waste", slot, fan);
         self->super.vtable = &wasteVtable;
     }
     return self;
@@ -46,6 +47,20 @@ bool WasteCardTapped(struct Card *c)
 bool WastePileTapped(struct Pile *p)
 {
     BaizeResetError(p->owner);
+    return false;
+}
+
+bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+{
+    (void)self;
+
+    BaizeResetError(baize);
+
+    if ( c->owner == baize->stock ) {
+        return true;
+    } else {
+        BaizeSetError(baize, "You can only move cards to a Waste pile from the Stock");
+    }
     return false;
 }
 

@@ -29,7 +29,6 @@ static const struct FunctionToRegister {
     {"PileCategory", MoonGetPileCategory},
     {"CardCount", MoonGetCardCount},
     {"CardOwner", MoonGetCardOwner},
-    {"PowerMoves", MoonGetPowerMoves},
     {"SetAccept", MoonSetAccept},
     {"SetRecycles", MoonSetRecycles},
     {"PeekCard", MoonPeekCard},
@@ -232,22 +231,20 @@ int MoonAddPile(lua_State* L)
     float x = lua_tonumber(L, 2) - 1; // doesn't alter stack
     float y = lua_tonumber(L, 3) - 1; // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
-    const char* buildfunc = lua_tostring(L, 5);
-    const char* dragfunc = lua_tostring(L, 6);
 
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
 
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-        p = (struct Pile*)StockNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)StockNew((Vector2){x, y}, fan);
     } else if  ( strcmp(category, "Cell") == 0 ) {
-        p = (struct Pile*)CellNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)CellNew((Vector2){x, y}, fan);
     } else if ( strcmp(category, "Foundation") == 0 ) {
-        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan);
     } else if  ( strcmp(category, "Tableau") == 0 ) {
-        p = (struct Pile*)TableauNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)TableauNew((Vector2){x, y}, fan);
     } else if  ( strcmp(category, "Waste") == 0 ) {
-        p = (struct Pile*)WasteNew((Vector2){x, y}, fan, buildfunc, dragfunc);
+        p = (struct Pile*)WasteNew((Vector2){x, y}, fan);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);
     }
@@ -388,42 +385,6 @@ int MoonGetCardOwner(lua_State *L)
         return 0;
     }
     lua_pushlightuserdata(L, c->owner);
-    return 1;
-}
-
-int MoonGetPowerMoves(lua_State *L)
-{
-    struct Baize *baize = lua_touserdata(L, 1);
-    struct Pile *dstPile = lua_touserdata(L, 2);
-
-    if ( !BaizeValid(baize) ) {
-        fprintf(stderr, "WARNING: PowerMoves: invalid baize\n");
-        return 0;
-    }
-    if ( dstPile != NULL && !PileValid(dstPile) ) {
-        fprintf(stderr, "WARNING: PowerMoves: invalid pile\n");
-        return 0;
-    }
-
-    double emptyCells = 0.0;
-    double emptyCols = 0.0;
-    size_t index;
-    for ( struct Pile *p=ArrayFirst(baize->piles, &index); p; p=ArrayNext(baize->piles, &index) ) {
-        if ( ArrayLen(p->cards) == 0 ) {
-            if ( strcmp(p->category, "Cell") == 0 ) {
-                emptyCells++;
-            } else if ( strcmp(p->category, "Tableau") == 0 ) {
-                // 'If you are moving into an empty column, then the column you are moving into does not count as empty column.'
-                struct Tableau *t = (struct Tableau*)p;
-                if ( t->accept == 0 && p != dstPile ) {
-                    emptyCols++;
-                }
-            }
-        }
-    }
-
-    double n = (1.0 + emptyCells) * pow(2.0, emptyCols);
-    lua_pushinteger(L, (int)n);
     return 1;
 }
 

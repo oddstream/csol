@@ -131,7 +131,7 @@ void BaizeCreatePiles(struct Baize *const self)
         self->piles = ArrayNew(8);
     }
 
-    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE, NULL, NULL);
+    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE);
     if ( PileValid(self->stock) ) {
         lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
         self->stock->owner = self;
@@ -320,12 +320,14 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
 
 int BaizeCalcPercentComplete(struct Baize *const self)
 {
-    int sorted = 0, unsorted = 0;
-    size_t index;
-    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
-    }
-    return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
+    // int sorted = 0, unsorted = 0;
+    // size_t index;
+    // for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+    //     p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+    // }
+    // return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
+    (void)self;
+    return 42;
 }
 
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
@@ -449,7 +451,6 @@ void BaizeTouchStop(struct Baize *const self)
             struct Pile* p = largestIntersection(self, c);
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                // if ( ConformantDrag(self, self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
                 if ( p->vtable->CanAcceptTail(self, p, self->tail) ) {
                     while ( c ) {
                         CardStopDrag(c);

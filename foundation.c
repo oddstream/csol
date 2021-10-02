@@ -16,6 +16,7 @@
 static struct PileVtable foundationVtable = {
     &FoundationCardTapped,
     &FoundationPileTapped,
+    &FoundationCanAcceptCard,
     &FoundationCanAcceptTail,
     &FoundationCollect,
     &FoundationComplete,
@@ -29,11 +30,11 @@ static struct PileVtable foundationVtable = {
     &PileFree,
 };
 
-struct Foundation* FoundationNew(Vector2 slot, enum FanType fan, const char* buildfunc, const char* dragfunc)
+struct Foundation* FoundationNew(Vector2 slot, enum FanType fan)
 {
     struct Foundation* self = calloc(1, sizeof(struct Foundation));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Foundation", slot, fan, buildfunc, dragfunc);
+        PileCtor((struct Pile*)self, "Foundation", slot, fan);
         self->super.vtable = &foundationVtable;
         self->accept = 0; // accept any by default
     }
@@ -52,6 +53,21 @@ bool FoundationPileTapped(struct Pile *p)
     return false;
 }
 
+bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+{
+    BaizeResetError(baize);
+
+    if ( ArrayLen(self->cards) == 13 ) {
+        BaizeSetError(baize, "The foundation is full");
+        return false;
+    }
+
+    if ( PileEmpty(self) ) {
+        return CheckAccept(baize, self, c);
+    }
+    return CheckPair(baize, PilePeekCard(self), c);
+}
+
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     BaizeResetError(baize);
@@ -68,20 +84,15 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
         BaizeSetError(baize, "That would make the foundation over full");
         return false;
     }
-    if ( ArrayLen(self->cards) == 0 ) {
-        struct Foundation *f = (struct Foundation*)self;
-        if ( f->accept != 0 ) {
-            struct Card* c = ArrayGet(tail, 0);
-            if ( c->id.ordinal != f->accept ) {
-                char z[128];
-                sprintf(z, "This foundation can only accept a %d, not a %d", f->accept, c->id.ordinal);
-                BaizeSetError(baize, z);
-                return false;
-            }
-        }
-        return ConformantBuild(baize, self, tail);
+    if ( ArrayLen(tail) > 1 ) {
+        // TODO for Spider, invent a new pile category (Discard) than can accept a run of 13 cards
+        BaizeSetError(baize, "Can only move a single card to a Foundation");
+        return false;
     }
-    return ConformantBuild(baize, self, tail);
+    if ( PileEmpty(self) ) {
+        return CheckAccept(baize, self, ArrayGet(tail, 0));
+    }
+    return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
 }
 
 int FoundationCollect(struct Pile *const self)
