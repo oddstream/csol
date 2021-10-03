@@ -38,6 +38,7 @@ function Build()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
+        SetDraggable(pile, false)
     end
 
     pile = AddPile("Tableau", 1, 2, FAN_DOWN)
@@ -96,46 +97,6 @@ function CheckFoundation(cPrev, cThis)
   return true
 end
 
---[[
-function ConformantF(pile, cards)
-
-  LogTail("ConformantF tail", cards)
-
-  if not pile then
-    io.stderr:write("ConformantF passed a nil pile\n")
-  end
-
-  if #cards == 0 then
-    io.stderr:write("ConformantF passed an empty tail\n")
-    return false
-  end
-
-  local ok, err
-
-  if pile then
-    local cTop = PeekCard(pile)
-    if cTop then
-      ok, err = TwoCardsF(cTop, cards[1])
-      if not ok then
-        return false, err
-      end
-    end
-  end
-
-  local cPrev = cards[1]
-  for n=2, #cards do
-    local cThis = cards[n]
-    ok, err = TwoCardsF(cPrev, cThis)
-    if not ok then
-      return false, err
-    end
-    cPrev = cThis
-  end
-
-  return true, nil
-end
-]]
-
 function CheckTableauAccept(cThis)
   if cThis.ordinal == 13 then
     return true, nil
@@ -153,9 +114,6 @@ function CheckTableau(cPrev, cThis)
     io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
-  if PileCategory(cThis.owner) == "Foundation" then
-    return false, "Cannot move a card from a Foundation to a Tableau"
-  end
   return true
 end
 
@@ -163,45 +121,18 @@ function CheckTableauMovable(cPrev, cThis)
   return CheckTableau(cPrev, cThis)
 end
 
---[[
-function ConformantT(pile, cards)
-
-    LogTail("ConformantT tail", cards)
-    
-    local ok, err
-  
-    if pile then
-      local cTop = PeekCard(pile)
-      if cTop then
-        ok, err = TwoCardsT(cTop, cards[1])
-        if not ok then
-          return false, err
-        end
-      end
-    end
-
-    local cPrev = cards[1]
-    for n=2, #cards do
-      local cThis = cards[n]
-      ok, err = TwoCardsT(cPrev, cThis)
-      if not ok then
-        return false, err
-      end
-      cPrev = cThis
-    end
-
-    return true, nil
-end
-]]
-
 function CardTapped(card)
   LogCard("CardTapped", card)
 
-  local cardsMoved = false
+  local cardsMoved = 0
 
   if card.owner == STOCK then
-    cardsMoved = MoveCard(STOCK, WASTE)
+    for i=1,3 do
+      if MoveCard(STOCK, WASTE) then
+        cardsMoved = cardsMoved + 1
+      end
+    end
   end
 
-  return cardsMoved, nil
+  return cardsMoved > 0, nil
 end

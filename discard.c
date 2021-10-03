@@ -115,7 +115,7 @@ void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 void DiscardDraw(struct Pile *const self)
 {
     extern Color baizeHighlightColor;
-    extern Font fontAcme24;
+    extern Font fontAcme;
     extern float cardWidth;
 
     PileDraw(self);
@@ -124,5 +124,5 @@ void DiscardDraw(struct Pile *const self)
     Vector2 pos = PileScreenPos(self);
     pos.x += cardWidth / 8.0f;
     pos.y += cardWidth / 16.0f;
-    DrawTextEx(fontAcme24, "=", pos, fontSize, 0, baizeHighlightColor);
+    DrawTextEx(fontAcme, "=", pos, fontSize, 0, baizeHighlightColor);
 }

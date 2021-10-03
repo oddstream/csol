@@ -128,7 +128,7 @@ char variantName[64];
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
-Font fontAcme24 = {0};
+Font fontAcme = {0};
 Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
 
@@ -179,7 +179,7 @@ int main(void)
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-    fontAcme24 = LoadFontEx("assets/Acme-Regular.ttf", 24, 0, 0);
+    fontAcme = LoadFontEx("assets/Acme-Regular.ttf", (int)cardWidth / 2, 0, 0);
     fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
     fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
@@ -232,7 +232,7 @@ int main(void)
     SpritesheetFree(ssBack);
     SpritesheetFree(ssIcons);
 
-    UnloadFont(fontAcme24);
+    UnloadFont(fontAcme);
     UnloadFont(fontRobotoMedium24);
     UnloadFont(fontRobotoRegular14);
 

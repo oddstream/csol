@@ -28,6 +28,10 @@ struct UI* UiNew(void)
             if ( iw ) {
                 ArrayPush(((struct Container*)self->titleBar)->widgets, iw);
             }
+            iw = IconWidgetNew((struct Container*)self->titleBar, 1, DONE, BaizeCollectCommand);
+            if ( iw ) {
+                ArrayPush(((struct Container*)self->titleBar)->widgets, iw);
+            }
             ArrayPush(self->containers, self->titleBar);
             TitleBarLayoutWidgets((struct Container*)self->titleBar);
         }

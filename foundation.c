@@ -133,7 +133,7 @@ void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int 
 void FoundationDraw(struct Pile *const self)
 {
     extern Color baizeHighlightColor;
-    extern Font fontAcme24;
+    extern Font fontAcme;
 
     PileDraw(self);
 
@@ -144,6 +144,6 @@ void FoundationDraw(struct Pile *const self)
         Vector2 pos = PileScreenPos(self);
         pos.x += cardWidth / 8.0f;
         pos.y += cardWidth / 16.0f;
-        DrawTextEx(fontAcme24, UtilOrdToShortString(f->accept), pos, fontSize, 0, baizeHighlightColor);
+        DrawTextEx(fontAcme, UtilOrdToShortString(f->accept), pos, fontSize, 0, baizeHighlightColor);
     }
 }

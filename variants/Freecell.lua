@@ -39,6 +39,7 @@ function Build()
     for x = 5, 8 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
+        SetDraggable(pile, false)
     end
 
     for x = 1, 4 do
@@ -54,11 +55,18 @@ function Build()
 end
 
 function CheckCellAccept(cThis)
+  io.stderr:write("CheckCellAccept\n")
   return true, nil
 end
 
 function CheckCell(cPrev, cThis)
+  io.stderr:write("CheckCell\n")
   return cPrev == nil, nil
+end
+
+function CheckCellMovable(cPrev, cThis)
+  io.stderr:write("CheckCellMovable\n")
+  return true, nil
 end
 
 function CheckFoundationAccept(cThis)
@@ -81,46 +89,6 @@ function CheckFoundation(cPrev, cThis)
   return true
 end
 
---[[
-function ConformantF(pile, cards)
-
-  LogTail("ConformantF tail", cards)
-
-  if not pile then
-    io.stderr:write("ConformantF passed a nil pile\n")
-  end
-
-  if #cards == 0 then
-    io.stderr:write("ConformantF passed an empty tail\n")
-    return false
-  end
-
-  local ok, err
-
-  if pile then
-    local cTop = PeekCard(pile)
-    if cTop then
-      ok, err = CheckFoundationBuild(cTop, cards[1])
-      if not ok then
-        return false, err
-      end
-    end
-  end
-
-  local cPrev = cards[1]
-  for n=2, #cards do
-    local cThis = cards[n]
-    ok, err = CheckFoundationBuild(cPrev, cThis)
-    if not ok then
-      return false, err
-    end
-    cPrev = cThis
-  end
-
-  return true, nil
-end
-]]
-
 function CheckTableauAccept(cThis)
   return true, nil
 end
@@ -134,53 +102,9 @@ function CheckTableau(cPrev, cThis)
     io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
-  if PileCategory(cThis.owner) == "Foundation" then
-    return false, "Cannot move a card from a Foundation to a Tableau"
-  end
   return true
 end
 
 function CheckTableauMovable(cPrev, cThis)
   return CheckTableau(cPrev, cThis)
 end
-
---[[
-function ConformantT(pile, cards)
-
-  LogTail("ConformantT tail", cards)
-  
-  if #cards > 1 then
-    powerMoves = PowerMoves(BAIZE, pile)
-    if powerMoves == 0 then
-      return false, "Not enough room to move " .. #cards
-    end
-    if #cards > powerMoves then
-      return false, "Can move " .. powerMoves .. " cards, not " .. #cards
-    end
-  end
-
-  local ok, err
-
-  if pile then
-    local cTop = PeekCard(pile)
-    if cTop then
-      ok, err = CheckTableauBuild(cTop, cards[1])
-      if not ok then
-        return false, err
-      end
-    end
-  end
-
-  local cPrev = cards[1]
-  for n=2, #cards do
-    local cThis = cards[n]
-    ok, err = CheckTableauBuild(cPrev, cThis)
-    if not ok then
-      return false, err
-    end
-    cPrev = cThis
-  end
-
-  return true, nil
-end
-]]

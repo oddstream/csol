@@ -144,7 +144,7 @@ void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unso
 
 void StockDraw(struct Pile *const self)
 {
-    extern Font fontAcme24;
+    extern Font fontAcme;
     extern Color baizeHighlightColor;
 
     PileDraw(self);
@@ -157,6 +157,6 @@ void StockDraw(struct Pile *const self)
         Vector2 pos = PileScreenPos(self);
         pos.x += 10;
         pos.y += 10;
-        DrawTextEx(fontAcme24, z, pos, 24, 0, baizeHighlightColor);
+        DrawTextEx(fontAcme, z, pos, 24, 0, baizeHighlightColor);
     }
 }

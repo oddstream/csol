@@ -165,7 +165,7 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 
 void TableauDraw(struct Pile *const self)
 {
-    extern Font fontAcme24 ;
+    extern Font fontAcme;
     extern Color baizeHighlightColor;
 
     PileDraw(self);
@@ -177,6 +177,6 @@ void TableauDraw(struct Pile *const self)
         Vector2 pos = PileScreenPos(self);
         pos.x += cardWidth / 8.0f;
         pos.y += cardWidth / 16.0f;
-        DrawTextEx(fontAcme24, UtilOrdToShortString(t->accept), pos, fontSize, 0, baizeHighlightColor);
+        DrawTextEx(fontAcme, UtilOrdToShortString(t->accept), pos, fontSize, 0, baizeHighlightColor);
     }
 }

@@ -112,6 +112,12 @@ Rectangle PileBaizeRect(struct Pile *const self)
     return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
 }
 
+Rectangle PileScreenRect(struct Pile *const self)
+{
+    extern float cardWidth, cardHeight;
+    return (Rectangle){.x = self->pos.x + self->owner->dragOffset.x, .y = self->pos.y + self->owner->dragOffset.y, .width = cardWidth, .height = cardHeight};
+}
+
 Vector2 PileCalculatePosFromSlot(struct Pile *const self)
 {
     extern float leftMargin, topMargin, pilePaddingX, pilePaddingY, cardWidth, cardHeight;
@@ -362,7 +368,8 @@ void PileDraw(struct Pile *const self)
     extern Color baizeHighlightColor;
 
     // BeginDrawing() has been called by BaizeDraw()
-    Rectangle r = PileFannedScreenRect(self);
+    // Rectangle r = PileFannedScreenRect(self);
+    Rectangle r = PileScreenRect(self);
     DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
 }
 

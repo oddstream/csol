@@ -59,6 +59,7 @@ struct Card* PilePopCard(struct Pile *const self);
 struct Card* PilePeekCard(struct Pile *const self);
 bool PileIsStock(struct Pile *const self);
 Rectangle PileBaizeRect(struct Pile *const self);
+Rectangle PileScreenRect(struct Pile *const self);
 Vector2 PileBaizePos(struct Pile *const self);
 Vector2 PileScreenPos(struct Pile *const self);
 Vector2 PileCalculatePosFromSlot(struct Pile *const self);

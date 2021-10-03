@@ -103,9 +103,6 @@ function CheckTableau(cPrev, cThis)
     io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
-  if PileCategory(cThis.owner) == "Discard" then
-    return false, "Cannot move a card from a Discard to a Tableau"
-  end
   return true
 end
 
