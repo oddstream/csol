@@ -31,6 +31,7 @@ static const struct FunctionToRegister {
     {"CardCount", MoonGetCardCount},
     {"CardOwner", MoonGetCardOwner},
     {"SetAccept", MoonSetAccept},
+    {"SetDraggable", MoonSetDraggable},
     {"SetRecycles", MoonSetRecycles},
     {"PeekCard", MoonPeekCard},
     {"MoveCard", MoonMoveCard},
@@ -398,6 +399,18 @@ int MoonSetAccept(lua_State *L)
 
     if ( PileValid(p) ) {
         p->vtable->SetAccept(p, ord);
+    }
+
+    return 0;
+}
+
+int MoonSetDraggable(lua_State *L)
+{
+    struct Pile* p = lua_touserdata(L, 1);
+    bool draggable = lua_toboolean(L, 2);
+
+    if ( PileValid(p) ) {
+        p->draggable = draggable;
     }
 
     return 0;

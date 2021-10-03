@@ -2,7 +2,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <time.h>
 #include <string.h>
 #include <raylib.h>
@@ -318,18 +317,6 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
     return pile;
 }
 
-int BaizeCalcPercentComplete(struct Baize *const self)
-{
-    // int sorted = 0, unsorted = 0;
-    // size_t index;
-    // for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-    //     p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
-    // }
-    // return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
-    (void)self;
-    return 42;
-}
-
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
 {
     if ( self->tail ) {
@@ -379,6 +366,10 @@ void BaizeStopDrag(struct Baize *const self) {
 
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
 {
+    if ( self->tail ) {
+        fprintf(stderr, "WARNING: touch when there is a tail\n");
+    }
+
     // the UI is on top of the baize, so gets first dibs
     struct Widget *w = UiFindWidgetAt(self->ui, touchPosition);
     if ( w ) {
@@ -720,24 +711,3 @@ void BaizeToggleNavDrawerCommand(struct Baize *const self)
     UiToggleNavDrawer(self->ui);
 }
 
-size_t BaizePowerMoves(struct Baize *const self, struct Pile *const dstPile)
-{
-    double emptyCells = 0.0;
-    double emptyCols = 0.0;
-    size_t index;
-    for ( struct Pile *p=ArrayFirst(self->piles, &index); p; p=ArrayNext(self->piles, &index) ) {
-        if ( ArrayLen(p->cards) == 0 ) {
-            if ( strcmp(p->category, "Cell") == 0 ) {
-                emptyCells++;
-            } else if ( strcmp(p->category, "Tableau") == 0 ) {
-                // 'If you are moving into an empty column, then the column you are moving into does not count as empty column.'
-                struct Tableau *t = (struct Tableau*)p;
-                if ( t->accept == 0 && p != dstPile ) {
-                    emptyCols++;
-                }
-            }
-        }
-    }
-    double n = (1.0 + emptyCells) * pow(2.0, emptyCols);
-    return (size_t)n;
-}

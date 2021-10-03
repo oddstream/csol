@@ -11,7 +11,7 @@
 #include "tableau.h"
 #include "waste.h"
 
-#include "conformant.h"
+#include "check.h"
 #include "moon.h"
 #include "spritesheet.h"
 #include "undo.h"

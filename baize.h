@@ -55,7 +55,6 @@ void BaizeResetState(struct Baize *const self);
 void BaizePositionPiles(struct Baize *const self, const int windowWidth);
 void BaizeNewDealCommand(struct Baize *const self);
 struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);
-int BaizeCalcPercentComplete(struct Baize *const self);
 void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
 bool BaizeDragging(struct Baize *const self);
 void BaizeStartDrag(struct Baize *const self);
@@ -75,6 +74,5 @@ void BaizeFree(struct Baize *const self);
 
 bool BaizeCardTapped(struct Baize *const self, struct Card* c);
 void BaizeToggleNavDrawerCommand(struct Baize *const self);
-size_t BaizePowerMoves(struct Baize *const self, struct Pile *const dstPile);
 
 #endif

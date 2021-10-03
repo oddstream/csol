@@ -2,13 +2,14 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <raylib.h>
 
 #include "baize.h"
 #include "pile.h"
 #include "array.h"
 #include "tableau.h"
-#include "conformant.h"
+#include "check.h"
 #include "util.h"
 
 static struct PileVtable tableauVtable = {
@@ -59,26 +60,45 @@ bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
     return CheckPair(baize, PilePeekCard(self), c);
 }
 
-bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
 {
-    if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
-    }
-    if ( ArrayLen(tail) == 1 ) {
-        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
-    } else {
-        if ( baize->powerMoves ) {
-            size_t moves = BaizePowerMoves(baize, self);
-            if ( ArrayLen(tail) > moves ) {
-                char z[128];
-                if ( moves == 1 )
-                    sprintf(z, "Only enough space to move 1 card, not %lu", ArrayLen(tail));
-                else
-                    sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
-                BaizeSetError(baize, z);
-                return false;
+    double emptyCells = 0.0;
+    double emptyCols = 0.0;
+    size_t index;
+    for ( struct Pile *p=ArrayFirst(self->piles, &index); p; p=ArrayNext(self->piles, &index) ) {
+        if ( ArrayLen(p->cards) == 0 ) {
+            if ( strcmp(p->category, "Cell") == 0 ) {
+                emptyCells++;
+            } else if ( strcmp(p->category, "Tableau") == 0 ) {
+                // 'If you are moving into an empty column, then the column you are moving into does not count as empty column.'
+                struct Tableau *t = (struct Tableau*)p;
+                if ( t->accept == 0 && p != dstPile ) {
+                    emptyCols++;
+                }
             }
         }
+    }
+    double n = (1.0 + emptyCells) * pow(2.0, emptyCols);
+    return (size_t)n;
+}
+
+bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+{
+    if ( baize->powerMoves ) {
+        size_t moves = PowerMoves(baize, self);
+        if ( ArrayLen(tail) > moves ) {
+            char z[128];
+            if ( moves == 1 )
+                sprintf(z, "Only enough space to move 1 card, not %lu", ArrayLen(tail));
+            else
+                sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+            BaizeSetError(baize, z);
+            return false;
+        }
+    }
+    if ( PileEmpty(self) ) {
+        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
+    } else {
         return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
     }
 }
@@ -122,7 +142,6 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
         *sorted += 1;
         return;
     }
-    // TODO this reeks of inefficiency
     for ( size_t i = 0; i<ArrayLen(self->cards) - 1; i++ ) {
         struct Card *c0 = ArrayGet(self->cards, i);
         if ( !CardValid(c0) ) {

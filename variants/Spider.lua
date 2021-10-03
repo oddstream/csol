@@ -42,18 +42,19 @@ function Build()
   
     for x = 3, 10 do
         local pile = AddPile("Discard", x, 1, FAN_NONE)
+        SetDraggable(pile, false)
     end
 
     for x = 1, 4 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealDown(pile, 5)
+        DealDown(pile, 2)
         DealUp(pile, 1)
         TABLEAU[x] = pile
     end
 
     for x = 5, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealDown(pile, 4)
+        DealDown(pile, 1)
         DealUp(pile, 1)
         TABLEAU[x] = pile
     end
@@ -80,6 +81,8 @@ function CheckDiscard(cPrev, cThis)
 end
 
 function CheckDiscardMovable(cPrev, cThis)
+  -- LogCard("CheckDiscardMovable prev", cPrev)
+  -- LogCard("CheckDiscardMovable this", cThis)
   if cPrev.suit ~= cThis.suit then
     io.stderr:write("CheckDiscardMovable suit fail\n")
     return false, nil
@@ -107,6 +110,8 @@ function CheckTableau(cPrev, cThis)
 end
 
 function CheckTableauMovable(cPrev, cThis)
+  -- LogCard("CheckTableauMovable prev", cPrev)
+  -- LogCard("CheckTableauMovable this", cThis)
   if cPrev.suit ~= cThis.suit then
     io.stderr:write("CheckTableauMovable suit fail\n")
     return false, nil

@@ -91,6 +91,18 @@ void UndoStackFree(struct Array *stack)
     ArrayFree(stack);
 }
 
+static int CalcPercentComplete(struct Baize *const self)
+{
+    // int sorted = 0, unsorted = 0;
+    // size_t index;
+    // for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+    //     p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+    // }
+    // return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
+    (void)self;
+    return 42;
+}
+
 void BaizeUndoPush(struct Baize *const self)
 {
     struct Array* savedPiles = SnapshotNew(self);
@@ -101,7 +113,7 @@ void BaizeUndoPush(struct Baize *const self)
 
     sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
 
-    sprintf(zRight, "COMPLETE: %d%%", BaizeCalcPercentComplete(self));
+    sprintf(zRight, "COMPLETE: %d%%", CalcPercentComplete(self));
 
     if ( PileHidden(self->stock) ) {
         UiUpdateStatusBar(self->ui, NULL, zCenter, zRight);

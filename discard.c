@@ -10,7 +10,7 @@
 #include "pile.h"
 #include "array.h"
 #include "discard.h"
-#include "conformant.h"
+#include "check.h"
 #include "util.h"
 
 static struct PileVtable discardVtable = {

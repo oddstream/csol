@@ -1,4 +1,4 @@
-/* conformant.c */
+/* check.c */
 
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +9,7 @@
 
 #include "array.h"
 #include "baize.h"
-#include "conformant.h"
+#include "check.h"
 #include "moon.h"
 
 static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, struct Card *const cNext)
@@ -130,12 +130,20 @@ static bool checkTail(struct Baize *const baize, struct Array *const tail)
         return false;
     }
 
+    struct Card *cPrev = ArrayGet(tail, 0);
+
+    if ( !cPrev->owner->draggable ) {
+        char z[128];
+        sprintf(z, "You may not move cards from a %s", cPrev->owner->category);
+        BaizeSetError(baize, z);
+        return false;
+    }
+
     if ( ArrayLen(tail) == 1 ) {
         fprintf(stderr, "WARNING: %s passed tail with one card\n", __func__);
         return true;
     }
 
-    struct Card *cPrev = ArrayGet(tail, 0);
     size_t i = 1;
     while ( i < ArrayLen(tail) ) {
         struct Card *cNext = ArrayGet(tail, i);

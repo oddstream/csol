@@ -1,7 +1,7 @@
-/* conformant.h */
+/* check.h */
 
-#ifndef CONFORMANT_H
-#define CONFORMANT_H
+#ifndef CHECK_H
+#define CHECK_H
 
 #include <stdio.h>
 #include "array.h"

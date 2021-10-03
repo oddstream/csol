@@ -26,6 +26,7 @@ struct Pile {
     struct PileVtable *vtable;
     struct Baize *owner;
     char category[16];
+    bool draggable; // eg Discard, Foundation
     Vector2 slot;
     Vector2 pos;
     enum FanType fanType;
