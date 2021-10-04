@@ -30,6 +30,7 @@ void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum 
     self->magic = PILE_MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
     self->draggable = true;
+    self->singleCardMove = true;
     self->slot = slot;
     self->fanType = fan;
     self->cards = ArrayNew(52);

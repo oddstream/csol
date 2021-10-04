@@ -4,6 +4,8 @@ PACKS = 1
 
 POWERMOVES = true
 
+SEED = 1
+
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
@@ -39,17 +41,19 @@ function Build()
     for x = 5, 8 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
-        SetDraggable(pile, false)
+        Property(pile, DRAGGABLE, false)
     end
 
     for x = 1, 4 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealUp(pile, 7)
+        SetSingleCardMove(pile, not POWERMOVES)
     end
 
     for x = 5, 8 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         DealUp(pile, 6)
+        SetSingleCardMove(pile, not POWERMOVES)
     end
 
 end

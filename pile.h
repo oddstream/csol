@@ -27,6 +27,7 @@ struct Pile {
     struct Baize *owner;
     char category[16];
     bool draggable; // eg Discard, Foundation
+    bool singleCardMove;    // eg Forty Thieves
     Vector2 slot;
     Vector2 pos;
     enum FanType fanType;

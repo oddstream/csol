@@ -138,8 +138,9 @@ void BaizeCreatePiles(struct Baize *const self)
         for ( size_t i = 0; i < self->cardsInLibrary; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
+        int seed = MoonGetGlobalInt(self->L, "SEED", time(NULL));
+        srand(seed);
         // Knuth-Fisher–Yates shuffle
-        srand(time(NULL));
         size_t n = ArrayLen(self->stock->cards);
         for ( int i = n-1; i > 0; i-- ) {
             int j = rand() % (i+1);

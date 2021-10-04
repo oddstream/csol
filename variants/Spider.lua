@@ -10,6 +10,7 @@ SUITS = 1
 -- SUITS = 4
 
 POWERMOVES = false
+SEED = 2
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -42,19 +43,21 @@ function Build()
   
     for x = 3, 10 do
         local pile = AddPile("Discard", x, 1, FAN_NONE)
-        SetDraggable(pile, false)
+        Property(pile, DRAGGABLE, false)
     end
 
     for x = 1, 4 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealDown(pile, 2)
+        SetSingleCardMove(pile, false)
+        DealDown(pile, 4)
         DealUp(pile, 1)
         TABLEAU[x] = pile
     end
 
     for x = 5, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealDown(pile, 1)
+        SetSingleCardMove(pile, false)
+        DealDown(pile, 3)
         DealUp(pile, 1)
         TABLEAU[x] = pile
     end

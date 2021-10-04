@@ -124,7 +124,7 @@ float originalCardWidth = 140.0f, originalCardHeight = 190.0f;
 float cardScale = 1.0f;
 float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
-char variantName[64];
+char variantName[64] = "Klondike";
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
@@ -151,7 +151,6 @@ int main(void)
     uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xff};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
-    strncpy(variantName, "Klondike", sizeof(variantName)-1);
     LoadSettings(&windowWidth, &windowHeight);
     // fprintf(stderr, "cardScale %f\n", cardScale);
 

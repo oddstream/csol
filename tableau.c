@@ -84,16 +84,21 @@ static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
 
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    if ( baize->powerMoves ) {
-        size_t moves = PowerMoves(baize, self);
-        if ( ArrayLen(tail) > moves ) {
-            char z[128];
-            if ( moves == 1 )
-                sprintf(z, "Only enough space to move 1 card, not %lu", ArrayLen(tail));
-            else
-                sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
-            BaizeSetError(baize, z);
+    if ( ArrayLen(tail) > 1 ) {
+        if ( self->singleCardMove ) {
+            BaizeSetError(baize, "Only a single card may be moved at a time");
             return false;
+        } else if ( baize->powerMoves ) {
+            size_t moves = PowerMoves(baize, self);
+            if ( ArrayLen(tail) > moves ) {
+                char z[128];
+                if ( moves == 1 )
+                    sprintf(z, "Only enough space to move 1 card, not %lu", ArrayLen(tail));
+                else
+                    sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+                BaizeSetError(baize, z);
+                return false;
+            }
         }
     }
     if ( PileEmpty(self) ) {

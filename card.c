@@ -175,6 +175,14 @@ void CardDraw(struct Card *const self)
 
     Rectangle rectCard = CardScreenRect(self);
 
+    if ( CardDragging(self) ) {
+        rectCard.x += 2.0f;
+        rectCard.y += 2.0f;
+        DrawRectangleRounded(rectCard, 0.05, 9, (Color){0,0,0,63});
+        rectCard.x -= 4.0f;
+        rectCard.y -= 4.0f;
+    }
+
     if ( showFace ) {
         SpritesheetDraw(ssFace, self->frame, self->flipWidth, rectCard);
     } else {

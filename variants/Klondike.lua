@@ -1,8 +1,8 @@
 -- Klondike
 
 PACKS = 1
-
 POWERMOVES = false
+SEED = 2 -- winnable draw three
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -38,42 +38,34 @@ function Build()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetAccept(pile, 1)
-        SetDraggable(pile, false)
+        Property(pile, DRAGGABLE, false)
     end
 
-    pile = AddPile("Tableau", 1, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealUp(pile, 1)
+    local dealDown = 0
+    for x = 1, 7 do
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        SetSingleCardMove(pile, false)
+        SetAccept(pile, 13)
+        DealDown(pile, dealDown)
+        dealDown = dealDown + 1
+        DealUp(pile, 1)
+    end
 
-    pile = AddPile("Tableau", 2, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealDown(pile, 1)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 3, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealDown(pile, 2)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 4, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealDown(pile, 3)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 5, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealDown(pile, 4)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 6, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealDown(pile, 5)
-    DealUp(pile, 1)
-
-    pile = AddPile("Tableau", 7, 2, FAN_DOWN)
-    SetAccept(pile, 13)
-    DealDown(pile, 6)
-    DealUp(pile, 1)
+    Property(pile, DRAGGABLE, false)
+    local draggable = Property(pile, DRAGGABLE)
+    if draggable then
+      io.stderr:write("DRAGGABLE: {true}\n")
+    else
+      io.stderr:write("DRAGGABLE: {false or nil}\n")
+    end
+    
+    Property(pile, DRAGGABLE, true)
+    draggable = Property(pile, DRAGGABLE)
+    if draggable then
+      io.stderr:write("DRAGGABLE: {true}\n")
+    else
+      io.stderr:write("DRAGGABLE: {false or nil}\n")
+    end
 
 end
 
