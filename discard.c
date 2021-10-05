@@ -14,8 +14,6 @@
 #include "util.h"
 
 static struct PileVtable discardVtable = {
-    &DiscardCardTapped,
-    &DiscardPileTapped,
     &DiscardCanAcceptCard,
     &DiscardCanAcceptTail,
     &DiscardCollect,
@@ -38,18 +36,6 @@ struct Discard* DiscardNew(Vector2 slot, enum FanType fan)
         self->super.vtable = &discardVtable;
     }
     return self;
-}
-
-bool DiscardCardTapped(struct Card *c)
-{   // not used
-    BaizeResetError(c->owner->owner);
-    return false;
-}
-
-bool DiscardPileTapped(struct Pile *p)
-{
-    BaizeResetError(p->owner);
-    return false;
 }
 
 bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)

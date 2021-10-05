@@ -3,6 +3,8 @@
 PACKS = 1
 POWERMOVES = false
 SEED = 3 -- 2 winnable draw three
+STOCK_RECYCLES = 9999
+
 StockDealCards = 1
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
@@ -30,7 +32,7 @@ function Build()
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
-    SetPileRecycles(STOCK, 9999)
+    SetPileRecycles(STOCK, STOCK_RECYCLES)
   
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
@@ -115,4 +117,22 @@ function CardTapped(card)
   end
 
   return cardsMoved > 0, nil
+end
+
+function PileTapped(pile)
+  io.stdout:write("PileTapped\n")
+  if pile == STOCK then
+    if STOCK_RECYCLES == 0 then
+      return false, "No more Stock recycles"
+    end
+    if PileCardCount(WASTE) > 0 then
+      while PileCardCount(WASTE) > 0 do
+        MoveCard(WASTE, STOCK)
+      end
+      STOCK_RECYCLES = STOCK_RECYCLES - 1
+      SetPileRecycles(STOCK, STOCK_RECYCLES)
+      return true, nil
+    end
+  end
+  return false, nil
 end

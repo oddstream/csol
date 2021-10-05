@@ -13,8 +13,6 @@
 #include "util.h"
 
 static struct PileVtable tableauVtable = {
-    &TableauCardTapped,
-    &TableauPileTapped,
     &TableauCanAcceptCard,
     &TableauCanAcceptTail,
     &TableauCollect,
@@ -38,18 +36,6 @@ struct Tableau* TableauNew(Vector2 slot, enum FanType fan)
         self->accept = 0;   // accept any by default
     }
     return self;
-}
-
-bool TableauCardTapped(struct Card *c)
-{   // not used
-    BaizeResetError(c->owner->owner);
-    return false;
-}
-
-bool TableauPileTapped(struct Pile *p)
-{
-    BaizeResetError(p->owner);
-    return false;
 }
 
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)

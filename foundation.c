@@ -14,8 +14,6 @@
 #include "util.h"
 
 static struct PileVtable foundationVtable = {
-    &FoundationCardTapped,
-    &FoundationPileTapped,
     &FoundationCanAcceptCard,
     &FoundationCanAcceptTail,
     &FoundationCollect,
@@ -39,18 +37,6 @@ struct Foundation* FoundationNew(Vector2 slot, enum FanType fan)
         self->accept = 0; // accept any by default
     }
     return self;
-}
-
-bool FoundationCardTapped(struct Card *c)
-{   // not used
-    BaizeResetError(c->owner->owner);
-    return false;
-}
-
-bool FoundationPileTapped(struct Pile *p)
-{
-    BaizeResetError(p->owner);
-    return false;
 }
 
 bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)

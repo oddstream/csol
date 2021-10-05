@@ -15,8 +15,6 @@ struct Discard {
 };
 
 struct Discard* DiscardNew(Vector2 pos, enum FanType fan);
-bool DiscardCardTapped(struct Card *c);
-bool DiscardPileTapped(struct Pile *p);
 bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int DiscardCollect(struct Pile *const self);

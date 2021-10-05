@@ -12,8 +12,6 @@
 #include "cell.h"
 
 static struct PileVtable cellVtable = {
-    &CellCardTapped,
-    &CellPileTapped,
     &CellCanAcceptCard,
     &CellCanAcceptTail,
     &CellCollect,
@@ -36,18 +34,6 @@ struct Cell* CellNew(Vector2 slot, enum FanType fan)
         self->super.vtable = &cellVtable;
     }
     return self;
-}
-
-bool CellCardTapped(struct Card *c)
-{   // not used
-    BaizeResetError(c->owner->owner);
-    return false;
-}
-
-bool CellPileTapped(struct Pile *p)
-{
-    BaizeResetError(p->owner);
-    return false;
 }
 
 bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)

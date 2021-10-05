@@ -500,8 +500,12 @@ void BaizeTouchStop(struct Baize *const self)
         }
         self->touchedWidget = NULL;
     } else if ( self->touchedPile ) {
-        if ( self->touchedPile->vtable->PileTapped(self->touchedPile) ) {
+        if ( BaizePileTapped(self, self->touchedPile) ) {
             BaizeAfterUserMove(self);
+        } else {
+            if ( self->errorString ) {
+                UiToast(self->ui, self->errorString);
+            }
         }
         self->touchedPile = NULL;
     } else if ( self->dragging ) {
