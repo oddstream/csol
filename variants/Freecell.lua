@@ -30,7 +30,7 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 5, -5)  -- hide the stock off screen
+    PileMoveTo(STOCK, 5, -5)  -- hide the stock off screen
 
     local pile
 
@@ -40,20 +40,24 @@ function Build()
 
     for x = 5, 8 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        SetAccept(pile, 1)
-        Property(pile, DRAGGABLE, false)
+        SetPileAccept(pile, 1)
+        SetPileDraggable(pile, false);
     end
 
     for x = 1, 4 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealUp(pile, 7)
-        SetSingleCardMove(pile, not POWERMOVES)
+        for n=1,7 do
+          MoveCard(STOCK, pile)
+        end
+        SetPileSingleCardMove(pile, not POWERMOVES)
     end
 
     for x = 5, 8 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealUp(pile, 6)
-        SetSingleCardMove(pile, not POWERMOVES)
+        for n=1,6 do
+          MoveCard(STOCK, pile)
+        end
+        SetPileSingleCardMove(pile, not POWERMOVES)
     end
 
 end

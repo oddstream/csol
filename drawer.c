@@ -75,7 +75,8 @@ void DrawerFree(struct Container *const self)
 
 bool DrawerVisible(struct Drawer *const self)
 {
-    return self->super.rect.x > -1.0f;   // don't compare a float with 0
+    // return self->super.rect.x > -1.0f;   // don't compare a float with 0
+    return self->super.rect.x > -DRAWER_WIDTH / 2.0f;
 }
 
 void DrawerShow(struct Drawer *const self)

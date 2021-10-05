@@ -2,7 +2,8 @@
 
 PACKS = 1
 POWERMOVES = false
-SEED = 2 -- winnable draw three
+SEED = 3 -- 2 winnable draw three
+StockDealCards = 1
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -28,8 +29,8 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 1, 1)
-    SetRecycles(STOCK, 9999)
+    PileMoveTo(STOCK, 1, 1)
+    SetPileRecycles(STOCK, 9999)
   
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
@@ -37,34 +38,21 @@ function Build()
 
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        SetAccept(pile, 1)
-        Property(pile, DRAGGABLE, false)
+        SetPileAccept(pile, 1)
+        SetPileDraggable(pile, false)
     end
 
-    local dealDown = 0
+    local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetSingleCardMove(pile, false)
-        SetAccept(pile, 13)
-        DealDown(pile, dealDown)
-        dealDown = dealDown + 1
-        DealUp(pile, 1)
-    end
-
-    Property(pile, DRAGGABLE, false)
-    local draggable = Property(pile, DRAGGABLE)
-    if draggable then
-      io.stderr:write("DRAGGABLE: {true}\n")
-    else
-      io.stderr:write("DRAGGABLE: {false or nil}\n")
-    end
-    
-    Property(pile, DRAGGABLE, true)
-    draggable = Property(pile, DRAGGABLE)
-    if draggable then
-      io.stderr:write("DRAGGABLE: {true}\n")
-    else
-      io.stderr:write("DRAGGABLE: {false or nil}\n")
+        SetPileSingleCardMove(pile, false)
+        SetPileAccept(pile, 13)
+        for n = 1, deal do
+          MoveCard(STOCK, pile)
+          SetCardProne(PilePeekCard(pile), true)
+        end
+        SetCardProne(PilePeekCard(pile), false)
+        deal = deal + 1
     end
 
 end
@@ -119,7 +107,7 @@ function CardTapped(card)
   local cardsMoved = 0
 
   if card.owner == STOCK then
-    for i=1,3 do
+    for i=1,StockDealCards do
       if MoveCard(STOCK, WASTE) then
         cardsMoved = cardsMoved + 1
       end

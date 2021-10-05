@@ -33,7 +33,7 @@ static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, s
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
-        MoonPushCard(L, cNext);
+        MoonPushCardAsTable(L, cNext);
 
         // one arg (card-as-a-table), two returns (boolean, error string)
         if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
@@ -94,8 +94,8 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
-        MoonPushCard(L, cPrev);
-        MoonPushCard(L, cNext);
+        MoonPushCardAsTable(L, cPrev);
+        MoonPushCardAsTable(L, cNext);
 
         // two args (card-as-a-table x 2), two returns (boolean, error string)
         if ( lua_pcall(L, 2, 2, 0) != LUA_OK ) {

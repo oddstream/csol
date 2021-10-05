@@ -13,25 +13,21 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def);
 float MoonGetGlobalFloat(lua_State* L, const char* var, const float def);
 const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def);
 float MoonGetFieldNumber(lua_State* L, const char* key, const float def);
-void MoonPushCard(lua_State *L, struct Card *const c);
-void MoonPushTail(lua_State *L, struct Array *const tail);
+void MoonPushCardAsTable(lua_State *L, struct Card *const c);
+void MoonPushTailAsTable(lua_State *L, struct Array *const tail);
 
 int MoonAddPile(lua_State* L);
-int MoonDealUp(lua_State* L);
-int MoonDealDown(lua_State* L);
 int MoonFindPile(lua_State* L);
-int MoonMovePileTo(lua_State* L);
-int MoonGetPileCategory(lua_State* L);
-int MoonGetCardCount(lua_State *L);
-int MoonGetCardOwner(lua_State* L);
-int MoonSetAccept(lua_State* L);
-int MoonSetRecycles(lua_State* L);
-int MoonSetSingleCardMove(lua_State* L);
-int MoonPeekCard(lua_State* L);
+int MoonPileMoveTo(lua_State* L);
+int MoonPileCategory(lua_State* L);
+int MoonPileCardCount(lua_State *L);
+int MoonCardOwner(lua_State* L);
+int MoonSetCardProne(lua_State* L);
+int MoonSetPileAccept(lua_State* L);
+int MoonSetPileDraggable(lua_State* L);
+int MoonSetPileRecycles(lua_State* L);
+int MoonSetPileSingleCardMove(lua_State* L);
+int MoonPilePeekCard(lua_State* L);
 int MoonMoveCard(lua_State* L);
 
-int PropertyPileDraggable(lua_State* L);
-int PropertyCardProne(lua_State* L);
-
-int MoonProperty(lua_State* L);
 #endif

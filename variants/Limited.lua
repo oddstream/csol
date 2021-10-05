@@ -4,7 +4,7 @@ PACKS = 2
 
 POWERMOVES = true
 
-SEED = 1
+SEED = 2
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -30,21 +30,23 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 1, 1)
-    SetRecycles(STOCK, 0)
+    PileMoveTo(STOCK, 1, 1)
+    SetPileRecycles(STOCK, 0)
 
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     for x = 5, 12 do
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
-        SetAccept(pile, 1)
-        Property(pile, DRAGGABLE, false)
+        SetPileAccept(pile, 1)
+        SetPileDraggable(pile, false)
     end
 
     for x = 1, 12 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        DealUp(pile, 3)
-        SetSingleCardMove(pile, not POWERMOVES)
+        for n=1,3 do
+          MoveCard(STOCK, pile)
+        end
+        SetPileSingleCardMove(pile, not POWERMOVES)
     end
 
 end

@@ -23,27 +23,18 @@ static const struct FunctionToRegister {
     lua_CFunction cFunction;
 } FunctionsToRegister[] = {
     {"AddPile", MoonAddPile},
-    {"DealUp", MoonDealUp},
-    {"DealDown", MoonDealDown},
     {"FindPile", MoonFindPile},
-    {"MovePileTo", MoonMovePileTo},
-    {"PileCategory", MoonGetPileCategory},
-    {"CardCount", MoonGetCardCount},
-    {"CardOwner", MoonGetCardOwner},
-    {"SetAccept", MoonSetAccept},
-    {"SetRecycles", MoonSetRecycles},
-    {"SetSingleCardMove", MoonSetSingleCardMove},
-    {"Property", MoonProperty},
-    {"PeekCard", MoonPeekCard},
+    {"PileMoveTo", MoonPileMoveTo},
+    {"PileCategory", MoonPileCategory},
+    {"PileCardCount", MoonPileCardCount},
+    {"CardOwner", MoonCardOwner},
+    {"SetCardProne", MoonSetCardProne},
+    {"SetPileAccept", MoonSetPileAccept},
+    {"SetPileDraggable", MoonSetPileDraggable},
+    {"SetPileRecycles", MoonSetPileRecycles},
+    {"SetPileSingleCardMove", MoonSetPileSingleCardMove},
+    {"PilePeekCard", MoonPilePeekCard},
     {"MoveCard", MoonMoveCard},
-};
-
-static const struct PropertyToRegister {
-    char luaFunction[32];
-    lua_CFunction cFunction;
-} PropertiesToRegister[] = {
-    {"DRAGGABLE", PropertyPileDraggable},
-    {"PRONE", PropertyCardProne},
 };
 
 static struct Baize* getBaize(lua_State* L)
@@ -66,10 +57,6 @@ void MoonRegisterFunctions(lua_State* L)
     for ( size_t i=0; i<sizeof(FunctionsToRegister) / sizeof(struct FunctionToRegister); i++ ) {
         lua_pushcfunction(L, FunctionsToRegister[i].cFunction);
         lua_setglobal(L, FunctionsToRegister[i].luaFunction);
-    }
-    for ( size_t i=0; i<sizeof(PropertiesToRegister) / sizeof(struct PropertyToRegister); i++ ) {
-        lua_pushcfunction(L, PropertiesToRegister[i].cFunction);
-        lua_setglobal(L, PropertiesToRegister[i].luaFunction);
     }
 }
 
@@ -187,14 +174,20 @@ float MoonGetFieldNumber(lua_State* L, const char* key, const float def)
     return result;
 }
 
-void MoonPushCard(lua_State *L, struct Card *const c)
+void MoonPushCardAsTable(lua_State *L, struct Card *const c)
 {
     if ( c ) {
         if ( !CardValid(c) ) {
             fprintf(stderr, "WARNING: Invalid card in %s\n", __func__);
         }
-        lua_createtable(L, 0, 5);       // create and push new 4-element table
-        
+        lua_createtable(L, 0, 7);       // create and push new 7-element table
+
+        lua_pushinteger(L, (int)c->pos.x);
+        lua_setfield(L, -2, "x"); // table["x"] = c->pos.x, pops key value
+
+        lua_pushinteger(L, (int)c->pos.y);
+        lua_setfield(L, -2, "y"); // table["y"] = c->pos.y, pops key value
+
         lua_pushinteger(L, c->id.ordinal);
         lua_setfield(L, -2, "ordinal"); // table["ordinal"] = c->ord, pops key value
 
@@ -214,7 +207,7 @@ void MoonPushCard(lua_State *L, struct Card *const c)
     }
 }
 
-void MoonPushTail(lua_State *L, struct Array *const tail)
+void MoonPushTailAsTable(lua_State *L, struct Array *const tail)
 {
     // fprintf(stdout, "MoonPushTail Lua stack in  %d\n", lua_gettop(L));
 
@@ -226,7 +219,7 @@ void MoonPushTail(lua_State *L, struct Array *const tail)
     size_t index;
     struct Card* c = ArrayFirst(tail, &index);
     while ( c ) {
-        MoonPushCard(L, c);
+        MoonPushCardAsTable(L, c);
         lua_seti(L, -2, index + 1);     // add the card-table to the underlying table
         c = ArrayNext(tail, &index);
     }
@@ -275,60 +268,6 @@ int MoonAddPile(lua_State* L)
     }
 }
 
-int MoonDealUp(lua_State* L)
-{
-    struct Baize* baize = getBaize(L);
-    if ( !BaizeValid(baize) ) {
-        return 0;
-    }
-
-    struct Pile* p = lua_touserdata(L, 1); // get argument
-    if ( !PileValid(p) ) {
-        fprintf(stderr, "destination pile is not valid");
-        return 0;
-    }
-    
-    int n = lua_tointeger(L, 2);
-    while ( n-- ) {
-        struct Card* c = PilePopCard(baize->stock);
-        if ( c ) {
-            CardFlipUp(c);
-            PilePushCard(p, c);
-        } else {
-            fprintf(stderr, "cannot pop card from Stock\n");
-        }
-    }
-
-    return 0;
-}
-
-int MoonDealDown(lua_State* L)
-{
-    struct Baize* baize = getBaize(L);
-    if ( !BaizeValid(baize) ) {
-        return 0;
-    }
-
-    struct Pile* p = lua_touserdata(L, 1); // get argument
-    if ( !PileValid(p) ) {
-        fprintf(stderr, "destination pile is not valid\n");
-        return 0;
-    }
-    
-    int n = lua_tointeger(L, 2);
-    while ( n-- ) {
-        struct Card* c = PilePopCard(baize->stock);
-        if ( c ) {
-            CardFlipDown(c);
-            PilePushCard(p, c);
-        } else {
-            fprintf(stderr, "cannot pop card from Stock\n");
-        }
-    }
-
-    return 0;
-}
-
 int MoonFindPile(lua_State* L)
 {
     struct Baize* baize = getBaize(L);
@@ -348,7 +287,7 @@ int MoonFindPile(lua_State* L)
     return 0;
 }
 
-int MoonMovePileTo(lua_State* L)
+int MoonPileMoveTo(lua_State* L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     float x = lua_tonumber(L, 2) - 1;
@@ -371,7 +310,7 @@ int MoonMovePileTo(lua_State* L)
     return 0;
 }
 
-int MoonGetPileCategory(lua_State *L)
+int MoonPileCategory(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     if ( !PileValid(p) ) {
@@ -383,7 +322,7 @@ int MoonGetPileCategory(lua_State *L)
     return 1;
 }
 
-int MoonGetCardCount(lua_State *L)
+int MoonPileCardCount(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     if ( PileValid(p) ) {
@@ -394,7 +333,7 @@ int MoonGetCardCount(lua_State *L)
     return 1;
 }
 
-int MoonGetCardOwner(lua_State *L)
+int MoonCardOwner(lua_State *L)
 {
     struct Card* c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
@@ -405,7 +344,23 @@ int MoonGetCardOwner(lua_State *L)
     return 1;
 }
 
-int MoonSetAccept(lua_State *L)
+int MoonSetCardProne(lua_State *L)
+{
+    struct Card* c = lua_touserdata(L, 1);
+    if ( !CardValid(c) ) {
+        fprintf(stderr, "WARNING: %s: invalid card\n", __func__);
+        return 0;
+    }
+    bool prone = lua_toboolean(L, 2);
+    if ( prone ) {
+        CardFlipDown(c);
+    } else {
+        CardFlipUp(c);
+    }
+    return 0;
+}
+
+int MoonSetPileAccept(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     enum CardOrdinal ord = lua_tointeger(L, 2);
@@ -417,7 +372,19 @@ int MoonSetAccept(lua_State *L)
     return 0;
 }
 
-int MoonSetRecycles(lua_State *L)
+int MoonSetPileDraggable(lua_State *L)
+{
+    struct Pile* p = lua_touserdata(L, 1);
+    bool draggable = lua_toboolean(L, 2);
+
+    if ( PileValid(p) ) {
+        p->draggable = draggable;
+    }
+
+    return 0;
+}
+
+int MoonSetPileRecycles(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     int r = lua_tointeger(L, 2);
@@ -429,7 +396,7 @@ int MoonSetRecycles(lua_State *L)
     return 0;
 }
 
-int MoonSetSingleCardMove(lua_State *L)
+int MoonSetPileSingleCardMove(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     if ( PileValid(p) ) {
@@ -438,83 +405,17 @@ int MoonSetSingleCardMove(lua_State *L)
     return 0;
 }
 
-int PropertyPileDraggable(lua_State *L)
-{
-    // arg 1 = object
-    // arg 2 = this function
-    // arg 3 = value to set (optional)
-    int argc = lua_gettop(L);
-    struct Pile *const pile = lua_touserdata(L, 1);
-    if ( !PileValid(pile) ) {
-        return 0;
-    }
-    switch ( argc ) {
-        case 2:
-            lua_pushboolean(L, pile->draggable);
-            return 1;
-        case 3:
-            pile->draggable = lua_toboolean(L, 3);
-            return 0;
-        default:
-            fprintf(stderr, "%s called with %d args\n", __func__, argc);
-            return 0;
-    }
-}
-
-int PropertyCardProne(lua_State *L)
-{
-    // arg 1 = object
-    // arg 2 = this function
-    // arg 3 = value to set (optional)
-    int argc = lua_gettop(L);
-    struct Card *const card = lua_touserdata(L, 1);
-    if ( !CardValid(card) ) {
-        return 0;
-    }
-    if ( argc == 2 ) {
-        lua_pushboolean(L, card->prone);
-        return 1;
-    } else if ( argc == 3 ) {
-        bool prone = lua_toboolean(L, 3);
-        if ( prone && !card->prone ) {
-            CardFlipDown(card);
-        } else if ( !prone && card->prone ) {
-            CardFlipUp(card);
-        }
-        return 0;
-    } else {
-        fprintf(stderr, "%s called with %d args\n", __func__, argc);
-        return 0;
-    }
-}
-
-int MoonProperty(lua_State* L)
-{
-    /*
-        Property(pile, DRAGGABLE)
-            returns current property
-        Property(pile, DRAGGABLE, true)
-            sets property
-    */
-    if ( !lua_isfunction(L, 2) ) {
-        fprintf(stderr, "ERROR: unknown property\n");
-        return 0;
-    }
-    lua_CFunction func = lua_tocfunction(L, 2);
-    return func(L);
-}
-
-int MoonPeekCard(lua_State *L)
+int MoonPilePeekCard(lua_State *L)
 {
     struct Pile *p = lua_touserdata(L, 1);
 
     if ( !PileValid(p) ) {
         fprintf(stderr, "%s pile not valid\n", __func__);
-        lua_pushnil(L);
-        return 1;
+        return 0;
     }
 
-    MoonPushCard(L, PilePeekCard(p));    // may be NULL if pile empty
+    // MoonPushCardAsTable(L, PilePeekCard(p));    // may be NULL if pile empty
+    lua_pushlightuserdata(L, PilePeekCard(p));
     return 1;
 }
 

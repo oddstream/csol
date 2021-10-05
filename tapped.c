@@ -30,7 +30,7 @@ bool BaizeCardTapped(struct Baize *const self, struct Card* c)
     }
 
     // push one arg, the card (as a table)
-    MoonPushCard(L, c);
+    MoonPushCardAsTable(L, c);
 
     // one arg (card-as-a-table), two returns (boolean cards moved, error string)
     if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {

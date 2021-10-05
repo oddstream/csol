@@ -36,29 +36,35 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    MovePileTo(STOCK, 1, 1)
-    SetRecycles(STOCK, 0)
+    PileMoveTo(STOCK, 1, 1)
+    SetPileRecycles(STOCK, 0)
 
     TABLEAU = {}
   
     for x = 3, 10 do
         local pile = AddPile("Discard", x, 1, FAN_NONE)
-        Property(pile, DRAGGABLE, false)
+        SetPileDraggable(pile, false)
     end
 
     for x = 1, 4 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetSingleCardMove(pile, false)
-        DealDown(pile, 4)
-        DealUp(pile, 1)
+        SetPileSingleCardMove(pile, false)
+        for n=1,4 do
+          MoveCard(STOCK, pile)
+          SetCardProne(PilePeekCard(pile), true)
+        end
+        MoveCard(STOCK, pile)
         TABLEAU[x] = pile
     end
 
     for x = 5, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetSingleCardMove(pile, false)
-        DealDown(pile, 3)
-        DealUp(pile, 1)
+        SetPileSingleCardMove(pile, false)
+        for n=1,3 do
+          MoveCard(STOCK, pile)
+          SetCardProne(PilePeekCard(pile), true)
+        end
+        MoveCard(STOCK, pile)
         TABLEAU[x] = pile
     end
 end
@@ -132,17 +138,17 @@ function CardTapped(card)
     local emptyTabs = 0
     if card.owner == STOCK then
       for _, tab in ipairs(TABLEAU) do
-        if CardCount(tab) == 0 then
+        if PileCardCount(tab) == 0 then
           emptyTabs = emptyTabs + 1
         else
-          tabCards = tabCards + CardCount(tab)
+          tabCards = tabCards + PileCardCount(tab)
         end
       end
       if emptyTabs > 0 and tabCards >= #TABLEAU then
         errMsg = "All empty tableaux must be filled before dealing a new row"
       else
         for _, tab in ipairs(TABLEAU) do
-          DealUp(tab, 1)
+          MoveCard(STOCK, tab)
           cardsMoved = true
         end
       end

@@ -36,5 +36,9 @@ void IconWidgetDraw(struct Widget *const self)
     iconRect.y = con->rect.y + self->rect.y;
     iconRect.width = self->rect.width;
     iconRect.height = self->rect.height;
+    if ( CheckCollisionPointRec(GetMousePosition(), iconRect) ) {
+        iconRect.x += 2.0f;
+        iconRect.y += 2.0f;
+    }
     SpritesheetDraw(ssIcons, iw->frame, 1.0f, iconRect);
 }

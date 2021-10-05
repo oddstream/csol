@@ -69,6 +69,11 @@ void TextWidgetDraw(struct Widget *const self)
         pos.x += ICON_SIZE;
     }
     if ( tw->text ) {
+        // Rectangle screenRect = (Rectangle){.x=pos.x, .y=pos.y, .width=tw->super.rect.width, .height=tw->super.rect.height};
+        // if ( CheckCollisionPointRec(GetMousePosition(), screenRect) ) {
+        //     pos.x += 2.0f;
+        //     pos.y += 2.0f;
+        // }
         DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, 1.2f, uiTextColor);
     }
 }
