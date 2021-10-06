@@ -1,10 +1,8 @@
 -- Freecell
 
 PACKS = 1
-
+SEED = 2 -- winnable in 76 moves
 POWERMOVES = true
-
-SEED = 1
 
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
@@ -46,7 +44,7 @@ function Build()
 
     for x = 1, 4 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        for n=1,7 do
+        for n = 1, 7 do
           MoveCard(STOCK, pile)
         end
         SetPileSingleCardMove(pile, not POWERMOVES)
@@ -54,7 +52,7 @@ function Build()
 
     for x = 5, 8 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        for n=1,6 do
+        for n = 1, 6 do
           MoveCard(STOCK, pile)
         end
         SetPileSingleCardMove(pile, not POWERMOVES)
@@ -62,20 +60,20 @@ function Build()
 
 end
 
-function CheckCellAccept(cThis)
-  io.stderr:write("CheckCellAccept\n")
-  return true, nil
-end
+-- function CheckCellAccept(cThis)
+--   io.stderr:write("CheckCellAccept\n")
+--   return true, nil
+-- end
 
-function CheckCell(cPrev, cThis)
-  io.stderr:write("CheckCell\n")
-  return cPrev == nil, nil
-end
+-- function CheckCell(cPrev, cThis)
+--   io.stderr:write("CheckCell\n")
+--   return cPrev == nil, nil
+-- end
 
-function CheckCellMovable(cPrev, cThis)
-  io.stderr:write("CheckCellMovable\n")
-  return true, nil
-end
+-- function CheckCellMovable(cPrev, cThis)
+--   io.stderr:write("CheckCellMovable\n")
+--   return true, nil
+-- end
 
 function CheckFoundationAccept(cThis)
   if cThis.ordinal == 1 then

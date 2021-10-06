@@ -4,7 +4,7 @@ PACKS = 2
 
 POWERMOVES = true
 
-SEED = 2
+SEED = 4
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -101,4 +101,14 @@ function CardTapped(card)
   end
 
   return cardsMoved, nil
+end
+
+function PileTapped(pile)
+  if pile == WASTE then
+    if PileCardCount(STOCK) > 0 then
+      MoveCard(STOCK, WASTE)
+      return true, nil
+    end
+  end
+  return false, nil
 end

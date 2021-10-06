@@ -160,31 +160,49 @@ static bool checkTail(struct Baize *const baize, struct Array *const tail)
 
 bool CheckAccept(struct Baize *const baize, struct Pile *const dstPile, struct Card *const c)
 {
+    // return true if (an empty) dstPile can accept the card
     return checkAccept(baize, dstPile, c);
 }
 
-bool CheckCard(struct Baize *const baize, struct Pile *const dstPile, struct Card *const c)
-{
-    if ( PileEmpty(dstPile) ) {
-        return checkAccept(baize, dstPile, c);
-    } else {
-        struct Card *cPrev = PilePeekCard(dstPile);
-        return checkPair(baize, cPrev, c, false);
-    }
-}
+// bool CheckCard(struct Baize *const baize, struct Pile *const dstPile, struct Card *const c)
+// {
+//     if ( PileEmpty(dstPile) ) {
+//         return checkAccept(baize, dstPile, c);
+//     } else {
+//         struct Card *cPrev = PilePeekCard(dstPile);
+//         return checkPair(baize, cPrev, c, false);
+//     }
+// }
 
 bool CheckPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext)
 {
+    // return true if it's ok to build cNext onto cPrev
     return checkPair(baize, cPrev, cNext, false);
 }
 
-bool CheckTail(struct Baize *const baize, struct Pile *const dstPile, struct Array *const tail)
+bool CheckCards(struct Baize *const baize, struct Pile *const pile)
 {
-    // if ( PileEmpty(dstPile) ) {
-    //     if ( !checkAccept(baize, dstPile, ArrayGet(tail, 0)) ) {
-    //         return false;
-    //     }
-    // }
-    (void)dstPile;  // TODO retire
+    // return true if the cards in this pile are built correctly (an empty pile is built correctly)
+    if ( PileEmpty(pile) ) {
+        return true;
+    }
+
+    struct Card *cPrev = ArrayGet(pile->cards, 0);
+    size_t i = 1;
+    while ( i < ArrayLen(pile->cards) ) {
+        struct Card *cNext = ArrayGet(pile->cards, i);
+        if ( !checkPair(baize, cPrev, cNext, false) ) {
+            return false;
+        }
+        cPrev = cNext;
+        i++;
+    }
+    
+    return true;
+}
+
+bool CheckTail(struct Baize *const baize, struct Array *const tail)
+{
+    // returns true if it's ok to drag this tail
     return checkTail(baize, tail);
 }

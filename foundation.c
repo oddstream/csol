@@ -89,14 +89,13 @@ int FoundationCollect(struct Pile *const self)
 
 bool FoundationComplete(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileLen(self) == 13;
 }
 
 bool FoundationConformant(struct Pile *const self)
 {
     (void)self;
-    return false;
+    return true;
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)

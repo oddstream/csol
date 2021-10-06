@@ -68,14 +68,13 @@ int CellCollect(struct Pile *const self)
 
 bool CellComplete(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileEmpty(self);
 }
 
 bool CellConformant(struct Pile *const self)
 {
     (void)self;
-    return false;
+    return true;
 }
 
 void CellSetAccept(struct Pile *const self, enum CardOrdinal ord)

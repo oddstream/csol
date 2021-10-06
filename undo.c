@@ -5,6 +5,7 @@
 
 #include "array.h"
 #include "baize.h"
+#include "util.h"
 
 #include "ui.h"
 
@@ -93,14 +94,17 @@ void UndoStackFree(struct Array *stack)
 
 static int CalcPercentComplete(struct Baize *const self)
 {
-    // int sorted = 0, unsorted = 0;
-    // size_t index;
-    // for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-    //     p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
-    // }
-    // return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
+#if 1
+    int sorted = 0, unsorted = 0;
+    size_t index;
+    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+    }
+    return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->cardsInLibrary, (float)self->cardsInLibrary, 0.0f, 100.0f));
+#else
     (void)self;
     return 42;
+#endif
 }
 
 void BaizeUndoPush(struct Baize *const self)
@@ -159,13 +163,13 @@ void BaizeSavePositionCommand(struct Baize *const self)
 {
     UiHideNavDrawer(self->ui);
 
-    // if ( BaizeComplete(self) ) {
-    //     fprintf(stderr, "*** Cannot bookmark a completed game ***\n");
-    //     return;
-    // }
+    if ( BaizeComplete(self) ) {
+        UiToast(self->ui, "Cannot bookmark a completed game");
+        return;
+    }
     self->savedPosition = ArrayLen(self->undoStack);
     UiToast(self->ui, "Position bookmarked");
-    fprintf(stderr, "*** Position bookmarked ***\n");
+    // fprintf(stderr, "*** Position bookmarked ***\n");
     fprintf(stderr, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
 }
 
@@ -180,10 +184,10 @@ void BaizeLoadPositionCommand(struct Baize *const self)
         fprintf(stderr, "*** No bookmark ***\n");
         return;
     }
-    // if ( BaizeComplete(self) ) {
-    //     fprintf(stderr, "*** Cannot undo a completed game ***\n");
-    //     return;
-    // }
+    if ( BaizeComplete(self) ) {
+        UiToast(self->ui, "Cannot undo a completed game");
+        return;
+    }
     struct Array *snapshot = NULL;
     while ( ArrayLen(self->undoStack) + 1 > self->savedPosition ) {
         if ( snapshot ) {
@@ -225,10 +229,10 @@ void BaizeUndoCommand(struct Baize *const self)
         return;
     }
 
-    // if ( BaizeComplete(self) ) {
-    //     fprintf(stderr, "*** Cannot undo a completed game ***");
-    //     return;
-    // }
+    if ( BaizeComplete(self) ) {
+        UiToast(self->ui, "Cannot undo a completed game");
+        return;
+    }
 
     struct Array* snapshot = BaizeUndoPop(self);    // removes current state
     if ( NULL == snapshot ) {

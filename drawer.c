@@ -59,6 +59,8 @@ void DrawerUpdate(struct Container *const self)
                 d->super.rect.x += 16.0f;
             }
             break;
+        default:
+            break;
     }
 }
 

@@ -39,6 +39,8 @@ void StatusBarLayoutWidgets(struct Container *const self)
             case 1:
                 w->rect.x = self->rect.width - w->rect.width - padding;
                 break;
+            default:
+                break;
         }
         w->rect.y = (self->rect.height / 2.0f) - (w->rect.height / 2.0f);
     }

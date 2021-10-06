@@ -59,7 +59,7 @@ bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         BaizeSetError(baize, "Can only move 13 cards to a Discard");
         return false;
     }
-    return CheckTail(baize, self, tail);
+    return CheckTail(baize, tail);
 }
 
 int DiscardCollect(struct Pile *const self)
@@ -70,14 +70,12 @@ int DiscardCollect(struct Pile *const self)
 
 bool DiscardComplete(struct Pile *const self)
 {
-    (void)self;
-    return true;
+    return PileLen(self) == 13;
 }
 
 bool DiscardConformant(struct Pile *const self)
 {
-    (void)self;
-    return true;
+    return PileEmpty(self) || PileLen(self) == 13;
 }
 
 void DiscardSetAccept(struct Pile *const self, enum CardOrdinal ord)

@@ -76,14 +76,12 @@ int WasteCollect(struct Pile *const self)
 
 bool WasteComplete(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileEmpty(self);
 }
 
 bool WasteConformant(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileEmpty(self);
 }
 
 void WasteSetAccept(struct Pile *const self, enum CardOrdinal ord)

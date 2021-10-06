@@ -88,9 +88,9 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         }
     }
     if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
+        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckTail(baize, tail);
     } else {
-        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0)) && CheckTail(baize, self, tail);
+        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0)) && CheckTail(baize, tail);
     }
 }
 
@@ -101,14 +101,12 @@ int TableauCollect(struct Pile *const self)
 
 bool TableauComplete(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileEmpty(self);
 }
 
 bool TableauConformant(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return CheckCards(self->owner, self);
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)

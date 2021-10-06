@@ -64,14 +64,12 @@ int StockCollect(struct Pile *const self)
 
 bool StockComplete(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileEmpty(self);
 }
 
 bool StockConformant(struct Pile *const self)
 {
-    (void)self;
-    return false;
+    return PileEmpty(self);
 }
 
 void StockSetAccept(struct Pile *const self, enum CardOrdinal ord)

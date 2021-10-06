@@ -43,6 +43,8 @@ void TitleBarLayoutWidgets(struct Container *const self)
                 w->rect.x = nextRight - w->rect.width;
                 nextRight -= w->rect.width + padding;
                 break;
+            default:
+                break;
         }
         w->rect.y = (self->rect.height / 2.0f) - (w->rect.height / 2.0f);
     }

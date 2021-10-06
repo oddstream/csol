@@ -201,12 +201,17 @@ endif
 #
 #  https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 
-CFLAGS += -Wall -Wextra -Werror -Wpedantic -Wshadow -Wstrict-prototypes -Wsign-compare -Wformat=2 -std=c99 -D_DEFAULT_SOURCE
+CFLAGS += -std=c99 -D_DEFAULT_SOURCE
+# https://airbus-seclab.github.io/c-compiler-security/
+CFLAGS += -Werror
+CFLAGS += -Wall -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wstack-protector -Wtrampolines -Walloca -Wvla -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=4 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wstack-usage=1000000 -Wcast-align=strict
+# CFLAGS += -D_FORTIFY_SOURCE=2
+# CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE 
 
 ifeq ($(BUILD_MODE),DEBUG)
     CFLAGS += -ggdb3 -O0
 else
-    CFLAGS += -s -O1
+    CFLAGS += -s -O2
 endif
 
 # Additional flags for compiler (if desired)

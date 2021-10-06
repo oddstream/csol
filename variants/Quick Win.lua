@@ -1,11 +1,10 @@
--- Klondike
+-- Quick Win
 
 PACKS = 1
 POWERMOVES = false
-SEED = 3 -- 2 winnable draw three
-STOCK_RECYCLES = 9999
+STOCK_RECYCLES = 1
 
-StockDealCards = 1
+-- SEED = 4
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -33,30 +32,30 @@ function Build()
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
     SetPileRecycles(STOCK, STOCK_RECYCLES)
-  
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
-    
-    local pile
 
-    for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+
+    for x = 9, 12 do
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetPileAccept(pile, 1)
         SetPileDraggable(pile, false)
     end
 
-    local deal = 1
-    for x = 1, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetPileSingleCardMove(pile, false)
-        SetPileAccept(pile, 13)
-        for n = 1, deal do
+    for x = 1, 12 do
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        for n=1,2 do
           MoveCard(STOCK, pile)
-          SetCardProne(PilePeekCard(pile), true)
         end
-        SetCardProne(PilePeekCard(pile), false)
-        deal = deal + 1
+        SetPileSingleCardMove(pile, false)
     end
 
+    for x = 1, 12 do
+        local pile = AddPile("Tableau", x, 4, FAN_DOWN)
+        for n=1,2 do
+          MoveCard(STOCK, pile)
+        end
+        SetPileSingleCardMove(pile, false)
+    end
 end
 
 function CheckFoundationAccept(cThis)
@@ -69,31 +68,27 @@ end
 
 function CheckFoundation(cPrev, cThis)
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckFoundation suit fail\n")
+    -- io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckFoundation ordinal fail\n")
+    -- io.stderr:write("CheckFoundation ordinal fail\n")
     return false, nil
   end
   return true
 end
 
 function CheckTableauAccept(cThis)
-  if cThis.ordinal == 13 then
-    return true, nil
-  else
-    return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
-  end
+  return true, nil
 end
 
 function CheckTableau(cPrev, cThis)
-  if cPrev.color == cThis.color then
-    io.stderr:write("CheckTableau color fail\n")
+  if cPrev.suit ~= cThis.suit then
+    -- io.stderr:write("CheckTableau suit fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableau ordinal fail\n")
+    -- io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
   return true
@@ -106,39 +101,36 @@ end
 function CardTapped(card)
   LogCard("CardTapped", card)
 
-  local cardsMoved = 0
+  local cardsMoved = false
 
   if card.owner == STOCK then
-    for i=1,StockDealCards do
-      if MoveCard(STOCK, WASTE) then
-        cardsMoved = cardsMoved + 1
-      end
-    end
+    cardsMoved = MoveCard(STOCK, WASTE)
   end
 
-  return cardsMoved > 0, nil
+  return cardsMoved, nil
 end
 
 function PileTapped(pile)
-  io.stdout:write("PileTapped\n")
-  if pile == STOCK then
-    if STOCK_RECYCLES == 0 then
-      return false, "No more Stock recycles"
-    end
-    if PileCardCount(WASTE) > 0 then
-      while PileCardCount(WASTE) > 0 do
-        MoveCard(WASTE, STOCK)
+    io.stdout:write("PileTapped\n")
+    if pile == STOCK then
+      if STOCK_RECYCLES == 0 then
+        return false, "No more Stock recycles"
       end
-      STOCK_RECYCLES = STOCK_RECYCLES - 1
-      SetPileRecycles(STOCK, STOCK_RECYCLES)
-      return true, nil
+      if PileCardCount(WASTE) > 0 then
+        while PileCardCount(WASTE) > 0 do
+          MoveCard(WASTE, STOCK)
+        end
+        STOCK_RECYCLES = STOCK_RECYCLES - 1
+        SetPileRecycles(STOCK, STOCK_RECYCLES)
+        return true, nil
+      end
+    elseif pile == WASTE then
+      if PileCardCount(STOCK) > 0 then
+        MoveCard(STOCK, WASTE)
+        return true, nil
+      end
     end
-  elseif pile == WASTE then
-    if PileCardCount(STOCK) > 0 then
-      MoveCard(STOCK, WASTE)
-      return true, nil
-    end
+  
+    return false, nil
   end
-
-  return false, nil
-end
+  

@@ -37,7 +37,7 @@ bool CardValid(struct Card *const self)
 void CardToString(struct Card *const self, char* z)
 {
     unsigned dw = *((unsigned*)(&self->id));
-    sprintf(z, "{%x: p=%u o=%s s=%s p=%u}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->prone);
+    sprintf(z, "{%x: p=%d o=%s s=%s p=%d}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->prone);
 }
 
 Vector2 CardBaizePos(struct Card *const self)

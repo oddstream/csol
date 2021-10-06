@@ -156,6 +156,8 @@ Rectangle PileFannedBaizeRect(struct Pile *const self)
             case FAN_DOWN3:
                 r.height = cPos.y + cardHeight - r.y;
                 break;
+            default:
+                break;
         }
     }
     return r;
@@ -246,6 +248,8 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
         case FAN_LEFT3:
             break;
         case FAN_DOWN3:
+            break;
+        default:
             break;
     }
     return pos;

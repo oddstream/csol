@@ -1,16 +1,16 @@
 -- Spider
 
-PACKS = 8
-SUITS = 1
+-- PACKS = 8
+-- SUITS = 1
 
--- PACKS = 4
--- SUITS = 2
+PACKS = 4
+SUITS = 2
 
 -- PACKS = 2
 -- SUITS = 4
 
 POWERMOVES = false
-SEED = 2
+SEED = 5
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 

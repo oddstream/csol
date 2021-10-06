@@ -557,6 +557,10 @@ bool BaizeConformant(struct Baize *const self)
 void BaizeAfterUserMove(struct Baize *const self)
 {
     // TODO automoves (in Lua)
+
+    if ( BaizeComplete(self) ) {
+        UiToast(self->ui, "Game complete");
+    }
     // TODO test started/complete/conformant
 
     BaizeUndoPush(self);
@@ -593,6 +597,8 @@ void BaizeUpdate(struct Baize *const self)
             if ( self->tail || self->touchedPile || self->touchedWidget || self->dragging ) {
                 BaizeTouchStop(self);
             }
+            break;
+        default:
             break;
     }
 
