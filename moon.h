@@ -28,6 +28,8 @@ int MoonSetPileDraggable(lua_State* L);
 int MoonSetPileRecycles(lua_State* L);
 int MoonSetPileSingleCardMove(lua_State* L);
 int MoonPilePeekCard(lua_State* L);
+int MoonPileDemoteCards(lua_State *L);
+int MoonPilePromoteCards(lua_State *L);
 int MoonMoveCard(lua_State* L);
 
 #endif

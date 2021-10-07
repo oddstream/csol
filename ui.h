@@ -55,10 +55,11 @@ struct Widget {
     int align;  // alignment in parent container: left=-1, center=0, right=+1
     // bool disabled;
     BaizeCommandFunction bcf;
+    void* param;        // NULL, or a pointer to a block of memory, owned by the widget
     Rectangle rect;    // x, y relative to parent
 };
 
-void WidgetCtor(struct Widget *const self, struct Container* parent, int align, BaizeCommandFunction bcf);
+void WidgetCtor(struct Widget *const self, struct Container* parent, int align, BaizeCommandFunction bcf, void* param);
 void WidgetUpdate(struct Widget *const self);
 void WidgetDraw(struct Widget *const self);
 void WidgetFree(struct Widget *const self);
@@ -68,7 +69,7 @@ struct IconWidget {
     enum IconName frame;
 };
 
-struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, BaizeCommandFunction bcf);
+struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, BaizeCommandFunction bcf, void* param);
 void IconWidgetDraw(struct Widget *const self);
 
 struct TextWidget {
@@ -79,7 +80,7 @@ struct TextWidget {
     char *text;
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf);
+struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf, void* param);
 void TextWidgetSetText(struct TextWidget *const self, const char *text);
 void TextWidgetDraw(struct Widget *const self);
 void TextWidgetFree(struct Widget *const self);
@@ -186,8 +187,9 @@ struct UI* UiNew(void);
 void UiToast(struct UI *const self, const char* message);
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right);
 void UiUpdateTitleBar(struct UI *const self, const char* center);
-void UiHideNavDrawer(struct UI *const self);
+void UiHideDrawers(struct UI *const self);
 void UiToggleNavDrawer(struct UI *const self);
+void UiToggleVariantDrawer(struct UI *const self);
 struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos);
 void UiLayout(struct UI *const self, const int windowWidth, const int windowHeight);
 void UiUpdate(struct UI *const self);
@@ -201,6 +203,7 @@ struct UI {
     struct TitleBar *titleBar;
     struct StatusBar *statusBar;
     struct NavDrawer *navDrawer;
+    struct NavDrawer *variantDrawer;
 
     struct ToastManager *toastManager;
 };

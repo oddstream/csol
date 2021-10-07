@@ -1,6 +1,7 @@
 -- Quick Win
 
 PACKS = 1
+SUITS = 4
 POWERMOVES = false
 STOCK_RECYCLES = 1
 
@@ -47,6 +48,8 @@ function Build()
           MoveCard(STOCK, pile)
         end
         SetPileSingleCardMove(pile, false)
+        PileDemoteCards(pile, 13)
+        PilePromoteCards(pile, 1)
     end
 
     for x = 1, 12 do
@@ -55,6 +58,8 @@ function Build()
           MoveCard(STOCK, pile)
         end
         SetPileSingleCardMove(pile, false)
+        PileDemoteCards(pile, 13)
+        PilePromoteCards(pile, 1)
     end
 end
 

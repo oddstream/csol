@@ -34,6 +34,8 @@ static const struct FunctionToRegister {
     {"SetPileRecycles", MoonSetPileRecycles},
     {"SetPileSingleCardMove", MoonSetPileSingleCardMove},
     {"PilePeekCard", MoonPilePeekCard},
+    {"PileDemoteCards", MoonPileDemoteCards},
+    {"PilePromoteCards", MoonPilePromoteCards},
     {"MoveCard", MoonMoveCard},
 };
 
@@ -408,15 +410,86 @@ int MoonSetPileSingleCardMove(lua_State *L)
 int MoonPilePeekCard(lua_State *L)
 {
     struct Pile *p = lua_touserdata(L, 1);
-
     if ( !PileValid(p) ) {
-        fprintf(stderr, "%s pile not valid\n", __func__);
+        fprintf(stderr, "ERROR: %s: pile not valid\n", __func__);
         return 0;
     }
 
     // MoonPushCardAsTable(L, PilePeekCard(p));    // may be NULL if pile empty
     lua_pushlightuserdata(L, PilePeekCard(p));
     return 1;
+}
+
+int MoonPileDemoteCards(lua_State *L)
+{
+    struct Pile *p = lua_touserdata(L, 1);
+    if ( !PileValid(p) ) {
+        fprintf(stderr, "ERROR: %s: pile not valid\n", __func__);
+        return 0;
+    }
+    enum CardOrdinal ord = lua_tointeger(L, 2);
+    if ( ord < 1 || ord > 13 ) {
+        fprintf(stderr, "ERROR: %s: ordinal not valid\n", __func__);
+        return 0;
+    }
+
+    if (PileEmpty(p)) {
+        return 0;
+    }
+
+    struct Array *tmp = ArrayClone(p->cards);
+    if (tmp) {
+        ArrayReset(p->cards);
+        size_t index;
+        for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
+            if (c->id.ordinal == ord) {
+                ArrayPush(p->cards, c);
+            }
+        }
+        for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
+            if (c->id.ordinal != ord) {
+                ArrayPush(p->cards, c);
+            }
+        }
+        ArrayFree(tmp);
+    }
+    return 0;
+}
+
+int MoonPilePromoteCards(lua_State *L)
+{
+    struct Pile *p = lua_touserdata(L, 1);
+    if ( !PileValid(p) ) {
+        fprintf(stderr, "ERROR: %s: pile not valid\n", __func__);
+        return 0;
+    }
+    enum CardOrdinal ord = lua_tointeger(L, 2);
+    if ( ord < 1 || ord > 13 ) {
+        fprintf(stderr, "ERROR: %s: ordinal not valid\n", __func__);
+        return 0;
+    }
+
+    if (PileEmpty(p)) {
+        return 0;
+    }
+
+    struct Array *tmp = ArrayClone(p->cards);
+    if (tmp) {
+        ArrayReset(p->cards);
+        size_t index;
+        for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
+            if (c->id.ordinal != ord) {
+                ArrayPush(p->cards, c);
+            }
+        }
+        for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
+            if (c->id.ordinal == ord) {
+                ArrayPush(p->cards, c);
+            }
+        }
+        ArrayFree(tmp);
+    }
+    return 0;
 }
 
 int MoonMoveCard(lua_State *L)

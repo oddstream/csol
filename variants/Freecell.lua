@@ -1,8 +1,13 @@
 -- Freecell
 
 PACKS = 1
-SEED = 2 -- winnable in 76 moves
+SUITS = 4
 POWERMOVES = true
+EASY = true
+
+if not EASY then
+  SEED = 2 -- winnable in 76 moves
+end
 
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
@@ -48,6 +53,10 @@ function Build()
           MoveCard(STOCK, pile)
         end
         SetPileSingleCardMove(pile, not POWERMOVES)
+        if EASY then
+          PileDemoteCards(pile, 13)
+          PilePromoteCards(pile, 1)
+        end
     end
 
     for x = 5, 8 do
@@ -56,6 +65,10 @@ function Build()
           MoveCard(STOCK, pile)
         end
         SetPileSingleCardMove(pile, not POWERMOVES)
+        if EASY then
+          PileDemoteCards(pile, 13)
+          PilePromoteCards(pile, 1)
+        end
     end
 
 end
@@ -85,11 +98,11 @@ end
 
 function CheckFoundation(cPrev, cThis)
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckFoundation suit fail\n")
+    -- io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckFoundation ordinal fail\n")
+    -- io.stderr:write("CheckFoundation ordinal fail\n")
     return false, nil
   end
   return true
@@ -101,11 +114,11 @@ end
 
 function CheckTableau(cPrev, cThis)
   if cPrev.color == cThis.color then
-    io.stderr:write("CheckTableau color fail\n")
+    -- io.stderr:write("CheckTableau color fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableau ordinal fail\n")
+    -- io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
   return true

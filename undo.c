@@ -159,9 +159,11 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
     }
 }
 
-void BaizeSavePositionCommand(struct Baize *const self)
+void BaizeSavePositionCommand(struct Baize *const self, void* param)
 {
-    UiHideNavDrawer(self->ui);
+    (void)param;
+
+    UiHideDrawers(self->ui);
 
     if ( BaizeComplete(self) ) {
         UiToast(self->ui, "Cannot bookmark a completed game");
@@ -173,9 +175,10 @@ void BaizeSavePositionCommand(struct Baize *const self)
     fprintf(stderr, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
 }
 
-void BaizeLoadPositionCommand(struct Baize *const self)
+void BaizeLoadPositionCommand(struct Baize *const self, void* param)
 {
-    UiHideNavDrawer(self->ui);
+    (void)param;
+    UiHideDrawers(self->ui);
 
     fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
 
@@ -205,7 +208,7 @@ void BaizeLoadPositionCommand(struct Baize *const self)
 
 void BaizeRestartDealCommand(struct Baize *const self)
 {
-    UiHideNavDrawer(self->ui);
+    UiHideDrawers(self->ui);
 
     struct Array *snapshot = NULL;
     while ( ArrayLen(self->undoStack) > 0 ) {
@@ -222,8 +225,10 @@ void BaizeRestartDealCommand(struct Baize *const self)
     BaizeUndoPush(self);    // replace current state
 }
 
-void BaizeUndoCommand(struct Baize *const self)
+void BaizeUndoCommand(struct Baize *const self, void* param)
 {
+    (void)param;
+
     if ( ArrayLen(self->undoStack) < 2 ) {
         UiToast(self->ui, "Nothing to undo");
         return;

@@ -1,10 +1,9 @@
 -- Limited
 
 PACKS = 2
-
+SUITS = 4
 POWERMOVES = true
-
-SEED = 4
+SEED = 4  -- winnable
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -61,11 +60,11 @@ end
 
 function CheckFoundation(cPrev, cThis)
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckFoundation suit fail\n")
+    -- io.stderr:write("CheckFoundation suit fail\n")
     return false, nil
   end
   if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckFoundation ordinal fail\n")
+    -- io.stderr:write("CheckFoundation ordinal fail\n")
     return false, nil
   end
   return true
@@ -77,11 +76,11 @@ end
 
 function CheckTableau(cPrev, cThis)
   if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckTableu suit fail\n")
+    -- io.stderr:write("CheckTableau suit fail\n")
     return false, nil
   end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableu ordinal fail\n")
+    -- io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
   end
   return true

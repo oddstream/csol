@@ -1,6 +1,7 @@
 -- Klondike
 
 PACKS = 1
+SUITS = 4
 POWERMOVES = false
 SEED = 3 -- 2 winnable draw three
 STOCK_RECYCLES = 9999

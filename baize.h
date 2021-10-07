@@ -38,11 +38,12 @@ struct Baize {
 };
 
 struct Array* BaizeCommandQueue;
-typedef void (*BaizeCommandFunction)(struct Baize *const);
+typedef void (*BaizeCommandFunction)(struct Baize *const, void* param);
 struct BaizeCommand {
     // ISO C forbids conversion of object pointer to function pointer type [-Werror=pedantic]
     // so we hide our function pointer in a struct
     BaizeCommandFunction bcf;
+    void *param;
 };
 
 struct Baize* BaizeNew(void);
@@ -53,9 +54,9 @@ void BaizeCreateCards(struct Baize *const self);
 void BaizeCreatePiles(struct Baize *const self);
 void BaizeResetState(struct Baize *const self);
 void BaizePositionPiles(struct Baize *const self, const int windowWidth);
-void BaizeNewDealCommand(struct Baize *const self);
+void BaizeNewDealCommand(struct Baize *const self, void* param);
 struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);
-void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
+bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
 bool BaizeDragging(struct Baize *const self);
 void BaizeStartDrag(struct Baize *const self);
 void BaizeDragBy(struct Baize *const self, Vector2 delta);
@@ -63,7 +64,7 @@ void BaizeStopDrag(struct Baize *const self);
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchStop(struct Baize *const self);
-void BaizeCollectCommand(struct Baize *const self);
+void BaizeCollectCommand(struct Baize *const self, void* param);
 bool BaizeComplete(struct Baize *const self);
 bool BaizeConformant(struct Baize *const self);
 void BaizeAfterUserMove(struct Baize *const self);
@@ -74,6 +75,9 @@ void BaizeFree(struct Baize *const self);
 
 bool BaizeCardTapped(struct Baize *const self, struct Card *const c);
 bool BaizePileTapped(struct Baize *const self, struct Pile *const c);
-void BaizeToggleNavDrawerCommand(struct Baize *const self);
+void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);
+void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
+void BaizeFindGameCommand(struct Baize *const self, void* param);
+void BaizeChangeVariantCommand(struct Baize *const self, void* param);
 
 #endif

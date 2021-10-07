@@ -11,11 +11,11 @@ static struct WidgetVtable textWidgetVtable = {
     &TextWidgetFree,
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf)
+struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf, void* param)
 {
     struct TextWidget* self = calloc(1, sizeof(struct TextWidget));
     if ( self ) {
-        WidgetCtor((struct Widget*)self, parent, align, bcf);
+        WidgetCtor((struct Widget*)self, parent, align, bcf, param);
         self->super.vtable = &textWidgetVtable;
         self->frame = frame;
         self->font = font;

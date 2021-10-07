@@ -215,7 +215,7 @@ int main(void)
                 struct BaizeCommand *bc = ArrayGet(BaizeCommandQueue, 0);
                 if ( bc ) {
                     if ( bc->bcf ) {
-                        bc->bcf(baize);
+                        bc->bcf(baize, bc->param);
                     }
                     ArrayDeleteFirst(BaizeCommandQueue, free);
                 } else {

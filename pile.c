@@ -321,7 +321,7 @@ bool PileIsAt(struct Pile *const self, Vector2 point)
 
 void PileRepushAllCards(struct Pile *const self)
 {
-    if ( ArrayLen(self->cards) == 0 ) {
+    if (PileEmpty(self)) {
         return;
     }
     struct Array *tmp = ArrayClone(self->cards);

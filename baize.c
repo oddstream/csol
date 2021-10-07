@@ -32,6 +32,7 @@ struct Baize* BaizeNew() {
     }
     self->magic = BAIZE_MAGIC;
 
+    // nb there isn't a luaL_resetstate() so any globals set in one variant end up in the next
     self->L = luaL_newstate();
     luaL_openlibs(self->L);
 
@@ -102,8 +103,15 @@ void BaizeCreateCards(struct Baize *const self)
     {   // scope for packs, suits, i
         size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
         size_t suits = MoonGetGlobalInt(self->L, "SUITS", 4);
-        self->cardsInLibrary = packs * suits * 13;
-        self->cardLibrary = calloc(self->cardsInLibrary, sizeof(struct Card));
+        size_t newSize = packs * suits * 13;
+
+        if (self->cardLibrary) {
+            memset(self->cardLibrary, 0, self->cardsInLibrary * sizeof(struct Card));
+            free(self->cardLibrary);
+        }
+        self->cardLibrary = calloc(newSize, sizeof(struct Card));
+        self->cardsInLibrary = newSize;
+
         size_t i = 0;
         for ( size_t pack = 0; pack < packs; pack++ ) {
             for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
@@ -112,6 +120,8 @@ void BaizeCreateCards(struct Baize *const self)
                 }
             }
         }
+
+        fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, newSize);
     }
 
     self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
@@ -243,11 +253,12 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth)
     }
 }
 
-void BaizeNewDealCommand(struct Baize *const self)
+void BaizeNewDealCommand(struct Baize *const self, void* param)
 {
+    (void)param;
     // TODO record lost game if this one started
 
-    UiHideNavDrawer(self->ui);
+    UiHideDrawers(self->ui);
     BaizeCreatePiles(self);
     BaizeResetState(self);
 }
@@ -318,23 +329,40 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
     return pile;
 }
 
-void BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
+bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
 {
+    size_t index = 0;
+    struct Pile* p = cFirst->owner;
+
+    // check no cards in this pile are transitioning
+    for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
+        if (CardTransitioning(c)) {
+            return false;
+        }
+    }
+    // find the index of the first tail card
+    size_t iFirst = 9999;
+    for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
+        if (c == cFirst) {
+            iFirst = index;
+            break;
+        }
+    }
+    if (iFirst == 999) {
+        fprintf(stderr, "ERROR: %s: card not found in pile\n", __func__);
+        return false;
+    }
+    // free any old tail
     if ( self->tail ) {
         ArrayFree(self->tail);
         self->tail = NULL;
     }
-    size_t index = 0;
-    struct Pile* p = cFirst->owner;
-    struct Card* c = (struct Card*)ArrayFirst(p->cards, &index);
-    while ( c ) {
-        if ( c == cFirst ) {
-            self->tail = ArrayNew(ArrayCap(p->cards));
-            ArrayCopyTail(self->tail, p->cards, index);
-            break;
-        }
-        c = (struct Card*)ArrayNext(p->cards, &index);
+    // make a new tail
+    self->tail = ArrayNew(ArrayCap(p->cards));
+    if (self->tail) {
+        ArrayCopyTail(self->tail, p->cards, iFirst);
     }
+    return ArrayLen(self->tail) > 0;
 }
 
 bool BaizeDragging(struct Baize *const self) {
@@ -382,21 +410,18 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
             // dx = touchPosition.x - c->pos.x;
             // dy = touchPosition.y - c->pos.y;
             // LOGCARD(c);
-            if ( !CardTransitioning(c) ) {
-                BaizeMakeTail(self, c);
-                if ( self->tail ) {
-                    // {
-                    //     size_t cindex;
-                    //     for ( struct Card *cdrag = ArrayFirst(self->tail, &cindex); cdrag; cdrag = ArrayNext(self->tail, &cindex) ) {
-                    //         CardStartDrag2(cdrag, cdrag->pos);
-                    //     }
-                    //     // center the card on the touch position (experimental)
-                    //     extern float cardWidth, cardHeight;
-                    //     c->pos.x = touchPosition.x - (cardWidth / 2.0);
-                    //     c->pos.y = touchPosition.y - (cardHeight / 2.0);
-                    // }
-                    ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
-                }
+            if ( BaizeMakeTail(self, c) ) {
+                // {
+                //     size_t cindex;
+                //     for ( struct Card *cdrag = ArrayFirst(self->tail, &cindex); cdrag; cdrag = ArrayNext(self->tail, &cindex) ) {
+                //         CardStartDrag2(cdrag, cdrag->pos);
+                //     }
+                //     // center the card on the touch position (experimental)
+                //     extern float cardWidth, cardHeight;
+                //     c->pos.x = touchPosition.x - (cardWidth / 2.0);
+                //     c->pos.y = touchPosition.y - (cardHeight / 2.0);
+                // }
+                ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
             }
         } else {
             self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
@@ -408,7 +433,7 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
     }
     
     self->lastTouch = touchPosition;
-    UiHideNavDrawer(self->ui);
+    UiHideDrawers(self->ui);
 }
 
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
@@ -495,6 +520,7 @@ void BaizeTouchStop(struct Baize *const self)
             struct BaizeCommand *bc = calloc(1, sizeof(struct BaizeCommand));
             if ( bc ) {
                 bc->bcf = self->touchedWidget->bcf;
+                bc->param = self->touchedWidget->param;
                 ArrayPush(BaizeCommandQueue, bc);
             }
         }
@@ -513,8 +539,10 @@ void BaizeTouchStop(struct Baize *const self)
     }
 }
 
-void BaizeCollectCommand(struct Baize *const self)
+void BaizeCollectCommand(struct Baize *const self, void* param)
 {
+    (void)param;
+
     int count, totalCount = 0;
     for (;;) {
         count = 0;
@@ -615,22 +643,25 @@ void BaizeUpdate(struct Baize *const self)
     ArrayForeach(self->piles, (ArrayIterFunc)PileUpdate);
 
     if ( IsKeyReleased(KEY_U) ) {
-        BaizeUndoCommand(self);
+        BaizeUndoCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_S) ) {
-        BaizeSavePositionCommand(self);
+        BaizeSavePositionCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_L) ) {
-        BaizeLoadPositionCommand(self);
+        BaizeLoadPositionCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_N) ) {
-        BaizeNewDealCommand(self);
+        BaizeNewDealCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_R) ) {
-        BaizeRestartDealCommand(self);
+        BaizeRestartDealCommand(self, NULL);
+    }
+    if ( IsKeyReleased(KEY_F) ) {
+        BaizeFindGameCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_C) ) {
-        BaizeCollectCommand(self);
+        BaizeCollectCommand(self, NULL);
     }
 
     UiUpdate(self->ui);
@@ -717,8 +748,32 @@ void BaizeFree(struct Baize *const self)
     free(self);
 }
 
-void BaizeToggleNavDrawerCommand(struct Baize *const self)
+void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param)
 {
+    (void)param;
     UiToggleNavDrawer(self->ui);
 }
 
+void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param)
+{
+    (void)param;
+    UiToggleVariantDrawer(self->ui);
+}
+
+void BaizeFindGameCommand(struct Baize *const self, void* param)
+{
+    (void)param;
+    UiToggleVariantDrawer(self->ui);
+}
+
+void BaizeChangeVariantCommand(struct Baize *const self, void* param)
+{
+    if (param) {
+        extern char variantName[64];
+        strncpy(variantName, param, sizeof(variantName)-1);
+        BaizeCreateCards(self);
+        BaizeCreatePiles(self);
+        BaizeResetState(self);
+        UiToast(self->ui, (const char*)param);
+    }
+}

@@ -124,7 +124,7 @@ void TableauSetRecycles(struct Pile *const self, int r)
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
 {
     // iterate the pile->cards using an unsigned size_t, so make sure there are >2 before doing len-1
-    if ( ArrayLen(self->cards) == 0 ) {
+    if (PileEmpty(self)) {
         return;
     }
     if ( ArrayLen(self->cards) == 1 ) {

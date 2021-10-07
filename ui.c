@@ -1,6 +1,7 @@
 /* ui.c */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "ui.h"
 #include "undo.h"
@@ -15,20 +16,20 @@ struct UI* UiNew(void)
 
         self->titleBar = TitleBarNew();
         if ( self->titleBar ) {
-            struct IconWidget *iw = IconWidgetNew((struct Container*)self->titleBar, -1, MENU, BaizeToggleNavDrawerCommand);
+            struct IconWidget *iw = IconWidgetNew((struct Container*)self->titleBar, -1, MENU, BaizeToggleNavDrawerCommand, NULL);
             if ( iw ) {
                 ArrayPush(((struct Container*)self->titleBar)->widgets, iw);
             }
-            struct TextWidget *tw = TextWidgetNew((struct Container*)self->titleBar, NONE, &fontRobotoMedium24, 24.0f, 0, NULL);
+            struct TextWidget *tw = TextWidgetNew((struct Container*)self->titleBar, NONE, &fontRobotoMedium24, 24.0f, 0, NULL, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "Variant Title");
                 ArrayPush(((struct Container*)self->titleBar)->widgets, tw);
             }
-            iw = IconWidgetNew((struct Container*)self->titleBar, 1, UNDO, BaizeUndoCommand);
+            iw = IconWidgetNew((struct Container*)self->titleBar, 1, UNDO, BaizeUndoCommand, NULL);
             if ( iw ) {
                 ArrayPush(((struct Container*)self->titleBar)->widgets, iw);
             }
-            iw = IconWidgetNew((struct Container*)self->titleBar, 1, DONE, BaizeCollectCommand);
+            iw = IconWidgetNew((struct Container*)self->titleBar, 1, DONE, BaizeCollectCommand, NULL);
             if ( iw ) {
                 ArrayPush(((struct Container*)self->titleBar)->widgets, iw);
             }
@@ -38,17 +39,17 @@ struct UI* UiNew(void)
 
         self->statusBar = StatusBarNew();
         if ( self->statusBar ) {
-            struct TextWidget *tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, -1, NULL);
+            struct TextWidget *tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, -1, NULL, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "STOCK:");
                 ArrayPush(((struct Container*)self->statusBar)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 0, NULL);
+            tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 0, NULL, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "MOVES");
                 ArrayPush(((struct Container*)self->statusBar)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 1, NULL);
+            tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 1, NULL, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "PERCENT COMPLETE");
                 ArrayPush(((struct Container*)self->statusBar)->widgets, tw);
@@ -71,28 +72,54 @@ struct UI* UiNew(void)
 
         self->navDrawer = NavDrawerNew();
         if ( self->navDrawer ) {
-            struct TextWidget *tw = TextWidgetNew((struct Container*)self->navDrawer, STAR, &fontRobotoMedium24, 24.0f, -1, BaizeNewDealCommand);
+            struct TextWidget *tw = TextWidgetNew((struct Container*)self->navDrawer, STAR, &fontRobotoMedium24, 24.0f, -1, BaizeNewDealCommand, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "New deal");
                 ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->navDrawer, RESTORE, &fontRobotoMedium24, 24.0f, -1, BaizeRestartDealCommand);
+            tw = TextWidgetNew((struct Container*)self->navDrawer, RESTORE, &fontRobotoMedium24, 24.0f, -1, BaizeRestartDealCommand, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "Restart deal");
                 ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->navDrawer, BOOKMARK_ADD, &fontRobotoMedium24, 24.0f, -1, BaizeSavePositionCommand);
+            tw = TextWidgetNew((struct Container*)self->navDrawer, SEARCH, &fontRobotoMedium24, 24.0f, -1, BaizeFindGameCommand, NULL);
+            if ( tw ) {
+                TextWidgetSetText(tw, "Find game...");
+                ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
+            }
+            tw = TextWidgetNew((struct Container*)self->navDrawer, BOOKMARK_ADD, &fontRobotoMedium24, 24.0f, -1, BaizeSavePositionCommand, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "Bookmark");
                 ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->navDrawer, BOOKMARK, &fontRobotoMedium24, 24.0f, -1, BaizeLoadPositionCommand);
+            tw = TextWidgetNew((struct Container*)self->navDrawer, BOOKMARK, &fontRobotoMedium24, 24.0f, -1, BaizeLoadPositionCommand, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "Goto bookmark");
                 ArrayPush(((struct Container*)self->navDrawer)->widgets, tw);
             }
 
             ArrayPush(self->containers, self->navDrawer);
+        }
+
+        self->variantDrawer = NavDrawerNew();
+        if (self->variantDrawer) {
+            int count = 0;
+            char **files = GetDirectoryFiles("variants", &count);
+            if ( count ) {
+                for ( int i=0; i<count; i++ ) {
+                    if (IsFileExtension(files[i], ".lua")) {
+                        const char* vname = GetFileNameWithoutExt(files[i]);
+                        // fprintf(stdout, "FILE: %s\n", vname);
+                        struct TextWidget *tw = TextWidgetNew((struct Container*)self->variantDrawer, NONE, &fontRobotoMedium24, 24.0f, -1, BaizeChangeVariantCommand, strdup(vname));
+                        if ( tw ) {
+                            TextWidgetSetText(tw, GetFileNameWithoutExt(files[i]));
+                            ArrayPush(((struct Container*)self->variantDrawer)->widgets, tw);
+                        }
+                    }
+                }
+            }
+            ClearDirectoryFiles();
+            ArrayPush(self->containers, self->variantDrawer);
         }
 
         self->toastManager = ToastManagerNew();
@@ -118,10 +145,13 @@ void UiUpdateTitleBar(struct UI *const self, const char* center)
     TextWidgetSetText(tw, center);
 }
 
-void UiHideNavDrawer(struct UI *const self)
+void UiHideDrawers(struct UI *const self)
 {
     if ( DrawerVisible((struct Drawer*)self->navDrawer) ) {
         DrawerHide((struct Drawer*)self->navDrawer);
+    }
+    if ( DrawerVisible((struct Drawer*)self->variantDrawer) ) {
+        DrawerHide((struct Drawer*)self->variantDrawer);
     }
 }
 
@@ -131,6 +161,15 @@ void UiToggleNavDrawer(struct UI *const self)
         DrawerHide((struct Drawer*)self->navDrawer);
     } else {
         DrawerShow((struct Drawer*)self->navDrawer);
+    }
+}
+
+void UiToggleVariantDrawer(struct UI *const self)
+{
+    if ( DrawerVisible((struct Drawer*)self->variantDrawer) ) {
+        DrawerHide((struct Drawer*)self->variantDrawer);
+    } else {
+        DrawerShow((struct Drawer*)self->variantDrawer);
     }
 }
 
