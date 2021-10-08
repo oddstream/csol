@@ -50,6 +50,8 @@ struct Baize* BaizeNew(void);
 bool BaizeValid(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);
 void BaizeSetError(struct Baize *const self, const char *str);
+void BaizeOpenLua(struct Baize *const self);
+void BaizeCloseLua(struct Baize *const self);
 void BaizeCreateCards(struct Baize *const self);
 void BaizeCreatePiles(struct Baize *const self);
 void BaizeResetState(struct Baize *const self);

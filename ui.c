@@ -6,6 +6,50 @@
 #include "ui.h"
 #include "undo.h"
 
+static int cmpfunc(const void* a, const void *b) {
+    char * const * aa = a;
+    char * const * bb = b;
+    return strcmp(*aa, *bb);
+}
+
+#if 0
+static void qsortfiles(char** files, int count) {
+    // Sort files by name
+    // https://github.com/raysan5/raygui/blob/master/examples/custom_file_dialog/gui_file_dialog.h
+    // https://en.wikibooks.org/wiki/Algorithm_Implementation/Sorting/Quicksort#C
+    if (count > 1)
+    {
+        const unsigned int MAX = 64;
+        unsigned int left = 0, stack[64], pos = 0, seed = rand(), len = count;
+
+        for (;;)
+        {
+            for (; left + 1 < len; len++)    // Sort left to len - 1
+            {
+                if (pos == MAX) len = stack[pos = 0];               // Stack overflow, reset
+                char *pivot = files[left + seed%(len - left)];      // Pick random pivot
+                seed = seed*69069 + 1;                              // Next pseudo-random number
+                stack[pos++] = len;                                 // Sort right part later
+
+                for (unsigned int right = left - 1;;)               // Inner loop: partitioning
+                {
+                    while (strcmp(files[++right], pivot) < 0);      // Look for greater element
+                    while (strcmp(pivot, files[--len]) < 0);        // Look for smaller element
+                    if (right >= len) break;                        // Partition point found?
+                    char *temp = files[right];
+                    files[right] = files[len];                      // The only swap
+                    files[len] = temp;
+                }                                                   // Partitioned, continue left part
+            }
+
+            if (pos == 0) break;                                    // Stack empty?
+            left = len;                                             // Left to right is sorted
+            len = stack[--pos];                                     // Get next range to sort
+        }
+    }
+}
+#endif
+
 struct UI* UiNew(void)
 {
     extern Font fontRobotoRegular14, fontRobotoMedium24;
@@ -106,10 +150,17 @@ struct UI* UiNew(void)
             int count = 0;
             char **files = GetDirectoryFiles("variants", &count);
             if ( count ) {
+
+                qsort(files, count, sizeof(char*), cmpfunc);
+                // qsortfiles(files, count);
+
                 for ( int i=0; i<count; i++ ) {
+                    // fprintf(stdout, "FILE: %s\n", files[i]);
                     if (IsFileExtension(files[i], ".lua")) {
                         const char* vname = GetFileNameWithoutExt(files[i]);
-                        // fprintf(stdout, "FILE: %s\n", vname);
+                        if (vname[0] == '~') {
+                            continue;
+                        }
                         struct TextWidget *tw = TextWidgetNew((struct Container*)self->variantDrawer, NONE, &fontRobotoMedium24, 24.0f, -1, BaizeChangeVariantCommand, strdup(vname));
                         if ( tw ) {
                             TextWidgetSetText(tw, GetFileNameWithoutExt(files[i]));

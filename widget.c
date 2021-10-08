@@ -11,6 +11,16 @@ void WidgetCtor(struct Widget *const self, struct Container* parent, int align, 
     self->param = param;
 }
 
+Rectangle WidgetScreenRect(struct Widget *const self)
+{
+    Rectangle r;
+    r.x = self->parent->rect.x + self->rect.x;
+    r.y = self->parent->rect.y + self->rect.y;
+    r.width = self->rect.width;
+    r.height = self->rect.height;
+    return r;
+}
+
 void WidgetUpdate(struct Widget *const self)
 {
     (void)self;

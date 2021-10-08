@@ -3,7 +3,7 @@
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
-SEED = 3 -- 2 winnable draw three
+-- SEED = 3 -- 2 winnable draw three
 STOCK_RECYCLES = 9999
 
 StockDealCards = 1
@@ -81,6 +81,9 @@ function CheckFoundation(cPrev, cThis)
 end
 
 function CheckTableauAccept(cThis)
+  if cThis.prone then
+    return false, "Cannot move a face down card"
+  end
   if cThis.ordinal == 13 then
     return true, nil
   else

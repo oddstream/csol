@@ -64,6 +64,10 @@ void TextWidgetDraw(struct Widget *const self)
         iconRect.y = con->rect.y + self->rect.y;
         iconRect.width = ICON_SIZE;
         iconRect.height = ICON_SIZE;
+        if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
+            iconRect.x += 2.0f;
+            iconRect.y += 2.0f;
+        }
         SpritesheetDraw(ssIcons, tw->frame, 1.0f, iconRect);
 
         pos.x += ICON_SIZE;
@@ -74,6 +78,14 @@ void TextWidgetDraw(struct Widget *const self)
         //     pos.x += 2.0f;
         //     pos.y += 2.0f;
         // }
+        if ( tw->frame != NONE ) {
+            pos.x += WIDGET_PADDING;
+            pos.y += WIDGET_PADDING / 2.0f;//self->parent->rect.y + (ICON_SIZE / 2.0f) - (self->rect.height / 2.0f);
+        }
+        if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
+            pos.x += 2.0f;
+            pos.y += 2.0f;
+        }
         DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, 1.2f, uiTextColor);
     }
 }

@@ -1,9 +1,12 @@
--- Quick Win
+-- Acme
 
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
+-- SEED = 3 -- 2 winnable draw three
 STOCK_RECYCLES = 1
+
+StockDealCards = 1
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -31,34 +34,32 @@ function Build()
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
     SetPileRecycles(STOCK, STOCK_RECYCLES)
-
+  
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    
+    local pile
 
-    for x = 9, 12 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE)
+    for x = 4, 7 do
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetPileAccept(pile, 1)
         SetPileDraggable(pile, false)
     end
 
-    for x = 1, 12 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        for n=1,2 do
-          MoveCard(STOCK, pile)
-        end
+    RESERVE = AddPile("Reserve", 1, 2, FAN_DOWN)
+    for n = 1, 13 do
+        MoveCard(STOCK, RESERVE)
+        SetCardProne(PilePeekCard(RESERVE), true)
+    end
+    SetCardProne(PilePeekCard(RESERVE), false)
+
+    TABLEAUX = {}
+    for x = 4, 7 do
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
         SetPileSingleCardMove(pile, false)
-        PileDemoteCards(pile, 13)
-        PilePromoteCards(pile, 1)
+        MoveCard(STOCK, pile)
+        TABLEAUX[#TABLEAUX+1] = pile
     end
 
-    for x = 1, 12 do
-        local pile = AddPile("Tableau", x, 4, FAN_DOWN)
-        for n=1,2 do
-          MoveCard(STOCK, pile)
-        end
-        SetPileSingleCardMove(pile, false)
-        PileDemoteCards(pile, 13)
-        PilePromoteCards(pile, 1)
-    end
 end
 
 function CheckFoundationAccept(cThis)
@@ -85,6 +86,11 @@ function CheckTableauAccept(cThis)
   if cThis.prone then
     return false, "Cannot move a face down card"
   end
+--   if cThis.ordinal == 13 then
+--     return true, nil
+--   else
+--     return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
+--   end
   return true, nil
 end
 
@@ -107,36 +113,48 @@ end
 function CardTapped(card)
   LogCard("CardTapped", card)
 
-  local cardsMoved = false
+  local cardsMoved = 0
 
   if card.owner == STOCK then
-    cardsMoved = MoveCard(STOCK, WASTE)
+    for i = 1, StockDealCards do
+      if MoveCard(STOCK, WASTE) then
+        cardsMoved = cardsMoved + 1
+      end
+    end
   end
 
-  return cardsMoved, nil
+  return cardsMoved > 0, nil
 end
 
 function PileTapped(pile)
-    io.stdout:write("PileTapped\n")
-    if pile == STOCK then
-      if STOCK_RECYCLES == 0 then
-        return false, "No more Stock recycles"
-      end
-      if PileCardCount(WASTE) > 0 then
-        while PileCardCount(WASTE) > 0 do
-          MoveCard(WASTE, STOCK)
-        end
-        STOCK_RECYCLES = STOCK_RECYCLES - 1
-        SetPileRecycles(STOCK, STOCK_RECYCLES)
-        return true, nil
-      end
-    elseif pile == WASTE then
-      if PileCardCount(STOCK) > 0 then
-        MoveCard(STOCK, WASTE)
-        return true, nil
-      end
+  io.stdout:write("PileTapped\n")
+  if pile == STOCK then
+    if STOCK_RECYCLES == 0 then
+      return false, "No more Stock recycles"
     end
-  
-    return false, nil
+    if PileCardCount(WASTE) > 0 then
+      while PileCardCount(WASTE) > 0 do
+        MoveCard(WASTE, STOCK)
+      end
+      STOCK_RECYCLES = STOCK_RECYCLES - 1
+      SetPileRecycles(STOCK, STOCK_RECYCLES)
+      return true, nil
+    end
+  elseif pile == WASTE then
+    if PileCardCount(STOCK) > 0 then
+      MoveCard(STOCK, WASTE)
+      return true, nil
+    end
   end
-  
+
+  return false, nil
+end
+
+function AfterMove()
+    -- io.stdout:write("AfterMove\n")
+    for i = 1, 4 do
+        if PileCardCount(TABLEAUX[i]) == 0 then
+            MoveCard(RESERVE, TABLEAUX[i])
+        end
+    end
+end

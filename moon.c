@@ -14,6 +14,7 @@
 #include "cell.h"
 #include "discard.h"
 #include "foundation.h"
+#include "reserve.h"
 #include "tableau.h"
 #include "waste.h"
 #include "moon.h"
@@ -253,6 +254,8 @@ int MoonAddPile(lua_State* L)
         p = (struct Pile*)DiscardNew((Vector2){x, y}, fan);
     } else if ( strcmp(category, "Foundation") == 0 ) {
         p = (struct Pile*)FoundationNew((Vector2){x, y}, fan);
+    } else if ( strcmp(category, "Reserve") == 0 ) {
+        p = (struct Pile*)ReserveNew((Vector2){x, y}, fan);
     } else if ( strcmp(category, "Tableau") == 0 ) {
         p = (struct Pile*)TableauNew((Vector2){x, y}, fan);
     } else if ( strcmp(category, "Waste") == 0 ) {

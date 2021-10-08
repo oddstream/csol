@@ -3,7 +3,7 @@
 PACKS = 2
 SUITS = 4
 POWERMOVES = true
-SEED = 4  -- winnable
+-- SEED = 4  -- winnable
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -71,6 +71,9 @@ function CheckFoundation(cPrev, cThis)
 end
 
 function CheckTableauAccept(cThis)
+  if cThis.prone then
+    return false, "Cannot move a face down card"
+  end
   return true, nil
 end
 

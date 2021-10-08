@@ -13,41 +13,13 @@
 
 #define BAIZE_MAGIC (0x19910920)
 
-struct Baize* BaizeNew() {
-
-    // extern char variantName[64];
-
-    // fprintf(stdout, "CardID is %lu bytes\n", sizeof(struct CardId));    // 4
-    // fprintf(stdout, "Card is %lu bytes\n", sizeof(struct Card));    // 72 (2021.09.17)
-    // fprintf(stdout, "unsigned is %lu bytes\n", sizeof(unsigned));   4
-    // fprintf(stdout, "unsigned long is %lu bytes\n", sizeof(unsigned long)); // 8
-    // fprintf(stdout, "void* is %lu bytes\n", sizeof(void*)); // 8
-
-    // char fname[128];
-    // unsigned packs = 1;
-
+struct Baize* BaizeNew()
+{
     struct Baize* self = calloc(1, sizeof(struct Baize));
     if ( !self ) {
         return NULL;
     }
     self->magic = BAIZE_MAGIC;
-
-    // nb there isn't a luaL_resetstate() so any globals set in one variant end up in the next
-    self->L = luaL_newstate();
-    luaL_openlibs(self->L);
-
-    MoonRegisterFunctions(self->L);
-
-    // create a handle to this Baize inside Lua TODO maybe not needed
-    lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
-
-    lua_pushinteger(self->L, FAN_NONE);    lua_setglobal(self->L, "FAN_NONE");
-    lua_pushinteger(self->L, FAN_DOWN);    lua_setglobal(self->L, "FAN_DOWN");
-    lua_pushinteger(self->L, FAN_LEFT);    lua_setglobal(self->L, "FAN_LEFT");
-    lua_pushinteger(self->L, FAN_RIGHT);   lua_setglobal(self->L, "FAN_RIGHT");
-    lua_pushinteger(self->L, FAN_DOWN3);   lua_setglobal(self->L, "FAN_DOWN3");
-    lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
-    lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
 
     self->ui = UiNew();
 
@@ -70,6 +42,34 @@ void BaizeResetError(struct Baize *const self)
     if ( self->errorString ) {
         free(self->errorString);
         self->errorString = NULL;
+    }
+}
+
+void BaizeOpenLua(struct Baize *const self)
+{
+    // nb there isn't a luaL_resetstate() so any globals set in one variant end up in the next
+    self->L = luaL_newstate();
+    luaL_openlibs(self->L);
+
+    MoonRegisterFunctions(self->L);
+
+    // create a handle to this Baize inside Lua TODO maybe not needed
+    lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
+
+    lua_pushinteger(self->L, FAN_NONE);    lua_setglobal(self->L, "FAN_NONE");
+    lua_pushinteger(self->L, FAN_DOWN);    lua_setglobal(self->L, "FAN_DOWN");
+    lua_pushinteger(self->L, FAN_LEFT);    lua_setglobal(self->L, "FAN_LEFT");
+    lua_pushinteger(self->L, FAN_RIGHT);   lua_setglobal(self->L, "FAN_RIGHT");
+    lua_pushinteger(self->L, FAN_DOWN3);   lua_setglobal(self->L, "FAN_DOWN3");
+    lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
+    lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
+}
+
+void BaizeCloseLua(struct Baize *const self)
+{
+    if (self->L) {
+        lua_close(self->L);
+        self->L = NULL;
     }
 }
 
@@ -100,17 +100,18 @@ void BaizeCreateCards(struct Baize *const self)
         UiUpdateTitleBar(self->ui, variantName);
     }
 
-    {   // scope for packs, suits, i
+    {   // scope for packs, suits, cardRequired, i
         size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
         size_t suits = MoonGetGlobalInt(self->L, "SUITS", 4);
-        size_t newSize = packs * suits * 13;
+        size_t cardsRequired = packs * suits * 13;
 
+        // first time this is called, self->cardLibrary will ne NULL because we used calloc()
         if (self->cardLibrary) {
-            memset(self->cardLibrary, 0, self->cardsInLibrary * sizeof(struct Card));
+            // memset(self->cardLibrary, 0, self->cardsInLibrary * sizeof(struct Card));
             free(self->cardLibrary);
         }
-        self->cardLibrary = calloc(newSize, sizeof(struct Card));
-        self->cardsInLibrary = newSize;
+        self->cardLibrary = calloc(cardsRequired, sizeof(struct Card));
+        self->cardsInLibrary = cardsRequired;
 
         size_t i = 0;
         for ( size_t pack = 0; pack < packs; pack++ ) {
@@ -121,7 +122,7 @@ void BaizeCreateCards(struct Baize *const self)
             }
         }
 
-        fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, newSize);
+        // fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, cardRequired);
     }
 
     self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
@@ -148,8 +149,7 @@ void BaizeCreatePiles(struct Baize *const self)
         for ( size_t i = 0; i < self->cardsInLibrary; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
-        int seed = MoonGetGlobalInt(self->L, "SEED", time(NULL));
-        srand(seed);
+        srand(time(NULL));
         // Knuth-Fisher–Yates shuffle
         size_t n = ArrayLen(self->stock->cards);
         for ( int i = n-1; i > 0; i-- ) {
@@ -584,7 +584,23 @@ bool BaizeConformant(struct Baize *const self)
 
 void BaizeAfterUserMove(struct Baize *const self)
 {
-    // TODO automoves (in Lua)
+    fprintf(stderr, "stack %d\n", lua_gettop(self->L));
+
+    int typ = lua_getglobal(self->L, "AfterMove");  // push Lua function name onto the stack
+    if ( typ != LUA_TFUNCTION ) {
+        fprintf(stderr, "AfterMove is not a function\n");
+        lua_pop(self->L, 1);  // remove func from stack
+    } else {
+        // no args, no returns
+        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
+            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);
+        } else {
+            // nothing
+        }
+    }
+
+    fprintf(stderr, "stack %d\n", lua_gettop(self->L));
 
     if ( BaizeComplete(self) ) {
         UiToast(self->ui, "Game complete");
@@ -744,7 +760,6 @@ void BaizeFree(struct Baize *const self)
     ArrayFree(self->piles);
     free(self->cardLibrary);
     UiFree(self->ui);
-    lua_close(self->L);
     free(self);
 }
 
@@ -768,7 +783,14 @@ void BaizeFindGameCommand(struct Baize *const self, void* param)
 
 void BaizeChangeVariantCommand(struct Baize *const self, void* param)
 {
+    // TODO consider setting variant global variables to nil
+    // like SUITS, PACKS, EASY, POWERMOVES, SEED, CardTapped, PileTapped
+
     if (param) {
+        // don't want global variables from one variant being carried over into next variant
+        // there isn't a luaL_reset, so...
+        BaizeCloseLua(self);
+        BaizeOpenLua(self);
         extern char variantName[64];
         strncpy(variantName, param, sizeof(variantName)-1);
         BaizeCreateCards(self);

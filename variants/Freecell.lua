@@ -3,11 +3,6 @@
 PACKS = 1
 SUITS = 4
 POWERMOVES = true
-EASY = true
-
-if not EASY then
-  SEED = 2 -- winnable in 76 moves
-end
 
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
@@ -109,6 +104,9 @@ function CheckFoundation(cPrev, cThis)
 end
 
 function CheckTableauAccept(cThis)
+  if cThis.prone then
+    return false, "Cannot move a face down card"
+  end
   return true, nil
 end
 

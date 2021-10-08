@@ -60,6 +60,7 @@ struct Widget {
 };
 
 void WidgetCtor(struct Widget *const self, struct Container* parent, int align, BaizeCommandFunction bcf, void* param);
+Rectangle WidgetScreenRect(struct Widget *const self);
 void WidgetUpdate(struct Widget *const self);
 void WidgetDraw(struct Widget *const self);
 void WidgetFree(struct Widget *const self);

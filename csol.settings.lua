@@ -8,8 +8,4 @@ WindowWidth = 1920
 WindowHeight = 1080
 CardScale = 1
 BaizeColor = {red=0.1, green=0.25, blue=0.1, alpha=1}
--- Variant = "Freecell"
--- Variant = "Klondike"
-Variant = "Limited"
--- Variant = "Quick Win"
--- Variant = "Spider"
+Variant = "Quick Win"

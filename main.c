@@ -202,6 +202,7 @@ int main(void)
     }
     struct Baize* baize = BaizeNew();
     if ( BaizeValid(baize) ) {
+        BaizeOpenLua(baize);
         BaizeCreateCards(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize);
@@ -224,6 +225,7 @@ int main(void)
             }
         }
         ArrayFree(BaizeCommandQueue);
+        BaizeCloseLua(baize);
         BaizeFree(baize);
     }
 
