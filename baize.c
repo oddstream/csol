@@ -158,7 +158,7 @@ void BaizeCreatePiles(struct Baize *const self)
         }
     }
 
-    fprintf(stderr, "stock has %lu cards\n", PileLen(self->stock));
+    // fprintf(stderr, "stock has %lu cards\n", PileLen(self->stock));
 
     int typ = lua_getglobal(self->L, "Build");  // push value of Build onto the stack
     if ( typ != LUA_TFUNCTION ) {
@@ -167,13 +167,13 @@ void BaizeCreatePiles(struct Baize *const self)
     } else {
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);
+            lua_pop(self->L, 1);    // remove error
         } else {
-            fprintf(stderr, "Build called ok\n");
+            // fprintf(stderr, "Build called ok\n");
         }
     }
 
-    fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
+    // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
     // create handy shortcuts for waste, foundations and tableau
     {
@@ -261,6 +261,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     UiHideDrawers(self->ui);
     BaizeCreatePiles(self);
     BaizeResetState(self);
+    BaizeStartGame(self);
 }
 
 struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
@@ -584,23 +585,23 @@ bool BaizeConformant(struct Baize *const self)
 
 void BaizeAfterUserMove(struct Baize *const self)
 {
-    fprintf(stderr, "stack %d\n", lua_gettop(self->L));
+    // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
 
     int typ = lua_getglobal(self->L, "AfterMove");  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "AfterMove is not a function\n");
+        // fprintf(stderr, "AfterMove is not a function\n");
         lua_pop(self->L, 1);  // remove func from stack
     } else {
         // no args, no returns
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);
+            lua_pop(self->L, 1);    // remove error
         } else {
             // nothing
         }
     }
 
-    fprintf(stderr, "stack %d\n", lua_gettop(self->L));
+    // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
 
     if ( BaizeComplete(self) ) {
         UiToast(self->ui, "Game complete");
@@ -671,7 +672,11 @@ void BaizeUpdate(struct Baize *const self)
         BaizeNewDealCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_R) ) {
-        BaizeRestartDealCommand(self, NULL);
+        if ( IsKeyDown(KEY_LEFT_SHIFT) ) {
+            BaizeReloadVariantCommand(self, NULL);
+        } else {
+            BaizeRestartDealCommand(self, NULL);
+        }
     }
     if ( IsKeyReleased(KEY_F) ) {
         BaizeFindGameCommand(self, NULL);
@@ -781,21 +786,25 @@ void BaizeFindGameCommand(struct Baize *const self, void* param)
     UiToggleVariantDrawer(self->ui);
 }
 
+void BaizeReloadVariantCommand(struct Baize *const self, void* param)
+{
+    (void)param;
+    // don't want global variables from one variant being carried over into next variant
+    // there isn't a luaL_reset, so...
+    BaizeCloseLua(self);
+    BaizeOpenLua(self);
+    BaizeCreateCards(self);
+    BaizeCreatePiles(self);
+    BaizeResetState(self);
+    BaizeStartGame(self);
+}
+
 void BaizeChangeVariantCommand(struct Baize *const self, void* param)
 {
-    // TODO consider setting variant global variables to nil
-    // like SUITS, PACKS, EASY, POWERMOVES, SEED, CardTapped, PileTapped
-
     if (param) {
-        // don't want global variables from one variant being carried over into next variant
-        // there isn't a luaL_reset, so...
-        BaizeCloseLua(self);
-        BaizeOpenLua(self);
         extern char variantName[64];
         strncpy(variantName, param, sizeof(variantName)-1);
-        BaizeCreateCards(self);
-        BaizeCreatePiles(self);
-        BaizeResetState(self);
-        UiToast(self->ui, (const char*)param);
+        BaizeReloadVariantCommand(self, NULL);
     }
 }
+

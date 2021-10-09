@@ -1,10 +1,25 @@
 -- Acme
 
+--[[
+  Acme is a Canfield type of patience or solitaire card game using a single deck of playing cards.
+  Acme has four tableau stacks of one card each, and they are built down in suit.
+  There are also four Foundations that build up in suit.
+  The Reserve Pile contains 13 cards which can be played onto the Foundations or Tableau Stacks.
+  The deck turns up one card at a time.
+  Only the top card of a Tableau stack can be moved.
+  These cards can be moved to a Foundation or onto another Tableau stack.
+  The Tableau builds down in suit, and the Foundations build up in suit.
+  Cards from the Reserve automatically fill empty spaces.
+  Any card can fill empty Tableau spaces after the Reserve is empty.
+  There is only one redeal allowed in this game, so only two passes through the deck are allowed.
+  Strategy: Rather than using the cards from the deck, a player should try to use all of the reserve cards first.
+  Only two passes are allowed, so the deck should be used wisely.
+]]
+
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
 -- SEED = 3 -- 2 winnable draw three
-STOCK_RECYCLES = 1
 
 StockDealCards = 1
 
@@ -33,7 +48,6 @@ function Build()
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
   
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
@@ -55,11 +69,15 @@ function Build()
     TABLEAUX = {}
     for x = 4, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetPileSingleCardMove(pile, false)
         MoveCard(STOCK, pile)
         TABLEAUX[#TABLEAUX+1] = pile
     end
 
+end
+
+function StartGame()
+  STOCK_RECYCLES = 1
+  SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 function CheckFoundationAccept(cThis)
@@ -108,6 +126,16 @@ end
 
 function CheckTableauMovable(cPrev, cThis)
   return CheckTableau(cPrev, cThis)
+end
+
+function CheckTableauTail(pileLen, tailLen)
+  io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
+
+  if POWERMOVES or tailLen == 1 then
+    return true, nil
+  end
+
+  return false, "Can only move one card"
 end
 
 function CardTapped(card)

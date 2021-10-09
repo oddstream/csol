@@ -30,35 +30,41 @@ function Build()
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
 
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
-    for x = 9, 12 do
+    for x = 7, 10 do
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetPileAccept(pile, 1)
         SetPileDraggable(pile, false)
     end
 
-    for x = 1, 12 do
+    TABLEAUX = {}
+
+    for x = 1, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         for n=1,2 do
           MoveCard(STOCK, pile)
         end
-        SetPileSingleCardMove(pile, false)
         PileDemoteCards(pile, 13)
         PilePromoteCards(pile, 1)
+        table.insert(TABLEAUX, pile)
     end
 
-    for x = 1, 12 do
+    for x = 1, 10 do
         local pile = AddPile("Tableau", x, 4, FAN_DOWN)
         for n=1,2 do
           MoveCard(STOCK, pile)
         end
-        SetPileSingleCardMove(pile, false)
         PileDemoteCards(pile, 13)
         PilePromoteCards(pile, 1)
+        table.insert(TABLEAUX, pile)
     end
+end
+
+function StartGame()
+  STOCK_RECYCLES = 1
+  SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 function CheckFoundationAccept(cThis)
@@ -89,10 +95,6 @@ function CheckTableauAccept(cThis)
 end
 
 function CheckTableau(cPrev, cThis)
-  if cPrev.suit ~= cThis.suit then
-    -- io.stderr:write("CheckTableau suit fail\n")
-    return false, nil
-  end
   if cPrev.ordinal ~= cThis.ordinal + 1 then
     -- io.stderr:write("CheckTableau ordinal fail\n")
     return false, nil
@@ -117,26 +119,41 @@ function CardTapped(card)
 end
 
 function PileTapped(pile)
-    io.stdout:write("PileTapped\n")
-    if pile == STOCK then
-      if STOCK_RECYCLES == 0 then
-        return false, "No more Stock recycles"
+  io.stdout:write("PileTapped\n")
+  if pile == STOCK then
+    if STOCK_RECYCLES == 0 then
+      return false, "No more Stock recycles"
+    end
+    if PileCardCount(WASTE) > 0 then
+      while PileCardCount(WASTE) > 0 do
+        MoveCard(WASTE, STOCK)
       end
+      STOCK_RECYCLES = STOCK_RECYCLES - 1
+      SetPileRecycles(STOCK, STOCK_RECYCLES)
+      return true, nil
+    end
+  elseif pile == WASTE then
+    if PileCardCount(STOCK) > 0 then
+      MoveCard(STOCK, WASTE)
+      return true, nil
+    end
+  end
+
+  return false, nil
+end
+  
+function AfterMove()
+  -- io.stdout:write("AfterMove\n")
+  for _, pile in ipairs(TABLEAUX) do
+    if PileCardCount(pile) == 0 then
       if PileCardCount(WASTE) > 0 then
-        while PileCardCount(WASTE) > 0 do
-          MoveCard(WASTE, STOCK)
-        end
-        STOCK_RECYCLES = STOCK_RECYCLES - 1
-        SetPileRecycles(STOCK, STOCK_RECYCLES)
-        return true, nil
-      end
-    elseif pile == WASTE then
-      if PileCardCount(STOCK) > 0 then
-        MoveCard(STOCK, WASTE)
-        return true, nil
+        MoveCard(WASTE, pile)
+      elseif PileCardCount(STOCK) > 0 then
+        MoveCard(STOCK, pile)
       end
     end
-  
-    return false, nil
   end
-  
+  if PileCardCount(WASTE) == 0 then
+    MoveCard(STOCK, WASTE)
+  end
+end

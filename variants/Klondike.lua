@@ -4,7 +4,6 @@ PACKS = 1
 SUITS = 4
 POWERMOVES = false
 -- SEED = 3 -- 2 winnable draw three
-STOCK_RECYCLES = 9999
 
 StockDealCards = 1
 
@@ -33,7 +32,6 @@ function Build()
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
   
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
@@ -48,7 +46,6 @@ function Build()
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetPileSingleCardMove(pile, false)
         SetPileAccept(pile, 13)
         for n = 1, deal do
           MoveCard(STOCK, pile)
@@ -58,6 +55,11 @@ function Build()
         deal = deal + 1
     end
 
+end
+
+function StartGame()
+  STOCK_RECYCLES = 999
+  SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 function CheckFoundationAccept(cThis)

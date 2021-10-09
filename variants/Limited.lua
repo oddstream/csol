@@ -45,7 +45,6 @@ function Build()
         for n=1,3 do
           MoveCard(STOCK, pile)
         end
-        SetPileSingleCardMove(pile, not POWERMOVES)
     end
 
 end

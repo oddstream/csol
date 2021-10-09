@@ -77,9 +77,11 @@ void BaizeFree(struct Baize *const self);
 
 bool BaizeCardTapped(struct Baize *const self, struct Card *const c);
 bool BaizePileTapped(struct Baize *const self, struct Pile *const c);
+void BaizeStartGame(struct Baize *const self);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);
 void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
 void BaizeFindGameCommand(struct Baize *const self, void* param);
+void BaizeReloadVariantCommand(struct Baize *const self, void* param);
 void BaizeChangeVariantCommand(struct Baize *const self, void* param);
 
 #endif

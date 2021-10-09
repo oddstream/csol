@@ -38,7 +38,6 @@ function Build()
 
     for x = 1, 4 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetPileSingleCardMove(pile, false)
         for n=1,4 do
           MoveCard(STOCK, pile)
           SetCardProne(PilePeekCard(pile), true)
@@ -49,7 +48,6 @@ function Build()
 
     for x = 5, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        SetPileSingleCardMove(pile, false)
         for n=1,3 do
           MoveCard(STOCK, pile)
           SetCardProne(PilePeekCard(pile), true)

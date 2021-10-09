@@ -2,7 +2,7 @@
 
 PACKS = 1
 SUITS = 4
-POWERMOVES = true
+POWERMOVES = false
 
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
@@ -24,7 +24,7 @@ function Build()
 
     if type(AddPile) ~= "function" then
         io.stderr:write("Build cannot find function AddPile\n")
-        return
+        return  
     end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
@@ -47,7 +47,6 @@ function Build()
         for n = 1, 7 do
           MoveCard(STOCK, pile)
         end
-        SetPileSingleCardMove(pile, not POWERMOVES)
         if EASY then
           PileDemoteCards(pile, 13)
           PilePromoteCards(pile, 1)
@@ -59,7 +58,6 @@ function Build()
         for n = 1, 6 do
           MoveCard(STOCK, pile)
         end
-        SetPileSingleCardMove(pile, not POWERMOVES)
         if EASY then
           PileDemoteCards(pile, 13)
           PilePromoteCards(pile, 1)
@@ -125,3 +123,14 @@ end
 function CheckTableauMovable(cPrev, cThis)
   return CheckTableau(cPrev, cThis)
 end
+
+function CheckTableauTail(pileLen, tailLen)
+  io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
+
+  if POWERMOVES or tailLen == 1 then
+    return true, nil
+  end
+
+  return false, "Can only move one card"
+end
+

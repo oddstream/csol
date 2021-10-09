@@ -223,6 +223,8 @@ void BaizeRestartDealCommand(struct Baize *const self)
     }
     self->savedPosition = 0;
     BaizeUndoPush(self);    // replace current state
+
+    BaizeStartGame(self);
 }
 
 void BaizeUndoCommand(struct Baize *const self, void* param)

@@ -123,10 +123,10 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
     return result;
 }
 
-static bool checkTail(struct Baize *const baize, struct Array *const tail)
+static bool checkTailCards(struct Baize *const baize, struct Array *const tail)
 {
     if ( ArrayLen(tail) == 0 ) {
-        fprintf(stderr, "WARNING: %s passed empty tail\n", __func__);
+        fprintf(stderr, "ERROR: %s passed empty tail\n", __func__);
         return false;
     }
 
@@ -137,11 +137,6 @@ static bool checkTail(struct Baize *const baize, struct Array *const tail)
         sprintf(z, "You may not move cards from a %s", cPrev->owner->category);
         BaizeSetError(baize, z);
         return false;
-    }
-
-    if ( ArrayLen(tail) == 1 ) {
-        fprintf(stderr, "WARNING: %s passed tail with one card\n", __func__);
-        return true;
     }
 
     size_t i = 1;
@@ -201,8 +196,70 @@ bool CheckCards(struct Baize *const baize, struct Pile *const pile)
     return true;
 }
 
+static bool checkTailMovable(struct Baize *const baize, struct Array *const tail)
+{
+    /*
+        ask Lua if movement is constrained by only allowing
+        1. one card at a time to be moved
+        2. one card or the whole pile to be moved (eg American Toad)
+        3. any amount of cards to be moved
+
+        The number of moves that can be made if POWERMOVES is set is only
+        known when the destination pile is known, which makes it a "can build"
+        function, not a "can drag" function.
+    */
+    lua_State *L = baize->L;
+    bool result = true;
+    BaizeResetError(baize);
+
+    if ( ArrayLen(tail) == 0 ) {
+        fprintf(stderr, "ERROR: %s: empty tail\n", __func__);
+        return false;
+    }
+
+    struct Card *const c0 = ArrayGet(tail, 0);
+
+    char funcName[64];
+    strcpy(funcName, "Check");
+    strcat(funcName, c0->owner->category);
+    strcat(funcName, "Tail");
+
+    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
+    if ( typ != LUA_TFUNCTION ) {
+        fprintf(stderr, "%s is not a function\n", funcName);
+        lua_pop(L, 1);  // remove func from stack
+    } else {
+        lua_pushinteger(L, ArrayLen(c0->owner->cards));    // length of originating pile
+        lua_pushinteger(L, ArrayLen(tail));         // length of tail
+
+        // two args (int len, int len), two returns (boolean, error string)
+        if ( lua_pcall(L, 2, 2, 0) != LUA_OK ) {
+            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+        } else {
+            // fprintf(stderr, "%s called ok\n", func);
+            if ( lua_isboolean(L, 1) ) {
+                result = lua_toboolean(L, 1);
+            } else {
+                fprintf(stderr, "WARNING: expecting boolean return from %s\n", funcName);
+                result = false;
+            }
+            if ( lua_isnil(L, 2) ) {
+                ;
+            } else if ( lua_isstring(L, 2) ) {
+                BaizeSetError(baize, lua_tostring(L, 2));
+            } else {
+                fprintf(stderr, "WARNING: expecting string or nil return from %s\n", funcName);
+            }
+            lua_pop(L, 2);  // remove returned boolean, string from stack
+        }
+    }
+
+   return result;
+}
+
 bool CheckTail(struct Baize *const baize, struct Array *const tail)
 {
     // returns true if it's ok to drag this tail
-    return checkTail(baize, tail);
+    return checkTailMovable(baize, tail) && checkTailCards(baize, tail);
 }

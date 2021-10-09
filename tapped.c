@@ -10,6 +10,23 @@
 #include "baize.h"
 #include "moon.h"
 
+void BaizeStartGame(struct Baize *const self)
+{
+    int typ = lua_getglobal(self->L, "StartGame");  // push function name onto the stack
+    if ( typ != LUA_TFUNCTION ) {
+        fprintf(stderr, "StartGame is not a function\n");
+        lua_pop(self->L, 1);  // remove function name
+    } else {
+        // no args, no returns
+        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
+            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);    // remove error
+        } else {
+            // nothing
+        }
+    }
+}
+
 bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
 {
     // {

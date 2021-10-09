@@ -1,8 +1,25 @@
 # csol
 
-Towards a polymorphic solitaire engine in C and [raylib](https://raylib.com/).
+Towards a polymorphic solitaire engine in C, [raylib](https://raylib.com/) and games configured by [Lua](https://lua.org).
 
-It's an adaptation of my Go+ebiten version, which was itself an adaptation of my [Lua](https://www.lua.org/)/[Solar2D](https://solar2d.com/) retained mode engine used in the Android game (which was itself an adaptation of my messy vanilla JavaScript/SVG engine used for the [online game](https://oddstream/games/Solitaire)). The intention is that this version will replace all of those, and provide Linux, Windows, Android and browser-based versions from the same code base. If I had a Mac there would be iOS and Mac versions, too.
+## What the C does
+
+* Handles all the graphics and sounds
+* Moves the cards from pile to pile
+* Turns the cards face up/down
+* Defines categories of piles (Cell, Discard, Foundation, Reserve, Stock, Tableau) and enforces the rules that apply to them (for example, a Cell can only contain a single card of any type)
+* Creates the cards, sorts them and places them into the Stock pile
+
+## What the Lua does
+
+## History
+
+First there was an [online version](https://oddstream/games/Solitaire)) version written in vanilla JavaScript, with scalable SVG graphics. There was an html file for each game variant, and these html files were built from a standard header, a set of game rules and a standard footer.
+
+Second, there was an Android version written in [Lua](https://www.lua.org/) and using the [Solar2D](https://solar2d.com/) retained mode engine.
+
+Third, there was a version written in Go, using the immediate mode [Ebiten](https://ebiten.org) graphics/game engine.
+The intention is that this version would replace the previous two versions, and provide Linux, Windows, Android and browser-based versions from the same code base. If I had a Mac there would have been iOS and Mac versions, too.
 
 This version is different because it's much simpler, and uses Lua scripts to configure each variant, rather than relying on static tables embedded in the executable.
 

@@ -206,6 +206,7 @@ int main(void)
         BaizeCreateCards(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize);
+        BaizeStartGame(baize);
         BaizeCommandQueue = ArrayNew(8);
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeLayout(baize, GetScreenWidth(), GetScreenHeight());

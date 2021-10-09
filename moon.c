@@ -33,11 +33,11 @@ static const struct FunctionToRegister {
     {"SetPileAccept", MoonSetPileAccept},
     {"SetPileDraggable", MoonSetPileDraggable},
     {"SetPileRecycles", MoonSetPileRecycles},
-    {"SetPileSingleCardMove", MoonSetPileSingleCardMove},
     {"PilePeekCard", MoonPilePeekCard},
     {"PileDemoteCards", MoonPileDemoteCards},
     {"PilePromoteCards", MoonPilePromoteCards},
     {"MoveCard", MoonMoveCard},
+    {"CardToTable", MoonCardToTable},
 };
 
 static struct Baize* getBaize(lua_State* L)
@@ -401,24 +401,15 @@ int MoonSetPileRecycles(lua_State *L)
     return 0;
 }
 
-int MoonSetPileSingleCardMove(lua_State *L)
-{
-    struct Pile* p = lua_touserdata(L, 1);
-    if ( PileValid(p) ) {
-        p->singleCardMove = lua_toboolean(L, 2);
-    }
-    return 0;
-}
-
 int MoonPilePeekCard(lua_State *L)
 {
     struct Pile *p = lua_touserdata(L, 1);
+
     if ( !PileValid(p) ) {
         fprintf(stderr, "ERROR: %s: pile not valid\n", __func__);
         return 0;
     }
 
-    // MoonPushCardAsTable(L, PilePeekCard(p));    // may be NULL if pile empty
     lua_pushlightuserdata(L, PilePeekCard(p));
     return 1;
 }
@@ -522,5 +513,17 @@ int MoonMoveCard(lua_State *L)
     }
 
     lua_pushboolean(L, cardsMoved);
+    return 1;
+}
+
+int MoonCardToTable(lua_State *L)
+{
+    struct Card *const c = lua_touserdata(L, 1);
+
+    if ( !CardValid(c) ) {
+        fprintf(stderr, "WARNING: %s card not valid\n", __func__);
+        return 0;
+    }
+    MoonPushCardAsTable(L, c);
     return 1;
 }

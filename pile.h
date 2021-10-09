@@ -27,7 +27,6 @@ struct Pile {
     struct Baize *owner;
     char category[16];
     bool draggable; // eg Discard, Foundation
-    bool singleCardMove;    // eg Forty Thieves
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
