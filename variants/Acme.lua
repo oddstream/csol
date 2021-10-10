@@ -80,12 +80,14 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function CheckFoundation(cPrev, cThis)
-  if not cPrev then
-    if cThis.ordinal ~= 1 then
-      return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
-    end
-  else
+function FoundationAccept(pile, cThis)
+  if cThis.ordinal ~= 1 then
+    return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
+  end
+  return true
+end
+
+function FoundationBuildPair(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
       -- io.stderr:write("CheckFoundation suit fail\n")
       return false, nil
@@ -94,14 +96,15 @@ function CheckFoundation(cPrev, cThis)
       -- io.stderr:write("CheckFoundation ordinal fail\n")
       return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableau(cPrev, cThis)
-  if not cPrev then
+function TableauAccept(pile, cThis)
     -- accept any card to an empty pile
-  else
+    return true
+end
+
+function TableauBuildPair(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
       -- io.stderr:write("CheckTableau suit fail\n")
       return false, nil
@@ -110,22 +113,21 @@ function CheckTableau(cPrev, cThis)
       -- io.stderr:write("CheckTableau ordinal fail\n")
       return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableauMovable(cPrev, cThis)
-  return CheckTableau(cPrev, cThis)
+function TableauMovePair(cPrev, cThis)
+    return TableauBuildPair(cPrev, cThis)
 end
 
-function CheckTableauTail(pileLen, tailLen)
-  io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
+function TableauMoveTail(pileLen, tailLen)
+    io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
 
-  if POWERMOVES or tailLen == 1 then
-    return true, nil
-  end
+    if POWERMOVES or tailLen == 1 then
+      return true, nil
+    end
 
-  return false, "Can only move one card"
+    return false, "Can only move one card"
 end
 
 function CardTapped(card)

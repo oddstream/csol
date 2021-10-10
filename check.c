@@ -24,18 +24,18 @@ static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, s
     }
 
     char funcName[64];
-    strcpy(funcName, "Check");
-    strcat(funcName, dstPile->category);
+    strcpy(funcName, dstPile->category);
+    strcat(funcName, "Accept");
 
     int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
-        lua_pushnil(L);
+        lua_pushlightuserdata(L, dstPile);
         MoonPushCardAsTable(L, cNext);
 
-        // one arg (nil card, card-as-a-table), two returns (boolean, error string)
+        // one arg (dest pile, card-as-a-table), two returns (boolean, error string)
         if ( lua_pcall(L, 2, 2, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
@@ -80,10 +80,11 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
     }
 
     char funcName[64];
-    strcpy(funcName, "Check");
-    strcat(funcName, cPrev->owner->category);
+    strcpy(funcName, cPrev->owner->category);
     if ( movable ) {
-        strcat(funcName, "Movable");
+        strcat(funcName, "MovePair");
+    } else {
+        strcat(funcName, "BuildPair");
     }
 
     int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
@@ -221,9 +222,8 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
     struct Card *const c0 = ArrayGet(tail, 0);
 
     char funcName[64];
-    strcpy(funcName, "Check");
-    strcat(funcName, c0->owner->category);
-    strcat(funcName, "Tail");
+    strcpy(funcName, c0->owner->category);
+    strcat(funcName, "MoveTail");
 
     int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
@@ -259,7 +259,7 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
    return result;
 }
 
-bool CheckTail(struct Baize *const baize, struct Array *const tail)
+bool CheckDragTail(struct Baize *const baize, struct Array *const tail)
 {
     // returns true if it's ok to drag this tail
     return checkTailMovable(baize, tail) && checkTailCards(baize, tail);

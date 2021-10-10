@@ -154,7 +154,7 @@ const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def)
     return result;
 }
 
-float MoonGetFieldNumber(lua_State* L, const char* key, const float def)
+float MoonGetFieldFloat(lua_State* L, const char* key, const float def)
 {
     // assumes table is on top of stack
     float result = def;

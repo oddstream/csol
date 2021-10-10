@@ -82,56 +82,53 @@ function StartGame()
     MoveCard(STOCK, WASTE)
 end
 
-function CheckFoundation(cPrev, cThis)
-    if not cPrev then
-        if cThis.ordinal ~= FOUNDATION_ACCEPT then
-            return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. " not a " .. cThis.ordinal
-        end
-    else
-        -- The foundations build up in suit, wrapping from King to Ace as necessary. 
-        if cPrev.suit ~= cThis.suit then
-            return false, nil
-        end
-        if cPrev.ordinal == 13 and cThis.ordinal == 1 then
-            -- wrap from King to Ace
-            return true, nil
-        elseif cPrev.ordinal + 1 == cThis.ordinal then
-            -- up, eg 2 to 3
-            return true, nil
-        else
-            return false, nil
-        end
+function FoundationAccept(pile, cThis)
+    if cThis.ordinal ~= FOUNDATION_ACCEPT then
+        return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. " not a " .. cThis.ordinal
     end
     return true
 end
 
-function CheckTableau(cPrev, cThis)
-    if not cPrev then
-        -- accept any card onto an empty pile
+function FoundationBuildPair(cPrev, cThis)
+    -- The foundations build up in suit, wrapping from King to Ace as necessary. 
+    if cPrev.suit ~= cThis.suit then
+        return false, nil
+    elseif cPrev.ordinal == 13 and cThis.ordinal == 1 then
+        -- wrap from King to Ace
+    elseif cPrev.ordinal + 1 == cThis.ordinal then
+        -- up, eg 2 to 3
     else
-        -- Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
-        if cPrev.suit ~= cThis.suit then
-            return false, nil
-        end
-        if cPrev.ordinal == 1 and cThis.ordinal == 13 then
-            -- wrap from Ace to King
-        elseif cPrev.ordinal == cThis.ordinal + 1 then
-            -- down, eg 3 to 2
-        else
-            return false, nil
-        end
+        return false, nil
     end
     return true
 end
 
-function CheckTableauMovable(cPrev, cThis)
+function TableauAccept(pile, cThis)
+    -- accept any card onto an empty pile
+    return true
+end
+
+function TableauBuildPair(cPrev, cThis)
+    -- Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
+    if cPrev.suit ~= cThis.suit then
+        return false, nil
+    elseif cPrev.ordinal == 1 and cThis.ordinal == 13 then
+        -- wrap from Ace to King
+    elseif cPrev.ordinal == cThis.ordinal + 1 then
+        -- down, eg 3 to 2
+    else
+        return false, nil
+    end
+    return true
+end
+
+function TableauMovePair(cPrev, cThis)
+    return TableauBuildPair(cPrev, cThis)
+end
+
+function TableauMoveTail(pileLen, tailLen)
     -- can only move a single card or a whole pile
-    return CheckTableau(cPrev, cThis)
-end
-
-function CheckTableauTail(pileLen, tailLen)
     io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
-
     if tailLen == 1 or pileLen == tailLen then
         return true, nil
     end

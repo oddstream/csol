@@ -62,77 +62,76 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function CheckFoundation(cPrev, cThis)
-  if not cPrev then
+function FoundationAccept(pile, cThis)
     if cThis.ordinal ~= 1 then
       return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
     end
-  else
+    return true
+end
+
+function FoundationBuildPair(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
-      io.stderr:write("CheckFoundation suit fail\n")
+      -- io.stderr:write("CheckFoundation suit fail\n")
       return false, nil
     end
     if cPrev.ordinal + 1 ~= cThis.ordinal then
-      io.stderr:write("CheckFoundation ordinal fail\n")
+      -- io.stderr:write("CheckFoundation ordinal fail\n")
       return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableau(cPrev, cThis)
-  -- if cPrev is nil, then we are trying to place cThis onto an empty pile
-  if not cPrev then
+function TableauAccept(pile, cThis)
     if cThis.ordinal == 13 then
       return true
     else
       return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
     end
-  else
+end
+
+function TableauBuildPair(cPrev, cThis)
     if cPrev.color == cThis.color then
-      io.stderr:write("CheckTableau color fail\n")
+      -- io.stderr:write("CheckTableau color fail\n")
       return false, nil
     end
     if cPrev.ordinal ~= cThis.ordinal + 1 then
-      io.stderr:write("CheckTableau ordinal fail\n")
+      -- io.stderr:write("CheckTableau ordinal fail\n")
       return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableauMovable(cPrev, cThis)
-  return CheckTableau(cPrev, cThis)
+function TableauMovePair(cPrev, cThis)
+  return TableauBuildPair(cPrev, cThis)
 end
 
 function CardTapped(card)
-  -- LogCard("CardTapped", card)
-  if card.owner == STOCK then
-    for i=1,StockDealCards do
-      MoveCard(STOCK, WASTE)
+    -- LogCard("CardTapped", card)
+    if card.owner == STOCK then
+        for i=1,StockDealCards do
+            MoveCard(STOCK, WASTE)
+        end
     end
-  end
 end
 
 function PileTapped(pile)
-  -- io.stdout:write("PileTapped\n")
-  if pile == STOCK then
-    if STOCK_RECYCLES == 0 then
-      return "No more Stock recycles"
+    -- io.stdout:write("PileTapped\n")
+    if pile == STOCK then
+        if STOCK_RECYCLES == 0 then
+          return "No more Stock recycles"
+        end
+        if PileCardCount(WASTE) > 0 then
+          while PileCardCount(WASTE) > 0 do
+              MoveCard(WASTE, STOCK)
+          end
+          STOCK_RECYCLES = STOCK_RECYCLES - 1
+          SetPileRecycles(STOCK, STOCK_RECYCLES)
+          return nil
+        end
+    elseif pile == WASTE then
+        if PileCardCount(STOCK) > 0 then
+            MoveCard(STOCK, WASTE)
+            return nil
+        end
     end
-    if PileCardCount(WASTE) > 0 then
-      while PileCardCount(WASTE) > 0 do
-        MoveCard(WASTE, STOCK)
-      end
-      STOCK_RECYCLES = STOCK_RECYCLES - 1
-      SetPileRecycles(STOCK, STOCK_RECYCLES)
-      return nil
-    end
-  elseif pile == WASTE then
-    if PileCardCount(STOCK) > 0 then
-      MoveCard(STOCK, WASTE)
-      return nil
-    end
-  end
-  return nil
 end

@@ -85,7 +85,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpDst = pos;
     // float dist = UtilDistance(self->lerpSrc, self->lerpDst);
     // self->lerpStepAmount = fminf(0.025f, speed*(1.0f/dist));
-    self->lerpStepAmount = SLOW_SPEED;
+    self->lerpStepAmount = NORMAL_SPEED;
     self->lerpStep = 0.0;       // trigger a lerp
 }
 
@@ -179,7 +179,8 @@ void CardDraw(struct Card *const self)
 
     Rectangle rectCard = CardScreenRect(self);
 
-    if ( CardDragging(self) || CardTransitioning(self) ) {
+    if ( CardDragging(self) ) {
+        // || CardTransitioning(self) 
         rectCard.x += 2.0f;
         rectCard.y += 2.0f;
         DrawRectangleRounded(rectCard, 0.05, 9, (Color){0,0,0,63});

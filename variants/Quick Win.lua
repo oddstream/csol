@@ -69,28 +69,30 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function CheckFoundation(cPrev, cThis)
-  if not cPrev then
+function FoundationAccept(pile, cThis)
     if cThis.ordinal ~= 1 then
       return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
     end
-  else
+    return true
+end
+
+function FoundationBuildPair(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
-      -- io.stderr:write("CheckFoundation suit fail\n")
-      return false, nil
+        -- io.stderr:write("CheckFoundation suit fail\n")
+        return false, nil
     end
     if cPrev.ordinal + 1 ~= cThis.ordinal then
-      -- io.stderr:write("CheckFoundation ordinal fail\n")
-      return false, nil
+        -- io.stderr:write("CheckFoundation ordinal fail\n")
+        return false, nil
     end
-  end
+    return true
+end
+
+function TableauAccept(pile, cThis)
   return true
 end
 
-function CheckTableau(cPrev, cThis)
-  if not cPrev then
-    -- accept any card to an empty pile
-  else
+function TableauBuildPair(cPrev, cThis)
     if cPrev.ordinal ~= cThis.ordinal + 1 then
       -- io.stderr:write("CheckTableau ordinal fail\n")
       return false, nil
@@ -98,12 +100,11 @@ function CheckTableau(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
       return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableauMovable(cPrev, cThis)
-  return CheckTableau(cPrev, cThis)
+function TableauMovePair(cPrev, cThis)
+  return TableauBuildPair(cPrev, cThis)
 end
 
 function CardTapped(card)

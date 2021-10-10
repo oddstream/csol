@@ -103,7 +103,7 @@ bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
         } else {
             fprintf(stderr, "WARNING: expecting string or nil return from PileTapped\n");
         }
-        lua_pop(L, 1);  // remove returned boolean, string from stack
+        lua_pop(L, 1);  // remove returned string from stack
     }
 
     return crc != BaizeCRC(self);

@@ -66,27 +66,13 @@ function Build()
 
 end
 
--- function CheckCell(cPrev, cThis)
---   io.stderr:write("CheckCell\n")
---   return cPrev == nil, nil
--- end
-
--- function CheckCellMovable(cPrev, cThis)
---   io.stderr:write("CheckCellMovable\n")
---   return true, nil
--- end
-
--- function CheckCellTail(pileLen, tailLen)
---   io.stderr:write("CheckCellTail\n")
---   return true
--- end
-
-function CheckFoundation(cPrev, cThis)
-  if not cPrev then
+function FoundationAccept(pile, cThis)
     if cThis.ordinal ~= 1 then
       return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
     end
-  else
+end
+
+function FoundationBuildPair(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
       -- io.stderr:write("CheckFoundation suit fail\n")
       return false
@@ -95,21 +81,14 @@ function CheckFoundation(cPrev, cThis)
       -- io.stderr:write("CheckFoundation ordinal fail\n")
       return false
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableauAccept(cThis)
-  if cThis.prone then
-    return false, "Cannot move a face down card"
-  end
-  return true
+function TableauAccept(pile, cThis)
+    return true
 end
 
-function CheckTableau(cPrev, cThis)
-  if not cPrev then
-    -- accept any card to an empty pile
-  else
+function TableauBuildPair(cPrev, cThis)
     if cPrev.color == cThis.color then
       -- io.stderr:write("CheckTableau color fail\n")
       return false
@@ -118,21 +97,19 @@ function CheckTableau(cPrev, cThis)
       -- io.stderr:write("CheckTableau ordinal fail\n")
       return false
     end
-  end
-  return true
-end
-
-function CheckTableauMovable(cPrev, cThis)
-  return CheckTableau(cPrev, cThis)
-end
-
-function CheckTableauTail(pileLen, tailLen)
-  -- io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
-
-  if POWERMOVES or tailLen == 1 then
     return true
-  end
-
-  return false, "Can only move one card"
 end
 
+function TableauMovePair(cPrev, cThis)
+  return TableauBuildPair(cPrev, cThis)
+end
+
+function TableauMoveTail(pileLen, tailLen)
+    -- io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
+
+    if POWERMOVES or tailLen == 1 then
+      return true
+    end
+
+    return false, "Can only move one card"
+end

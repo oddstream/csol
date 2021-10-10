@@ -1,4 +1,4 @@
--- Spid
+-- Spider
 
 POWERMOVES = false
 
@@ -57,62 +57,63 @@ function Build()
     end
 end
 
-function CheckDiscard(cPrev, cThis)
-  if not cPrev then
+function DiscardAccept(pile, cThis)
     if cThis.ordinal ~= 13 then
       return false, "An empty Discard can only accept an King, not a " .. cThis.ordinal
     end
-  else
+    return true
+end
+
+function DiscardBuildPair(cPrev, cThis)
     if cPrev.suit ~= cThis.suit then
-      io.stderr:write("CheckDiscard suit fail\n")
+        -- io.stderr:write("CheckDiscard suit fail\n")
+        return false, nil
+    end
+    if cPrev.ordinal + 1 ~= cThis.ordinal then
+        -- io.stderr:write("CheckDiscard ordinal fail\n")
+        return false, nil
+    end
+    return true
+end
+
+function DiscardMovePair(cPrev, cThis)
+    -- LogCard("CheckDiscardMovable prev", cPrev)
+    -- LogCard("CheckDiscardMovable this", cThis)
+    if cPrev.suit ~= cThis.suit then
+      -- io.stderr:write("CheckDiscardMovable suit fail\n")
       return false, nil
     end
     if cPrev.ordinal + 1 ~= cThis.ordinal then
-      io.stderr:write("CheckDiscard ordinal fail\n")
+      -- io.stderr:write("CheckDiscardMovable ordinal fail\n")
       return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckDiscardMovable(cPrev, cThis)
-  -- LogCard("CheckDiscardMovable prev", cPrev)
-  -- LogCard("CheckDiscardMovable this", cThis)
-  if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckDiscardMovable suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckDiscardMovable ordinal fail\n")
-    return false, nil
-  end
-  return true
+function TableauAccept(pile, cThis)
+    return true
 end
 
-function CheckTableau(cPrev, cThis)
-  if not cPrev then
-    -- accept any card to an empty pile
-  else
+function TableauBuildPair(cPrev, cThis)
     if cPrev.ordinal ~= cThis.ordinal + 1 then
-      io.stderr:write("CheckTableau ordinal fail\n")
-      return false, nil
+        -- io.stderr:write("CheckTableau ordinal fail\n")
+        return false, nil
     end
-  end
-  return true
+    return true
 end
 
-function CheckTableauMovable(cPrev, cThis)
-  -- LogCard("CheckTableauMovable prev", cPrev)
-  -- LogCard("CheckTableauMovable this", cThis)
-  if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckTableauMovable suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableauMovable ordinal fail\n")
-    return false, nil
-  end
-  return true
+function TableauMovePair(cPrev, cThis)
+    -- LogCard("CheckTableauMovable prev", cPrev)
+    -- LogCard("CheckTableauMovable this", cThis)
+    if cPrev.suit ~= cThis.suit then
+      -- io.stderr:write("CheckTableauMovable suit fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal ~= cThis.ordinal + 1 then
+        -- io.stderr:write("CheckTableauMovable ordinal fail\n")
+      return false, nil
+    end
+    return true
 end
 
 function CardTapped(card)

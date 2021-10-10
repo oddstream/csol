@@ -29,10 +29,10 @@ void LoadSettings(int *windowWidth, int *windowHeight)
         int typ = lua_getglobal(L, "BaizeColor");
         if ( typ == LUA_TTABLE ) {
             float r, g, b, a;
-            r = MoonGetFieldNumber(L, "red", 1);
-            g = MoonGetFieldNumber(L, "green", 1);
-            b = MoonGetFieldNumber(L, "blue", 1);
-            a = MoonGetFieldNumber(L, "alpha", 1);
+            r = MoonGetFieldFloat(L, "red", 1);
+            g = MoonGetFieldFloat(L, "green", 1);
+            b = MoonGetFieldFloat(L, "blue", 1);
+            a = MoonGetFieldFloat(L, "alpha", 1);
             baizeColor = (Color){.r=r*255, .g=g*255, .b=b*255, .a=a*255};
         } else {
             baizeColor = DARKGREEN;

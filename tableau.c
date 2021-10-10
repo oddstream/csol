@@ -85,9 +85,9 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         }
     }
     if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckTail(baize, tail);
+        return CheckAccept(baize, self, ArrayGet(tail, 0)) && CheckDragTail(baize, tail);
     } else {
-        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0)) && CheckTail(baize, tail);
+        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0)) && CheckDragTail(baize, tail);
     }
 }
 
