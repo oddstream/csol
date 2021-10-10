@@ -143,6 +143,7 @@ int main(void)
 
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
     fprintf(stderr, "sizeof(void*) == %lu\n", sizeof(void*));
+    fprintf(stderr, "sizeof(unsigned int) == %lu\n", sizeof(unsigned int));
     fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
     fprintf(stderr, "sizeof(Card) == %lu\n", sizeof(struct Card));
 

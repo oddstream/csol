@@ -48,6 +48,7 @@ struct BaizeCommand {
 
 struct Baize* BaizeNew(void);
 bool BaizeValid(struct Baize *const self);
+unsigned int BaizeCRC(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);
 void BaizeSetError(struct Baize *const self, const char *str);
 void BaizeOpenLua(struct Baize *const self);

@@ -48,8 +48,8 @@ function Build()
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         SetPileAccept(pile, 13)
         for n = 1, deal do
-          MoveCard(STOCK, pile)
-          SetCardProne(PilePeekCard(pile), true)
+          local c = MoveCard(STOCK, pile)
+          SetCardProne(c, true)
         end
         SetCardProne(PilePeekCard(pile), false)
         deal = deal + 1
@@ -62,45 +62,41 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function CheckFoundationAccept(cThis)
-  if cThis.ordinal == 1 then
-    return true, nil
-  else
-    return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
-  end
-end
-
 function CheckFoundation(cPrev, cThis)
-  if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckFoundation suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckFoundation ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    if cThis.ordinal ~= 1 then
+      return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
+    end
+  else
+    if cPrev.suit ~= cThis.suit then
+      io.stderr:write("CheckFoundation suit fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal + 1 ~= cThis.ordinal then
+      io.stderr:write("CheckFoundation ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
 
-function CheckTableauAccept(cThis)
-  if cThis.prone then
-    return false, "Cannot move a face down card"
-  end
-  if cThis.ordinal == 13 then
-    return true, nil
-  else
-    return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
-  end
-end
-
 function CheckTableau(cPrev, cThis)
-  if cPrev.color == cThis.color then
-    io.stderr:write("CheckTableau color fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableau ordinal fail\n")
-    return false, nil
+  -- if cPrev is nil, then we are trying to place cThis onto an empty pile
+  if not cPrev then
+    if cThis.ordinal == 13 then
+      return true
+    else
+      return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
+    end
+  else
+    if cPrev.color == cThis.color then
+      io.stderr:write("CheckTableau color fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal ~= cThis.ordinal + 1 then
+      io.stderr:write("CheckTableau ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
@@ -110,26 +106,19 @@ function CheckTableauMovable(cPrev, cThis)
 end
 
 function CardTapped(card)
-  LogCard("CardTapped", card)
-
-  local cardsMoved = 0
-
+  -- LogCard("CardTapped", card)
   if card.owner == STOCK then
     for i=1,StockDealCards do
-      if MoveCard(STOCK, WASTE) then
-        cardsMoved = cardsMoved + 1
-      end
+      MoveCard(STOCK, WASTE)
     end
   end
-
-  return cardsMoved > 0, nil
 end
 
 function PileTapped(pile)
-  io.stdout:write("PileTapped\n")
+  -- io.stdout:write("PileTapped\n")
   if pile == STOCK then
     if STOCK_RECYCLES == 0 then
-      return false, "No more Stock recycles"
+      return "No more Stock recycles"
     end
     if PileCardCount(WASTE) > 0 then
       while PileCardCount(WASTE) > 0 do
@@ -137,14 +126,13 @@ function PileTapped(pile)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
       SetPileRecycles(STOCK, STOCK_RECYCLES)
-      return true, nil
+      return nil
     end
   elseif pile == WASTE then
     if PileCardCount(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
-      return true, nil
+      return nil
     end
   end
-
-  return false, nil
+  return nil
 end

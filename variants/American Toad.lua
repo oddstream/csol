@@ -40,13 +40,20 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with PACKS of shuffled cards
-    PileMoveTo(STOCK, 10, 1)
+    PileMoveTo(STOCK, 1, 1)
 
-    WASTE = AddPile("Waste", 10, 2, FAN_DOWN3)
+    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
+    RESERVE = AddPile("Reserve", 4, 1, FAN_RIGHT)
+    for n = 1, 20 do
+        local c = MoveCard(STOCK, RESERVE)
+        SetCardProne(c, true)
+    end
+    SetCardProne(PilePeekCard(RESERVE), false)
+    
     FOUNDATIONS = {}
     for x = 1, 8 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 2, FAN_NONE)
         SetPileDraggable(pile, false)
         -- FOUNDATIONS[#FOUNDATIONS+1] = pile
         table.insert(FOUNDATIONS, pile)
@@ -54,18 +61,11 @@ function Build()
 
     TABLEAUX = {}
     for x = 1, 8 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        local pile = AddPile("Tableau", x, 3, FAN_DOWN)
         MoveCard(STOCK, pile)
         table.insert(TABLEAUX, pile)
     end
 
-    RESERVE = AddPile("Reserve", 10, 3, FAN_DOWN)
-    for n = 1, 20 do
-        MoveCard(STOCK, RESERVE)
-        SetCardProne(PilePeekCard(RESERVE), true)
-    end
-    SetCardProne(PilePeekCard(RESERVE), false)
-    
 end
 
 function StartGame()
@@ -82,50 +82,46 @@ function StartGame()
     MoveCard(STOCK, WASTE)
 end
 
-function CheckFoundationAccept(cThis)
-  if cThis.ordinal == FOUNDATION_ACCEPT then
-    return true, nil
-  else
-    return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. " not a " .. cThis.ordinal
-  end
-end
-
 function CheckFoundation(cPrev, cThis)
-    -- The foundations build up in suit, wrapping from King to Ace as necessary. 
-    if cPrev.suit ~= cThis.suit then
-        return false, nil
-    end
-    if cPrev.ordinal == 13 and cThis.ordinal == 1 then
-        -- wrap from King to Ace
-        return true, nil
-    elseif cPrev.ordinal + 1 == cThis.ordinal then
-        -- up, eg 2 to 3
-        return true, nil
+    if not cPrev then
+        if cThis.ordinal ~= FOUNDATION_ACCEPT then
+            return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. " not a " .. cThis.ordinal
+        end
     else
-        return false, nil
+        -- The foundations build up in suit, wrapping from King to Ace as necessary. 
+        if cPrev.suit ~= cThis.suit then
+            return false, nil
+        end
+        if cPrev.ordinal == 13 and cThis.ordinal == 1 then
+            -- wrap from King to Ace
+            return true, nil
+        elseif cPrev.ordinal + 1 == cThis.ordinal then
+            -- up, eg 2 to 3
+            return true, nil
+        else
+            return false, nil
+        end
     end
-end
-
-function CheckTableauAccept(cThis)
-  if cThis.prone then
-    return false, "Cannot move a face down card"
-  end
-  return true, nil
+    return true
 end
 
 function CheckTableau(cPrev, cThis)
-    -- Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
-    if cPrev.suit ~= cThis.suit then
-        return false, nil
-    end
-    if cPrev.ordinal == 1 and cThis.ordinal == 13 then
-        -- wrap from Ace to King
-    elseif cPrev.ordinal == cThis.ordinal + 1 then
-        -- down, eg 3 to 2
+    if not cPrev then
+        -- accept any card onto an empty pile
     else
-        return false, nil
+        -- Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
+        if cPrev.suit ~= cThis.suit then
+            return false, nil
+        end
+        if cPrev.ordinal == 1 and cThis.ordinal == 13 then
+            -- wrap from Ace to King
+        elseif cPrev.ordinal == cThis.ordinal + 1 then
+            -- down, eg 3 to 2
+        else
+            return false, nil
+        end
     end
-    return true, nil
+    return true
 end
 
 function CheckTableauMovable(cPrev, cThis)
@@ -143,22 +139,17 @@ function CheckTableauTail(pileLen, tailLen)
 end
 
 function CardTapped(card)
-  LogCard("CardTapped", card)
-
-  local cardsMoved = false
-
+--   LogCard("CardTapped", card)
   if card.owner == STOCK then
-    cardsMoved = MoveCard(STOCK, WASTE)
+    MoveCard(STOCK, WASTE)
   end
-
-  return cardsMoved, nil
 end
 
 function PileTapped(pile)
 --   io.stdout:write("PileTapped\n")
   if pile == STOCK then
     if STOCK_RECYCLES == 0 then
-      return false, "No more Stock recycles"
+      return "No more Stock recycles"
     end
     if PileCardCount(WASTE) > 0 then
       while PileCardCount(WASTE) > 0 do
@@ -166,13 +157,13 @@ function PileTapped(pile)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
       SetPileRecycles(STOCK, STOCK_RECYCLES)
-      return true, nil
+      return nil
     end
   elseif pile == WASTE then
     if PileCardCount(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
-      return true, nil
+      return nil
     end
   end
-  return false, nil
+  return nil
 end

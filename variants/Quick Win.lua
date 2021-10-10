@@ -43,7 +43,7 @@ function Build()
 
     for x = 1, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        for n=1,2 do
+        for n = 1, 2 do
           MoveCard(STOCK, pile)
         end
         PileDemoteCards(pile, 13)
@@ -53,7 +53,7 @@ function Build()
 
     for x = 1, 10 do
         local pile = AddPile("Tableau", x, 4, FAN_DOWN)
-        for n=1,2 do
+        for n = 1, 2 do
           MoveCard(STOCK, pile)
         end
         PileDemoteCards(pile, 13)
@@ -67,37 +67,35 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function CheckFoundationAccept(cThis)
-  if cThis.ordinal == 1 then
-    return true, nil
-  else
-    return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
-  end
-end
-
 function CheckFoundation(cPrev, cThis)
-  if cPrev.suit ~= cThis.suit then
-    -- io.stderr:write("CheckFoundation suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal + 1 ~= cThis.ordinal then
-    -- io.stderr:write("CheckFoundation ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    if cThis.ordinal ~= 1 then
+      return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
+    end
+  else
+    if cPrev.suit ~= cThis.suit then
+      -- io.stderr:write("CheckFoundation suit fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal + 1 ~= cThis.ordinal then
+      -- io.stderr:write("CheckFoundation ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
 
-function CheckTableauAccept(cThis)
-  if cThis.prone then
-    return false, "Cannot move a face down card"
-  end
-  return true, nil
-end
-
 function CheckTableau(cPrev, cThis)
-  if cPrev.ordinal ~= cThis.ordinal + 1 then
-    -- io.stderr:write("CheckTableau ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    -- accept any card to an empty pile
+  else
+    if cPrev.ordinal ~= cThis.ordinal + 1 then
+      -- io.stderr:write("CheckTableau ordinal fail\n")
+      return false, nil
+    end
+    if cPrev.suit ~= cThis.suit then
+      return false, nil
+    end
   end
   return true
 end
@@ -107,22 +105,17 @@ function CheckTableauMovable(cPrev, cThis)
 end
 
 function CardTapped(card)
-  LogCard("CardTapped", card)
-
-  local cardsMoved = false
-
+  -- LogCard("CardTapped", card)
   if card.owner == STOCK then
-    cardsMoved = MoveCard(STOCK, WASTE)
+    MoveCard(STOCK, WASTE)
   end
-
-  return cardsMoved, nil
 end
 
 function PileTapped(pile)
-  io.stdout:write("PileTapped\n")
+  -- io.stdout:write("PileTapped\n")
   if pile == STOCK then
     if STOCK_RECYCLES == 0 then
-      return false, "No more Stock recycles"
+      return "No more Stock recycles"
     end
     if PileCardCount(WASTE) > 0 then
       while PileCardCount(WASTE) > 0 do
@@ -130,16 +123,12 @@ function PileTapped(pile)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
       SetPileRecycles(STOCK, STOCK_RECYCLES)
-      return true, nil
     end
   elseif pile == WASTE then
     if PileCardCount(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
-      return true, nil
     end
   end
-
-  return false, nil
 end
   
 function AfterMove()

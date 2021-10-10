@@ -247,6 +247,37 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
         case FAN_LEFT3:
             break;
         case FAN_DOWN3:
+            {
+                float x0 = pos.x;
+                float y0 = pos.y;
+                float y1 = y0 + cardHeight / CARD_FACE_FAN_FACTOR;
+                float y2 = y1 + cardHeight / CARD_FACE_FAN_FACTOR;
+                switch ( ArrayLen(self->cards) ) {
+                    case 0:
+                        // do nothing, incoming card will be at pos
+                        break;
+                    case 1:
+                        // incoming card at slot[1]
+                        pos.y = y1;
+                        break;
+                    case 2:
+                        // incoming card at slot[2]
+                        pos.y = y2;
+                        break;
+                    default:
+                        // >= 3 cards
+                        // incoming card at slot[2]
+                        pos.y = y2;
+                        // top card needs to transition from slot[2] to slot[1]
+                        int i = (int)ArrayLen(self->cards) - 1;
+                        CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y1});
+                        // mid card needs to transition from slot[1] to slot[0]
+                        for ( --i; i>= 0; i-- ) {
+                            CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y0});
+                        }
+                        break;
+                }
+            }
             break;
         default:
             break;
@@ -339,7 +370,8 @@ int PileGenericCollect(struct Pile *const self)
     // prefer to collect a run of cards from one pile to one foundation
 
     // NB Spider piles are not collected because moving them to the 'foundations' is optional according to Morehead and Mott-Smith
-    // compensated for by Spider being complete when a Tableau is either empty or contains 13 conformant cards
+    // so Spider games have Discard piles, not Foundation piles
+    // Spider could be complete when a Tableau is either empty or contains 13 conformant cards (TODO not currently implemented)
     struct Baize* baize = self->owner;
     int cardsMoved = 0;
     size_t index;

@@ -39,8 +39,8 @@ function Build()
     for x = 1, 4 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         for n=1,4 do
-          MoveCard(STOCK, pile)
-          SetCardProne(PilePeekCard(pile), true)
+          local c = MoveCard(STOCK, pile)
+          SetCardProne(c, true)
         end
         MoveCard(STOCK, pile)
         TABLEAU[x] = pile
@@ -49,30 +49,28 @@ function Build()
     for x = 5, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         for n=1,3 do
-          MoveCard(STOCK, pile)
-          SetCardProne(PilePeekCard(pile), true)
+          local c = MoveCard(STOCK, pile)
+          SetCardProne(c, true)
         end
         MoveCard(STOCK, pile)
         TABLEAU[x] = pile
     end
 end
 
-function CheckDiscardAccept(cThis)
-  if cThis.ordinal == 13 then
-    return true, nil
-  else
-    return false, "An empty Discard can only accept an King, not a " .. cThis.ordinal
-  end
-end
-
 function CheckDiscard(cPrev, cThis)
-  if cPrev.suit ~= cThis.suit then
-    io.stderr:write("CheckDiscard suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal + 1 ~= cThis.ordinal then
-    io.stderr:write("CheckDiscard ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    if cThis.ordinal ~= 13 then
+      return false, "An empty Discard can only accept an King, not a " .. cThis.ordinal
+    end
+  else
+    if cPrev.suit ~= cThis.suit then
+      io.stderr:write("CheckDiscard suit fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal + 1 ~= cThis.ordinal then
+      io.stderr:write("CheckDiscard ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
@@ -91,14 +89,14 @@ function CheckDiscardMovable(cPrev, cThis)
   return true
 end
 
-function CheckTableauAccept(cThis)
-  return true, nil
-end
-
 function CheckTableau(cPrev, cThis)
-  if cPrev.ordinal ~= cThis.ordinal + 1 then
-    io.stderr:write("CheckTableau ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    -- accept any card to an empty pile
+  else
+    if cPrev.ordinal ~= cThis.ordinal + 1 then
+      io.stderr:write("CheckTableau ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
@@ -118,9 +116,7 @@ function CheckTableauMovable(cPrev, cThis)
 end
 
 function CardTapped(card)
-    LogCard("CardTapped", card)
-
-    local cardsMoved = false
+    -- LogCard("CardTapped", card)
     local errMsg = nil
     local tabCards = 0
     local emptyTabs = 0
@@ -137,10 +133,9 @@ function CardTapped(card)
       else
         for _, tab in ipairs(TABLEAU) do
           MoveCard(STOCK, tab)
-          cardsMoved = true
         end
       end
     end
 
-    return cardsMoved, errMsg
+    return errMsg
 end

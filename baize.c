@@ -31,6 +31,23 @@ bool BaizeValid(struct Baize *const self)
     return self && self->magic == BAIZE_MAGIC;
 }
 
+unsigned int BaizeCRC(struct Baize *const self)
+{
+    // calculate a CRC to detect changes to the cards
+    // sizeof(unsigned int) == 4 at the time of writing
+    // https://stackoverflow.com/questions/21001659/crc32-algorithm-implementation-in-c-without-a-look-up-table-and-with-a-public-li
+    unsigned int crc = 0xFFFFFFFF, mask;
+    size_t pindex;
+    for ( struct Pile* p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
+        crc = crc ^ ArrayLen(p->cards);
+        for ( int j = 7; j >= 0; j-- ) {
+            mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0xEDB88320 & mask);
+        }
+    }
+    return ~crc;
+}
+
 void BaizeSetError(struct Baize *const self, const char *str)
 {
     BaizeResetError(self);
@@ -586,6 +603,7 @@ bool BaizeConformant(struct Baize *const self)
 void BaizeAfterUserMove(struct Baize *const self)
 {
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
+    // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
     int typ = lua_getglobal(self->L, "AfterMove");  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {

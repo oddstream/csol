@@ -36,7 +36,6 @@ bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
     //     fprintf(stdout, "sizeof(Card) == %lu\n", sizeof(struct Card));
     // }
     lua_State *L = self->L;
-    bool cardsMoved = false;
     BaizeResetError(self);
 
     int typ = lua_getglobal(L, "CardTapped");  // push function name onto the stack
@@ -46,79 +45,66 @@ bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
         return false;
     }
 
+    unsigned int crc = BaizeCRC(self);
+
     // push one arg, the card (as a table)
     MoonPushCardAsTable(L, c);
-
-    // one arg (card-as-a-table), two returns (boolean cards moved, error string)
-    if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
+    // one arg (card-as-a-table), one return (error string or nil)
+    if ( lua_pcall(L, 1, 1, 0) != LUA_OK ) {
         fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
         // fprintf(stderr, "%s called ok\n", func);
-        if ( lua_isboolean(L, 1) ) {
-            cardsMoved = lua_toboolean(L, 1);
-        } else {
-            fprintf(stderr, "WARNING: expecting boolean return from CardTapped\n");
-            cardsMoved = false;
-        }
-        if ( lua_isnil(L, 2) ) {
+        if ( lua_isnil(L, 1) ) {
             ;
-        } else if ( lua_isstring(L, 2) ) {
-            const char *str = lua_tostring(L, 2);
+        } else if ( lua_isstring(L, 1) ) {
+            const char *str = lua_tostring(L, 1);
             if ( str ) {
                 BaizeSetError(self, str);
             }
         } else {
             fprintf(stderr, "WARNING: expecting string or nil return from CardTapped\n");
-            cardsMoved = false;
         }
-        lua_pop(L, 2);  // remove returned boolean, string from stack
+        lua_pop(L, 1);  // remove returned boolean, string from stack
     }
 
-    return cardsMoved;
+    return crc != BaizeCRC(self);
 }
 
 bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
 {
     lua_State *L = self->L;
-    bool cardsMoved = false;
     BaizeResetError(self);
 
     int typ = lua_getglobal(L, "PileTapped");  // push function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "WARNING: PileTapped is not a function\n");
+        fprintf(stderr, "PileTapped is not a function\n");
         lua_pop(L, 1);  // remove function name
         return false;
     }
 
+    unsigned int crc = BaizeCRC(self);
+
     // push one arg, the pile
     lua_pushlightuserdata(L, p);
-
-    // one arg (pile), two returns (boolean cards moved, error string)
-    if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
+    // one arg (pile), one return (error string or nil)
+    if ( lua_pcall(L, 1, 1, 0) != LUA_OK ) {
         fprintf(stderr, "ERROR: error running Lua function: %s\n", lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
         // fprintf(stderr, "%s called ok\n", func);
-        if ( lua_isboolean(L, 1) ) {
-            cardsMoved = lua_toboolean(L, 1);
-        } else {
-            fprintf(stderr, "WARNING: expecting boolean return from PileTapped\n");
-            cardsMoved = false;
-        }
-        if ( lua_isnil(L, 2) ) {
+        if ( lua_isnil(L, 1) ) {
             ;
-        } else if ( lua_isstring(L, 2) ) {
-            const char *str = lua_tostring(L, 2);
+        } else if ( lua_isstring(L, 1) ) {
+            const char *str = lua_tostring(L, 1);
             if ( str ) {
                 BaizeSetError(self, str);
             }
         } else {
             fprintf(stderr, "WARNING: expecting string or nil return from PileTapped\n");
-            cardsMoved = false;
         }
-        lua_pop(L, 2);  // remove returned boolean, string from stack
+        lua_pop(L, 1);  // remove returned boolean, string from stack
     }
 
-    return cardsMoved;
+    return crc != BaizeCRC(self);
 }

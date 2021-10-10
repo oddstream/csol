@@ -49,41 +49,36 @@ function Build()
 
 end
 
-function CheckFoundationAccept(cThis)
-  if cThis.ordinal == 1 then
-    return true, nil
-  else
-    return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
-  end
-end
-
 function CheckFoundation(cPrev, cThis)
-  if cPrev.suit ~= cThis.suit then
-    -- io.stderr:write("CheckFoundation suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal + 1 ~= cThis.ordinal then
-    -- io.stderr:write("CheckFoundation ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    if cThis.ordinal ~= 1 then
+      return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
+    end
+  else
+    if cPrev.suit ~= cThis.suit then
+      -- io.stderr:write("CheckFoundation suit fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal + 1 ~= cThis.ordinal then
+      -- io.stderr:write("CheckFoundation ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
 
-function CheckTableauAccept(cThis)
-  if cThis.prone then
-    return false, "Cannot move a face down card"
-  end
-  return true, nil
-end
-
 function CheckTableau(cPrev, cThis)
-  if cPrev.suit ~= cThis.suit then
-    -- io.stderr:write("CheckTableau suit fail\n")
-    return false, nil
-  end
-  if cPrev.ordinal ~= cThis.ordinal + 1 then
-    -- io.stderr:write("CheckTableau ordinal fail\n")
-    return false, nil
+  if not cPrev then
+    -- accept any card to an empty pile
+  else
+    if cPrev.suit ~= cThis.suit then
+      -- io.stderr:write("CheckTableau suit fail\n")
+      return false, nil
+    end
+    if cPrev.ordinal ~= cThis.ordinal + 1 then
+      -- io.stderr:write("CheckTableau ordinal fail\n")
+      return false, nil
+    end
   end
   return true
 end
@@ -92,24 +87,27 @@ function CheckTableauMovable(cPrev, cThis)
   return CheckTableau(cPrev, cThis)
 end
 
-function CardTapped(card)
-  LogCard("CardTapped", card)
+function CheckTableauTail(pileLen, tailLen)
+  io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
 
-  local cardsMoved = false
-
-  if card.owner == STOCK then
-    cardsMoved = MoveCard(STOCK, WASTE)
+  if POWERMOVES or tailLen == 1 then
+    return true, nil
   end
 
-  return cardsMoved, nil
+  return false, "Can only move one card"
+end
+
+function CardTapped(card)
+  -- LogCard("CardTapped", card)
+  if card.owner == STOCK then
+    MoveCard(STOCK, WASTE)
+  end
 end
 
 function PileTapped(pile)
   if pile == WASTE then
     if PileCardCount(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
-      return true, nil
     end
   end
-  return false, nil
 end

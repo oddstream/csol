@@ -491,8 +491,6 @@ int MoonMoveCard(lua_State *L)
     struct Pile *src = lua_touserdata(L, 1);
     struct Pile* dst = lua_touserdata(L, 2);
 
-    bool cardsMoved = false;
-
     if ( !PileValid(src) ) {
         fprintf(stderr, "WARNING: %s source pile not valid\n", __func__);
         lua_pushboolean(L, false);
@@ -507,12 +505,16 @@ int MoonMoveCard(lua_State *L)
 
     struct Card *c = PilePeekCard(src);
     if ( c ) {
-        if ( PileMoveCards(dst, c) ) {
-            cardsMoved = true;
+        if ( !PileMoveCards(dst, c) ) {
+            c = NULL;
         }
     }
 
-    lua_pushboolean(L, cardsMoved);
+    if (c) {
+        lua_pushlightuserdata(L, c);
+    } else {
+        lua_pushnil(L);
+    }
     return 1;
 }
 

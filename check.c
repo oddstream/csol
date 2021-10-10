@@ -26,17 +26,17 @@ static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, s
     char funcName[64];
     strcpy(funcName, "Check");
     strcat(funcName, dstPile->category);
-    strcat(funcName, "Accept");
 
     int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
+        lua_pushnil(L);
         MoonPushCardAsTable(L, cNext);
 
-        // one arg (card-as-a-table), two returns (boolean, error string)
-        if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
+        // one arg (nil card, card-as-a-table), two returns (boolean, error string)
+        if ( lua_pcall(L, 2, 2, 0) != LUA_OK ) {
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
@@ -67,17 +67,14 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
     bool result = false;
     BaizeResetError(baize);
 
-    if ( !CardValid(cPrev) ) {
-        fprintf(stderr, "WARNING: %s passed invalid prev card\n", __func__);
-        return false;
-    }
+    // cPrev is allowed to by NULL (accept card to an empty pile), but cNext isn't
 
     if ( !CardValid(cNext) ) {
         fprintf(stderr, "WARNING: %s passed invalid next card\n", __func__);
         return false;
     }
 
-    if ( cPrev->prone || cNext->prone ) {
+    if ( (cPrev && cPrev->prone) || cNext->prone ) {
         fprintf(stderr, "WARNING: %s passed a face down card\n", __func__);
         return false;
     }
@@ -94,7 +91,7 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
-        MoonPushCardAsTable(L, cPrev);
+        MoonPushCardAsTable(L, cPrev);  // okay with NULL
         MoonPushCardAsTable(L, cNext);
 
         // two args (card-as-a-table x 2), two returns (boolean, error string)
@@ -215,6 +212,10 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
     if ( ArrayLen(tail) == 0 ) {
         fprintf(stderr, "ERROR: %s: empty tail\n", __func__);
         return false;
+    }
+
+    if ( ArrayLen(tail) == 1 ) {
+        return true;    // shirley one card is always movable?
     }
 
     struct Card *const c0 = ArrayGet(tail, 0);
