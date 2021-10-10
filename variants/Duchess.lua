@@ -17,7 +17,7 @@ StockDealCards = 1
 
 function LogCard(title, card)
   if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileCategory(card.owner) .. "}\n")
+    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
   else
     io.stderr:write(title .. " {nil}\n")
   end
@@ -78,7 +78,7 @@ function CheckFoundation(cPrev, cThis)
         -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
         if FOUNDATION_ACCEPT == 0 then
             -- LogCard("Faccept", cThis)
-            if PileCategory(cThis.owner) ~= "Reserve" then
+            if PileType(cThis.owner) ~= "Reserve" then
                 return false, "The first Foundation card must come from a Reserve"
             end
             FOUNDATION_ACCEPT = cThis.ordinal
@@ -113,7 +113,7 @@ function CheckTableau(cPrev, cThis)
     if not cPrev then
         -- Spaces that occur on the tableau are filled with any top card in the reserve.
         -- If the entire reserve is exhausted however, it is not replenished; spaces that occur after this point have to be filled with cards from the waste pile or, if a wastepile has not been made yet, the stock.
-        if PileCategory(cThis.owner) == "Waste" then
+        if PileType(cThis.owner) == "Waste" then
             for _, pile in ipairs(RESERVES) do
                 if PileCardCount(pile) > 0 then
                     return false, "An empty Tableau must be filled from a Reserve"

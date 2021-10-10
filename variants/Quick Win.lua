@@ -4,12 +4,14 @@ PACKS = 1
 SUITS = 4
 POWERMOVES = false
 STOCK_RECYCLES = 1
+-- CARD_FILTER = {1, 7, 8, 9, 10, 11, 12}  -- twos, threes, fours, fives, sixes, and kings removed
+STRIP_CARDS = {12,13}
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function LogCard(title, card)
-  if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileCategory(card.owner) .. "}\n")
+  if card and type(card) == "table" then
+    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
   else
     io.stderr:write(title .. " {nil}\n")
   end

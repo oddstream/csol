@@ -19,7 +19,7 @@ void MoonPushTailAsTable(lua_State *L, struct Array *const tail);
 int MoonAddPile(lua_State* L);
 int MoonFindPile(lua_State* L);
 int MoonPileMoveTo(lua_State* L);
-int MoonPileCategory(lua_State* L);
+int MoonPileType(lua_State* L);
 int MoonPileCardCount(lua_State *L);
 int MoonCardOwner(lua_State* L);
 int MoonSetCardProne(lua_State* L);

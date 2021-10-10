@@ -117,6 +117,31 @@ void BaizeCreateCards(struct Baize *const self)
         UiUpdateTitleBar(self->ui, variantName);
     }
 
+    bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+
+    {
+        if ( lua_getglobal(self->L, "STRIP_CARDS") != LUA_TTABLE ) {
+            fprintf(stdout, "STRIP_CARDS is not set\n");
+        } else {
+            fprintf(stdout, "STRIP_CARDS is set\n");
+            for ( int i=1; i<14; i++ ) {
+                lua_pushinteger(self->L, i);    // pushes +1 onto stack
+                lua_gettable(self->L, -2);      // pops integer/index, pushes value
+                if ( lua_isnumber(self->L, -1) ) {
+                    int result;
+                    result = lua_tointeger(self->L, -1);    // doesn't alter stack
+                    if ( result > 0 && result < 14 ) {
+                        cardFilter[result] = 0;
+                    } else {
+                        fprintf(stderr, "ERROR: STRIP_CARDS: invalid value %d\n", result);
+                    }
+                }
+                lua_pop(self->L, 1);    // remove result of lua_gettable
+            }
+        }
+        lua_pop(self->L, 1);    // remove result of lua_getglobal
+    }
+
     {   // scope for packs, suits, cardRequired, i
         size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
         size_t suits = MoonGetGlobalInt(self->L, "SUITS", 4);
@@ -134,15 +159,21 @@ void BaizeCreateCards(struct Baize *const self)
         for ( size_t pack = 0; pack < packs; pack++ ) {
             for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
                 for ( enum CardSuit s = 0; s < suits; s++ ) {
-                    self->cardLibrary[i++] = CardNew(pack, o, s);
+                    if ( cardFilter[o] ) {
+                        self->cardLibrary[i++] = CardNew(pack, o, s);
+                    } else {
+                        // fprintf(stderr, "Skipping %u\n", o);
+                    }
                 }
             }
         }
+        self->cardsInLibrary = i;   // incase any were taken out by cardFilter
 
-        // fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, cardRequired);
+        fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, self->cardsInLibrary);
     }
 
     self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
+
 }
 
 void BaizeCreatePiles(struct Baize *const self)

@@ -27,7 +27,7 @@ StockDealCards = 1
 
 function LogCard(title, card)
   if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileCategory(card.owner) .. "}\n")
+    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
   else
     io.stderr:write(title .. " {nil}\n")
   end

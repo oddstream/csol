@@ -26,7 +26,7 @@ static const struct FunctionToRegister {
     {"AddPile", MoonAddPile},
     {"FindPile", MoonFindPile},
     {"PileMoveTo", MoonPileMoveTo},
-    {"PileCategory", MoonPileCategory},
+    {"PileType", MoonPileType},
     {"PileCardCount", MoonPileCardCount},
     {"CardOwner", MoonCardOwner},
     {"SetCardProne", MoonSetCardProne},
@@ -315,7 +315,7 @@ int MoonPileMoveTo(lua_State* L)
     return 0;
 }
 
-int MoonPileCategory(lua_State *L)
+int MoonPileType(lua_State *L)
 {
     struct Pile* p = lua_touserdata(L, 1);
     if ( !PileValid(p) ) {

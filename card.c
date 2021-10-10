@@ -13,6 +13,10 @@
 #include "util.h"
 
 #define CARD_MAGIC (0x29041962)
+#define DEBUG_SPEED  (0.0025f)
+#define SLOW_SPEED (0.010f)
+#define NORMAL_SPEED (0.02f)
+#define FAST_SPEED (0.040f)
 
 extern struct Spritesheet *ssFace, *ssBack;
 
@@ -81,7 +85,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpDst = pos;
     // float dist = UtilDistance(self->lerpSrc, self->lerpDst);
     // self->lerpStepAmount = fminf(0.025f, speed*(1.0f/dist));
-    self->lerpStepAmount = 0.025f;
+    self->lerpStepAmount = SLOW_SPEED;
     self->lerpStep = 0.0;       // trigger a lerp
 }
 
@@ -175,7 +179,7 @@ void CardDraw(struct Card *const self)
 
     Rectangle rectCard = CardScreenRect(self);
 
-    if ( CardDragging(self) ) {
+    if ( CardDragging(self) || CardTransitioning(self) ) {
         rectCard.x += 2.0f;
         rectCard.y += 2.0f;
         DrawRectangleRounded(rectCard, 0.05, 9, (Color){0,0,0,63});
