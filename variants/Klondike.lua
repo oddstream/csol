@@ -40,7 +40,6 @@ function Build()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetPileAccept(pile, 1)
-        SetPileDraggable(pile, false)
     end
 
     local deal = 1
@@ -63,46 +62,58 @@ function StartGame()
 end
 
 function FoundationAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     if cThis.ordinal ~= 1 then
-      return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
+        return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
     end
     return true
 end
 
 function FoundationBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     if cPrev.suit ~= cThis.suit then
-      -- io.stderr:write("CheckFoundation suit fail\n")
-      return false, nil
+        -- io.stderr:write("CheckFoundation suit fail\n")
+        return false, nil
     end
     if cPrev.ordinal + 1 ~= cThis.ordinal then
-      -- io.stderr:write("CheckFoundation ordinal fail\n")
-      return false, nil
+        -- io.stderr:write("CheckFoundation ordinal fail\n")
+        return false, nil
     end
     return true
 end
 
 function TableauAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     if cThis.ordinal == 13 then
-      return true
+        return true
     else
-      return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
+        return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
     end
 end
 
 function TableauBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     if cPrev.color == cThis.color then
-      -- io.stderr:write("CheckTableau color fail\n")
-      return false, nil
+        -- io.stderr:write("CheckTableau color fail\n")
+        return false, nil
     end
     if cPrev.ordinal ~= cThis.ordinal + 1 then
-      -- io.stderr:write("CheckTableau ordinal fail\n")
-      return false, nil
+        -- io.stderr:write("CheckTableau ordinal fail\n")
+        return false, nil
     end
     return true
 end
 
 function TableauMovePair(cPrev, cThis)
-  return TableauBuildPair(cPrev, cThis)
+    return TableauBuildPair(cPrev, cThis)
 end
 
 function CardTapped(card)

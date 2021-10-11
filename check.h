@@ -11,6 +11,6 @@ bool CheckAccept(struct Baize *const baize, struct Pile *const dstPile, struct C
 // bool CheckCard(struct Baize *const baize, struct Pile *const dstPile, struct Card *const c);
 bool CheckPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext);
 bool CheckCards(struct Baize *const baize, struct Pile *const pile);
-bool CheckDragTail(struct Baize *const baize, struct Array *const tail);
+bool CheckTailCanBeDragged(struct Baize *const baize, struct Array *const tail);
 
 #endif

@@ -124,7 +124,6 @@ float originalCardWidth = 140.0f, originalCardHeight = 190.0f;
 float cardScale = 1.0f;
 float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
-char variantName[64] = "Klondike";
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
@@ -135,10 +134,15 @@ Font fontRobotoRegular14 = {0};
 struct Array* BaizeCommandQueue = {0};
 
 // int main(int argc, char* argv[], char* envp[]);
-
-// int main(int argc, char* argv[], char* envp[]) 
-int main(void) 
+int main(int argc, char* argv[], char* envp[])
+// int main(void) 
 {
+    (void)envp;
+
+    for ( int i=0; i<argc; i++ ) {
+        fprintf(stdout, "%d. %s\n", i, argv[i]);
+    }
+
     int windowWidth = 640, windowHeight = 480;
 
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
@@ -201,7 +205,7 @@ int main(void)
         fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
         fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());
     }
-    struct Baize* baize = BaizeNew();
+    struct Baize* baize = BaizeNew(argc == 2 ? argv[1] : "Klondike");
     if ( BaizeValid(baize) ) {
         BaizeOpenLua(baize);
         BaizeCreateCards(baize);
@@ -220,9 +224,9 @@ int main(void)
                     if ( bc->bcf ) {
                         bc->bcf(baize, bc->param);
                     }
-                    ArrayDeleteFirst(BaizeCommandQueue, free);
+                    ArrayDelete(BaizeCommandQueue, 0, free);
                 } else {
-                    ArrayDeleteFirst(BaizeCommandQueue, NULL);
+                    ArrayDelete(BaizeCommandQueue, 0, NULL);
                 }
             }
         }

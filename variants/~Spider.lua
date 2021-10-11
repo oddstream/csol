@@ -33,7 +33,6 @@ function Build()
   
     for x = 3, 10 do
         local pile = AddPile("Discard", x, 1, FAN_NONE)
-        SetPileDraggable(pile, false)
     end
 
     for x = 1, 4 do
@@ -58,6 +57,9 @@ function Build()
 end
 
 function DiscardAccept(pile, cThis)
+    if PileType(cThis.owner) == "Discard" then
+        return false, "Cannot move cards from a Discard"
+    end
     if cThis.ordinal ~= 13 then
       return false, "An empty Discard can only accept an King, not a " .. cThis.ordinal
     end
@@ -65,6 +67,9 @@ function DiscardAccept(pile, cThis)
 end
 
 function DiscardBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Discard" then
+        return false, "Cannot move cards from a Discard"
+    end
     if cPrev.suit ~= cThis.suit then
         -- io.stderr:write("CheckDiscard suit fail\n")
         return false, nil
@@ -77,6 +82,9 @@ function DiscardBuildPair(cPrev, cThis)
 end
 
 function DiscardMovePair(cPrev, cThis)
+    if PileType(cThis.owner) == "Discard" then
+        return false, "Cannot move cards from a Discard"
+    end
     -- LogCard("CheckDiscardMovable prev", cPrev)
     -- LogCard("CheckDiscardMovable this", cThis)
     if cPrev.suit ~= cThis.suit then
@@ -91,10 +99,16 @@ function DiscardMovePair(cPrev, cThis)
 end
 
 function TableauAccept(pile, cThis)
+    if PileType(cThis.owner) == "Discard" then
+        return false, "Cannot move cards from a Discard"
+    end
     return true
 end
 
 function TableauBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Discard" then
+        return false, "Cannot move cards from a Discard"
+    end
     if cPrev.ordinal ~= cThis.ordinal + 1 then
         -- io.stderr:write("CheckTableau ordinal fail\n")
         return false, nil
@@ -103,6 +117,9 @@ function TableauBuildPair(cPrev, cThis)
 end
 
 function TableauMovePair(cPrev, cThis)
+    if PileType(cThis.owner) == "Discard" then
+        return false, "Cannot move cards from a Discard"
+    end
     -- LogCard("CheckTableauMovable prev", cPrev)
     -- LogCard("CheckTableauMovable this", cThis)
     if cPrev.suit ~= cThis.suit then

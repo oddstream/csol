@@ -35,14 +35,16 @@ function Build()
 
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
+    FOUNDATIONS = {}
     for x = 7, 10 do
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         SetPileAccept(pile, 1)
-        SetPileDraggable(pile, false)
+        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
+    MoveCard(STOCK, FOUNDATIONS[1], 1, 0)
 
+    TABLEAUX = {}
     for x = 1, 10 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
         for n = 1, 2 do
@@ -65,11 +67,14 @@ function Build()
 end
 
 function StartGame()
-  STOCK_RECYCLES = 1
-  SetPileRecycles(STOCK, STOCK_RECYCLES)
+    STOCK_RECYCLES = 1
+    SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 function FoundationAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+      return false, "Cannot move cards from a Foundation"
+    end
     if cThis.ordinal ~= 1 then
       return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
     end
@@ -77,6 +82,9 @@ function FoundationAccept(pile, cThis)
 end
 
 function FoundationBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     if cPrev.suit ~= cThis.suit then
         -- io.stderr:write("CheckFoundation suit fail\n")
         return false, nil
@@ -88,11 +96,22 @@ function FoundationBuildPair(cPrev, cThis)
     return true
 end
 
+function FoundationMoveTail(pileLen, tailLen)
+    -- won't ever be called unless there's a fanned Foundation
+    return false, "Cannot move cards from a Foundation"
+end
+
 function TableauAccept(pile, cThis)
-  return true
+    if PileType(cThis.owner) == "Foundation" then
+      return false, "Cannot move a cards from a Foundation"
+    end
+    return true
 end
 
 function TableauBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+      return false, "Cannot move cards from a Foundation"
+    end
     if cPrev.ordinal ~= cThis.ordinal + 1 then
       -- io.stderr:write("CheckTableau ordinal fail\n")
       return false, nil
@@ -104,14 +123,14 @@ function TableauBuildPair(cPrev, cThis)
 end
 
 function TableauMovePair(cPrev, cThis)
-  return TableauBuildPair(cPrev, cThis)
+    return TableauBuildPair(cPrev, cThis)
 end
 
 function CardTapped(card)
-  -- LogCard("CardTapped", card)
-  if card.owner == STOCK then
-    MoveCard(STOCK, WASTE)
-  end
+    -- LogCard("CardTapped", card)
+    if card.owner == STOCK then
+        MoveCard(STOCK, WASTE)
+    end
 end
 
 function PileTapped(pile)

@@ -12,7 +12,6 @@
 
 extern float cardScale;
 extern Color baizeColor;
-extern char variantName[64];
 
 void LoadSettings(int *windowWidth, int *windowHeight)
 {
@@ -25,7 +24,6 @@ void LoadSettings(int *windowWidth, int *windowHeight)
         *windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);
         *windowHeight = MoonGetGlobalInt(L, "WindowHeight", 480);
         cardScale = MoonGetGlobalFloat(L, "CardScale", 1.0f);
-        strncpy(variantName, MoonGetGlobalString(L, "Variant", "Klondike"), sizeof(variantName)-1);
         int typ = lua_getglobal(L, "BaizeColor");
         if ( typ == LUA_TTABLE ) {
             float r, g, b, a;

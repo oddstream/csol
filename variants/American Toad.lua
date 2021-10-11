@@ -54,7 +54,6 @@ function Build()
     FOUNDATIONS = {}
     for x = 1, 8 do
         local pile = AddPile("Foundation", x, 2, FAN_NONE)
-        SetPileDraggable(pile, false)
         -- FOUNDATIONS[#FOUNDATIONS+1] = pile
         table.insert(FOUNDATIONS, pile)
     end
@@ -83,6 +82,9 @@ function StartGame()
 end
 
 function FoundationAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     if cThis.ordinal ~= FOUNDATION_ACCEPT then
         return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. " not a " .. cThis.ordinal
     end
@@ -90,6 +92,9 @@ function FoundationAccept(pile, cThis)
 end
 
 function FoundationBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+      return false, "Cannot move cards from a Foundation"
+    end
     -- The foundations build up in suit, wrapping from King to Ace as necessary. 
     if cPrev.suit ~= cThis.suit then
         return false, nil
@@ -104,11 +109,17 @@ function FoundationBuildPair(cPrev, cThis)
 end
 
 function TableauAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+      return false, "Cannot move cards from a Foundation"
+    end
     -- accept any card onto an empty pile
     return true
 end
 
 function TableauBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     -- Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
     if cPrev.suit ~= cThis.suit then
         return false, nil

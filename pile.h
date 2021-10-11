@@ -26,7 +26,6 @@ struct Pile {
     struct PileVtable *vtable;
     struct Baize *owner;
     char category[16];
-    bool draggable; // eg Discard, Foundation
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
@@ -47,6 +46,8 @@ struct PileVtable {
     void (*Free)(struct Pile *const self);
 };
 
+struct CardAndIndex {struct Card* card; size_t index;};
+
 void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan);
 bool PileValid(struct Pile *const self);
 bool PileHidden(struct Pile *const self);
@@ -55,6 +56,7 @@ size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);
 struct Card* PilePopCard(struct Pile *const self);
 struct Card* PilePeekCard(struct Pile *const self);
+struct CardAndIndex PileFindCard(struct Pile *const self, enum CardOrdinal ord, enum CardSuit suit);
 bool PileIsStock(struct Pile *const self);
 Rectangle PileBaizeRect(struct Pile *const self);
 Rectangle PileScreenRect(struct Pile *const self);

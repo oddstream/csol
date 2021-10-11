@@ -65,7 +65,7 @@ void ToastManagerUpdate(struct ToastManager *const self)
     struct Toast *t = ArrayGet(self->toasts, 0);
     if ( t->ticksLeft < 0 ) {
         // fprintf(stdout, "Deleting toast %s\n", t->message);
-        ArrayDeleteFirst(self->toasts, (ArrayFreeFunc)ToastFree);
+        ArrayDelete(self->toasts, 0, (ArrayFreeFunc)ToastFree);
     }
 }
 

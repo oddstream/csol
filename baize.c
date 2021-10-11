@@ -13,14 +13,14 @@
 
 #define BAIZE_MAGIC (0x19910920)
 
-struct Baize* BaizeNew()
+struct Baize* BaizeNew(const char *variant)
 {
     struct Baize* self = calloc(1, sizeof(struct Baize));
     if ( !self ) {
         return NULL;
     }
     self->magic = BAIZE_MAGIC;
-
+    strcpy(self->variantName, variant);
     self->ui = UiNew();
 
     return self;
@@ -102,11 +102,9 @@ void BaizeCreateCards(struct Baize *const self)
     // Lua global PACKS will still be set from first run of variant.lua
 
     { // scope for fname
-        extern char variantName[64];
-
         char fname[128];
 
-        snprintf(fname, 127, "variants/%s.lua", variantName);
+        snprintf(fname, 127, "variants/%s.lua", self->variantName);
 
         if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
             fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
@@ -114,7 +112,7 @@ void BaizeCreateCards(struct Baize *const self)
             return;
         }
 
-        UiUpdateTitleBar(self->ui, variantName);
+        UiUpdateTitleBar(self->ui, self->variantName);
     }
 
     bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
@@ -140,6 +138,13 @@ void BaizeCreateCards(struct Baize *const self)
             }
         }
         lua_pop(self->L, 1);    // remove result of lua_getglobal
+
+        self->numberOfCardsInSuit = 0;
+        for ( int i=1; i<14; i++ ) {
+            if (cardFilter[i]) {
+                self->numberOfCardsInSuit += 1;
+            }
+        }
     }
 
     {   // scope for packs, suits, cardRequired, i
@@ -153,7 +158,7 @@ void BaizeCreateCards(struct Baize *const self)
             free(self->cardLibrary);
         }
         self->cardLibrary = calloc(cardsRequired, sizeof(struct Card));
-        self->cardsInLibrary = cardsRequired;
+        self->numberOfCardsInLibrary = cardsRequired;
 
         size_t i = 0;
         for ( size_t pack = 0; pack < packs; pack++ ) {
@@ -167,9 +172,9 @@ void BaizeCreateCards(struct Baize *const self)
                 }
             }
         }
-        self->cardsInLibrary = i;   // incase any were taken out by cardFilter
+        self->numberOfCardsInLibrary = i;   // incase any were taken out by cardFilter
 
-        fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, self->cardsInLibrary);
+        fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, self->numberOfCardsInLibrary);
     }
 
     self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
@@ -194,7 +199,7 @@ void BaizeCreatePiles(struct Baize *const self)
         lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
         self->stock->owner = self;
         ArrayPush(self->piles, self->stock);
-        for ( size_t i = 0; i < self->cardsInLibrary; i++ ) {
+        for ( size_t i = 0; i < self->numberOfCardsInLibrary; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
         srand(time(NULL));
@@ -384,11 +389,12 @@ bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     struct Pile* p = cFirst->owner;
 
     // check no cards in this pile are transitioning
-    for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
-        if (CardTransitioning(c)) {
-            return false;
-        }
-    }
+    // for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
+    //     if (CardTransitioning(c)) {
+    //         return false;
+    //     }
+    // }
+
     // find the index of the first tail card
     size_t iFirst = 9999;
     for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
@@ -460,16 +466,6 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
             // dy = touchPosition.y - c->pos.y;
             // LOGCARD(c);
             if ( BaizeMakeTail(self, c) ) {
-                // {
-                //     size_t cindex;
-                //     for ( struct Card *cdrag = ArrayFirst(self->tail, &cindex); cdrag; cdrag = ArrayNext(self->tail, &cindex) ) {
-                //         CardStartDrag2(cdrag, cdrag->pos);
-                //     }
-                //     // center the card on the touch position (experimental)
-                //     extern float cardWidth, cardHeight;
-                //     c->pos.x = touchPosition.x - (cardWidth / 2.0);
-                //     c->pos.y = touchPosition.y - (cardHeight / 2.0);
-                // }
                 ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
             }
         } else {
@@ -851,8 +847,7 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
 void BaizeChangeVariantCommand(struct Baize *const self, void* param)
 {
     if (param) {
-        extern char variantName[64];
-        strncpy(variantName, param, sizeof(variantName)-1);
+        strncpy(self->variantName, param, sizeof(self->variantName)-1);
         BaizeReloadVariantCommand(self, NULL);
     }
 }

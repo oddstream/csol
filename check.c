@@ -129,14 +129,6 @@ static bool checkTailCards(struct Baize *const baize, struct Array *const tail)
     }
 
     struct Card *cPrev = ArrayGet(tail, 0);
-
-    if ( !cPrev->owner->draggable ) {
-        char z[128];
-        sprintf(z, "You may not move cards from a %s", cPrev->owner->category);
-        BaizeSetError(baize, z);
-        return false;
-    }
-
     size_t i = 1;
     while ( i < ArrayLen(tail) ) {
         struct Card *cNext = ArrayGet(tail, i);
@@ -198,6 +190,7 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
 {
     /*
         ask Lua if movement is constrained by only allowing
+        0. no cards to be moved (eg from a Foundation)
         1. one card at a time to be moved
         2. one card or the whole pile to be moved (eg American Toad)
         3. any amount of cards to be moved
@@ -216,7 +209,7 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
     }
 
     if ( ArrayLen(tail) == 1 ) {
-        return true;    // shirley one card is always movable?
+        return true;    // shirley one card is always movable? no - what if it comes from a foundation
     }
 
     struct Card *const c0 = ArrayGet(tail, 0);
@@ -259,7 +252,7 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
    return result;
 }
 
-bool CheckDragTail(struct Baize *const baize, struct Array *const tail)
+bool CheckTailCanBeDragged(struct Baize *const baize, struct Array *const tail)
 {
     // returns true if it's ok to drag this tail
     return checkTailMovable(baize, tail) && checkTailCards(baize, tail);

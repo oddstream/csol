@@ -1,6 +1,8 @@
 -- Amazons
 
 --[[
+    https://en.wikipedia.org/wiki/Amazons_(solitaire)
+    Morehead and Mott-Smith, p179
 ]]
 
 PACKS = 1
@@ -34,7 +36,6 @@ function Build()
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         FOUNDATIONS[#FOUNDATIONS+1] = pile
         SetPileAccept(pile, 1)
-        SetPileDraggable(pile, false)
     end
 
     RESERVES = {}
@@ -98,8 +99,8 @@ end
 function CardTapped(card)
     -- LogCard("CardTapped", card)
     if card.owner == STOCK then
-        for _, tab in ipairs(RESERVES) do
-            MoveCard(STOCK, tab)
+        for _, res in ipairs(RESERVES) do
+            MoveCard(STOCK, res)
         end
     end
 end
@@ -107,10 +108,11 @@ end
 function PileTapped(pile)
     -- io.stdout:write("PileTapped\n")
     if pile == STOCK then
-        for _, tab in ipairs(RESERVES) do
-            while PileCardCount(tab) > 0 do
-                MoveCard(tab, STOCK)
-            end
+        for _, res in ipairs(RESERVES) do
+            MoveAllCards(res, STOCK)
+            -- while PileCardCount(res) > 0 do
+            --     MoveCard(res, STOCK)
+            -- end
         end
     end
     return nil  -- no error striing

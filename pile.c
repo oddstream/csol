@@ -29,7 +29,6 @@ void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum 
 {
     self->magic = PILE_MAGIC;
     strncpy(self->category, category, sizeof self->category - 1);
-    self->draggable = true;
     self->slot = slot;
     self->fanType = fan;
     self->cards = ArrayNew(52);
@@ -83,6 +82,17 @@ struct Card* PilePopCard(struct Pile *const self)
 struct Card* PilePeekCard(struct Pile *const self)
 {
     return (struct Card*)ArrayPeek(self->cards);
+}
+
+struct CardAndIndex PileFindCard(struct Pile *const self, enum CardOrdinal ord, enum CardSuit suit)
+{
+    size_t index;
+    for ( struct Card *c = ArrayFirst(self->cards, &index); c; c = ArrayNext(self->cards, &index) ) {
+        if ( c->id.ordinal == ord && c->id.suit == suit ) {
+           return (struct CardAndIndex){.card=c, .index=index}; 
+        }
+    }
+    return (struct CardAndIndex){.card=NULL, .index=0};
 }
 
 bool PileIsStock(struct Pile *const self)
@@ -303,13 +313,18 @@ bool PileMoveCards(struct Pile *const self, struct Card* c)
         pc = ArrayNext(src->cards, &index);
     }
 
+    if (!pc) {
+        fprintf(stderr, "ERROR: %s could not find card in pile\n", __func__);
+        return false;
+    }
+
     // pop the tail off the source and push onto tmp stack
     struct Array* tmp = ArrayNew(PileLen(self) + PileLen(src));
     while ( PileLen(src) != newSrcLen ) {
         ArrayPush(tmp, PilePopCard(src));
     }
 
-    // make some noise
+    // TODO make some noise
 
     // pop all cards off the tmp stack and onto the destination (self)
     while ( ArrayLen(tmp) ) {
@@ -337,6 +352,11 @@ bool PileMoveCards(struct Pile *const self, struct Card* c)
     }
 
     // TODO scrunch
+
+    if (newSrcLen == oldSrcLen) {
+        fprintf(stderr, "WARNING: %s did nothing?\n", __func__);
+        return false;
+    }
 
     return newSrcLen != oldSrcLen;
 }

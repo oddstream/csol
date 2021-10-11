@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/csol",
-            "args": [],
+            "args": ["Quick Win"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

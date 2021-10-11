@@ -43,30 +43,27 @@ bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self,
 {
     BaizeResetError(baize);
 
-    if ( ArrayLen(self->cards) == 13 ) {
+    if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "The foundation is full");
         return false;
     }
 
     if ( PileEmpty(self) ) {
         return CheckAccept(baize, self, c);
+    } else {
+        return CheckPair(baize, PilePeekCard(self), c);
     }
-    return CheckPair(baize, PilePeekCard(self), c);
 }
 
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     BaizeResetError(baize);
-    // not true for Spider!
-    // if ( ArrayLen(tail) != 1 ) {
-    //     strcpy(self->owner->errorString, "Can only move single cards to a foundation");
-    //     return false;
-    // }
-    if ( ArrayLen(self->cards) == 13 ) {
+
+    if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "The foundation is full");
         return false;
     }
-    if ( ArrayLen(self->cards) + ArrayLen(tail) > 13 ) {
+    if ( ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "That would make the foundation over full");
         return false;
     }
@@ -75,10 +72,15 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
         BaizeSetError(baize, "Can only move a single card to a Foundation");
         return false;
     }
+    if ( !CheckTailCanBeDragged(baize, tail) ) {
+        return false;
+    }
+
     if ( PileEmpty(self) ) {
         return CheckAccept(baize, self, ArrayGet(tail, 0));
+    } else {
+        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
     }
-    return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
 }
 
 int FoundationCollect(struct Pile *const self)
@@ -89,7 +91,7 @@ int FoundationCollect(struct Pile *const self)
 
 bool FoundationComplete(struct Pile *const self)
 {
-    return PileLen(self) == 13;
+    return PileLen(self) == self->owner->numberOfCardsInSuit;
 }
 
 bool FoundationConformant(struct Pile *const self)

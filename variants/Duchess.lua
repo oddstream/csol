@@ -54,7 +54,6 @@ function Build()
     for x = 4, 7 do
         local pile = AddPile("Foundation", x, 2, FAN_NONE)
         FOUNDATIONS[#FOUNDATIONS+1] = pile
-        SetPileDraggable(pile, false)
     end
 
     TABLEAUX = {}
@@ -73,6 +72,9 @@ function StartGame()
 end
 
 function FoundationAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     -- To start the game, the player will choose among the top cards of the reserve fans which will start the first foundation pile.
     -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
     if FOUNDATION_ACCEPT == 0 then
@@ -93,6 +95,9 @@ function FoundationAccept(pile, cThis)
 end
 
 function FoundationBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     -- The foundations are built up by suit and ranking is continuous as Aces are placed over Kings.
     if cPrev.suit ~= cThis.suit then
         return false, nil
@@ -108,6 +113,9 @@ function FoundationBuildPair(cPrev, cThis)
 end
 
 function TableauAccept(pile, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     -- Spaces that occur on the tableau are filled with any top card in the reserve.
     -- If the entire reserve is exhausted however, it is not replenished; spaces that occur after this point have to be filled with cards from the waste pile or, if a wastepile has not been made yet, the stock.
     if PileType(cThis.owner) == "Waste" then
@@ -120,6 +128,9 @@ function TableauAccept(pile, cThis)
 end
 
 function TableauBuildPair(cPrev, cThis)
+    if PileType(cThis.owner) == "Foundation" then
+        return false, "Cannot move cards from a Foundation"
+    end
     -- The cards on the tableau are built down in alternating colors. Ranking is also continuous in the tableau as Kings can be placed over Aces. 
     if cPrev.color == cThis.color then
         -- io.stderr:write("CheckTableau color fail\n")

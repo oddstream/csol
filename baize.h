@@ -10,8 +10,13 @@
 
 struct Baize {
     unsigned magic;
-    size_t cardsInLibrary;
+
+    char variantName[64];
+
+    size_t numberOfCardsInSuit;
+    size_t numberOfCardsInLibrary;
     struct Card *cardLibrary;
+
     lua_State *L;
 
     struct Array *piles;
@@ -46,7 +51,7 @@ struct BaizeCommand {
     void *param;
 };
 
-struct Baize* BaizeNew(void);
+struct Baize* BaizeNew(const char*);
 bool BaizeValid(struct Baize *const self);
 unsigned int BaizeCRC(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);
