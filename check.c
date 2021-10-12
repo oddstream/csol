@@ -12,24 +12,54 @@
 #include "check.h"
 #include "moon.h"
 
+static bool getOneOrTwoReturns(struct Baize *const baize, const char *cFunc, const char *luaFunc)
+{
+    // if last element (-1) is a string or nil
+    // then previous element (-2) should be a boolean
+    // if last element (-1) is a boolean, then the error string has been skipped
+
+    lua_State *L = baize->L;
+    bool result = false;
+
+    if ( lua_isboolean(L, -1) ) {
+        result = lua_toboolean(L, -1);  // does not alter stack
+        lua_pop(L, 1);                  // remove boolean from stack
+    } else if ( lua_isstring(L, -1) ) {
+        BaizeSetError(baize, lua_tostring(L, -1));
+        if ( lua_isboolean(L, -2) ) {
+            result = lua_toboolean(L, -2);
+        } else {
+            fprintf(stderr, "WARNING: %s: expecting boolean return from %s, instead got a %d\n", cFunc, luaFunc, lua_type(L, -2));
+        }
+        lua_pop(L, 2);
+    } else if ( lua_isnil(L, -1) ) {
+        if ( lua_isboolean(L, -2) ) {
+            result = lua_toboolean(L, -2);
+        } else {
+            fprintf(stderr, "WARNING: %s: expecting boolean return from %s, instead got a %d\n", cFunc, luaFunc, lua_type(L, -2));
+        }
+        lua_pop(L, 2);
+    }
+    return result;
+}
+
 static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, struct Card *const cNext)
 {
     lua_State *L = baize->L;
     bool result = false;
-    BaizeResetError(baize);
 
     if ( !CardValid(cNext) ) {
-        fprintf(stderr, "WARNING: %s passed invalid next card\n", __func__);
+        fprintf(stderr, "WARNING: %s: passed invalid next card\n", __func__);
         return false;
     }
 
-    char funcName[64];
-    strcpy(funcName, dstPile->category);
-    strcat(funcName, "Accept");
+    char luaFunction[64];
+    strcpy(luaFunction, dstPile->category);
+    strcat(luaFunction, "Accept");
 
-    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
+    int typ = lua_getglobal(L, luaFunction);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "%s is not a function\n", funcName);
+        fprintf(stderr, "%s is not a function\n", luaFunction);
         lua_pop(L, 1);  // remove func from stack
     } else {
         lua_pushlightuserdata(L, dstPile);
@@ -40,32 +70,17 @@ static bool checkAccept(struct Baize *const baize, struct Pile *const dstPile, s
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
-            // fprintf(stderr, "%s called ok\n", func);
-            if ( lua_isboolean(L, 1) ) {
-                result = lua_toboolean(L, 1);
-            } else {
-                fprintf(stderr, "WARNING: expecting boolean return from %s\n", funcName);
-                result = false;
-            }
-            if ( lua_isnil(L, 2) ) {
-                ;
-            } else if ( lua_isstring(L, 2) ) {
-                BaizeSetError(baize, lua_tostring(L, 2));
-            } else {
-                fprintf(stderr, "WARNING: expecting string or nil return from %s\n", funcName);
-            }
-            lua_pop(L, 2);  // remove returned boolean, string from stack
+            result = getOneOrTwoReturns(baize, __func__, luaFunction);
         }
     }
 
     return result;
 }
 
-static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext, bool movable)
+static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext, const char *suffix)
 {
     lua_State *L = baize->L;
     bool result = false;
-    BaizeResetError(baize);
 
     // cPrev is allowed to by NULL (accept card to an empty pile), but cNext isn't
 
@@ -79,17 +94,13 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
         return false;
     }
 
-    char funcName[64];
-    strcpy(funcName, cPrev->owner->category);
-    if ( movable ) {
-        strcat(funcName, "MovePair");
-    } else {
-        strcat(funcName, "BuildPair");
-    }
+    char luaFunction[64];
+    strcpy(luaFunction, cPrev->owner->category);
+    strcat(luaFunction, suffix);
 
-    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
+    int typ = lua_getglobal(L, luaFunction);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "%s is not a function\n", funcName);
+        fprintf(stderr, "%s is not a function\n", luaFunction);
         lua_pop(L, 1);  // remove func from stack
     } else {
         MoonPushCardAsTable(L, cPrev);  // okay with NULL
@@ -100,21 +111,7 @@ static bool checkPair(struct Baize *const baize, struct Card *const cPrev, struc
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
-            // fprintf(stderr, "%s called ok\n", func);
-            if ( lua_isboolean(L, 1) ) {
-                result = lua_toboolean(L, 1);
-            } else {
-                fprintf(stderr, "WARNING: expecting boolean return from %s\n", funcName);
-                result = false;
-            }
-            if ( lua_isnil(L, 2) ) {
-                ;
-            } else if ( lua_isstring(L, 2) ) {
-                BaizeSetError(baize, lua_tostring(L, 2));
-            } else {
-                fprintf(stderr, "WARNING: expecting string or nil return from %s\n", funcName);
-            }
-            lua_pop(L, 2);  // remove returned boolean, string from stack
+            result = getOneOrTwoReturns(baize, __func__, luaFunction);
         }
     }
 
@@ -132,7 +129,7 @@ static bool checkTailCards(struct Baize *const baize, struct Array *const tail)
     size_t i = 1;
     while ( i < ArrayLen(tail) ) {
         struct Card *cNext = ArrayGet(tail, i);
-        if ( !checkPair(baize, cPrev, cNext, true) ) {
+        if ( !checkPair(baize, cPrev, cNext, "MovePair") ) {
             return false;
         }
 
@@ -162,7 +159,7 @@ bool CheckAccept(struct Baize *const baize, struct Pile *const dstPile, struct C
 bool CheckPair(struct Baize *const baize, struct Card *const cPrev, struct Card *const cNext)
 {
     // return true if it's ok to build cNext onto cPrev
-    return checkPair(baize, cPrev, cNext, false);
+    return checkPair(baize, cPrev, cNext, "BuildPair");
 }
 
 bool CheckCards(struct Baize *const baize, struct Pile *const pile)
@@ -176,7 +173,7 @@ bool CheckCards(struct Baize *const baize, struct Pile *const pile)
     size_t i = 1;
     while ( i < ArrayLen(pile->cards) ) {
         struct Card *cNext = ArrayGet(pile->cards, i);
-        if ( !checkPair(baize, cPrev, cNext, false) ) {
+        if ( !checkPair(baize, cPrev, cNext, "BuildPair") ) {
             return false;
         }
         cPrev = cNext;
@@ -201,7 +198,6 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
     */
     lua_State *L = baize->L;
     bool result = true;
-    BaizeResetError(baize);
 
     if ( ArrayLen(tail) == 0 ) {
         fprintf(stderr, "ERROR: %s: empty tail\n", __func__);
@@ -214,13 +210,13 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
 
     struct Card *const c0 = ArrayGet(tail, 0);
 
-    char funcName[64];
-    strcpy(funcName, c0->owner->category);
-    strcat(funcName, "MoveTail");
+    char luaFunction[64];
+    strcpy(luaFunction, c0->owner->category);
+    strcat(luaFunction, "MoveTail");
 
-    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
+    int typ = lua_getglobal(L, luaFunction);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "%s is not a function\n", funcName);
+        fprintf(stderr, "%s is not a function\n", luaFunction);
         lua_pop(L, 1);  // remove func from stack
     } else {
         lua_pushinteger(L, ArrayLen(c0->owner->cards));    // length of originating pile
@@ -231,21 +227,7 @@ static bool checkTailMovable(struct Baize *const baize, struct Array *const tail
             fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         } else {
-            // fprintf(stderr, "%s called ok\n", func);
-            if ( lua_isboolean(L, 1) ) {
-                result = lua_toboolean(L, 1);
-            } else {
-                fprintf(stderr, "WARNING: expecting boolean return from %s\n", funcName);
-                result = false;
-            }
-            if ( lua_isnil(L, 2) ) {
-                ;
-            } else if ( lua_isstring(L, 2) ) {
-                BaizeSetError(baize, lua_tostring(L, 2));
-            } else {
-                fprintf(stderr, "WARNING: expecting string or nil return from %s\n", funcName);
-            }
-            lua_pop(L, 2);  // remove returned boolean, string from stack
+            result = getOneOrTwoReturns(baize, __func__, luaFunction);
         }
     }
 

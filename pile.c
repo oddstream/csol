@@ -295,18 +295,53 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
     return pos;
 }
 
-bool PileMoveCards(struct Pile *const self, struct Card* c)
+bool PileMoveCard(struct Pile *const self, struct Pile *const src)
+{
+    // an optimized, single card version of PileMoveCards
+    struct Card *const c = PilePopCard(src);
+    if (!c) {
+        // fprintf(stderr, "WARNING: %s: source pile is empty\n", __func__);
+        return false;
+    }
+#if 0
+    if ( !self->vtable->CanAcceptCard(self->owner, self, c) ) {
+        return false;
+    }
+#endif
+    PilePushCard(self, c);
+
+    // flip up an exposed source card, if src pile is not Stock*
+    if ( !PileIsStock(src) ) {
+        struct Card* tc = PilePeekCard(src);
+        if ( tc ) {
+            CardFlipUp(tc);
+        }
+    }
+
+    // special case: waste may need refanning if we took a card from it
+    if ( src->fanType == FAN_DOWN3 || src->fanType == FAN_LEFT3 || src->fanType == FAN_RIGHT3 ) {
+        PileRepushAllCards(src);
+    }
+
+    return true;
+}
+
+bool PileMoveCards(struct Pile *const self, struct Card const* c)
 {
     // move cards to this pile
 
     struct Pile* src = c->owner;
+    if (src==self) {
+        fprintf(stderr, "ERROR: %s: src and dst are the same\n", __func__);
+        return false;
+    }
     size_t oldSrcLen = PileLen(src);
 
     // find the new length of the source pile
     size_t newSrcLen = 0, index;
     struct Card* pc = ArrayFirst(src->cards, &index);
-    while ( pc ) {
-        if ( pc == c ) {
+    while (pc) {
+        if (pc == c) {
             break;
         }
         newSrcLen++;
@@ -314,7 +349,7 @@ bool PileMoveCards(struct Pile *const self, struct Card* c)
     }
 
     if (!pc) {
-        fprintf(stderr, "ERROR: %s could not find card in pile\n", __func__);
+        fprintf(stderr, "ERROR: %s: could not find card in pile\n", __func__);
         return false;
     }
 
@@ -339,9 +374,9 @@ bool PileMoveCards(struct Pile *const self, struct Card* c)
 
     // flip up an exposed source card, if src pile is not Stock*
     // if ( strncmp(src->category, "Stock", 5) ) {
-    if ( !PileIsStock(src) ) {
+    if (!PileIsStock(src)) {
         struct Card* tc = PilePeekCard(src);
-        if ( tc ) {
+        if (tc) {
             CardFlipUp(tc);
         }
     }
@@ -398,17 +433,25 @@ int PileGenericCollect(struct Pile *const self)
     for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
         for (;;) {
             struct Card *c = PilePeekCard(self);
-            if ( c == NULL ) {
+            if (!c) {
                 // this pile is empty
                 return cardsMoved;
             }
+#if 1
             if ( !fp->vtable->CanAcceptCard(baize, fp, c) ) {
-                // onto the next foundation
+                // this Foundation doesn't want this card; onto the next Foundation
                 break;
             }
-            if ( PileMoveCards(fp, c) ) {
+            if ( PileMoveCard(fp, self) ) {
                 cardsMoved++;
             }
+#else
+            if (PileMoveCard(fp, self)) {
+                cardsMoved++;
+            } else {
+                break;
+            }
+#endif
         }
     }
     return cardsMoved;

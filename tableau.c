@@ -40,8 +40,6 @@ struct Tableau* TableauNew(Vector2 slot, enum FanType fan)
 
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    BaizeResetError(baize);
-
     // TODO check card draggable
     if ( PileEmpty(self) ) {
         return CheckAccept(baize, self, c);
@@ -74,8 +72,6 @@ static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
 
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeResetError(baize);
-
     if ( ArrayLen(tail) > 1 ) {
         if ( baize->powerMoves ) {
             size_t moves = PowerMoves(baize, self);

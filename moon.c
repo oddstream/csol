@@ -504,11 +504,8 @@ int MoonMoveCard(lua_State *L)
             CardFlipUp(c);
         }
     } else {
-        c = PilePeekCard(src);
-        if ( c ) {
-            if ( !PileMoveCards(dst, c) ) {
-                c = NULL;
-            }
+        if ( PileMoveCard(dst, src) ) {
+            c = PilePeekCard(dst);
         }
     }
 

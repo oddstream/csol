@@ -40,8 +40,6 @@ bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 {
     (void)self;
 
-    BaizeResetError(baize);
-
     if ( c->owner == baize->stock ) {
         return true;
     } else {
@@ -54,7 +52,6 @@ bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
 {
     (void)self;
 
-    BaizeResetError(baize);
     // TODO maybe move three cards
     if ( ArrayLen(tail) == 1 ) {
         struct Card *c = ArrayGet(tail, 0);

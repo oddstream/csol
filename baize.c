@@ -56,7 +56,7 @@ void BaizeSetError(struct Baize *const self, const char *str)
 
 void BaizeResetError(struct Baize *const self)
 {
-    if ( self->errorString ) {
+    if (self->errorString) {
         free(self->errorString);
         self->errorString = NULL;
     }
@@ -451,7 +451,7 @@ void BaizeStopDrag(struct Baize *const self) {
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
 {
     if ( self->tail ) {
-        fprintf(stderr, "WARNING: touch when there is a tail\n");
+        fprintf(stderr, "ERROR: touch when there is a tail\n");
     }
 
     // the UI is on top of the baize, so gets first dibs
@@ -505,7 +505,10 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
 
 void BaizeTouchStop(struct Baize *const self)
 {
-    if ( self->tail ) {
+    BaizeResetError(self);
+
+    if (self->tail) {
+        // TODO this could be complicated and optimized by using CanAcceptCard() & PileMoveCard(dst,src) if len tail == 1
         size_t index;
         struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
         struct Card *cHeadOfTail = c;
@@ -523,10 +526,10 @@ void BaizeTouchStop(struct Baize *const self)
                         BaizeAfterUserMove(self);
                     }
                 } else {
-                    if ( self->errorString ) {
+                    if (self->errorString) {
                         UiToast(self->ui, self->errorString);
                     }
-                    while ( c ) {
+                    while (c) {
                         CardCancelDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
                     }
@@ -546,7 +549,7 @@ void BaizeTouchStop(struct Baize *const self)
             if ( BaizeCardTapped(self, cHeadOfTail) ) {
                 BaizeAfterUserMove(self);
             } else {
-                if ( self->errorString ) {
+                if (self->errorString) {
                     UiToast(self->ui, self->errorString);
                 }
             }
@@ -574,7 +577,7 @@ void BaizeTouchStop(struct Baize *const self)
         if ( BaizePileTapped(self, self->touchedPile) ) {
             BaizeAfterUserMove(self);
         } else {
-            if ( self->errorString ) {
+            if (self->errorString) {
                 UiToast(self->ui, self->errorString);
             }
         }

@@ -40,8 +40,7 @@ struct Discard* DiscardNew(Vector2 slot, enum FanType fan)
 
 bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    BaizeResetError(baize);
-
+    (void)baize;
     (void)self;
     (void)c;
 
@@ -50,8 +49,6 @@ bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
 
 bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeResetError(baize);
-
     if ( !PileEmpty(self) ) {
         return false;
     }

@@ -39,7 +39,6 @@ struct Cell* CellNew(Vector2 slot, enum FanType fan)
 bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)c;
-    BaizeResetError(baize);
     if ( !PileEmpty(self) ) {
         BaizeSetError(baize, "Can only move a card to an empty Cell");
         return false;
@@ -49,7 +48,6 @@ bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struc
 
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeResetError(baize);
     if ( ArrayLen(tail) != 1 ) {
         BaizeSetError(baize, "Can only move a single card to a Cell");
         return false;

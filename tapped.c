@@ -36,7 +36,6 @@ bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
     //     fprintf(stdout, "sizeof(Card) == %lu\n", sizeof(struct Card));
     // }
     lua_State *L = self->L;
-    BaizeResetError(self);
 
     int typ = lua_getglobal(L, "CardTapped");  // push function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
@@ -74,7 +73,6 @@ bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
 bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
 {
     lua_State *L = self->L;
-    BaizeResetError(self);
 
     int typ = lua_getglobal(L, "PileTapped");  // push function name onto the stack
     if ( typ != LUA_TFUNCTION ) {

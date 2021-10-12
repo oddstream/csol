@@ -41,8 +41,6 @@ struct Foundation* FoundationNew(Vector2 slot, enum FanType fan)
 
 bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    BaizeResetError(baize);
-
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "The foundation is full");
         return false;
@@ -57,8 +55,6 @@ bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self,
 
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeResetError(baize);
-
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "The foundation is full");
         return false;
@@ -68,7 +64,6 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
         return false;
     }
     if ( ArrayLen(tail) > 1 ) {
-        // TODO for Spider, invent a new pile category (Discard) than can accept a run of 13 cards
         BaizeSetError(baize, "Can only move a single card to a Foundation");
         return false;
     }
