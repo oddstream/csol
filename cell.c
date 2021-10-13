@@ -40,7 +40,7 @@ bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struc
 {
     (void)c;
     if ( !PileEmpty(self) ) {
-        BaizeSetError(baize, "Can only move a card to an empty Cell");
+        BaizeSetError(baize, "(C) Can only move a card to an empty Cell");
         return false;
     }
     return true;
@@ -49,11 +49,11 @@ bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struc
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( ArrayLen(tail) != 1 ) {
-        BaizeSetError(baize, "Can only move a single card to a Cell");
+        BaizeSetError(baize, "(C) Can only move a single card to a Cell");
         return false;
     }
     if ( !PileEmpty(self) ) {
-        BaizeSetError(baize, "Can only move a card to an empty Cell");
+        BaizeSetError(baize, "(C) Can only move a card to an empty Cell");
         return false;
     }
     return true;

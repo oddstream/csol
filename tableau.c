@@ -9,7 +9,7 @@
 #include "pile.h"
 #include "array.h"
 #include "tableau.h"
-#include "check.h"
+#include "constraint.h"
 #include "util.h"
 
 static struct PileVtable tableauVtable = {
@@ -40,12 +40,16 @@ struct Tableau* TableauNew(Vector2 slot, enum FanType fan)
 
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    // TODO check card draggable
-    if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, c);
-    } else {
-        return CheckPair(baize, PilePeekCard(self), c);
+    (void)baize;    // TODO retire
+    bool result = false;
+    struct Array *tail = ArrayNew(1);
+    if (tail) {
+        ArrayPush(tail, c);
+        // TODO check card draggable?
+        result = CanTailBeAppended(self, tail);
+        ArrayFree(tail);
     }
+    return result;
 }
 
 static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
@@ -78,22 +82,18 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
             if ( ArrayLen(tail) > moves ) {
                 char z[128];
                 if ( moves == 1 )
-                    sprintf(z, "Only enough space to move 1 card, not %lu", ArrayLen(tail));
+                    sprintf(z, "(C) Only enough space to move 1 card, not %lu", ArrayLen(tail));
                 else
-                    sprintf(z, "Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+                    sprintf(z, "(C) Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
                 BaizeSetError(baize, z);
                 return false;
             }
         }
     }
-    if ( !CheckTailCanBeDragged(baize, tail) ) {
+    if ( !CanTailBeMoved(tail) ) {
         return false;
     }
-    if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, ArrayGet(tail, 0));
-    } else {
-        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
-    }
+    return CanTailBeAppended(self, tail);
 }
 
 int TableauCollect(struct Pile *const self)
@@ -108,7 +108,7 @@ bool TableauComplete(struct Pile *const self)
 
 bool TableauConformant(struct Pile *const self)
 {
-    return CheckCards(self->owner, self);
+    return IsPileConformant(self);
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)
@@ -125,6 +125,11 @@ void TableauSetRecycles(struct Pile *const self, int r)
 
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
 {
+#if 1
+    (void)self;
+    (void)sorted;
+    (void)unsorted;
+#else
     // iterate the pile->cards using an unsigned size_t, so make sure there are >2 before doing len-1
     if (PileEmpty(self)) {
         return;
@@ -152,6 +157,7 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
             }
         }
     }
+#endif
 }
 
 void TableauDraw(struct Pile *const self)

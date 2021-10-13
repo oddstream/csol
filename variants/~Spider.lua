@@ -4,20 +4,6 @@ POWERMOVES = false
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
-function LogCard(title, card)
-  if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
-  else
-    io.stderr:write(title .. " {nil}\n")
-  end
-end
-
-function LogTail(title, cards)
-  for n=1, #cards do
-    LogCard(title, cards[n])
-  end
-end
-
 function Build()
 
     if type(AddPile) ~= "function" then
@@ -56,79 +42,91 @@ function Build()
     end
 end
 
-function DiscardAccept(pile, cThis)
-    if PileType(cThis.owner) == "Discard" then
-        return false, "Cannot move cards from a Discard"
+function CanTailBeMoved(tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
     end
-    if cThis.ordinal ~= 13 then
-      return false, "An empty Discard can only accept an King, not a " .. cThis.ordinal
+    local c1 = TailGet(tail, 1)
+    local pile = CardOwner(c1)
+    if PileType(pile) == "Discard" then
+        return false, "You cannot move cards from a Discard"
+    elseif PileType(pile) == "Tableau" then
+        for i = 2, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Moved cards must all have the same suit"
+            end
+            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Moved cards must be in descending order"
+            end
+
+            c1 = c2
+        end
+    else
+        io.stderr:write("CanTailBeMoved: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function DiscardBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Discard" then
-        return false, "Cannot move cards from a Discard"
+function CanTailBeAppended(pile, tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
     end
-    if cPrev.suit ~= cThis.suit then
-        -- io.stderr:write("CheckDiscard suit fail\n")
-        return false, nil
-    end
-    if cPrev.ordinal + 1 ~= cThis.ordinal then
-        -- io.stderr:write("CheckDiscard ordinal fail\n")
-        return false, nil
+    if PileType(pile) == "Discard" then
+        if TailLen(tail) ~= 13 then
+            return false, "Discard can only accept 13 cards"
+        else
+            local c1 = TailGet(tail, 0)
+            if CardOrdinal(c1) ~= 13 then
+                return false, "Can only discard from a 13"
+            end
+            for i = 2, TailLen(tail) do
+                local c2 = TailGet(tail, i)
+
+                if CardSuit(c1) ~= CardSuit(c2) then
+                    return false, "Discarded piles must be all the same suit"
+                end
+                if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                    return false, "Discarded piles build up"
+                end
+
+                c1 = c2
+            end
+        end
+    elseif PileType(pile) == "Tableau" then
+        if PileLen(pile) == 0 then
+            -- accept any card
+        else
+            local c1 = PilePeek(pile)
+            local c2 = TailGet(tail, 1)
+            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Tableaux build down"
+            end
+        end
+    else
+        io.stderr:write("CanTailBeAppended: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function DiscardMovePair(cPrev, cThis)
-    if PileType(cThis.owner) == "Discard" then
-        return false, "Cannot move cards from a Discard"
-    end
-    -- LogCard("CheckDiscardMovable prev", cPrev)
-    -- LogCard("CheckDiscardMovable this", cThis)
-    if cPrev.suit ~= cThis.suit then
-      -- io.stderr:write("CheckDiscardMovable suit fail\n")
-      return false, nil
-    end
-    if cPrev.ordinal + 1 ~= cThis.ordinal then
-      -- io.stderr:write("CheckDiscardMovable ordinal fail\n")
-      return false, nil
-    end
-    return true
-end
+function IsPileConformant(pile)
+    if PileType(pile) == "Discard" or PileType(pile) == "Tableau" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
 
-function TableauAccept(pile, cThis)
-    if PileType(cThis.owner) == "Discard" then
-        return false, "Cannot move cards from a Discard"
-    end
-    return true
-end
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false
+            end
+            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                return false
+            end
 
-function TableauBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Discard" then
-        return false, "Cannot move cards from a Discard"
-    end
-    if cPrev.ordinal ~= cThis.ordinal + 1 then
-        -- io.stderr:write("CheckTableau ordinal fail\n")
-        return false, nil
-    end
-    return true
-end
-
-function TableauMovePair(cPrev, cThis)
-    if PileType(cThis.owner) == "Discard" then
-        return false, "Cannot move cards from a Discard"
-    end
-    -- LogCard("CheckTableauMovable prev", cPrev)
-    -- LogCard("CheckTableauMovable this", cThis)
-    if cPrev.suit ~= cThis.suit then
-      -- io.stderr:write("CheckTableauMovable suit fail\n")
-      return false, nil
-    end
-    if cPrev.ordinal ~= cThis.ordinal + 1 then
-        -- io.stderr:write("CheckTableauMovable ordinal fail\n")
-      return false, nil
+            c1 = c2
+        end
+    else
+        io.stderr:write("IsPileConformant: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
@@ -138,12 +136,12 @@ function CardTapped(card)
     local errMsg = nil
     local tabCards = 0
     local emptyTabs = 0
-    if card.owner == STOCK then
+    if CardOwner(card) == STOCK then
       for _, tab in ipairs(TABLEAU) do
-        if PileCardCount(tab) == 0 then
+        if PileLen(tab) == 0 then
           emptyTabs = emptyTabs + 1
         else
-          tabCards = tabCards + PileCardCount(tab)
+          tabCards = tabCards + PileLen(tab)
         end
       end
       if emptyTabs > 0 and tabCards >= #TABLEAU then

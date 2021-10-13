@@ -107,7 +107,7 @@ void BaizeCreateCards(struct Baize *const self)
         snprintf(fname, 127, "variants/%s.lua", self->variantName);
 
         if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
-            fprintf(stderr, "%s\n", lua_tostring(self->L, -1));
+            fprintf(stderr, "ERROR: %s: %s\n", __func__, lua_tostring(self->L, -1));
             lua_pop(self->L, 1);
             return;
         }
@@ -213,13 +213,13 @@ void BaizeCreatePiles(struct Baize *const self)
 
     // fprintf(stderr, "stock has %lu cards\n", PileLen(self->stock));
 
-    int typ = lua_getglobal(self->L, "Build");  // push value of Build onto the stack
+    int typ = lua_getglobal(self->L, "Build");  // push value of "Build" onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "Build is not a function\n");
+        fprintf(stderr, "ERROR: %s: Build is not a function\n", __func__);
         lua_pop(self->L, 1);    // remove "Build" from stack
     } else {
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
             // fprintf(stderr, "Build called ok\n");
@@ -642,7 +642,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     } else {
         // no args, no returns
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
             // nothing

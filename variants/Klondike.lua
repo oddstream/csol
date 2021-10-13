@@ -9,20 +9,6 @@ StockDealCards = 1
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
-function LogCard(title, card)
-  if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
-  else
-    io.stderr:write(title .. " {nil}\n")
-  end
-end
-
-function LogTail(title, cards)
-  for n=1, #cards do
-    LogCard(title, cards[n])
-  end
-end
-
 function Build()
 
     if type(AddPile) ~= "function" then
@@ -50,7 +36,7 @@ function Build()
           local c = MoveCard(STOCK, pile)
           SetCardProne(c, true)
         end
-        SetCardProne(PilePeekCard(pile), false)
+        SetCardProne(PilePeek(pile), false)
         deal = deal + 1
     end
 
@@ -61,64 +47,127 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function FoundationAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
+function CanTailBeMoved(tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
     end
-    if cThis.ordinal ~= 1 then
-        return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
-    end
-    return true
-end
+    local c1 = TailGet(tail, 1)
+    local pile = CardOwner(c1)
+    if PileType(pile) == "Foundation" then
+        return false, "You cannot move cards from a Foundation"
+    elseif PileType(pile) == "Tableau" then
+        for i = 2, TailLen(tail) do
+            local c2 = TailGet(tail, i)
 
-function FoundationBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    if cPrev.suit ~= cThis.suit then
-        -- io.stderr:write("CheckFoundation suit fail\n")
-        return false, nil
-    end
-    if cPrev.ordinal + 1 ~= cThis.ordinal then
-        -- io.stderr:write("CheckFoundation ordinal fail\n")
-        return false, nil
-    end
-    return true
-end
+            if CardColor(c1) == CardColor(c2) then
+                return false, "Card must be in alternating colors"
+            end
+            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Cards must be in increasing value"
+            end
 
-function TableauAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    if cThis.ordinal == 13 then
-        return true
+            c1 = c2
+        end
+    elseif PileType(pile) == "Waste" then
+        if TailLen(tail) > 1 then
+            return false, "Only a single card can be moved from Waste"
+        end
     else
-        return false, "An empty Tableau can only accept a King, not a " .. cThis.ordinal
-    end
-end
-
-function TableauBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    if cPrev.color == cThis.color then
-        -- io.stderr:write("CheckTableau color fail\n")
-        return false, nil
-    end
-    if cPrev.ordinal ~= cThis.ordinal + 1 then
-        -- io.stderr:write("CheckTableau ordinal fail\n")
-        return false, nil
+        io.stderr:write("CanTailBeMoved: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function TableauMovePair(cPrev, cThis)
-    return TableauBuildPair(cPrev, cThis)
+function CanTailBeAppended(pile, tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
+    end
+    if PileType(pile) == "Foundation" then
+        if TailLen(tail) > 1 then
+            return false, "Foundation can only accept a single card"
+        elseif PileLen(pile) == 0 then
+            local c1 = TailGet(tail, 1)
+            if CardOrdinal(c1) ~= 1 then
+                return false, "Foundation can only accept a 1, not a " .. math.floor(CardOrdinal(c1))
+            end
+        else
+            local c1 = PilePeek(pile)
+            for i = 1, TailLen(tail) do
+                local c2 = TailGet(tail, i)
+
+                if CardSuit(c1) ~= CardSuit(c2) then
+                    return false, "Foundations must be built in suit"
+                end
+                if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                    return false, "Foundations build up"
+                end
+
+                c1 = c2
+            end
+        end
+    elseif PileType(pile) == "Tableau" then
+        if PileLen(pile) == 0 then
+            local c1 = TailGet(tail, 1)
+            if CardOrdinal(c1) ~= 13 then
+                return false, "Empty Tableaux can only accept a 13, not a " .. math.floor(CardOrdinal(c1))
+            end
+        else
+            local c1 = PilePeek(pile)
+            for i = 1, TailLen(tail) do
+                local c2 = TailGet(tail, i)
+                if CardColor(c1) == CardColor(c2) then
+                    return false, "Tableaux build in alternate color"
+                end
+                if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                    return false, "Tableaux build down"
+                end
+
+                c1 = c2
+            end
+        end
+    else
+        io.stderr:write("CanTailBeAppended: unknown pile type " .. PileType(pile) .. "\n")
+    end
+    return true
+end
+
+function IsPileConformant(pile)
+    if PileType(pile) == "Foundation" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
+
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Foundations must be built in suit"
+            end
+            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                return false, "Foundations build up"
+            end
+
+            c1 = c2
+        end
+    elseif PileType(pile) == "Tableau" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
+
+            if CardColor(c1) == CardColor(c2) then
+                return false, "Tableaux build in alternate color"
+            end
+            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Tableaux build down"
+            end
+
+            c1 = c2
+        end
+    else
+        io.stderr:write("IsPileConformant: unknown pile type " .. PileType(pile) .. "\n")
+    end
+    return true
 end
 
 function CardTapped(card)
-    -- LogCard("CardTapped", card)
-    if card.owner == STOCK then
+    if CardOwner(card) == STOCK then
         for i=1,StockDealCards do
             MoveCard(STOCK, WASTE)
         end
@@ -131,8 +180,8 @@ function PileTapped(pile)
         if STOCK_RECYCLES == 0 then
           return "No more Stock recycles"
         end
-        if PileCardCount(WASTE) > 0 then
-          while PileCardCount(WASTE) > 0 do
+        if PileLen(WASTE) > 0 then
+          while PileLen(WASTE) > 0 do
               MoveCard(WASTE, STOCK)
           end
           STOCK_RECYCLES = STOCK_RECYCLES - 1
@@ -140,7 +189,7 @@ function PileTapped(pile)
           return nil
         end
     elseif pile == WASTE then
-        if PileCardCount(STOCK) > 0 then
+        if PileLen(STOCK) > 0 then
             MoveCard(STOCK, WASTE)
             return nil
         end

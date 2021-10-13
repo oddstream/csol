@@ -19,7 +19,7 @@ void BaizeStartGame(struct Baize *const self)
     } else {
         // no args, no returns
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "error running Lua function: %s\n", lua_tostring(self->L, -1));
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
             // nothing
@@ -46,11 +46,12 @@ bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
 
     unsigned int crc = BaizeCRC(self);
 
-    // push one arg, the card (as a table)
-    MoonPushCardAsTable(L, c);
-    // one arg (card-as-a-table), one return (error string or nil)
+    // push one arg, the card
+    lua_pushlightuserdata(L, c);
+
+    // one arg (card), one return (error string or nil)
     if ( lua_pcall(L, 1, 1, 0) != LUA_OK ) {
-        fprintf(stderr, "error running Lua function: %s\n", lua_tostring(L, -1));
+        fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
         lua_pop(L, 1);
     } else {
         // fprintf(stderr, "%s called ok\n", func);
@@ -87,7 +88,7 @@ bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
     lua_pushlightuserdata(L, p);
     // one arg (pile), one return (error string or nil)
     if ( lua_pcall(L, 1, 1, 0) != LUA_OK ) {
-        fprintf(stderr, "ERROR: error running Lua function: %s\n", lua_tostring(L, -1));
+        fprintf(stderr, "ERROR: %s: error running Lua function: %s\n", __func__, lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
         // fprintf(stderr, "%s called ok\n", func);
@@ -99,7 +100,7 @@ bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
                 BaizeSetError(self, str);
             }
         } else {
-            fprintf(stderr, "WARNING: expecting string or nil return from PileTapped\n");
+            fprintf(stderr, "WARNING: %s: expecting string or nil return from PileTapped\n", __func__);
         }
         lua_pop(L, 1);  // remove returned string from stack
     }

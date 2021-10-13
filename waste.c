@@ -40,10 +40,11 @@ bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 {
     (void)self;
 
-    if ( c->owner == baize->stock ) {
+    if ( PileIsStock(c->owner) ) {
+        // the only place we allow a prone card to be moved/dragged
         return true;
     } else {
-        BaizeSetError(baize, "You can only move cards to a Waste pile from the Stock");
+        BaizeSetError(baize, "(C) You can only move cards to a Waste pile from the Stock");
     }
     return false;
 }
@@ -55,13 +56,13 @@ bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
     // TODO maybe move three cards
     if ( ArrayLen(tail) == 1 ) {
         struct Card *c = ArrayGet(tail, 0);
-        if ( c && c->owner == baize->stock ) {
+        if ( CardValid(c) && PileIsStock(c->owner) ) {
             return true;
         } else {
-            BaizeSetError(baize, "You can only move cards to a Waste pile from the Stock");
+            BaizeSetError(baize, "(C) You can only move cards to a Waste pile from the Stock");
         }
     } else {
-        BaizeSetError(baize, "You can only move one card to a Waste pile");
+        BaizeSetError(baize, "(C) You can only move one card to a Waste pile");
     }
     return false;
 }

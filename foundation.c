@@ -10,7 +10,7 @@
 #include "pile.h"
 #include "array.h"
 #include "foundation.h"
-#include "check.h"
+#include "constraint.h"
 #include "util.h"
 
 static struct PileVtable foundationVtable = {
@@ -42,40 +42,38 @@ struct Foundation* FoundationNew(Vector2 slot, enum FanType fan)
 bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "The foundation is full");
+        BaizeSetError(baize, "(C) The foundation is full");
         return false;
     }
 
-    if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, c);
-    } else {
-        return CheckPair(baize, PilePeekCard(self), c);
+    bool result = false;
+    struct Array *tail = ArrayNew(1);
+    if (tail) {
+        ArrayPush(tail, c);
+        result = CanTailBeAppended(self, tail);
+        ArrayFree(tail);
     }
+    return result;
 }
 
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "The foundation is full");
+        BaizeSetError(baize, "(C) The foundation is full");
         return false;
     }
     if ( ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "That would make the foundation over full");
+        BaizeSetError(baize, "(C) That would make the foundation over full");
         return false;
     }
     if ( ArrayLen(tail) > 1 ) {
-        BaizeSetError(baize, "Can only move a single card to a Foundation");
+        BaizeSetError(baize, "(C) Can only move a single card to a Foundation");
         return false;
     }
-    if ( !CheckTailCanBeDragged(baize, tail) ) {
+    if ( !CanTailBeMoved(tail) ) {
         return false;
     }
-
-    if ( PileEmpty(self) ) {
-        return CheckAccept(baize, self, ArrayGet(tail, 0));
-    } else {
-        return CheckPair(baize, PilePeekCard(self), ArrayGet(tail, 0));
-    }
+    return CanTailBeAppended(self, tail);
 }
 
 int FoundationCollect(struct Pile *const self)

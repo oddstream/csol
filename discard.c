@@ -10,7 +10,7 @@
 #include "pile.h"
 #include "array.h"
 #include "discard.h"
-#include "check.h"
+#include "constraint.h"
 #include "util.h"
 
 static struct PileVtable discardVtable = {
@@ -53,10 +53,10 @@ bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         return false;
     }
     if ( ArrayLen(tail) != baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "Can only move a full set of cards to a Discard");
+        BaizeSetError(baize, "(C) Can only move a full set of cards to a Discard");
         return false;
     }
-    return CheckTailCanBeDragged(baize, tail);
+    return CanTailBeMoved(tail);
 }
 
 int DiscardCollect(struct Pile *const self)

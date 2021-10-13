@@ -94,17 +94,12 @@ void UndoStackFree(struct Array *stack)
 
 static int CalcPercentComplete(struct Baize *const self)
 {
-#if 1
     int sorted = 0, unsorted = 0;
     size_t index;
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
     }
     return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->numberOfCardsInLibrary, (float)self->numberOfCardsInLibrary, 0.0f, 100.0f));
-#else
-    (void)self;
-    return 42;
-#endif
 }
 
 void BaizeUndoPush(struct Baize *const self)

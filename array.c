@@ -1,6 +1,7 @@
 /* array.c */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "array.h"
@@ -13,6 +14,23 @@ struct Array* ArrayNew(size_t initialSize)
     self->data = calloc(initialSize, sizeof(void*));
     return self;
 }
+
+/*
+    stack protector not protecting local variables
+    
+struct Array* ArrayNewStack(size_t initialSize)
+{
+    struct Array* self = alloca(sizeof(struct Array));
+    if (self) {
+        memset(self, 1, sizeof(struct Array));
+        self->used = 0;
+        self->size = initialSize;
+        self->data = alloca(initialSize * sizeof(void*));
+        memset(self->data, initialSize, sizeof(void*));     // vagrind
+    }
+    return self;
+}
+*/
 
 size_t ArrayLen(struct Array *const self)
 {
@@ -48,7 +66,12 @@ void ArraySwap(struct Array *const self, int i, int j)
 
 void* ArrayGet(struct Array *const self, int pos)
 {
-    return self->data[pos];
+    if ((size_t)pos < self->used) {
+        return self->data[pos];
+    } else {
+        fprintf(stderr, "WARNING: %s: index %d exceeds used %lu\n", __func__, pos, self->used);
+        return NULL;
+    }
 }
 
 void* ArrayFirst(struct Array *const self, size_t *index)

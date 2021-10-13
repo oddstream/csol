@@ -97,8 +97,7 @@ function FoundationBuildPair(cPrev, cThis)
 end
 
 function CardTapped(card)
-    -- LogCard("CardTapped", card)
-    if card.owner == STOCK then
+    if CardOwner(card) == STOCK then
         for _, res in ipairs(RESERVES) do
             MoveCard(STOCK, res)
         end

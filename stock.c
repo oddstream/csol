@@ -38,7 +38,7 @@ struct Stock* StockNew(Vector2 slot, enum FanType fan)
 
 bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    BaizeSetError(baize, "You cannot move cards to the Stock");
+    BaizeSetError(baize, "(C) You cannot move cards to the Stock");
 
     (void)baize;
     (void)self;
@@ -48,7 +48,7 @@ bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeSetError(baize, "You cannot move cards to the Stock");
+    BaizeSetError(baize, "(C) You cannot move cards to the Stock");
 
     (void)baize;
     (void)self;

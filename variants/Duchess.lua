@@ -1,6 +1,7 @@
 -- Duchess
 
 --[[
+    https://en.wikipedia.org/wiki/Duchess_(solitaire)
     Duchess (also Dutchess) is a patience or solitaire card game which uses a deck of 52 playing cards.
     It has all four typical features of a traditional solitaire game: a tableau, a reserve, a stock and a waste pile, and is quite easy to win.
     It is closely related to Canfield.
@@ -9,32 +10,12 @@
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
--- SEED = 3 -- 2 winnable draw three
 
 StockDealCards = 1
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
-function LogCard(title, card)
-  if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
-  else
-    io.stderr:write(title .. " {nil}\n")
-  end
-end
-
-function LogTail(title, cards)
-  for n=1, #cards do
-    LogCard(title, cards[n])
-  end
-end
-
 function Build()
-
-    if type(AddPile) ~= "function" then
-        io.stderr:write("Build cannot find function AddPile\n")
-        return
-    end
 
     RESERVES = {}
     for i = 1, 4 do
@@ -71,93 +52,147 @@ function StartGame()
     FOUNDATION_ACCEPT = 0
 end
 
-function FoundationAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
+function CanTailBeMoved(tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
     end
-    -- To start the game, the player will choose among the top cards of the reserve fans which will start the first foundation pile.
-    -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
-    if FOUNDATION_ACCEPT == 0 then
-        -- LogCard("Faccept", cThis)
-        if PileType(cThis.owner) ~= "Reserve" then
-            return false, "The first Foundation card must come from a Reserve"
+    local c1 = TailGet(tail, 1)
+    local pile = CardOwner(c1)
+    if PileType(pile) == "Foundation" then
+        return false, "You cannot move cards from a Foundation"
+    elseif PileType(pile) == "Tableau" then
+        for i = 2, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+            if CardColor(c1) == CardColor(c2) then
+                return false, "Card must be in alternating colors"
+            end
+            if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+                -- Ranking is continuous in the tableau as Kings can be placed over Aces.
+            elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Cards must be in increasing value"
+            end
+            c1 = c2
         end
-        FOUNDATION_ACCEPT = cThis.ordinal
-        for _, pile in ipairs(FOUNDATIONS) do
-            SetPileAccept(pile, FOUNDATION_ACCEPT)
+    elseif PileType(pile) == "Waste" then
+        if TailLen(tail) > 1 then
+            return false, "Only a single card can be moved from Waste"
         end
-    end
-    if cThis.ordinal == FOUNDATION_ACCEPT then
-        return true, nil
+    elseif PileType(pile) == "Reserve" then
+        if TailLen(tail) > 1 then
+            return false, "Only a single card can be moved from a Reserve"
+        end
     else
-        return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. ", not a " .. cThis.ordinal
-    end
-end
-
-function FoundationBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    -- The foundations are built up by suit and ranking is continuous as Aces are placed over Kings.
-    if cPrev.suit ~= cThis.suit then
-        return false, nil
-    end
-    if cPrev.ordinal == 13 and cThis.ordinal == 1 then
-        -- wrap from King to Ace
-    elseif cPrev.ordinal + 1 == cThis.ordinal then
-        -- up, eg 2 to 3
-    else
-        return false, nil
+        io.stderr:write("CanTailBeMoved: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function TableauAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
+function CanTailBeAppended(pile, tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
     end
-    -- Spaces that occur on the tableau are filled with any top card in the reserve.
-    -- If the entire reserve is exhausted however, it is not replenished; spaces that occur after this point have to be filled with cards from the waste pile or, if a wastepile has not been made yet, the stock.
-    if PileType(cThis.owner) == "Waste" then
-        for _, res in ipairs(RESERVES) do
-            if PileCardCount(res) > 0 then
-                return false, "An empty Tableau must be filled from a Reserve"
+    if PileType(pile) == "Foundation" then
+        if TailLen(tail) > 1 then
+            return false, "Foundation can only accept a single card"
+        elseif PileLen(pile) == 0 then
+            local c1 = TailGet(tail, 1)
+            if FOUNDATION_ACCEPT == 0 then
+                -- To start the game, the player will choose among the top cards of the reserve fans which will start the first foundation pile.
+                -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
+                if PileType(CardOwner(c1)) ~= "Reserve" then
+                    return false, "The first Foundation card must come from a Reserve"
+                end
+                FOUNDATION_ACCEPT = CardOrdinal(c1)
+                for _, pile in ipairs(FOUNDATIONS) do
+                    SetPileAccept(pile, FOUNDATION_ACCEPT)
+                end
+            end
+            if CardOrdinal(c1) ~= FOUNDATION_ACCEPT then
+                return false, "Foundation can only accept a " .. FOUNDATION_ACCEPT .. ", not a " .. math.floor(CardOrdinal(c1))
+            end
+        else
+            local c1 = PilePeek(pile)
+            local c2 = TailGet(tail, 1)
+            -- The foundations are built up by suit and ranking is continuous as Aces are placed over Kings. 
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Foundations must be built in suit"
+            end
+            if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
+                -- 
+            elseif CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                return false, "Foundations build up"
             end
         end
-    end
-end
-
-function TableauBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    -- The cards on the tableau are built down in alternating colors. Ranking is also continuous in the tableau as Kings can be placed over Aces. 
-    if cPrev.color == cThis.color then
-        -- io.stderr:write("CheckTableau color fail\n")
-        return false, nil
-    end
-    if cPrev.ordinal == 1 and cThis.ordinal == 13 then
-    -- wrap from Ace to King
-    elseif cPrev.ordinal == cThis.ordinal + 1 then
-    -- down, eg 3 to 2
+    elseif PileType(pile) == "Tableau" then
+        local c1 = TailGet(tail, 1)
+        if PileLen(pile) == 0 then
+            -- Spaces that occur on the tableau are filled with any top card in the reserve.
+            -- If the entire reserve is exhausted however, it is not replenished; spaces that occur after this point have to be filled with cards from the waste pile or, if a wastepile has not been made yet, the stock.
+            if PileType(CardOwner(c1)) == "Waste" then
+                for _, res in ipairs(RESERVES) do
+                    if PileLen(res) > 0 then
+                        return false, "An empty Tableau must be filled from a Reserve"
+                    end
+                end
+            end
+        else
+            local c1 = PilePeek(pile)
+            for i = 1, TailLen(tail) do
+                local c2 = TailGet(tail, i)
+                if CardColor(c1) == CardColor(c2) then
+                    return false, "Tableaux build in alternate color"
+                end
+                if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+                    --
+                elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                    return false, "Tableaux build down"
+                end
+                c1 = c2
+            end
+        end
     else
-        return false, nil
+        io.stderr:write("CanTailBeAppended: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function TableauMovePair(cPrev, cThis)
-    -- One card can be moved at a time, but sequences can also be moved as one unit. 
-    return TableauBuildPair(cPrev, cThis)
+function IsPileConformant(pile)
+    if PileType(pile) == "Foundation" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Foundations must be built in suit"
+            end
+            if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
+                --
+            elseif CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                return false, "Foundations build up"
+            end
+            c1 = c2
+        end
+    elseif PileType(pile) == "Tableau" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
+            if CardColor(c1) == CardColor(c2) then
+                return false, "Tableaux build in alternate color"
+            end
+            if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+                --
+            elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Tableaux build down"
+            end
+            c1 = c2
+        end
+    else
+        io.stderr:write("IsPileConformant: unknown pile type " .. PileType(pile) .. "\n")
+    end
+    return true
 end
 
--- function TableauTailMove(pileLen, tailLen)
---     return true, nil
--- end
-
 function CardTapped(card)
-  -- LogCard("CardTapped", card)
-  if card.owner == STOCK then
+  if CardOwner(card) == STOCK then
     for i = 1, StockDealCards do
       MoveCard(STOCK, WASTE)
     end
@@ -170,8 +205,8 @@ function PileTapped(pile)
     if STOCK_RECYCLES == 0 then
       return "No more Stock recycles"
     end
-    if PileCardCount(WASTE) > 0 then
-      while PileCardCount(WASTE) > 0 do
+    if PileLen(WASTE) > 0 then
+      while PileLen(WASTE) > 0 do
         MoveCard(WASTE, STOCK)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
@@ -179,7 +214,7 @@ function PileTapped(pile)
       return nil
     end
   elseif pile == WASTE then
-    if PileCardCount(STOCK) > 0 then
+    if PileLen(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
       return nil
     end
@@ -191,7 +226,7 @@ end
 function AfterMove()
     -- io.stdout:write("AfterMove\n")
     -- for i = 1, 4 do
-    --     if PileCardCount(TABLEAUX[i]) == 0 then
+    --     if PileLen(TABLEAUX[i]) == 0 then
     --         MoveCard(RESERVE, TABLEAUX[i])
     --     end
     -- end

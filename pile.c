@@ -303,11 +303,7 @@ bool PileMoveCard(struct Pile *const self, struct Pile *const src)
         // fprintf(stderr, "WARNING: %s: source pile is empty\n", __func__);
         return false;
     }
-#if 0
-    if ( !self->vtable->CanAcceptCard(self->owner, self, c) ) {
-        return false;
-    }
-#endif
+
     PilePushCard(self, c);
 
     // flip up an exposed source card, if src pile is not Stock*
@@ -437,7 +433,7 @@ int PileGenericCollect(struct Pile *const self)
                 // this pile is empty
                 return cardsMoved;
             }
-#if 1
+
             if ( !fp->vtable->CanAcceptCard(baize, fp, c) ) {
                 // this Foundation doesn't want this card; onto the next Foundation
                 break;
@@ -445,13 +441,6 @@ int PileGenericCollect(struct Pile *const self)
             if ( PileMoveCard(fp, self) ) {
                 cardsMoved++;
             }
-#else
-            if (PileMoveCard(fp, self)) {
-                cardsMoved++;
-            } else {
-                break;
-            }
-#endif
         }
     }
     return cardsMoved;

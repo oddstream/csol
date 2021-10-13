@@ -147,8 +147,7 @@ function TableauMoveTail(pileLen, tailLen)
 end
 
 function CardTapped(card)
---   LogCard("CardTapped", card)
-  if card.owner == STOCK then
+  if CardOwner(card) == STOCK then
     MoveCard(STOCK, WASTE)
   end
 end

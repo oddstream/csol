@@ -9,11 +9,14 @@ STRIP_CARDS = {12,13}
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
+--[[
 function LogCard(title, card)
-  if card and type(card) == "table" then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
-  else
+  if not card then
     io.stderr:write(title .. " {nil}\n")
+  elseif type(card) ~= "table" then
+    io.stderr:write(title .. " {unknown}\n")
+  else
+    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
   end
 end
 
@@ -22,6 +25,7 @@ function LogTail(title, cards)
     LogCard(title, cards[n])
   end
 end
+]]
 
 function Build()
 
@@ -71,64 +75,139 @@ function StartGame()
     SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
-function FoundationAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-      return false, "Cannot move cards from a Foundation"
-    end
-    if cThis.ordinal ~= 1 then
-      return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
+function Foundation_CanTailBeMoved(tail)
+    return false, "You cannot move cards from a Foundation"
+end
+
+function Tableau_CanTailBeMoved(tail)
+    local c1 = TailGet(tail, 1)
+    for i = 2, TailLen(tail) do
+        local c2 = TailGet(tail, i)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false
+        end
+        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            return false
+        end
+        c1 = c2
     end
     return true
 end
 
-function FoundationBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    if cPrev.suit ~= cThis.suit then
-        -- io.stderr:write("CheckFoundation suit fail\n")
-        return false, nil
-    end
-    if cPrev.ordinal + 1 ~= cThis.ordinal then
-        -- io.stderr:write("CheckFoundation ordinal fail\n")
-        return false, nil
+function Waste_CanTailBeMoved(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from Waste"
     end
     return true
 end
 
-function FoundationMoveTail(pileLen, tailLen)
-    -- won't ever be called unless there's a fanned Foundation
-    return false, "Cannot move cards from a Foundation"
+function CanTailBeMoved(tail)
+    local c1 = TailGet(tail, 1)
+    local pile = CardOwner(c1)
+    local fn = PileType(pile) .. "_CanTailBeMoved"
+    -- io.stderr:write("type(" .. fn .. ") == " .. type(_G[fn]) .. "\n")
+
+    if type(_G[fn]) == "function" then
+        return _G[fn](tail)
+    else
+        io.stderr:write("CanTailBeMoved: unknown pile type " .. PileType(pile) .. "\n")
+    end
+
+    return true
 end
 
-function TableauAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-      return false, "Cannot move a cards from a Foundation"
+function CanTailBeAppended(pile, tail)
+    if TailLen(tail) == 0 then
+        return false, "Empty tail"
+    end
+    if PileType(pile) == "Foundation" then
+        if TailLen(tail) > 1 then
+            return false, "Foundation can only accept a single card"
+        elseif PileLen(pile) == 0 then
+            local c1 = TailGet(tail, 1)
+            if CardOrdinal(c1) ~= 1 then
+                return false, "Foundation can only accept a 1, not a " .. math.floor(CardOrdinal(c1))
+            end
+        else
+            local c1 = PilePeek(pile)
+            for i = 1, TailLen(tail) do
+                local c2 = TailGet(tail, i)
+
+                if CardSuit(c1) ~= CardSuit(c2) then
+                    return false, "Foundations must be built in suit"
+                end
+                if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                    return false, "Foundations build up"
+                end
+
+                c1 = c2
+            end
+        end
+    elseif PileType(pile) == "Tableau" then
+        if PileLen(pile) == 0 then
+            -- do nothing, empty accept any card
+        else
+            local c1 = PilePeek(pile)
+            for i = 1, TailLen(tail) do
+                -- io.stderr:write(i .. " of " .. TailLen(tail) .. "\n")
+                local c2 = TailGet(tail, i)
+                if not c2 then
+                    io.stderr:write("CanTailBeAppended: nil tail card at index " .. i .. "\n")
+                    break
+                end
+                if CardSuit(c1) ~= CardSuit(c2) then
+                    return false, "Tableaux build in suit"
+                end
+                if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                    return false, "Tableaux build down"
+                end
+
+                c1 = c2
+            end
+        end
+    else
+        io.stderr:write("CanTailBeAppended: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function TableauBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-      return false, "Cannot move cards from a Foundation"
-    end
-    if cPrev.ordinal ~= cThis.ordinal + 1 then
-      -- io.stderr:write("CheckTableau ordinal fail\n")
-      return false, nil
-    end
-    if cPrev.suit ~= cThis.suit then
-      return false, nil
+function IsPileConformant(pile)
+    if PileType(pile) == "Foundation" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
+
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Foundations must be built in suit"
+            end
+            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                return false, "Foundations build up"
+            end
+
+            c1 = c2
+        end
+    elseif PileType(pile) == "Tableau" then
+        local c1 = PilePeek(pile)
+        for i = 2, PileLen(pile) do
+            local c2 = PileGet(tail, n)
+
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Tableaux build in suit"
+            end
+            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false, "Tableaux build down"
+            end
+
+            c1 = c2
+        end
+    else
+        io.stderr:write("IsPileConformant: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
-end
-
-function TableauMovePair(cPrev, cThis)
-    return TableauBuildPair(cPrev, cThis)
 end
 
 function CardTapped(card)
-    -- LogCard("CardTapped", card)
-    if card.owner == STOCK then
+    if CardOwner(card) == STOCK then
         MoveCard(STOCK, WASTE)
     end
 end
@@ -139,15 +218,15 @@ function PileTapped(pile)
     if STOCK_RECYCLES == 0 then
       return "No more Stock recycles"
     end
-    if PileCardCount(WASTE) > 0 then
-      while PileCardCount(WASTE) > 0 do
+    if PileLen(WASTE) > 0 then
+      while PileLen(WASTE) > 0 do
         MoveCard(WASTE, STOCK)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
       SetPileRecycles(STOCK, STOCK_RECYCLES)
     end
   elseif pile == WASTE then
-    if PileCardCount(STOCK) > 0 then
+    if PileLen(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
     end
   end
@@ -156,15 +235,15 @@ end
 function AfterMove()
   -- io.stdout:write("AfterMove\n")
   for _, pile in ipairs(TABLEAUX) do
-    if PileCardCount(pile) == 0 then
-      if PileCardCount(WASTE) > 0 then
+    if PileLen(pile) == 0 then
+      if PileLen(WASTE) > 0 then
         MoveCard(WASTE, pile)
-      elseif PileCardCount(STOCK) > 0 then
+      elseif PileLen(STOCK) > 0 then
         MoveCard(STOCK, pile)
       end
     end
   end
-  if PileCardCount(WASTE) == 0 then
+  if PileLen(WASTE) == 0 then
     MoveCard(STOCK, WASTE)
   end
 end

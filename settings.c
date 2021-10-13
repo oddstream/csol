@@ -18,7 +18,7 @@ void LoadSettings(int *windowWidth, int *windowHeight)
     lua_State *L = luaL_newstate();
 
     if ( luaL_loadfile(L, "csol.settings.lua") || lua_pcall(L, 0, 0, 0) ) {
-        fprintf(stderr, "%s\n", lua_tostring(L, -1));
+        fprintf(stderr, "ERROR: %s: col.settings.lua: %s\n", __func__, lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
         *windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);

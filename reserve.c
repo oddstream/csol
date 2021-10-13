@@ -40,7 +40,7 @@ bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
 {
     (void)self;
     (void)c;
-    BaizeSetError(baize, "Cannot move a card to a Reserve");
+    BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
     return false;
 }
 
@@ -48,7 +48,7 @@ bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
 {
     (void)self;
     (void)tail;
-    BaizeSetError(baize, "Cannot move a card to a Reserve");
+    BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
     return false;
 }
 
