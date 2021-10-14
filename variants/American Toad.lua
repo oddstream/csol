@@ -174,6 +174,28 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
+function SortedAndUnsorted_Tableau(pile)
+    local sorted = 0
+    local unsorted = 0
+    local c1 = PileGet(pile, 1)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(pile, i)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            unsorted = unsorted + 1
+        elseif CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+            -- wrap from Ace to King
+            sorted = sorted + 1
+        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+            sorted = sorted + 1
+        else
+            unsorted = unsorted + 1
+        end
+        c1 = c2
+    end
+    return sorted, unsorted
+end
+
+
 function CardTapped(card)
   if CardOwner(card) == STOCK then
     MoveCard(STOCK, WASTE)

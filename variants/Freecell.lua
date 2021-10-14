@@ -122,7 +122,7 @@ end
 function IsPileConformant_Foundation(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
-        local c2 = PileGet(tail, n)
+        local c2 = PileGet(pile, n)
         if CardSuit(c1) ~= CardSuit(c2) then
             return false, "Foundations must be built in suit"
         end
@@ -137,7 +137,7 @@ end
 function IsPileConformant_Tableau(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
-        local c2 = PileGet(tail, n)
+        local c2 = PileGet(pile, n)
         if CardColor(c1) == CardColor(c2) then
             return false, "Tableaux build in alternating colors"
         end
@@ -147,4 +147,22 @@ function IsPileConformant_Tableau(pile)
         c1 = c2
     end
     return true
+end
+
+function SortedAndUnsorted_Tableau(pile)
+    local sorted = 0
+    local unsorted = 0
+    local c1 = PileGet(pile, 1)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(pile, i)
+        if CardColor(c1) ~= CardColor(c2) then
+            unsorted = unsorted + 1
+        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+            sorted = sorted + 1
+        else
+            unsorted = unsorted + 1
+        end
+        c1 = c2
+    end
+    return sorted, unsorted
 end

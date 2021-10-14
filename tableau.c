@@ -125,12 +125,7 @@ void TableauSetRecycles(struct Pile *const self, int r)
 
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
 {
-#if 1
-    (void)self;
-    (void)sorted;
-    (void)unsorted;
-#else
-    // iterate the pile->cards using an unsigned size_t, so make sure there are >2 before doing len-1
+    // some optimizations
     if (PileEmpty(self)) {
         return;
     }
@@ -138,23 +133,35 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
         *sorted += 1;
         return;
     }
-    for ( size_t i = 0; i<ArrayLen(self->cards) - 1; i++ ) {
-        struct Card *c0 = ArrayGet(self->cards, i);
-        if ( !CardValid(c0) ) {
-            fprintf(stderr, "WARNING: Invalid card 0 in %s\n", __func__);
-        }
-        struct Card *c1 = ArrayGet(self->cards, i+1);
-        if ( !CardValid(c1) ) {
-            fprintf(stderr, "WARNING: Invalid card 1 in %s\n", __func__);
-        }
-        if ( c0->prone || c1->prone ) {
-            *unsorted += 1;
+#if 0
+    (void)self;
+    (void)sorted;
+    (void)unsorted;
+#else
+    char funcName[64]; sprintf(funcName, "SortedAndUnsorted_%s", self->category);
+    struct Baize *const baize = self->owner;
+    lua_State *L = baize->L;
+
+    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
+    if ( typ != LUA_TFUNCTION ) {
+        // fprintf(stderr, "%s is not a function\n", funcName);
+        lua_pop(L, 1);  // remove func from stack
+    } else {
+        lua_pushlightuserdata(L, self);
+        // one arg (pile), two returns (number, number)
+        if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(L, -1));
+            lua_pop(L, 1);  // remove error
         } else {
-            if ( CheckPair(self->owner, c0, c1) ) {
-                *sorted += 1;
+            if ( lua_isnumber(L, -2) && lua_isnumber(L, -1) ) {
+                int extraSorted = lua_tonumber(L, -2);
+                int extraUnsorted = lua_tonumber(L, -1);
+                *sorted += extraSorted;
+                *unsorted += extraUnsorted;
             } else {
-                *unsorted += 1;
+                fprintf(stderr, "ERROR: %s: expecting two numbers\n", __func__);
             }
+            lua_pop(L, 2);
         }
     }
 #endif

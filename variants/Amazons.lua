@@ -96,42 +96,6 @@ function CanTailBeAppended_Foundation(pile, tail)
     end
     return true
 end
---[[
-function FoundationAccept(pile, cThis)
-    if cThis.ordinal ~= 1 then
-        return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
-    end
-    local itarget = CalcPileIndex(FOUNDATIONS, pile)
-    local isource = CalcPileIndex(RESERVES, cThis.owner)
-    if isource ~= itarget then
-        return false, "Aces can only be placed on the Foundation above"
-    end
-    return true
-end
-
-function FoundationBuildPair(cPrev, cThis)
-    -- work out the index of the target pile
-    if cThis.ordinal ~= 12 then
-        local itarget = CalcPileIndex(FOUNDATIONS, cPrev.owner)
-        local isource = CalcPileIndex(RESERVES, cThis.owner)
-        if isource ~= itarget then
-            return false, "Cards can only be placed on the Foundation above"
-        end
-    end
-    if cPrev.suit ~= cThis.suit then
-        -- io.stderr:write("CheckFoundation suit fail\n")
-        return false, nil
-    end
-    if cPrev.ordinal == 1 and cThis.ordinal == 7 then
-        return true 
-    elseif cPrev.ordinal + 1 == cThis.ordinal then
-        return true
-    else
-        return false, nil
-    end
-    return true
-end
-]]
 
 function CardTapped(card)
     if CardOwner(card) == STOCK then

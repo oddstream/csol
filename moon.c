@@ -355,7 +355,11 @@ int MoonPileGet(lua_State* L)
         return 0;
     }
     int n = lua_tointeger(L, 2);
-    struct Card *const c = ArrayGet(p->cards, n);
+    if (n==0) {
+        fprintf(stderr, "WARNING: %s: zero index\n", __func__);
+    }
+    // C is 0-indexed, Lua is 1-indexed
+    struct Card *const c = ArrayGet(p->cards, n-1);
     if (!CardValid(c)) {
         fprintf(stderr, "WARNING: %s: invalid card\n", __func__);
         return 0;
@@ -649,6 +653,9 @@ int MoonTailGet(lua_State* L)
         fprintf(stderr, "ERROR: %s: invalid index, have type %d\n", __func__, lua_type(L, 2));
     }
     int n = lua_tonumber(L, 2);
+    if (n==0) {
+        fprintf(stderr, "WARNING: %s: zero index\n", __func__);
+    }
     // C is 0-indexed, Lua is 1-indexed
     struct Card *const c = ArrayGet(a, n-1);
     if (!CardValid(c)) {

@@ -111,14 +111,12 @@ function CanTailBeAppended_Foundation(pile, tail)
         local c1 = PilePeek(pile)
         for i = 1, TailLen(tail) do
             local c2 = TailGet(tail, i)
-
             if CardSuit(c1) ~= CardSuit(c2) then
                 return false, "Foundations must be built in suit"
             end
             if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
                 return false, "Foundations build up"
             end
-
             c1 = c2
         end
     end
@@ -151,37 +149,51 @@ function CanTailBeAppended_Tableau(pile, tail)
 end
 
 function IsPileConformant_Foundation(pile)
-    local c1 = PilePeek(pile)
+    local c1 = PileGet(pile, 1)
     for i = 2, PileLen(pile) do
-        local c2 = PileGet(tail, n)
-
+        local c2 = PileGet(pile, i)
         if CardSuit(c1) ~= CardSuit(c2) then
             return false, "Foundations build in suit"
         end
         if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
             return false, "Foundations build up"
         end
-
         c1 = c2
     end
     return true
 end
 
 function IsPileConformant_Tableau(pile)
-    local c1 = PilePeek(pile)
+    local c1 = PileGet(pile, 1)
     for i = 2, PileLen(pile) do
-        local c2 = PileGet(tail, n)
-
+        local c2 = PileGet(pile, i)
         if CardSuit(c1) ~= CardSuit(c2) then
             return false, "Tableaux build in suit"
         end
         if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
             return false, "Tableaux build down"
         end
-
         c1 = c2
     end
     return true
+end
+
+function SortedAndUnsorted_Tableau(pile)
+    local sorted = 0
+    local unsorted = 0
+    local c1 = PileGet(pile, 1)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(pile, i)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            unsorted = unsorted + 1
+        elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            unsorted = unsorted + 1
+        else
+            sorted = sorted + 1
+        end
+        c1 = c2
+    end
+    return sorted, unsorted
 end
 
 function CardTapped(card)
