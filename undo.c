@@ -63,7 +63,7 @@ static struct Array* SnapshotNew(struct Baize *const self)
     size_t pindex;
     for ( struct Pile *p = (struct Pile*)ArrayFirst(self->piles, &pindex); p; p = (struct Pile*)ArrayNext(self->piles, &pindex) ) {
         struct SavedCardArray* sca = SavedCardArrayNew(self->cardLibrary, p->cards);
-        ArrayPush(savedPiles, sca);
+        savedPiles = ArrayPush(savedPiles, sca);
     }
     return savedPiles;
 }
@@ -105,7 +105,7 @@ static int CalcPercentComplete(struct Baize *const self)
 void BaizeUndoPush(struct Baize *const self)
 {
     struct Array* savedPiles = SnapshotNew(self);
-    ArrayPush(self->undoStack, savedPiles);
+    self->undoStack = ArrayPush(self->undoStack, savedPiles);
     // mark movable
     // recalc percent complete
     char zLeft[64], zCenter[64], zRight[64];

@@ -83,7 +83,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpSrc = self->pos;
     self->lerpDst = pos;
 #if 1
-    self->lerpStepAmount = SLOW_SPEED;
+    self->lerpStepAmount = NORMAL_SPEED;
 #else
     // doing this makes the transition drawing order look wrong and ugly
     const float speed = 5.0f;

@@ -49,7 +49,7 @@ bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self,
     bool result = false;
     struct Array *tail = ArrayNew(1);
     if (tail) {
-        ArrayPush(tail, c);
+        tail = ArrayPush(tail, c);
         result = CanTailBeAppended(self, tail);
         ArrayFree(tail);
     }

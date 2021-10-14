@@ -44,7 +44,7 @@ bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
     bool result = false;
     struct Array *tail = ArrayNew(1);
     if (tail) {
-        ArrayPush(tail, c);
+        tail = ArrayPush(tail, c);
         // TODO check card draggable?
         result = CanTailBeAppended(self, tail);
         ArrayFree(tail);

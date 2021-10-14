@@ -66,7 +66,7 @@ void PilePushCard(struct Pile *const self, struct Card* c)
     // }
     CardTransitionTo(c, fannedPos);
     // CardSetPos(c, fannedPos);
-    ArrayPush(self->cards, c);
+    self->cards = ArrayPush(self->cards, c);
 }
 
 struct Card* PilePopCard(struct Pile *const self)
@@ -352,7 +352,7 @@ bool PileMoveCards(struct Pile *const self, struct Card const* c)
     // pop the tail off the source and push onto tmp stack
     struct Array* tmp = ArrayNew(PileLen(self) + PileLen(src));
     while ( PileLen(src) != newSrcLen ) {
-        ArrayPush(tmp, PilePopCard(src));
+        tmp = ArrayPush(tmp, PilePopCard(src));
     }
 
     // TODO make some noise

@@ -50,7 +50,7 @@ struct ToastManager* ToastManagerNew()
 void ToastManagerAdd(struct ToastManager *const self, struct Toast *t)
 {
     // fprintf(stdout, "Adding toast %s\n", t->message);
-    ArrayPush(self->toasts, t);
+    self->toasts = ArrayPush(self->toasts, t);
 }
 
 void ToastManagerUpdate(struct ToastManager *const self)

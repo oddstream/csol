@@ -273,7 +273,7 @@ int MoonAddPile(lua_State* L)
     }
     if ( PileValid(p) ) {
         p->owner = baize;
-        ArrayPush(baize->piles, p);
+        baize->piles = ArrayPush(baize->piles, p);
         lua_pushlightuserdata(L, p);
         return 1;
     } else {
@@ -440,12 +440,12 @@ int MoonPileDemoteCards(lua_State *L)
         size_t index;
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
             if (c->id.ordinal == ord) {
-                ArrayPush(p->cards, c);
+                p->cards = ArrayPush(p->cards, c);
             }
         }
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
             if (c->id.ordinal != ord) {
-                ArrayPush(p->cards, c);
+                p->cards = ArrayPush(p->cards, c);
             }
         }
         ArrayFree(tmp);
@@ -476,12 +476,12 @@ int MoonPilePromoteCards(lua_State *L)
         size_t index;
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
             if (c->id.ordinal != ord) {
-                ArrayPush(p->cards, c);
+                p->cards = ArrayPush(p->cards, c);
             }
         }
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
             if (c->id.ordinal == ord) {
-                ArrayPush(p->cards, c);
+                p->cards = ArrayPush(p->cards, c);
             }
         }
         ArrayFree(tmp);

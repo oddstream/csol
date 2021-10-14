@@ -198,7 +198,7 @@ void BaizeCreatePiles(struct Baize *const self)
     if ( PileValid(self->stock) ) {
         lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
         self->stock->owner = self;
-        ArrayPush(self->piles, self->stock);
+        self->piles = ArrayPush(self->piles, self->stock);
         for ( size_t i = 0; i < self->numberOfCardsInLibrary; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
@@ -247,9 +247,9 @@ void BaizeCreatePiles(struct Baize *const self)
                 self->waste = p;
                 lua_pushlightuserdata(self->L, self->waste);   lua_setglobal(self->L, "WASTE");
             } else if ( strncmp("Foundation", p->category, 10) == 0 ) {
-                ArrayPush(self->foundations, p);
+                self->foundations = ArrayPush(self->foundations, p);
             } else if ( strncmp("Tableau", p->category, 7) == 0 ) {
-                ArrayPush(self->tableaux, p);
+                self->tableaux = ArrayPush(self->tableaux, p);
             }
         }
     }
@@ -569,7 +569,7 @@ void BaizeTouchStop(struct Baize *const self)
             if ( bc ) {
                 bc->bcf = self->touchedWidget->bcf;
                 bc->param = self->touchedWidget->param;
-                ArrayPush(BaizeCommandQueue, bc);
+                BaizeCommandQueue = ArrayPush(BaizeCommandQueue, bc);
             }
         }
         self->touchedWidget = NULL;

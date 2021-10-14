@@ -8,10 +8,15 @@
 
 struct Array* ArrayNew(size_t initialSize)
 {
-    struct Array* self = calloc(1, sizeof(struct Array));
-    self->used = 0;
-    self->size = initialSize;
-    self->data = calloc(initialSize, sizeof(void*));
+    // struct Array* self = calloc(1, sizeof(struct Array));
+    // self->used = 0;
+    // self->size = initialSize;
+    // self->data = calloc(initialSize, sizeof(void*));
+    struct Array *self = calloc(1, sizeof(struct Array) + sizeof(void*[initialSize]));
+    if (self) {
+        self->used = 0;
+        self->size = initialSize;
+    }
     return self;
 }
 
@@ -110,15 +115,26 @@ void* ArrayLast(struct Array *const self, size_t *index)
     return self->data[*index];
 }
 
-void ArrayPush(struct Array *const self, void* element)
+struct Array* ArrayPush(struct Array *self, void* element)
 {
-    // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
+    // a->used is the number of used entries,
+    // because a->array[a->used++] updates a->used only *after* the array has been accessed.
     // Therefore a->used can go up to a->size 
     if ( self->used == self->size ) {
-        self->size *= 2;
-        self->data = reallocarray(self->data, self->size, sizeof(void*));
+        struct Array *new = calloc(1, sizeof(struct Array) + sizeof(void*[self->size * 2]));
+        if (new) {
+            new->size = self->size * 2;
+            new->used = self->used;
+            memcpy(new->data, self->data, self->used * sizeof(void*));
+            free(self);
+            self = new;
+        }
+    //     self->size *= 2;
+    //     self->data = reallocarray(self->data, self->size, sizeof(void*));
     }
+
     self->data[self->used++] = element;
+    return self;
 }
 
 void* ArrayPeek(struct Array *const self)
@@ -168,7 +184,7 @@ void ArrayReset(struct Array *const self)
 void ArrayFree(struct Array *const self)
 {
     if ( self ) {
-        free(self->data);
+        // free(self->data);
         free(self);
     }
 }
