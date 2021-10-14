@@ -12,32 +12,14 @@ One card is dealt onto the first foundation. This rank will be used as a base fo
 The foundations build up in suit, wrapping from King to Ace as necessary. 
 ]]
 
+V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 PACKS = 2
 SUITS = 4
 POWERMOVES = false
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
-function LogCard(title, card)
-  if card then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
-  else
-    io.stderr:write(title .. " {nil}\n")
-  end
-end
-
-function LogTail(title, cards)
-  for n=1, #cards do
-    LogCard(title, cards[n])
-  end
-end
-
 function Build()
-
-    if type(AddPile) ~= "function" then
-        io.stderr:write("Build cannot find function AddPile\n")
-        return
-    end
 
     -- a stock pile is always created first, and filled with PACKS of shuffled cards
     PileMoveTo(STOCK, 1, 1)
@@ -49,7 +31,7 @@ function Build()
         local c = MoveCard(STOCK, RESERVE)
         SetCardProne(c, true)
     end
-    SetCardProne(PilePeekCard(RESERVE), false)
+    SetCardProne(PilePeek(RESERVE), false)
     
     FOUNDATIONS = {}
     for x = 1, 8 do
@@ -71,79 +53,125 @@ function StartGame()
     STOCK_RECYCLES = 1
     SetPileRecycles(STOCK, STOCK_RECYCLES)
     MoveCard(STOCK, FOUNDATIONS[1])
-    local c = PilePeekCard(FOUNDATIONS[1])
-    local t = CardToTable(c)
-    FOUNDATION_ACCEPT = t.ordinal
-    -- LogCard("Setting Accept", t)
+    local c = PilePeek(FOUNDATIONS[1])
+    FOUNDATION_ACCEPT = CardOrdinal(c)
     for i = 1, 8 do
         SetPileAccept(FOUNDATIONS[i], FOUNDATION_ACCEPT)
     end
     MoveCard(STOCK, WASTE)
 end
 
-function FoundationAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    if cThis.ordinal ~= FOUNDATION_ACCEPT then
-        return false, "An empty Foundation can only accept a " .. FOUNDATION_ACCEPT .. " not a " .. cThis.ordinal
+function CanTailBeMoved_Foundation(tail)
+    return false, "You cannot move cards from a Foundation"
+end
+
+function CanTailBeMoved_Tableau(tail)
+    local c1 = TailGet(tail, 1)
+    local pile = CardOwner(c1)
+    if not (TailLen(tail) == 1 or TailLen(tail) == PileLen(pile)) then
+        return false, "Can only move one card, or the whole pile"
     end
     return true
 end
 
-function FoundationBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-      return false, "Cannot move cards from a Foundation"
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only one Waste card can be moved"
     end
-    -- The foundations build up in suit, wrapping from King to Ace as necessary. 
-    if cPrev.suit ~= cThis.suit then
-        return false, nil
-    elseif cPrev.ordinal == 13 and cThis.ordinal == 1 then
-        -- wrap from King to Ace
-    elseif cPrev.ordinal + 1 == cThis.ordinal then
-        -- up, eg 2 to 3
+    return true
+end
+
+function CanTailBeMoved_Reserve(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only one Reserve card can be moved"
+    end
+    return true
+end
+
+function CanTailBeAppended_Foundation(pile, tail)
+    if PileLen(pile) == 0 then
+        local c1 = TailGet(tail, 1)
+        if CardOrdinal(c1) ~= FOUNDATION_ACCEPT then
+            return false, "An empty Foundation can only accept a " .. V[FOUNDATION_ACCEPT] .. " not a " .. V[CardOrdinal(c1)]
+        end
     else
-        return false, nil
+        local c1 = PilePeek(pile)
+        for i = 1, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Foundations must be built in suit"
+            end
+            if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
+                -- wrap from King to Ace
+            elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
+                -- up, eg 3 on a 2
+            else
+                return false, "Foundations build up"
+            end 
+            c1 = c2
+        end
     end
     return true
 end
 
-function TableauAccept(pile, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-      return false, "Cannot move cards from a Foundation"
-    end
-    -- accept any card onto an empty pile
-    return true
-end
-
-function TableauBuildPair(cPrev, cThis)
-    if PileType(cThis.owner) == "Foundation" then
-        return false, "Cannot move cards from a Foundation"
-    end
-    -- Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
-    if cPrev.suit ~= cThis.suit then
-        return false, nil
-    elseif cPrev.ordinal == 1 and cThis.ordinal == 13 then
-        -- wrap from Ace to King
-    elseif cPrev.ordinal == cThis.ordinal + 1 then
-        -- down, eg 3 to 2
+function CanTailBeAppended_Tableau(pile, tail)
+    if PileLen(pile) == 0 then
+        -- do nothing, empty accept any card
     else
-        return false, nil
+        local c1 = PilePeek(pile)
+        for i = 1, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Tableaux must be built in suit"
+            end
+            if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+                -- wrap from Ace to King
+            elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+                -- down, eg 2 on a 3
+            else
+                return false, "Tableaux build up"
+            end 
+            c1 = c2
+        end
     end
     return true
 end
 
-function TableauMovePair(cPrev, cThis)
-    return TableauBuildPair(cPrev, cThis)
+function IsPileConformant_Foundation(pile)
+    local c1 = PilePeek(pile)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(pile, i)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations must be built in suit"
+        end
+        if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
+            -- wrap from King to Ace
+        elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
+            -- up, eg 3 on a 2
+        else
+            return false, "Foundations build up"
+        end 
+        c1 = c2
+    end
 end
 
-function TableauMoveTail(pileLen, tailLen)
-    -- can only move a single card or a whole pile
-    io.stderr:write("CheckTableauTail(" .. pileLen .. "," .. tailLen .. ")\n")
-    if tailLen == 1 or pileLen == tailLen then
-        return true, nil
+function IsPileConformant_Tableau(pile)
+    local c1 = PilePeek(pile)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(pile, i)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Tableaux must be built in suit"
+        end
+        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+            -- wrap from Ace to King
+        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+            -- down, eg 2 on a 3
+        else
+            return false, "Tableaux build up"
+        end 
+        c1 = c2
     end
-    return false, "Can only move one card, or the whole pile"
+    return true
 end
 
 function CardTapped(card)
@@ -158,19 +186,16 @@ function PileTapped(pile)
     if STOCK_RECYCLES == 0 then
       return "No more Stock recycles"
     end
-    if PileCardCount(WASTE) > 0 then
-      while PileCardCount(WASTE) > 0 do
+    if PileLen(WASTE) > 0 then
+      while PileLen(WASTE) > 0 do
         MoveCard(WASTE, STOCK)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
       SetPileRecycles(STOCK, STOCK_RECYCLES)
-      return nil
     end
   elseif pile == WASTE then
-    if PileCardCount(STOCK) > 0 then
+    if PileLen(STOCK) > 0 then
       MoveCard(STOCK, WASTE)
-      return nil
     end
   end
-  return nil
 end

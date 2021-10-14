@@ -1,5 +1,6 @@
 -- Limited
 
+V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 PACKS = 2
 SUITS = 4
 POWERMOVES = true
@@ -34,135 +35,116 @@ function Build()
 
 end
 
-function CanTailBeMoved(tail)
-    if TailLen(tail) == 0 then
-        return false, "Empty tail"
-    end
-    local c1 = TailGet(tail, 1)
-    local pile = CardOwner(c1)
-    if PileType(pile) == "Foundation" then
-        return false, "You cannot move cards from a Foundation"
-    elseif PileType(pile) == "Tableau" then
-        if POWERMOVES then
-            for i = 2, TailLen(tail) do
-                local c2 = TailGet(tail, i)
+function CanTailBeMoved_Foundation(tail)
+    return false, "You cannot move cards from a Foundation"
+end
 
-                if CardSuit(c1) ~= CardSuit(c2) then
-                    return false
-                end
-                if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                    return false
-                end
-
-                c1 = c2
+function CanTailBeMoved_Tableau(tail)
+    if POWERMOVES then
+        local c1 = TailGet(tail, 1)
+        for i = 2, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false
             end
-        else
-            if TailLen(tail) > 1 then
-                return false, "Can only move a single card"
+            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+                return false
             end
-        end
-    elseif PileType(pile) == "Waste" then
-        if TailLen(tail) > 1 then
-            return false, "Only a single card can be moved from Waste"
+            c1 = c2
         end
     else
-        io.stderr:write("CanTailBeMoved: unknown pile type " .. PileType(pile) .. "\n")
+        if TailLen(tail) > 1 then
+            return false, "Can only move a single card"
+        end
     end
     return true
 end
 
-function CanTailBeAppended(pile, tail)
-    if TailLen(tail) == 0 then
-        return false, "Empty tail"
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from Waste"
     end
-    if PileType(pile) == "Foundation" then
-        if TailLen(tail) > 1 then
-            return false, "Foundation can only accept a single card"
-        else
-            if PileLen(pile) == 0 then
-                local c1 = TailGet(tail, 1)
-                if CardOrdinal(c1) ~= 1 then
-                    return false, "Foundation can only accept a 1, not a " .. math.floor(CardOrdinal(c1))
-                end
-            else
-                local c1 = PilePeek(pile)
-                for i = 1, TailLen(tail) do
-                    local c2 = TailGet(tail, i)
+    return true
+end
 
-                    if CardSuit(c1) ~= CardSuit(c2) then
-                        return false, "Foundations must be built in suit"
-                    end
-                    if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                        return false, "Foundations build up"
-                    end
-
-                    c1 = c2
-                end
-            end
-        end
-    elseif PileType(pile) == "Tableau" then
+function CanTailBeAppended_Foundation(pile, tail)
+    if TailLen(tail) > 1 then
+        return false, "Foundation can only accept a single card"
+    else
         if PileLen(pile) == 0 then
-            -- do nothing, empty accept any card
+            local c1 = TailGet(tail, 1)
+            if CardOrdinal(c1) ~= 1 then
+                return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            end
         else
             local c1 = PilePeek(pile)
             for i = 1, TailLen(tail) do
-                -- io.stderr:write(i .. " of " .. TailLen(tail) .. "\n")
                 local c2 = TailGet(tail, i)
-                if not c2 then
-                    io.stderr:write("CanTailBeAppended: nil tail card at index " .. i .. "\n")
-                    break
-                end
                 if CardSuit(c1) ~= CardSuit(c2) then
-                    return false, "Tableaux build in suit"
+                    return false, "Foundations must be built in suit"
                 end
-                if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                    return false, "Tableaux build down"
+                if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+                    return false, "Foundations build up"
                 end
-
                 c1 = c2
             end
         end
-    else
-        io.stderr:write("CanTailBeAppended: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
-function IsPileConformant(pile)
-    if PileType(pile) == "Foundation" then
+function CanTailBeAppended_Tableau(pile, tail)
+    if PileLen(pile) == 0 then
+        -- do nothing, empty accept any card
+    else
         local c1 = PilePeek(pile)
-        for i = 2, PileLen(pile) do
-            local c2 = PileGet(tail, n)
-
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
+        for i = 1, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+            if not c2 then
+                io.stderr:write("CanTailBeAppended: nil tail card at index " .. i .. "\n")
+                break
             end
-            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build up"
-            end
-
-            c1 = c2
-        end
-    elseif PileType(pile) == "Tableau" then
-        local c1 = PilePeek(pile)
-        for i = 2, PileLen(pile) do
-            local c2 = PileGet(tail, n)
-
             if CardSuit(c1) ~= CardSuit(c2) then
                 return false, "Tableaux build in suit"
             end
             if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
                 return false, "Tableaux build down"
             end
-
             c1 = c2
         end
-    else
-        io.stderr:write("IsPileConformant: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
 end
 
+function IsPileConformant_Foundation(pile)
+    local c1 = PilePeek(pile)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(tail, n)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations must be built in suit"
+        end
+        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+            return false, "Foundations build up"
+        end
+        c1 = c2
+    end
+    return true
+end
+
+function IsPileConformant_Tableau(pile)
+    local c1 = PilePeek(pile)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(tail, n)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Tableaux build in suit"
+        end
+        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            return false, "Tableaux build down"
+        end
+        c1 = c2
+    end
+    return true
+end
 
 function CardTapped(card)
     if CardOwner(card) == STOCK then

@@ -5,26 +5,13 @@
     Morehead and Mott-Smith, p179
 ]]
 
+V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
 STRIP_CARDS = {2,3,4,5,6,13}
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
-
-function LogCard(title, card)
-  if card and type(card) == "table" then
-    io.stderr:write(title .. " {ordinal:" .. card.ordinal .. " suit:" .. card.suit .. " color:" .. card.color .. " owner:" .. PileType(card.owner) .. "}\n")
-  else
-    io.stderr:write(title .. " {nil}\n")
-  end
-end
-
-function LogTail(title, cards)
-  for n=1, #cards do
-    LogCard(title, cards[n])
-  end
-end
 
 function Build()
 
@@ -61,6 +48,55 @@ function CalcPileIndex(piles, pile)
     io.stderr:write("CalcPileIndex cannot find pile\n")
 end
 
+function CanTailBeMoved_Foundation(tail)
+    return false, "You cannot move cards from a Foundation"
+end
+
+function CanTailBeMoved_Reserve(tail)
+    if TailLen(tail) > 1 then
+        return false, "You can only move one Reserve card"
+    end
+    return true
+end
+
+function CanTailBeAppended_Foundation(pile, tail)
+    if TailLen(tail) > 1 then
+        return false, "Foundation can only accept a single card"
+    elseif PileLen(pile) == 0 then
+        local c1 = TailGet(tail, 1)
+        if CardOrdinal(c1) ~= 1 then
+            return false, "An empty Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+        end
+        local itarget = CalcPileIndex(FOUNDATIONS, pile)
+        local isource = CalcPileIndex(RESERVES, CardOwner(c1))
+        if isource ~= itarget then
+            return false, "Aces can only be placed on the Foundation above"
+        end
+    else
+        local c1 = PilePeek(pile)
+        local c2 = TailGet(tail, 1)
+        -- work out the index of the target pile
+        if CardOrdinal(c2) ~= 12 then
+            local itarget = CalcPileIndex(FOUNDATIONS, CardOwner(c1))
+            local isource = CalcPileIndex(RESERVES, CardOwner(c2))
+            if isource ~= itarget then
+                return false, "Cards can only be placed on the Foundation above"
+            end
+        end
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations build in suit"
+        end
+        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 7 then
+            return true
+        elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
+            return true
+        else
+            return false, "Foundations build up"
+        end
+    end
+    return true
+end
+--[[
 function FoundationAccept(pile, cThis)
     if cThis.ordinal ~= 1 then
         return false, "An empty Foundation can only accept an Ace, not a " .. cThis.ordinal
@@ -95,6 +131,7 @@ function FoundationBuildPair(cPrev, cThis)
     end
     return true
 end
+]]
 
 function CardTapped(card)
     if CardOwner(card) == STOCK then
@@ -105,7 +142,6 @@ function CardTapped(card)
 end
 
 function PileTapped(pile)
-    -- io.stdout:write("PileTapped\n")
     if pile == STOCK then
         for _, res in ipairs(RESERVES) do
             MoveAllCards(res, STOCK)
@@ -114,7 +150,6 @@ function PileTapped(pile)
             -- end
         end
     end
-    return nil  -- no error striing
 end
 
 function AfterMove()

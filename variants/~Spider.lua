@@ -42,93 +42,81 @@ function Build()
     end
 end
 
-function CanTailBeMoved(tail)
-    if TailLen(tail) == 0 then
-        return false, "Empty tail"
-    end
+function CanTailBeMoved_Discard(tail)
+    return false, "You cannot move cards from a Discard"
+end
+
+function CanTailBeMoved_Tableau(tail)
     local c1 = TailGet(tail, 1)
-    local pile = CardOwner(c1)
-    if PileType(pile) == "Discard" then
-        return false, "You cannot move cards from a Discard"
-    elseif PileType(pile) == "Tableau" then
+    for i = 2, TailLen(tail) do
+        local c2 = TailGet(tail, i)
+
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Moved cards must all have the same suit"
+        end
+        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            return false, "Moved cards must be in descending order"
+        end
+
+        c1 = c2
+    end
+    return true
+end
+
+function CanTailBeAppended_Discard(pile, tail)
+    if TailLen(tail) ~= 13 then
+        return false, "Discard can only accept 13 cards"
+    else
+        local c1 = TailGet(tail, 0)
+        if CardOrdinal(c1) ~= 13 then
+            return false, "Can only discard from a 13"
+        end
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)
 
             if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Moved cards must all have the same suit"
-            end
-            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                return false, "Moved cards must be in descending order"
-            end
-
-            c1 = c2
-        end
-    else
-        io.stderr:write("CanTailBeMoved: unknown pile type " .. PileType(pile) .. "\n")
-    end
-    return true
-end
-
-function CanTailBeAppended(pile, tail)
-    if TailLen(tail) == 0 then
-        return false, "Empty tail"
-    end
-    if PileType(pile) == "Discard" then
-        if TailLen(tail) ~= 13 then
-            return false, "Discard can only accept 13 cards"
-        else
-            local c1 = TailGet(tail, 0)
-            if CardOrdinal(c1) ~= 13 then
-                return false, "Can only discard from a 13"
-            end
-            for i = 2, TailLen(tail) do
-                local c2 = TailGet(tail, i)
-
-                if CardSuit(c1) ~= CardSuit(c2) then
-                    return false, "Discarded piles must be all the same suit"
-                end
-                if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                    return false, "Discarded piles build up"
-                end
-
-                c1 = c2
-            end
-        end
-    elseif PileType(pile) == "Tableau" then
-        if PileLen(pile) == 0 then
-            -- accept any card
-        else
-            local c1 = PilePeek(pile)
-            local c2 = TailGet(tail, 1)
-            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                return false, "Tableaux build down"
-            end
-        end
-    else
-        io.stderr:write("CanTailBeAppended: unknown pile type " .. PileType(pile) .. "\n")
-    end
-    return true
-end
-
-function IsPileConformant(pile)
-    if PileType(pile) == "Discard" or PileType(pile) == "Tableau" then
-        local c1 = PilePeek(pile)
-        for i = 2, PileLen(pile) do
-            local c2 = PileGet(tail, n)
-
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false
+                return false, "Discarded piles must be all the same suit"
             end
             if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false
+                return false, "Discarded piles build up"
             end
 
             c1 = c2
         end
-    else
-        io.stderr:write("IsPileConformant: unknown pile type " .. PileType(pile) .. "\n")
     end
     return true
+end
+
+function CanTailBeAppended_Tableau(pile, tail)
+    if PileLen(pile) == 0 then
+        -- accept any card
+    else
+        local c1 = PilePeek(pile)
+        local c2 = TailGet(tail, 1)
+        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            return false, "Tableaux build down"
+        end
+    end
+    return true
+end
+
+function IsPileConformant_Discard(pile)
+    local c1 = PilePeek(pile)
+    for i = 2, PileLen(pile) do
+        local c2 = PileGet(tail, n)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false
+        end
+        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+            return false
+        end
+        c1 = c2
+    end
+    return true
+end
+
+function IsPileConformant_Tableau(pile)
+    return IsPileConformant_Discard(pile)
 end
 
 function CardTapped(card)

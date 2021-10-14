@@ -49,7 +49,8 @@ bool CanTailBeMoved(struct Array *const tail)
         return false;
     }
 
-    struct Baize *const baize = c0->owner->owner;
+    struct Pile *const pile = c0->owner;
+    struct Baize *const baize = pile->owner;
 
     if (c0->prone) {
         // TODO check all the cards?
@@ -57,11 +58,13 @@ bool CanTailBeMoved(struct Array *const tail)
         return false;
     }
 
-    bool result = false;
+    char funcName[64]; sprintf(funcName, "%s_%s", __func__, pile->category);
+
+    bool result = true;
     lua_State *L = baize->L;
-    int typ = lua_getglobal(L, __func__);  // push Lua function name (same as this function name) onto the stack
+    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "%s is not a function\n", __func__);
+        fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
         lua_pushlightuserdata(L, tail);
@@ -87,11 +90,13 @@ bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail)
         return false;
     }
 
-    bool result = false;
+    char funcName[64]; sprintf(funcName, "%s_%s", __func__, pile->category);
+
+    bool result = true;
     lua_State *L = pile->owner->L;
-    int typ = lua_getglobal(L, __func__);  // push Lua function name (same as this function name) onto the stack
+    int typ = lua_getglobal(L, funcName);  // push Lua function name (same as this function name) onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "%s is not a function\n", __func__);
+        fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
         lua_pushlightuserdata(L, pile);
@@ -114,11 +119,13 @@ bool IsPileConformant(struct Pile *const pile)
         return false;
     }
 
-    bool result = false;
+    char funcName[64]; sprintf(funcName, "%s_%s", __func__, pile->category);
+
+    bool result = true;
     lua_State *L = pile->owner->L;
-    int typ = lua_getglobal(L, __func__);  // push Lua function name (same as this function name) onto the stack
+    int typ = lua_getglobal(L, funcName);  // push Lua function name (same as this function name) onto the stack
     if ( typ != LUA_TFUNCTION ) {
-        fprintf(stderr, "%s is not a function\n", __func__);
+        fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
         lua_pushlightuserdata(L, pile);
