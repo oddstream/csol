@@ -184,7 +184,10 @@ void CardDraw(struct Card *const self)
         DrawRectangleRounded(rectCard, 0.05, 9, (Color){0,0,0,63});
         rectCard.x -= 4.0f;
         rectCard.y -= 4.0f;
-    }
+    }/* else if ( CheckCollisionPointRec(GetMousePosition(), rectCard) ) {
+        rectCard.x += 2.0f;
+        rectCard.y += 2.0f;
+    }*/
 
     if ( showFace ) {
         SpritesheetDraw(ssFace, self->frame, self->flipWidth, rectCard);

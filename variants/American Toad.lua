@@ -26,25 +26,28 @@ function Build()
 
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
-    RESERVE = AddPile("Reserve", 4, 1, FAN_RIGHT)
+    local pile
+
+    RESERVES = {}
+    pile = AddPile("Reserve", 4, 1, FAN_RIGHT)
+    table.insert(RESERVES, pile)
     for n = 1, 20 do
-        local c = MoveCard(STOCK, RESERVE)
+        local c = MoveCard(STOCK, pile)
         SetCardProne(c, true)
     end
-    SetCardProne(PilePeek(RESERVE), false)
+    SetCardProne(PilePeek(pile), false)
     
     FOUNDATIONS = {}
     for x = 1, 8 do
-        local pile = AddPile("Foundation", x, 2, FAN_NONE)
-        -- FOUNDATIONS[#FOUNDATIONS+1] = pile
+        pile = AddPile("Foundation", x, 2, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
     end
 
     TABLEAUX = {}
     for x = 1, 8 do
-        local pile = AddPile("Tableau", x, 3, FAN_DOWN)
-        MoveCard(STOCK, pile)
+        pile = AddPile("Tableau", x, 3, FAN_DOWN)
         table.insert(TABLEAUX, pile)
+        MoveCard(STOCK, pile)
     end
 
 end

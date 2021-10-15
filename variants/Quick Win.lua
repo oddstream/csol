@@ -4,7 +4,6 @@ V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack"
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
-STOCK_RECYCLES = 1
 -- CARD_FILTER = {1, 7, 8, 9, 10, 11, 12}  -- twos, threes, fours, fives, sixes, and kings removed
 STRIP_CARDS = {12,13}
 
@@ -20,41 +19,42 @@ function Build()
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 1, 1)
 
+    local pile
+
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     FOUNDATIONS = {}
     for x = 7, 10 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE)
-        SetPileAccept(pile, 1)
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
+        SetPileAccept(pile, 1)
     end
 
     MoveCard(STOCK, FOUNDATIONS[1], 1, 0)
 
     TABLEAUX = {}
     for x = 1, 10 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         for n = 1, 2 do
           MoveCard(STOCK, pile)
         end
         PileDemoteCards(pile, 13)
         PilePromoteCards(pile, 1)
-        table.insert(TABLEAUX, pile)
     end
-
     for x = 1, 10 do
-        local pile = AddPile("Tableau", x, 4, FAN_DOWN)
+        pile = AddPile("Tableau", x, 4, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         for n = 1, 2 do
           MoveCard(STOCK, pile)
         end
         PileDemoteCards(pile, 13)
         PilePromoteCards(pile, 1)
-        table.insert(TABLEAUX, pile)
     end
 end
 
 function StartGame()
-    STOCK_RECYCLES = 1
+    STOCK_RECYCLES = 3
     SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
@@ -214,6 +214,13 @@ function PileTapped(pile)
       end
       STOCK_RECYCLES = STOCK_RECYCLES - 1
       SetPileRecycles(STOCK, STOCK_RECYCLES)
+      if 0 == STOCK_RECYCLES then
+        Toast("No Stock recycles remaining")
+      elseif 1 == STOCK_RECYCLES then
+        Toast("One Stock recycle remaining")
+      else
+        Toast(STOCK_RECYCLES .. " Stock recycles remaining")
+      end
     end
   elseif pile == WASTE then
     if PileLen(STOCK) > 0 then

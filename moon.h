@@ -15,6 +15,7 @@ const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def);
 float MoonGetFieldFloat(lua_State* L, const char* key, const float def);
 void MoonPushCardAsTable(lua_State *L, struct Card *const c);
 void MoonPushTailAsTable(lua_State *L, struct Array *const tail);
+void MoonPushArrayAsGlobalArray(lua_State *L, const char *name, struct Array *const a);
 
 int MoonAddPile(lua_State* L);
 int MoonFindPile(lua_State* L);
@@ -40,5 +41,7 @@ int MoonSetCardProne(lua_State* L);
 
 int MoonTailGet(lua_State* L);
 int MoonTailLen(lua_State* L);
+
+int MoonToast(lua_State *L);
 
 #endif

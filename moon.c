@@ -19,6 +19,7 @@
 #include "tableau.h"
 #include "waste.h"
 #include "moon.h"
+#include "ui.h"
 
 static const struct FunctionToRegister {
     char luaFunction[32];
@@ -48,6 +49,8 @@ static const struct FunctionToRegister {
 
     {"TailGet", MoonTailGet},
     {"TailLen", MoonTailLen},
+
+    {"Toast", MoonToast},
 };
 
 static struct Baize* getBaize(lua_State* L)
@@ -218,9 +221,12 @@ void MoonPushCardAsTable(lua_State *L, struct Card *const c)
     }
 }
 
+#if 0
 void MoonPushTailAsTable(lua_State *L, struct Array *const tail)
 {
     // fprintf(stdout, "MoonPushTail Lua stack in  %d\n", lua_gettop(L));
+
+    // TODO not currently used?
 
     // build table on stack
     // outer table is an array/sequence, same length as tail
@@ -236,6 +242,19 @@ void MoonPushTailAsTable(lua_State *L, struct Array *const tail)
     }
 
     // fprintf(stdout, "MoonPushTail Lua stack out %d\n", lua_gettop(L));
+}
+#endif
+
+void MoonPushArrayAsGlobalArray(lua_State *L, const char* name, struct Array *const a)
+{
+    lua_createtable(L, ArrayLen(a), 0);
+    for ( size_t i=0; i<ArrayLen(a); i++ ) {
+        lua_pushlightuserdata(L, ArrayGet(a, i));
+        lua_seti(L, -2, i + 1); // pops lightuserdata from stack
+        // lua_seti does the equivalent to t[n] = v,
+        // where t is the value at the given index and v is the value on the top of the stack.
+    }
+    lua_setglobal(L, name);   // Pops a value from the stack and sets it as the new value of global name
 }
 
 int MoonAddPile(lua_State* L)
@@ -675,4 +694,17 @@ int MoonTailLen(lua_State* L)
     }
     lua_pushnumber(L, ArrayLen(a));
     return 1;
+}
+
+int MoonToast(lua_State *L)
+{
+    struct Baize *const baize = getBaize(L);
+    if (baize) {
+        if (lua_isstring(L, -1)) {
+            UiToast(baize->ui, lua_tostring(L, -1));
+        } else {
+            fprintf(stderr, "WARNING: %s: string expected\n", __func__);
+        }
+    }
+    return 0;
 }

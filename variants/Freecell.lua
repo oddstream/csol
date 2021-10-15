@@ -19,17 +19,23 @@ function Build()
 
   local pile
 
+  CELLS = {}
   for x = 1, 4 do
     pile = AddPile("Cell", x, 1, FAN_NONE)
+    table.insert(CELLS, pile)
   end
 
+  FOUNDATIONS = {}
   for x = 5, 8 do
     pile = AddPile("Foundation", x, 1, FAN_NONE)
+    table.insert(FOUNDATIONS, pile)
     SetPileAccept(pile, 1)
   end
 
+  TABLEAUX = {}
   for x = 1, 4 do
     pile = AddPile("Tableau", x, 2, FAN_DOWN)
+    table.insert(TABLEAUX, pile)
     for n = 1, 7 do
       MoveCard(STOCK, pile)
     end
@@ -38,9 +44,9 @@ function Build()
       PilePromoteCards(pile, 1)
     end
   end
-
   for x = 5, 8 do
     pile = AddPile("Tableau", x, 2, FAN_DOWN)
+    table.insert(TABLEAUX, pile)
     for n = 1, 6 do
       MoveCard(STOCK, pile)
     end

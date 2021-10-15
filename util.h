@@ -3,6 +3,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <stdint.h>
+
 #include <raylib.h>
 
 float UtilDistance(Vector2 a, Vector2 b);
@@ -15,5 +17,7 @@ char* UtilOrdToShortString(int ord);
 char* UtilOrdToLongString(int ord);
 char* UtilSuitToShortString(int suit);
 char* UtilSuitToLongString(int suit);
+
+uint32_t UtilHash(char *str);
 
 #endif

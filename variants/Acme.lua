@@ -26,8 +26,6 @@ POWERMOVES = false
 
 StockDealCards = 1
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
-
 function Build()
 
     if type(AddPile) ~= "function" then
@@ -42,23 +40,27 @@ function Build()
     
     local pile
 
+    FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
+        table.insert(FOUNDATIONS, pile)
         SetPileAccept(pile, 1)
     end
 
-    RESERVE = AddPile("Reserve", 1, 2, FAN_DOWN)
+    RESERVES = {}
+    pile = AddPile("Reserve", 1, 2, FAN_DOWN)
+    table.insert(RESERVES, pile)
     for n = 1, 13 do
-        local c = MoveCard(STOCK, RESERVE)
+        local c = MoveCard(STOCK, pile)
         SetCardProne(c, true)
     end
-    SetCardProne(PilePeek(RESERVE), false)
+    SetCardProne(PilePeek(pile), false)
 
     TABLEAUX = {}
     for x = 4, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         MoveCard(STOCK, pile)
-        TABLEAUX[#TABLEAUX+1] = pile
     end
 
 end
@@ -224,7 +226,7 @@ function AfterMove()
     -- io.stdout:write("AfterMove\n")
     for i = 1, 4 do
         if PileLen(TABLEAUX[i]) == 0 then
-            MoveCard(RESERVE, TABLEAUX[i])
+            MoveCard(RESERVES[1], TABLEAUX[i])
         end
     end
 end

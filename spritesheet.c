@@ -85,13 +85,13 @@ void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Re
     float xOffset = (r.width / 2.0f) - (dstWidth / 2.0f);
     rDst = (Rectangle){.x = r.x + xOffset, .y = r.y, .width = dstWidth, .height = dstHeight};
     DrawTexturePro(
-            self->texture,
-            rSrc,
-            rDst,
-            (Vector2){0},//{self->origin.x * scale, self->origin.y * scale},
-            ang,
-            c
-        );
+        self->texture,
+        rSrc,
+        rDst,
+        (Vector2){0},//{self->origin.x * scale, self->origin.y * scale},
+        ang,
+        c
+    );
     // Rectangle r = {.x=x, .y=y, cardWidth, cardHeight};
     // DrawRectangleRounded(r, 0.1, 4, (Color){0,0,127,255});
 }

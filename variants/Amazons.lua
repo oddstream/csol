@@ -18,17 +18,19 @@ function Build()
     -- a stock pile is always created first, and filled with Packs of shuffled cards
     PileMoveTo(STOCK, 6, 1)
 
+    local pile
+
     FOUNDATIONS = {}
     for x = 1, 4 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE)
-        FOUNDATIONS[#FOUNDATIONS+1] = pile
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        table.insert(FOUNDATIONS, pile)
         SetPileAccept(pile, 1)
     end
 
     RESERVES = {}
     for x = 1, 4 do
         pile = AddPile("Reserve", x, 2, FAN_DOWN)
-        RESERVES[#RESERVES+1] = pile
+        table.insert(RESERVES, pile)
         MoveCard(STOCK, pile)
     end
 

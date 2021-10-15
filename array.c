@@ -22,16 +22,14 @@ struct Array* ArrayNew(size_t initialSize)
 
 /*
     stack protector not protecting local variables
-    
-struct Array* ArrayNewStack(size_t initialSize)
+    remove -Wstack-protector -Wstack-usage=1000000 from Makefile
+struct Array* ArrayNewTmp1(void *element)
 {
-    struct Array* self = alloca(sizeof(struct Array));
+    struct Array* self = alloca(sizeof(struct Array) + sizeof(void*[1]));
     if (self) {
-        memset(self, 1, sizeof(struct Array));
-        self->used = 0;
-        self->size = initialSize;
-        self->data = alloca(initialSize * sizeof(void*));
-        memset(self->data, initialSize, sizeof(void*));     // vagrind
+        self->used = 1;
+        self->size = 1;
+        self->data[0] = element;
     }
     return self;
 }

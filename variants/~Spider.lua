@@ -15,30 +15,32 @@ function Build()
     PileMoveTo(STOCK, 1, 1)
     SetPileRecycles(STOCK, 0)
 
-    TABLEAU = {}
-  
+    local pile
+
+    DISCARDS = {}
     for x = 3, 10 do
-        local pile = AddPile("Discard", x, 1, FAN_NONE)
+        pile = AddPile("Discard", x, 1, FAN_NONE)
+        table.insert(DISCARDS, pile)
     end
 
+    TABLEAUX = {}
     for x = 1, 4 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         for n=1,4 do
           local c = MoveCard(STOCK, pile)
           SetCardProne(c, true)
         end
         MoveCard(STOCK, pile)
-        TABLEAU[x] = pile
     end
-
     for x = 5, 10 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         for n=1,3 do
           local c = MoveCard(STOCK, pile)
           SetCardProne(c, true)
         end
         MoveCard(STOCK, pile)
-        TABLEAU[x] = pile
     end
 end
 
@@ -141,17 +143,17 @@ function CardTapped(card)
     local tabCards = 0
     local emptyTabs = 0
     if CardOwner(card) == STOCK then
-      for _, tab in ipairs(TABLEAU) do
+      for _, tab in ipairs(TABLEAUX) do
         if PileLen(tab) == 0 then
           emptyTabs = emptyTabs + 1
         else
           tabCards = tabCards + PileLen(tab)
         end
       end
-      if emptyTabs > 0 and tabCards >= #TABLEAU then
+      if emptyTabs > 0 and tabCards >= #TABLEAUX then
         errMsg = "All empty tableaux must be filled before dealing a new row"
       else
-        for _, tab in ipairs(TABLEAU) do
+        for _, tab in ipairs(TABLEAUX) do
           MoveCard(STOCK, tab)
         end
       end

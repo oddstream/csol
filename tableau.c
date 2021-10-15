@@ -40,15 +40,19 @@ struct Tableau* TableauNew(Vector2 slot, enum FanType fan)
 
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    (void)baize;    // TODO retire
+    (void)baize;
     bool result = false;
+#if 1
+    struct Array1 tail =(struct Array1){.size=1, .used=1, .data[0]=c};
+    result = CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, (struct Array*)&tail);
+#else
     struct Array *tail = ArrayNew(1);
     if (tail) {
         tail = ArrayPush(tail, c);
-        // TODO check card draggable?
-        result = CanTailBeAppended(self, tail);
+        result = CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, tail);
         ArrayFree(tail);
     }
+#endif
     return result;
 }
 
@@ -76,8 +80,11 @@ static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
 
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    if ( ArrayLen(tail) > 1 ) {
-        if ( baize->powerMoves ) {
+    if (ArrayLen(tail) == 1) {
+        return TableauCanAcceptCard(baize, self, ArrayGet(tail, 0));
+    }
+    if (ArrayLen(tail) > 1) {
+        if (baize->powerMoves) {
             size_t moves = PowerMoves(baize, self);
             if ( ArrayLen(tail) > moves ) {
                 char z[128];
@@ -90,10 +97,7 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
             }
         }
     }
-    if ( !CanTailBeMoved(tail) ) {
-        return false;
-    }
-    return CanTailBeAppended(self, tail);
+    return CanTailBeMoved(tail) && CanTailBeAppended(self, tail);
 }
 
 int TableauCollect(struct Pile *const self)
@@ -169,14 +173,14 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 
 void TableauDraw(struct Pile *const self)
 {
-    extern Font fontAcme;
-    extern Color baizeHighlightColor;
-
     PileDraw(self);
 
     struct Tableau* t = (struct Tableau*)self;
     if ( t->accept != 0 ) {
         extern float cardWidth;
+        extern Font fontAcme;
+        extern Color baizeHighlightColor;
+
         float fontSize = cardWidth / 2.0f;
         Vector2 pos = PileScreenPos(self);
         pos.x += cardWidth / 8.0f;

@@ -99,8 +99,6 @@ void BaizeCreateCards(struct Baize *const self)
 
     // TODO record lost game if current game started
 
-    // Lua global PACKS will still be set from first run of variant.lua
-
     { // scope for fname
         char fname[128];
 
@@ -124,7 +122,7 @@ void BaizeCreateCards(struct Baize *const self)
             fprintf(stdout, "STRIP_CARDS is set\n");
             for ( int i=1; i<14; i++ ) {
                 lua_pushinteger(self->L, i);    // pushes +1 onto stack
-                lua_gettable(self->L, -2);      // pops integer/index, pushes value
+                lua_gettable(self->L, -2);      // pops integer/index, pushes STRIP_CARDS[i]
                 if ( lua_isnumber(self->L, -1) ) {
                     int result;
                     result = lua_tointeger(self->L, -1);    // doesn't alter stack
@@ -150,9 +148,9 @@ void BaizeCreateCards(struct Baize *const self)
     {   // scope for packs, suits, cardRequired, i
         size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
         size_t suits = MoonGetGlobalInt(self->L, "SUITS", 4);
-        size_t cardsRequired = packs * suits * 13;
+        size_t cardsRequired = packs * suits * self->numberOfCardsInSuit;
 
-        // first time this is called, self->cardLibrary will ne NULL because we used calloc()
+        // first time this is called, self->cardLibrary will be NULL because we used calloc()
         if (self->cardLibrary) {
             // memset(self->cardLibrary, 0, self->cardsInLibrary * sizeof(struct Card));
             free(self->cardLibrary);
@@ -202,7 +200,8 @@ void BaizeCreatePiles(struct Baize *const self)
         for ( size_t i = 0; i < self->numberOfCardsInLibrary; i++ ) {
             PilePushCard(self->stock, &self->cardLibrary[i]);
         }
-        srand(time(NULL));
+        unsigned int seed = MoonGetGlobalInt(self->L, "SEED", time(NULL) & 0xFFFF);
+        srand(seed);
         // Knuth-Fisher–Yates shuffle
         size_t n = ArrayLen(self->stock->cards);
         for ( int i = n-1; i > 0; i-- ) {
@@ -228,29 +227,25 @@ void BaizeCreatePiles(struct Baize *const self)
 
     // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
-    // create handy shortcuts for waste, foundations and tableau
     {
-        self->waste = NULL;
         if ( self->foundations ) {
             ArrayReset(self->foundations);
         } else {
             self->foundations = ArrayNew(8);
         }
-        if ( self->tableaux ) {
-            ArrayReset(self->tableaux);
-        } else {
-            self->tableaux = ArrayNew(8);
-        }
+        self->waste = NULL;
+
         size_t pindex;
         for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
-            if ( strcmp(p->category, "Waste") == 0 ) {
-                self->waste = p;
-                lua_pushlightuserdata(self->L, self->waste);   lua_setglobal(self->L, "WASTE");
-            } else if ( strncmp("Foundation", p->category, 10) == 0 ) {
+            if ( strcmp("Foundation", p->category) == 0 ) {
                 self->foundations = ArrayPush(self->foundations, p);
-            } else if ( strncmp("Tableau", p->category, 7) == 0 ) {
-                self->tableaux = ArrayPush(self->tableaux, p);
+            } else if ( strcmp(p->category, "Waste") == 0 ) {
+                self->waste = p;
             }
+        }
+        if (self->waste) {
+            lua_pushlightuserdata(self->L, self->waste);
+            lua_setglobal(self->L, "WASTE");
         }
     }
 
@@ -805,7 +800,6 @@ void BaizeFree(struct Baize *const self)
 {
     self->magic = 0;
     BaizeResetError(self);
-    ArrayFree(self->tableaux);
     ArrayFree(self->foundations);
     UndoStackFree(self->undoStack);
     ArrayFree(self->tail);

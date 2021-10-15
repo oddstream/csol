@@ -20,10 +20,9 @@ struct Baize {
     lua_State *L;
 
     struct Array *piles;
-    struct Pile *stock;     // a struct Stock*
-    struct Pile *waste;     // a struct Waste*, may be NULL
-    struct Array* foundations;
-    struct Array* tableaux;
+    struct Pile *stock;         // a struct Stock*
+    struct Pile *waste;         // a struct Waste*, may be NULL, used by status bar
+    struct Array *foundations;  // used by collect
 
     struct Array *tail;
     struct Array *undoStack;

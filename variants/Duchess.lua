@@ -18,10 +18,12 @@ StockDealCards = 1
 
 function Build()
 
+    local pile
+
     RESERVES = {}
     for i = 1, 4 do
-        local pile = AddPile("Reserve", (i*2), 1, FAN_RIGHT3)
-        RESERVES[#RESERVES+1] = pile
+        pile = AddPile("Reserve", (i*2), 1, FAN_RIGHT3)
+        table.insert(RESERVES, pile)
         for j = 1, 3 do
             MoveCard(STOCK, pile)
         end
@@ -34,14 +36,14 @@ function Build()
     
     FOUNDATIONS = {}
     for x = 4, 7 do
-        local pile = AddPile("Foundation", x, 2, FAN_NONE)
-        FOUNDATIONS[#FOUNDATIONS+1] = pile
+        pile = AddPile("Foundation", x, 2, FAN_NONE)
+        table.insert(FOUNDATIONS, pile)
     end
 
     TABLEAUX = {}
     for x = 4, 7 do
-        local pile = AddPile("Tableau", x, 3, FAN_DOWN)
-        TABLEAUX[#TABLEAUX+1] = pile
+        pile = AddPile("Tableau", x, 3, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         MoveCard(STOCK, pile)
     end
 
@@ -51,6 +53,9 @@ function StartGame()
     STOCK_RECYCLES = 1
     SetPileRecycles(STOCK, STOCK_RECYCLES)
     FOUNDATION_ACCEPT = 0
+    for _, v in pairs(FOUNDATIONS) do
+        SetPileAccept(v, 0)
+    end
 end
 
 function CanTailBeMoved_Foundation(tail)

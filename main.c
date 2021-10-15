@@ -130,6 +130,7 @@ Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 Font fontAcme = {0};
 Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
+Texture2D recycleTexture = {0};
 
 struct Array* BaizeCommandQueue = {0};
 
@@ -187,6 +188,8 @@ int main(int argc, char* argv[], char* envp[])
     fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
     fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
+    recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");
+
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
 
@@ -238,6 +241,8 @@ int main(int argc, char* argv[], char* envp[])
     SpritesheetFree(ssFace);
     SpritesheetFree(ssBack);
     SpritesheetFree(ssIcons);
+
+    UnloadTexture(recycleTexture);
 
     UnloadFont(fontAcme);
     UnloadFont(fontRobotoMedium24);

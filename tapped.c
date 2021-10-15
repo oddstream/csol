@@ -100,7 +100,7 @@ bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
                 BaizeSetError(self, str);
             }
         } else {
-            fprintf(stderr, "WARNING: %s: expecting string or nil return from PileTapped\n", __func__);
+            fprintf(stderr, "ERROR: %s: expecting string or nil return from PileTapped\n", __func__);
         }
         lua_pop(L, 1);  // remove returned string from stack
     }

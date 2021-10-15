@@ -19,17 +19,23 @@ function Build()
     PileMoveTo(STOCK, 1, 1)
     SetPileRecycles(STOCK, 0)
 
+    local pile
+
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
+    FOUNDATIONS = {}
     for x = 5, 12 do
-        local pile = AddPile("Foundation", x, 1, FAN_NONE)
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        table.insert(FOUNDATIONS, pile)
         SetPileAccept(pile, 1)
     end
 
+    TABLEAUX = {}
     for x = 1, 12 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        for n=1,3 do
-          MoveCard(STOCK, pile)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
+        for n = 1, 3 do
+            MoveCard(STOCK, pile)
         end
     end
 

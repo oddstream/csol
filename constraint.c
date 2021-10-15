@@ -52,10 +52,14 @@ bool CanTailBeMoved(struct Array *const tail)
     struct Pile *const pile = c0->owner;
     struct Baize *const baize = pile->owner;
 
-    if (c0->prone) {
-        // TODO check all the cards?
-        BaizeSetError(baize, "(C) You cannot move a face down card");
-        return false;
+    {
+        size_t index;
+        for ( struct Card *c = ArrayFirst(tail, &index); c; c = ArrayNext(tail, &index) ) {
+            if (c->prone) {
+                BaizeSetError(baize, "(C) You cannot move a face down card");
+                return false;
+            }
+        }
     }
 
     char funcName[64]; sprintf(funcName, "%s_%s", __func__, pile->category);

@@ -12,11 +12,16 @@ struct Array  {
   // so we have to use eg piles->array = ArrayPush(piles->array, p)
 };
 
+struct Array1 {
+    size_t used;
+    size_t size;
+    void* data[1];
+};
+
 typedef void (*ArrayIterFunc)(void*);
 typedef void (*ArrayFreeFunc)(void*);
 
 struct Array* ArrayNew(size_t initialSize);
-// struct Array* ArrayNewStack(size_t initialSize);
 size_t ArrayLen(struct Array *const self);
 size_t ArrayCap(struct Array *const self);
 void ArrayDelete(struct Array *const self, size_t n, ArrayFreeFunc f);

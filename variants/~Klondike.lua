@@ -22,14 +22,18 @@ function Build()
     
     local pile
 
+    FOUNDATIONS = {}
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        AddPile("Foundation", x, 1, FAN_NONE)
+        table.insert(FOUNDATIONS, pile)
         SetPileAccept(pile, 1)
     end
 
+    TABLEAUX = {}
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
         SetPileAccept(pile, 13)
         for n = 1, deal do
           local c = MoveCard(STOCK, pile)
