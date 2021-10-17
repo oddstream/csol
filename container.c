@@ -8,9 +8,36 @@ void ContainerCtor(struct Container *const self, Rectangle r)
     self->widgets = ArrayNew(8);
 }
 
+#if 0
 void ContainerLayoutWidgets(struct Container *const self)
 {
     (void)self; // all laying out will be done by subclasses
+}
+#endif
+
+void ContainerStartDrag(struct Container *const self, Vector2 pos)
+{
+    (void)self;
+    (void)pos;
+}
+
+void ContainerDragBy(struct Container *const self, Vector2 delta)
+{
+    (void)self;
+    (void)delta;
+}
+
+void ContainerStopDrag(struct Container *const self, Vector2 pos)
+{
+    (void)self;
+    (void)pos;
+}
+
+bool ContainerWasDragged(struct Container *const self, Vector2 pos)
+{
+    (void)self;
+    (void)pos;
+    return false;
 }
 
 void ContainerUpdate(struct Container *const self)

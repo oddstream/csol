@@ -104,10 +104,17 @@ void StockDraw(struct Pile *const self)
 
     struct Stock* s = (struct Stock*)self;
     if (s->recycles) {
+        float iconSize = 96.0f;
+        float iconScale = 1.0f;
+        // retro cards are 71 wide, kenney cards are 140 wide
+        if (iconSize >= cardWidth) {
+            iconScale = cardWidth / 96.0f;  // eg 71/96=0.7395
+            iconSize *= iconScale;
+        }
         Vector2 pos = PileScreenPos(self);
-        pos.x += (cardWidth - 96.0f) / 2.0f;
-        pos.y += (cardHeight - 96.0f) / 2.0f;
-        if ( CheckCollisionPointRec(GetMousePosition(), (Rectangle){.x=pos.x, .y=pos.y, .width=96.0f, .height=96.0f}) ) {
+        pos.x += (cardWidth - iconSize) / 2.0f;
+        pos.y += (cardHeight - iconSize) / 2.0f;
+        if ( CheckCollisionPointRec(GetMousePosition(), (Rectangle){.x=pos.x, .y=pos.y, .width=iconSize, .height=iconSize}) ) {
             pos.x += 2.0f;
             pos.y += 2.0f;
         }
@@ -115,7 +122,7 @@ void StockDraw(struct Pile *const self)
             recycleTexture,
             pos,
             0.0f,   // rotation
-            1.0f,   // scale
+            iconScale,   // scale
             baizeHighlightColor
         );
         // if (s->recycles<10) {

@@ -41,7 +41,7 @@ struct Card /* tag */ {
     Vector2 pos;
     struct Pile* owner;
 
-    int frame;  // spritesheet frame
+    int frame;  // spritesheet frame, index into Info Vector2D struct
 
     bool dragging;
     Vector2 dragStartPos;

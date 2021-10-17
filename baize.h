@@ -29,6 +29,7 @@ struct Baize {
     size_t savedPosition;
     Vector2 lastTouch;
     struct Pile *touchedPile;
+
     struct Widget *touchedWidget;
 
     bool dragging;
@@ -70,7 +71,7 @@ void BaizeDragBy(struct Baize *const self, Vector2 delta);
 void BaizeStopDrag(struct Baize *const self);
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition);
-void BaizeTouchStop(struct Baize *const self);
+void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition);
 void BaizeCollectCommand(struct Baize *const self, void* param);
 bool BaizeComplete(struct Baize *const self);
 bool BaizeConformant(struct Baize *const self);

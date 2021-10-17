@@ -3,7 +3,10 @@
 #include "ui.h"
 
 static struct ContainerVtable navDrawerVtable = {
-    &DrawerLayoutWidgets,
+    &DrawerStartDrag,
+    &DrawerDragBy,
+    &DrawerStopDrag,
+    &DrawerWasDragged,
     &DrawerLayout,
     &DrawerUpdate,
     &DrawerDraw,     // no extra stuff

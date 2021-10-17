@@ -196,32 +196,57 @@ void UiUpdateTitleBar(struct UI *const self, const char* center)
     TextWidgetSetText(tw, center);
 }
 
-void UiHideDrawers(struct UI *const self)
+
+void UiShowNavDrawer(struct UI *const self)
 {
-    if ( DrawerVisible((struct Drawer*)self->navDrawer) ) {
-        DrawerHide((struct Drawer*)self->navDrawer);
+    if (!DrawerVisible((struct Drawer*)self->navDrawer)) {
+        DrawerShow((struct Drawer*)self->navDrawer);
     }
-    if ( DrawerVisible((struct Drawer*)self->variantDrawer) ) {
-        DrawerHide((struct Drawer*)self->variantDrawer);
+}
+
+void UiHideNavDrawer(struct UI *const self)
+{
+    if (DrawerVisible((struct Drawer*)self->navDrawer)) {
+        DrawerHide((struct Drawer*)self->navDrawer);
     }
 }
 
 void UiToggleNavDrawer(struct UI *const self)
 {
-    if ( DrawerVisible((struct Drawer*)self->navDrawer) ) {
+    if (DrawerVisible((struct Drawer*)self->navDrawer)) {
         DrawerHide((struct Drawer*)self->navDrawer);
     } else {
         DrawerShow((struct Drawer*)self->navDrawer);
     }
 }
 
+void UiShowVariantDrawer(struct UI *const self)
+{
+    if (!DrawerVisible((struct Drawer*)self->variantDrawer)) {
+        DrawerShow((struct Drawer*)self->variantDrawer);
+    }
+}
+
+void UiHideVariantDrawer(struct UI *const self)
+{
+    if (DrawerVisible((struct Drawer*)self->variantDrawer)) {
+        DrawerHide((struct Drawer*)self->variantDrawer);
+    }
+}
+
 void UiToggleVariantDrawer(struct UI *const self)
 {
-    if ( DrawerVisible((struct Drawer*)self->variantDrawer) ) {
+    if (DrawerVisible((struct Drawer*)self->variantDrawer)) {
         DrawerHide((struct Drawer*)self->variantDrawer);
     } else {
         DrawerShow((struct Drawer*)self->variantDrawer);
     }
+}
+
+void UiHideDrawers(struct UI *const self)
+{
+    UiHideNavDrawer(self);
+    UiHideVariantDrawer(self);
 }
 
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right)
@@ -234,8 +259,34 @@ void UiUpdateStatusBar(struct UI *const self, const char* left, const char* cent
     TextWidgetSetText(tw, right);
 }
 
+struct Container* UiFindContainerAt(struct UI *const self, Vector2 pos)
+{
+    size_t cindex;
+    for ( struct Container *con = ArrayFirst(self->containers, &cindex); con; con = ArrayNext(self->containers, &cindex) ) {
+        if ( CheckCollisionPointRec(pos, con->rect) ) {
+            return con;
+        }
+    }
+    return NULL;
+}
+
 struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos)
 {
+#if 1
+    struct Container *con = UiFindContainerAt(self, pos);
+    if (con) {
+        size_t windex;
+        for ( struct Widget *w = ArrayFirst(con->widgets, &windex); w; w = ArrayNext(con->widgets, &windex) ) {
+            Rectangle r = w->rect;
+            r.x += con->rect.x;
+            r.y += con->rect.y;
+            if ( CheckCollisionPointRec(pos, r) ) {
+                // fprintf(stdout, "Tapped on a widget\n");
+                return w;
+            }
+        }
+    }
+#else
     size_t cindex, windex;
     for ( struct Container *con = ArrayFirst(self->containers, &cindex); con; con = ArrayNext(self->containers, &cindex) ) {
         if ( CheckCollisionPointRec(pos, con->rect) ) {
@@ -251,6 +302,7 @@ struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos)
             }
         }
     }
+#endif
     return NULL;
 }
 

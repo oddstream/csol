@@ -48,6 +48,10 @@ void TextWidgetDraw(struct Widget *const self)
 {
     extern Color uiTextColor;
 
+    // if (self->rect.x < 0.0f) {
+    //     return;
+    // }
+
     struct TextWidget *const tw = (struct TextWidget*)self;
 
     // get the container's screen rect

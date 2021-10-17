@@ -3,7 +3,10 @@
 #include "ui.h"
 
 static struct ContainerVtable statusBarVtable = {
-    &StatusBarLayoutWidgets,
+    &ContainerStartDrag, // NOOP
+    &ContainerDragBy,    // NOOP
+    &ContainerStopDrag,  // NOOP
+    &ContainerWasDragged,// NOOP
     &StatusBarLayout,
     &StatusBarUpdate,
     &ContainerDraw,     // no extra stuff

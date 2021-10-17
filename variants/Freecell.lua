@@ -4,7 +4,7 @@ V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack"
 PACKS = 1
 SUITS = 4
 POWERMOVES = true
-
+EASY_SEEDS = {39675,50060,50419}
 -- C sets variable 'BAIZE', 'STOCK', FAN_*
 
 function Build()

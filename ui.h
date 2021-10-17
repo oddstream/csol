@@ -89,13 +89,13 @@ void TextWidgetFree(struct Widget *const self);
 struct ContainerVtable {
     // Rectangle (*Rect)(struct Container *const self);  // screen coords
     // struct Widget* (*FindWidgetAt)(struct Container *const self, Vector2 pos);
-    // bool (*StartDrag)(struct Container *const self, Vector2 pos);
-    // void (*DragBy)(struct Container *const self, Vector2 delta);
-    // void (*StopDrag)(struct Container *const self);
+    void (*StartDrag)(struct Container *const self, Vector2 pos);
+    void (*DragBy)(struct Container *const self, Vector2 delta);
+    void (*StopDrag)(struct Container *const self, Vector2 pos);
+    bool (*WasDragged)(struct Container *const self, Vector2 pos);
     // bool (*Visible)(struct Container *const self);
     // void (*Show)(struct Container *const self);
     // void (*Hide)(struct Container *const self);
-    void (*LayoutWidgets)(struct Container *const self);
     void (*Layout)(struct Container *const self, const int windowWidth, const int windowHeight);
     void (*Update)(struct Container *const self);
     void (*Draw)(struct Container *const self);
@@ -104,12 +104,16 @@ struct ContainerVtable {
 
 struct Container {
     struct ContainerVtable *vtable;
-    Rectangle rect;
+    Rectangle rect; // x, y screen coords
     struct Array *widgets;
 };
 
 void ContainerCtor(struct Container *const self, Rectangle r);
-void ContainerLayoutWidgets(struct Container *const self);
+// void ContainerLayoutWidgets(struct Container *const self);
+void ContainerStartDrag(struct Container *const self, Vector2 pos);
+void ContainerDragBy(struct Container *const self, Vector2 delta);
+void ContainerStopDrag(struct Container *const self, Vector2 pos);
+bool ContainerWasDragged(struct Container *const self, Vector2 pos);
 void ContainerUpdate(struct Container *const self);
 void ContainerDraw(struct Container *const self);
 void ContainerFree(struct Container *const self);
@@ -123,9 +127,15 @@ enum DrawerAniState {
 struct Drawer {
     struct Container super;
     enum DrawerAniState aniState;
+    Vector2 dragOffset;
+    Vector2 dragStartPos;
 };
 
 void DrawerCtor(struct Drawer *const self, Rectangle r);
+void DrawerStartDrag(struct Container *const self, Vector2 pos);
+void DrawerDragBy(struct Container *const self, Vector2 delta);
+void DrawerStopDrag(struct Container *const self, Vector2 pos);
+bool DrawerWasDragged(struct Container *const self, Vector2 pos);
 void DrawerLayoutWidgets(struct Container *const self);
 void DrawerLayout(struct Container *const self, const int windowWidth, const int windowHeight);
 void DrawerUpdate(struct Container *const self);
@@ -188,9 +198,16 @@ struct UI* UiNew(void);
 void UiToast(struct UI *const self, const char* message);
 void UiUpdateStatusBar(struct UI *const self, const char* left, const char* center, const char *right);
 void UiUpdateTitleBar(struct UI *const self, const char* center);
-void UiHideDrawers(struct UI *const self);
+
+void UiShowNavDrawer(struct UI *const self);
+void UiHideNavDrawer(struct UI *const self);
 void UiToggleNavDrawer(struct UI *const self);
+void UiShowVariantDrawer(struct UI *const self);
+void UiHideVariantDrawer(struct UI *const self);
 void UiToggleVariantDrawer(struct UI *const self);
+void UiHideDrawers(struct UI *const self);
+
+struct Container* UiFindContainerAt(struct UI *const self, Vector2 pos);
 struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos);
 void UiLayout(struct UI *const self, const int windowWidth, const int windowHeight);
 void UiUpdate(struct UI *const self);

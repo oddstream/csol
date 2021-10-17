@@ -23,7 +23,7 @@ extern struct Spritesheet *ssFace, *ssBack;
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
     struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .prone = 1, .dragging = false};
-    self.frame = (suit * 13) + (ord - 1);   // TODO specific to retro spritesheet
+    self.frame = (suit * 13) + (ord - 1); // index into Vector2D info struct, or retro spritesheet
     self.pos = (Vector2){.x=0.0f,.y=0.0f};
     self.flipWidth = 1.0f;
     self.flipStep = 0.0f;

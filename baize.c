@@ -425,7 +425,7 @@ void BaizeStartDrag(struct Baize *const self) {
 }
 
 void BaizeDragBy(struct Baize *const self, Vector2 delta) {
-    // delta is the differnce between the point now, and what it was previously
+    // delta is the difference between the point now, and what it was previously
     // (in gosol, delta is the difference between the point now and where the drag started)
     // fprintf(stdout, "BaizeDragBy %.0f, %.0f\n", delta.x, delta.y);
     self->dragOffset.x = self->dragOffset.x + delta.x;
@@ -450,8 +450,11 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
     }
 
     // the UI is on top of the baize, so gets first dibs
+    // the Widget's container is at w->parent
     struct Widget *w = UiFindWidgetAt(self->ui, touchPosition);
-    if ( w ) {
+    if (w) {
+        // ContainerStartDrag(w->parent, touchPosition);
+        w->parent->vtable->StartDrag(w->parent, touchPosition);
         self->touchedWidget = w;
     } else {
         struct Card* c = findCardAt(self, touchPosition);
@@ -469,11 +472,11 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
     }
 
     if ( self->tail == NULL && self->touchedPile == NULL && self->touchedWidget == NULL ) {
+        UiHideDrawers(self->ui);
         BaizeStartDrag(self);
     }
     
     self->lastTouch = touchPosition;
-    UiHideDrawers(self->ui);
 }
 
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
@@ -490,7 +493,8 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
     } else if ( self->touchedPile ) {
         // do nothing, can't drag a pile
     } else if ( self->touchedWidget ) {
-        // TODO drag widget (scroll a drawer)
+        // ContainerDragBy(self->touchedWidget->parent, delta);
+        self->touchedWidget->parent->vtable->DragBy(self->touchedWidget->parent, delta);
     } else if ( self->dragging ) {
         BaizeDragBy(self, delta);
     }
@@ -498,7 +502,7 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
     self->lastTouch = touchPosition;
 }
 
-void BaizeTouchStop(struct Baize *const self)
+void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
 {
     BaizeResetError(self);
 
@@ -558,13 +562,16 @@ void BaizeTouchStop(struct Baize *const self)
         ArrayFree(self->tail);
         self->tail = NULL;
     } else if ( self->touchedWidget ) {
-        // fprintf(stderr, "Widget Command\n");
-        if ( self->touchedWidget->bcf ) {
-            struct BaizeCommand *bc = calloc(1, sizeof(struct BaizeCommand));
-            if ( bc ) {
-                bc->bcf = self->touchedWidget->bcf;
-                bc->param = self->touchedWidget->param;
-                BaizeCommandQueue = ArrayPush(BaizeCommandQueue, bc);
+        self->touchedWidget->parent->vtable->StopDrag(self->touchedWidget->parent, touchPosition);
+        if (!self->touchedWidget->parent->vtable->WasDragged(self->touchedWidget->parent, touchPosition)) {
+            // fprintf(stderr, "Widget Command\n");
+            if (self->touchedWidget->bcf) {
+                struct BaizeCommand *bc = calloc(1, sizeof(struct BaizeCommand));
+                if ( bc ) {
+                    bc->bcf = self->touchedWidget->bcf;
+                    bc->param = self->touchedWidget->param;
+                    BaizeCommandQueue = ArrayPush(BaizeCommandQueue, bc);
+                }
             }
         }
         self->touchedWidget = NULL;
@@ -683,7 +690,7 @@ void BaizeUpdate(struct Baize *const self)
             break;
         case GESTURE_NONE:
             if ( self->tail || self->touchedPile || self->touchedWidget || self->dragging ) {
-                BaizeTouchStop(self);
+                BaizeTouchStop(self, touchPosition);
             }
             break;
         default:
@@ -825,7 +832,8 @@ void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param)
 void BaizeFindGameCommand(struct Baize *const self, void* param)
 {
     (void)param;
-    UiToggleVariantDrawer(self->ui);
+    UiHideNavDrawer(self->ui);
+    UiShowVariantDrawer(self->ui);
 }
 
 void BaizeReloadVariantCommand(struct Baize *const self, void* param)
@@ -847,5 +855,6 @@ void BaizeChangeVariantCommand(struct Baize *const self, void* param)
         strncpy(self->variantName, param, sizeof(self->variantName)-1);
         BaizeReloadVariantCommand(self, NULL);
     }
+    UiHideVariantDrawer(self->ui);
 }
 

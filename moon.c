@@ -44,7 +44,7 @@ static const struct FunctionToRegister {
     {"CardOwner", MoonCardOwner},
     {"CardProne", MoonCardProne},
     {"CardSuit", MoonCardSuit},
-    {"CardToTable", MoonCardToTable},
+    // {"CardToTable", MoonCardToTable},
     {"SetCardProne", MoonSetCardProne},
 
     {"TailGet", MoonTailGet},
@@ -190,6 +190,7 @@ float MoonGetFieldFloat(lua_State* L, const char* key, const float def)
     return result;
 }
 
+#if 0
 void MoonPushCardAsTable(lua_State *L, struct Card *const c)
 {
     if ( !CardValid(c) ) {
@@ -220,13 +221,12 @@ void MoonPushCardAsTable(lua_State *L, struct Card *const c)
         lua_setfield(L, -2, "owner");   // table["owner"] = c->owner, pops key value
     }
 }
+#endif
 
 #if 0
 void MoonPushTailAsTable(lua_State *L, struct Array *const tail)
 {
     // fprintf(stdout, "MoonPushTail Lua stack in  %d\n", lua_gettop(L));
-
-    // TODO not currently used?
 
     // build table on stack
     // outer table is an array/sequence, same length as tail
@@ -245,6 +245,7 @@ void MoonPushTailAsTable(lua_State *L, struct Array *const tail)
 }
 #endif
 
+#if 0
 void MoonPushArrayAsGlobalArray(lua_State *L, const char* name, struct Array *const a)
 {
     lua_createtable(L, ArrayLen(a), 0);
@@ -256,6 +257,7 @@ void MoonPushArrayAsGlobalArray(lua_State *L, const char* name, struct Array *co
     }
     lua_setglobal(L, name);   // Pops a value from the stack and sets it as the new value of global name
 }
+#endif
 
 int MoonAddPile(lua_State* L)
 {
@@ -633,6 +635,7 @@ int MoonCardSuit(lua_State *L)
     return 1;
 }
 
+#if 0
 int MoonCardToTable(lua_State *L)
 {
     struct Card *const c = lua_touserdata(L, 1);
@@ -644,6 +647,7 @@ int MoonCardToTable(lua_State *L)
     MoonPushCardAsTable(L, c);
     return 1;
 }
+#endif
 
 int MoonSetCardProne(lua_State *L)
 {
