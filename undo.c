@@ -114,15 +114,18 @@ void BaizeUndoPush(struct Baize *const self)
 
     sprintf(zRight, "COMPLETE: %d%%", CalcPercentComplete(self));
 
-    if ( PileHidden(self->stock) ) {
-        UiUpdateStatusBar(self->ui, NULL, zCenter, zRight);
-    } else {
-        if ( self->waste ) {
-            sprintf(zLeft, "STOCK: %lu WASTE: %lu", PileLen(self->stock), PileLen(self->waste));
+    if (self->stock) {
+        // Baize->stock may not be set yet if variant.lua/Build has not been run
+        if ( PileHidden(self->stock) ) {
+            UiUpdateStatusBar(self->ui, NULL, zCenter, zRight);
         } else {
-            sprintf(zLeft, "STOCK: %lu", PileLen(self->stock));
+            if ( self->waste ) {
+                sprintf(zLeft, "STOCK: %lu WASTE: %lu", PileLen(self->stock), PileLen(self->waste));
+            } else {
+                sprintf(zLeft, "STOCK: %lu", PileLen(self->stock));
+            }
+            UiUpdateStatusBar(self->ui, zLeft, zCenter, zRight);
         }
-        UiUpdateStatusBar(self->ui, zLeft, zCenter, zRight);
     }
 }
 

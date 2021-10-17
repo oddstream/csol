@@ -14,7 +14,7 @@ struct Cell {
     struct Pile super;
 };
 
-struct Cell* CellNew(Vector2 pos, enum FanType fan);
+struct Cell* CellNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
 bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int CellCollect(struct Pile *const self);

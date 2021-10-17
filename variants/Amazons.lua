@@ -16,7 +16,7 @@ STRIP_CARDS = {2,3,4,5,6,13}
 function Build()
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    PileMoveTo(STOCK, 6, 1)
+    STOCK = AddPile(STOCK, 6, 1, FAN_NONE)
 
     local pile
 

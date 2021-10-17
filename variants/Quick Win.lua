@@ -4,7 +4,6 @@ V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack"
 PACKS = 1
 SUITS = 4
 POWERMOVES = false
--- CARD_FILTER = {1, 7, 8, 9, 10, 11, 12}  -- twos, threes, fours, fives, sixes, and kings removed
 STRIP_CARDS = {12,13}
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
@@ -16,12 +15,11 @@ function Build()
         return
     end
 
-    -- a stock pile is always created first, and filled with Packs of shuffled cards
-    PileMoveTo(STOCK, 1, 1)
+    -- a stock pile is always created first, and filled with PACKS of shuffled cards
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
+    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     local pile
-
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     FOUNDATIONS = {}
     for x = 7, 10 do

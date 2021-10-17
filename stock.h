@@ -14,7 +14,7 @@ struct Stock {
     int recycles;
 };
 
-struct Stock* StockNew(Vector2 pos, enum FanType fanType);
+struct Stock* StockNew(struct Baize *const baize, Vector2 pos, enum FanType fanType);
 bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int StockCollect(struct Pile *const self);

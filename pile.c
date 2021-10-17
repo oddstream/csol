@@ -25,9 +25,10 @@
 //     return self;
 // }
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan)
+void PileCtor(struct Baize *const baize, struct Pile *const self, const char* category, Vector2 slot, enum FanType fan)
 {
     self->magic = PILE_MAGIC;
+    self->owner = baize;
     strncpy(self->category, category, sizeof self->category - 1);
     self->slot = slot;
     self->fanType = fan;

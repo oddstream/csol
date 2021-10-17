@@ -12,7 +12,7 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with Packs of shuffled cards
-    PileMoveTo(STOCK, 1, 1)
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
     SetPileRecycles(STOCK, 0)
 
     local pile

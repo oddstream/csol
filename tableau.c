@@ -27,11 +27,11 @@ static struct PileVtable tableauVtable = {
     &PileFree,
 };
 
-struct Tableau* TableauNew(Vector2 slot, enum FanType fan)
+struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
 {
     struct Tableau* self = calloc(1, sizeof(struct Tableau));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Tableau", slot, fan);
+        PileCtor(baize, (struct Pile*)self, "Tableau", slot, fan);
         self->super.vtable = &tableauVtable;
         self->accept = 0;   // accept any by default
     }

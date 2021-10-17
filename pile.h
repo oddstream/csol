@@ -48,7 +48,7 @@ struct PileVtable {
 
 struct CardAndIndex {struct Card* card; size_t index;};
 
-void PileCtor(struct Pile *const self, const char* category, Vector2 slot, enum FanType fan);
+void PileCtor(struct Baize *const baize, struct Pile *const self, const char* category, Vector2 slot, enum FanType fan);
 bool PileValid(struct Pile *const self);
 bool PileHidden(struct Pile *const self);
 bool PileEmpty(struct Pile *const self);

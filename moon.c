@@ -276,24 +276,38 @@ int MoonAddPile(lua_State* L)
 
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-        p = (struct Pile*)StockNew((Vector2){x, y}, fan);
+#if 0
+        size_t packs, suits;
+        if (lua_isnumber(L, 5)) {
+            packs = lua_tonumber(L, 5);
+        } else {
+            packs = 1;
+        }
+        if (lua_isnumber(L, 6)) {
+            suits = lua_tonumber(L, 6);
+        } else {
+            suits = 4;
+        }
+        bool *cardFilter = ParseCardFilter(L);  // TODO still getting from global STRIP_CARDS, for now
+        p = StockNew(baize, (Vector2){x, y}, fan, packs, suits, cardFilter)
+#endif        
+        p = (struct Pile*)StockNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Cell") == 0 ) {
-        p = (struct Pile*)CellNew((Vector2){x, y}, fan);
+        p = (struct Pile*)CellNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Discard") == 0 ) {
-        p = (struct Pile*)DiscardNew((Vector2){x, y}, fan);
+        p = (struct Pile*)DiscardNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Foundation") == 0 ) {
-        p = (struct Pile*)FoundationNew((Vector2){x, y}, fan);
+        p = (struct Pile*)FoundationNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Reserve") == 0 ) {
-        p = (struct Pile*)ReserveNew((Vector2){x, y}, fan);
+        p = (struct Pile*)ReserveNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Tableau") == 0 ) {
-        p = (struct Pile*)TableauNew((Vector2){x, y}, fan);
+        p = (struct Pile*)TableauNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Waste") == 0 ) {
-        p = (struct Pile*)WasteNew((Vector2){x, y}, fan);
+        p = (struct Pile*)WasteNew(baize, (Vector2){x, y}, fan);
     } else {
         fprintf(stderr, "Unknown pile category %s\n", category);
     }
     if ( PileValid(p) ) {
-        p->owner = baize;
         baize->piles = ArrayPush(baize->piles, p);
         lua_pushlightuserdata(L, p);
         return 1;

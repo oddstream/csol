@@ -15,7 +15,7 @@ struct Tableau {
     enum CardOrdinal accept;
 };
 
-struct Tableau* TableauNew(Vector2 pos, enum FanType fan);
+struct Tableau* TableauNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);

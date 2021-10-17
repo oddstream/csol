@@ -28,11 +28,11 @@ static struct PileVtable discardVtable = {
     &PileFree,
 };
 
-struct Discard* DiscardNew(Vector2 slot, enum FanType fan)
+struct Discard* DiscardNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
 {
     struct Discard* self = calloc(1, sizeof(struct Discard));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Discard", slot, fan);
+        PileCtor(baize, (struct Pile*)self, "Discard", slot, fan);
         self->super.vtable = &discardVtable;
     }
     return self;

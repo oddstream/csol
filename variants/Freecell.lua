@@ -14,8 +14,7 @@ function Build()
     return
   end
 
-    -- a stock pile is always created first, and filled with Packs of shuffled cards
-  PileMoveTo(STOCK, 5, -5)  -- hide the stock off screen
+  STOCK = AddPile("Stock", 5, -5, FAN_NONE)  -- hide the stock off screen
 
   local pile
 

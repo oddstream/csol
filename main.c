@@ -211,7 +211,6 @@ int main(int argc, char* argv[], char* envp[])
     struct Baize* baize = BaizeNew(argc == 2 ? argv[1] : "Klondike");
     if ( BaizeValid(baize) ) {
         BaizeOpenLua(baize);
-        BaizeCreateCards(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize);
         BaizeStartGame(baize);

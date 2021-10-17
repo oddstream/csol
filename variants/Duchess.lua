@@ -18,6 +18,8 @@ StockDealCards = 1
 
 function Build()
 
+    STOCK = AddPile("Stock", 2, 2, FAN_NONE)
+  
     local pile
 
     RESERVES = {}
@@ -29,9 +31,6 @@ function Build()
         end
     end
 
-    -- a stock pile is always created first, and filled with Packs of shuffled cards
-    PileMoveTo(STOCK, 2, 2)
-  
     WASTE = AddPile("Waste", 2, 3, FAN_DOWN3)
     
     FOUNDATIONS = {}

@@ -90,95 +90,6 @@ void BaizeCloseLua(struct Baize *const self)
     }
 }
 
-void BaizeCreateCards(struct Baize *const self)
-{
-    // the Baize object has been created by BaizeNew
-    // or has been used to play another variant
-    // reset/create piles Array
-    // open variant.lua, get PACKS, create cardLibrary
-
-    // TODO record lost game if current game started
-
-    { // scope for fname
-        char fname[128];
-
-        snprintf(fname, 127, "variants/%s.lua", self->variantName);
-
-        if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
-            fprintf(stderr, "ERROR: %s: %s\n", __func__, lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);
-            return;
-        }
-
-        UiUpdateTitleBar(self->ui, self->variantName);
-    }
-
-    bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-
-    {
-        if ( lua_getglobal(self->L, "STRIP_CARDS") != LUA_TTABLE ) {
-            fprintf(stdout, "STRIP_CARDS is not set\n");
-        } else {
-            fprintf(stdout, "STRIP_CARDS is set\n");
-            for ( int i=1; i<14; i++ ) {
-                lua_pushinteger(self->L, i);    // pushes +1 onto stack
-                lua_gettable(self->L, -2);      // pops integer/index, pushes STRIP_CARDS[i]
-                if ( lua_isnumber(self->L, -1) ) {
-                    int result;
-                    result = lua_tointeger(self->L, -1);    // doesn't alter stack
-                    if ( result > 0 && result < 14 ) {
-                        cardFilter[result] = 0;
-                    } else {
-                        fprintf(stderr, "ERROR: STRIP_CARDS: invalid value %d\n", result);
-                    }
-                }
-                lua_pop(self->L, 1);    // remove result of lua_gettable
-            }
-        }
-        lua_pop(self->L, 1);    // remove result of lua_getglobal
-
-        self->numberOfCardsInSuit = 0;
-        for ( int i=1; i<14; i++ ) {
-            if (cardFilter[i]) {
-                self->numberOfCardsInSuit += 1;
-            }
-        }
-    }
-
-    {   // scope for packs, suits, cardRequired, i
-        size_t packs = MoonGetGlobalInt(self->L, "PACKS", 1);
-        size_t suits = MoonGetGlobalInt(self->L, "SUITS", 4);
-        size_t cardsRequired = packs * suits * self->numberOfCardsInSuit;
-
-        // first time this is called, self->cardLibrary will be NULL because we used calloc()
-        if (self->cardLibrary) {
-            // memset(self->cardLibrary, 0, self->cardsInLibrary * sizeof(struct Card));
-            free(self->cardLibrary);
-        }
-        self->cardLibrary = calloc(cardsRequired, sizeof(struct Card));
-        self->numberOfCardsInLibrary = cardsRequired;
-
-        size_t i = 0;
-        for ( size_t pack = 0; pack < packs; pack++ ) {
-            for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
-                for ( enum CardSuit s = 0; s < suits; s++ ) {
-                    if ( cardFilter[o] ) {
-                        self->cardLibrary[i++] = CardNew(pack, o, s);
-                    } else {
-                        // fprintf(stderr, "Skipping %u\n", o);
-                    }
-                }
-            }
-        }
-        self->numberOfCardsInLibrary = i;   // incase any were taken out by cardFilter
-
-        fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, self->numberOfCardsInLibrary);
-    }
-
-    self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
-
-}
-
 void BaizeCreatePiles(struct Baize *const self)
 {
     // reset the old piles
@@ -192,32 +103,30 @@ void BaizeCreatePiles(struct Baize *const self)
         self->piles = ArrayNew(8);
     }
 
-    self->stock = (struct Pile*)StockNew((Vector2){0,0}, FAN_NONE);
-    if ( PileValid(self->stock) ) {
-        lua_pushlightuserdata(self->L, self->stock);   lua_setglobal(self->L, "STOCK");
-        self->stock->owner = self;
-        self->piles = ArrayPush(self->piles, self->stock);
-        for ( size_t i = 0; i < self->numberOfCardsInLibrary; i++ ) {
-            PilePushCard(self->stock, &self->cardLibrary[i]);
+    if ( self->foundations ) {
+        ArrayReset(self->foundations);
+    } else {
+        self->foundations = ArrayNew(8);
+    }
+    self->stock = NULL;
+    self->waste = NULL;
+
+    { // scope for fname
+        char fname[128];    snprintf(fname, 127, "variants/%s.lua", self->variantName);
+        if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
+            fprintf(stderr, "ERROR: %s: %s\n", __func__, lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);
+            return;
         }
-        unsigned int seed = MoonGetGlobalInt(self->L, "SEED", time(NULL) & 0xFFFF);
-        srand(seed);
-        // Knuth-Fisher–Yates shuffle
-        size_t n = ArrayLen(self->stock->cards);
-        for ( int i = n-1; i > 0; i-- ) {
-            int j = rand() % (i+1);
-            ArraySwap(self->stock->cards, i, j);
-        }
+
+        UiUpdateTitleBar(self->ui, self->variantName);
     }
 
-    // fprintf(stderr, "stock has %lu cards\n", PileLen(self->stock));
-
-    int typ = lua_getglobal(self->L, "Build");  // push value of "Build" onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(self->L, "Build") != LUA_TFUNCTION) { // push value of "Build" onto the stack, return type
         fprintf(stderr, "ERROR: %s: Build is not a function\n", __func__);
         lua_pop(self->L, 1);    // remove "Build" from stack
     } else {
-        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
+        if (lua_pcall(self->L, 0, 0, 0) != LUA_OK) {
             fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
@@ -227,27 +136,21 @@ void BaizeCreatePiles(struct Baize *const self)
 
     // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
-    {
-        if ( self->foundations ) {
-            ArrayReset(self->foundations);
-        } else {
-            self->foundations = ArrayNew(8);
-        }
-        self->waste = NULL;
-
+    // setup useful shortcuts
+    {   // scope for pindex
         size_t pindex;
         for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
             if ( strcmp("Foundation", p->category) == 0 ) {
                 self->foundations = ArrayPush(self->foundations, p);
+            } else if ( strcmp(p->category, "Stock") == 0 ) {
+                self->stock = p;
             } else if ( strcmp(p->category, "Waste") == 0 ) {
                 self->waste = p;
             }
         }
-        if (self->waste) {
-            lua_pushlightuserdata(self->L, self->waste);
-            lua_setglobal(self->L, "WASTE");
-        }
     }
+
+    self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
 
     // now the piles know their slots, calculate and set their positions
     BaizePositionPiles(self, GetScreenWidth());
@@ -391,7 +294,7 @@ bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     // }
 
     // find the index of the first tail card
-    size_t iFirst = 9999;
+    size_t iFirst = 2147483647;
     for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
         if (c == cFirst) {
             iFirst = index;
@@ -843,7 +746,6 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
     // there isn't a luaL_reset, so...
     BaizeCloseLua(self);
     BaizeOpenLua(self);
-    BaizeCreateCards(self);
     BaizeCreatePiles(self);
     BaizeResetState(self);
     BaizeStartGame(self);

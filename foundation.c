@@ -28,11 +28,11 @@ static struct PileVtable foundationVtable = {
     &PileFree,
 };
 
-struct Foundation* FoundationNew(Vector2 slot, enum FanType fan)
+struct Foundation* FoundationNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
 {
     struct Foundation* self = calloc(1, sizeof(struct Foundation));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Foundation", slot, fan);
+        PileCtor(baize, (struct Pile*)self, "Foundation", slot, fan);
         self->super.vtable = &foundationVtable;
         self->accept = 0; // accept any by default
     }

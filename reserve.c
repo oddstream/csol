@@ -26,11 +26,11 @@ static struct PileVtable reserveVtable = {
     &PileFree,
 };
 
-struct Reserve* ReserveNew(Vector2 slot, enum FanType fan)
+struct Reserve* ReserveNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
 {
     struct Reserve* self = calloc(1, sizeof(struct Reserve));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Reserve", slot, fan);
+        PileCtor(baize, (struct Pile*)self, "Reserve", slot, fan);
         self->super.vtable = &reserveVtable;
     }
     return self;

@@ -48,10 +48,6 @@ void TextWidgetDraw(struct Widget *const self)
 {
     extern Color uiTextColor;
 
-    // if (self->rect.x < 0.0f) {
-    //     return;
-    // }
-
     struct TextWidget *const tw = (struct TextWidget*)self;
 
     // get the container's screen rect
@@ -68,6 +64,9 @@ void TextWidgetDraw(struct Widget *const self)
         iconRect.y = con->rect.y + self->rect.y;
         iconRect.width = ICON_SIZE;
         iconRect.height = ICON_SIZE;
+        if (iconRect.y < TITLEBAR_HEIGHT) {
+            return;
+        }
         if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
             iconRect.x += 2.0f;
             iconRect.y += 2.0f;
@@ -85,6 +84,9 @@ void TextWidgetDraw(struct Widget *const self)
         if ( tw->frame != NONE ) {
             pos.x += WIDGET_PADDING;
             pos.y += WIDGET_PADDING / 2.0f;//self->parent->rect.y + (ICON_SIZE / 2.0f) - (self->rect.height / 2.0f);
+        }
+        if (pos.y < TITLEBAR_HEIGHT) {
+            return;
         }
         if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
             pos.x += 2.0f;

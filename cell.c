@@ -26,11 +26,11 @@ static struct PileVtable cellVtable = {
     &PileFree,
 };
 
-struct Cell* CellNew(Vector2 slot, enum FanType fan)
+struct Cell* CellNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
 {
     struct Cell* self = calloc(1, sizeof(struct Cell));
     if ( self ) {
-        PileCtor((struct Pile*)self, "Cell", slot, fan);
+        PileCtor(baize, (struct Pile*)self, "Cell", slot, fan);
         self->super.vtable = &cellVtable;
     }
     return self;
