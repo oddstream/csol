@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "spritesheet.h"
+#include "util.h"
 #include "ui.h"
 
 static struct WidgetVtable textWidgetVtable = {
@@ -52,41 +53,35 @@ void TextWidgetDraw(struct Widget *const self)
 
     // get the container's screen rect
     struct Container *const con = self->parent;
-    Rectangle rect = con->rect;
     // add our x,y to the container's x,y to get screen position
     Vector2 pos;
-    pos.x = rect.x + self->rect.x;
-    pos.y = rect.y + self->rect.y;
+    pos.x = con->rect.x + self->rect.x;
+    pos.y = con->rect.y + self->rect.y;
     if ( tw->frame != NONE ) {
         extern struct Spritesheet *ssIcons;
-        Rectangle iconRect;
-        iconRect.x = con->rect.x + self->rect.x;
-        iconRect.y = con->rect.y + self->rect.y;
-        iconRect.width = ICON_SIZE;
-        iconRect.height = ICON_SIZE;
-        if (iconRect.y < TITLEBAR_HEIGHT) {
+        Rectangle rectIcon = WidgetScreenRect(&(tw->super));
+        rectIcon.width = ICON_SIZE;
+        rectIcon.height = ICON_SIZE;
+
+        if (!UtilRectangleWithinRectangle(rectIcon, con->rect)) {
             return;
         }
         if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
-            iconRect.x += 2.0f;
-            iconRect.y += 2.0f;
+            rectIcon.x += 2.0f;
+            rectIcon.y += 2.0f;
         }
-        SpritesheetDraw(ssIcons, tw->frame, 1.0f, iconRect);
+        SpritesheetDraw(ssIcons, tw->frame, 1.0f, rectIcon);
 
         pos.x += ICON_SIZE;
     }
     if ( tw->text ) {
-        // Rectangle screenRect = (Rectangle){.x=pos.x, .y=pos.y, .width=tw->super.rect.width, .height=tw->super.rect.height};
-        // if ( CheckCollisionPointRec(GetMousePosition(), screenRect) ) {
-        //     pos.x += 2.0f;
-        //     pos.y += 2.0f;
-        // }
+        Rectangle rectText = WidgetScreenRect(&(tw->super));
+        if (!UtilRectangleWithinRectangle(rectText, con->rect)) {
+            return;
+        }
         if ( tw->frame != NONE ) {
             pos.x += WIDGET_PADDING;
             pos.y += WIDGET_PADDING / 2.0f;//self->parent->rect.y + (ICON_SIZE / 2.0f) - (self->rect.height / 2.0f);
-        }
-        if (pos.y < TITLEBAR_HEIGHT) {
-            return;
         }
         if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
             pos.x += 2.0f;

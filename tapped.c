@@ -12,8 +12,7 @@
 
 void BaizeStartGame(struct Baize *const self)
 {
-    int typ = lua_getglobal(self->L, "StartGame");  // push function name onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
         fprintf(stderr, "StartGame is not a function\n");
         lua_pop(self->L, 1);  // remove function name
     } else {
@@ -37,8 +36,7 @@ bool BaizeCardTapped(struct Baize *const self, struct Card *const c)
     // }
     lua_State *L = self->L;
 
-    int typ = lua_getglobal(L, "CardTapped");  // push function name onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(L, "CardTapped") != LUA_TFUNCTION) {  // push Lua function name onto the stack
         fprintf(stderr, "CardTapped is not a function\n");
         lua_pop(L, 1);  // remove function name
         return false;
@@ -75,8 +73,7 @@ bool BaizePileTapped(struct Baize *const self, struct Pile *const p)
 {
     lua_State *L = self->L;
 
-    int typ = lua_getglobal(L, "PileTapped");  // push function name onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(L, "PileTapped") != LUA_TFUNCTION) {  // push Lua function name onto the stack
         fprintf(stderr, "PileTapped is not a function\n");
         lua_pop(L, 1);  // remove function name
         return false;

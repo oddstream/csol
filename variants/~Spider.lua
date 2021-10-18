@@ -2,17 +2,9 @@
 
 POWERMOVES = false
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
+function BuildPiles()
 
-function Build()
-
-    if type(AddPile) ~= "function" then
-        io.stderr:write("Build cannot find function AddPile\n")
-        return
-    end
-
-    -- a stock pile is always created first, and filled with Packs of shuffled cards
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE, PACKS, SUITS)
     SetPileRecycles(STOCK, 0)
 
     local pile

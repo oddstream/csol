@@ -27,7 +27,7 @@ static const struct FunctionToRegister {
 } FunctionsToRegister[] = {
     {"AddPile", MoonAddPile},
     {"FindPile", MoonFindPile},
-    {"PileMoveTo", MoonPileMoveTo},
+    // {"PileMoveTo", MoonPileMoveTo},
     {"PileType", MoonPileType},
     {"PileGet", MoonPileGet},
     {"PileLen", MoonPileLen},
@@ -59,6 +59,7 @@ static struct Baize* getBaize(lua_State* L)
     if ( typ != LUA_TLIGHTUSERDATA ) {
         fprintf(stderr, "global BAIZE is not light userdata\n");
         lua_pop(L, 1);  // remove "BAIZE" from stack
+        return NULL;
     }
     struct Baize* baize = lua_touserdata(L, -1); // doesn't alter stack
     lua_pop(L, 1);  // pop light userdata
@@ -259,10 +260,49 @@ void MoonPushArrayAsGlobalArray(lua_State *L, const char* name, struct Array *co
 }
 #endif
 
+static void parseCardFilter(lua_State *L, bool cardFilter[14])
+{
+    // on entry, the thing on the top of the stack (position 7) is a table
+
+    for ( int i=1; i<14; i++ ) {
+        lua_pushinteger(L, i);    // pushes +1 onto stack
+        lua_gettable(L, -2);      // pops integer/index, pushes STRIP_CARDS[i]
+        if ( lua_isnumber(L, -1) ) {
+            int result;
+            result = lua_tointeger(L, -1);    // doesn't alter stack
+            if ( result > 0 && result < 14 ) {
+                cardFilter[result] = 0;
+                fprintf(stdout, "CardFilter: remove %d\n", result);
+            } else {
+                fprintf(stderr, "ERROR: cardFilter: invalid value %d\n", result);
+            }
+        }
+        lua_pop(L, 1);    // remove result of lua_gettable
+    }
+}
+
 int MoonAddPile(lua_State* L)
 {
     struct Baize* baize = getBaize(L);
     if ( !BaizeValid(baize) ) {
+        fprintf(stderr, "ERROR: %s: BAIZE not set\n", __func__);
+        return 0;
+    }
+
+    if (!lua_isstring(L, 1)) {
+        fprintf(stderr, "ERROR: %s: category string expected\n", __func__);
+        return 0;
+    }
+    if (!lua_isnumber(L, 2)) {
+        fprintf(stderr, "ERROR: %s: x number expected\n", __func__);
+        return 0;
+    }
+    if (!lua_isnumber(L, 3)) {
+        fprintf(stderr, "ERROR: %s: y number expected\n", __func__);
+        return 0;
+    }
+    if (!lua_isinteger(L, 4)) {
+        fprintf(stderr, "ERROR: %s: fan integer expected\n", __func__);
         return 0;
     }
 
@@ -276,7 +316,6 @@ int MoonAddPile(lua_State* L)
 
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
-#if 0
         size_t packs, suits;
         if (lua_isnumber(L, 5)) {
             packs = lua_tonumber(L, 5);
@@ -288,10 +327,11 @@ int MoonAddPile(lua_State* L)
         } else {
             suits = 4;
         }
-        bool *cardFilter = ParseCardFilter(L);  // TODO still getting from global STRIP_CARDS, for now
-        p = StockNew(baize, (Vector2){x, y}, fan, packs, suits, cardFilter)
-#endif        
-        p = (struct Pile*)StockNew(baize, (Vector2){x, y}, fan);
+        bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+        if (lua_istable(L, 7)) {
+            parseCardFilter(L, cardFilter);
+        }
+        p = (struct Pile*)StockNew(baize, (Vector2){x, y}, fan, packs, suits, cardFilter);
     } else if ( strcmp(category, "Cell") == 0 ) {
         p = (struct Pile*)CellNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Discard") == 0 ) {
@@ -335,6 +375,7 @@ int MoonFindPile(lua_State* L)
     return 0;
 }
 
+#if 0
 int MoonPileMoveTo(lua_State* L)
 {
     struct Pile* p = lua_touserdata(L, 1);
@@ -357,6 +398,7 @@ int MoonPileMoveTo(lua_State* L)
 
     return 0;
 }
+#endif
 
 int MoonPileType(lua_State *L)
 {

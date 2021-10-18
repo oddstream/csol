@@ -12,7 +12,7 @@ void DrawerCtor(struct Drawer *const self, Rectangle r)
 
 void DrawerStartDrag(struct Container *const self, Vector2 pos)
 {
-    fprintf(stdout, "DrawerStartDrag %.0f, %.0f\n", pos.x, pos.y);
+    // fprintf(stdout, "DrawerStartDrag %.0f, %.0f\n", pos.x, pos.y);
 
     struct Drawer *const dr = (struct Drawer*)self;
     dr->dragStartPos = pos;
@@ -35,12 +35,12 @@ void DrawerDragBy(struct Container *const self, Vector2 delta)
 
     DrawerLayoutWidgets(self);
 
-    fprintf(stdout, "DrawerDragBy %.0f,%.0f := %.0f,%.0f\n", delta.x, delta.y, dr->dragOffset.x, dr->dragOffset.y);
+    // fprintf(stdout, "DrawerDragBy %.0f,%.0f := %.0f,%.0f\n", delta.x, delta.y, dr->dragOffset.x, dr->dragOffset.y);
 }
 
 void DrawerStopDrag(struct Container *const self, Vector2 pos)
 {
-    fprintf(stdout, "DrawerStopDrag %.0f, %.0f\n", pos.x, pos.y);
+    // fprintf(stdout, "DrawerStopDrag %.0f, %.0f\n", pos.x, pos.y);
 
     (void)self;
     (void)pos;

@@ -122,21 +122,21 @@ void BaizeCreatePiles(struct Baize *const self)
         UiUpdateTitleBar(self->ui, self->variantName);
     }
 
-    if (lua_getglobal(self->L, "Build") != LUA_TFUNCTION) { // push value of "Build" onto the stack, return type
+    if (lua_getglobal(self->L, "BuildPiles") != LUA_TFUNCTION) { // push value of "BuildPiles" onto the stack, return type
         fprintf(stderr, "ERROR: %s: Build is not a function\n", __func__);
-        lua_pop(self->L, 1);    // remove "Build" from stack
+        lua_pop(self->L, 1);    // remove "BuildPiles" from stack
     } else {
         if (lua_pcall(self->L, 0, 0, 0) != LUA_OK) {
             fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
-            // fprintf(stderr, "Build called ok\n");
+            // fprintf(stderr, "BuildPiles called ok\n");
         }
     }
 
     // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
-    // setup useful shortcuts
+    // setup useful shortcuts for collect (to foundations) and statusbar
     {   // scope for pindex
         size_t pindex;
         for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
@@ -540,8 +540,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
     // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
-    int typ = lua_getglobal(self->L, "AfterMove");  // push Lua function name onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if(lua_getglobal(self->L, "AfterMove") != LUA_TFUNCTION) {  // push Lua function name onto the stack
         // fprintf(stderr, "AfterMove is not a function\n");
         lua_pop(self->L, 1);  // remove func from stack
     } else {

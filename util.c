@@ -86,3 +86,21 @@ uint32_t UtilHash(char *str)
     }
     return hash;
 }
+
+bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer)
+{
+    if (inner.x < outer.x || inner.y < outer.y) {
+        return false;
+    }
+    float innerRight = inner.x + inner.width;
+    float outerRight = outer.x + outer.width;
+    if (innerRight > outerRight) {
+        return false;
+    }
+    float innerBottom = inner.y + inner.height;
+    float outerBottom = outer.y + outer.height;
+    if (innerBottom > outerBottom) {
+        return false;
+    }
+    return true;
+}

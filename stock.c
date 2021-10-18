@@ -28,6 +28,7 @@ static struct PileVtable stockVtable = {
     &PileFree,
 };
 
+#if 0
 static void ParseCardFilter(lua_State *L, bool cardFilter[14])
 {
     if ( lua_getglobal(L, "STRIP_CARDS") != LUA_TTABLE ) {
@@ -51,11 +52,10 @@ static void ParseCardFilter(lua_State *L, bool cardFilter[14])
     }
     lua_pop(L, 1);    // remove result of lua_getglobal
 }
+#endif
 
-static void CreateCardLibrary(struct Baize *const baize)
+static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t suits, bool cardFilter[14])
 {
-    bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-    ParseCardFilter(baize->L, cardFilter);
     baize->numberOfCardsInSuit = 0;
     for ( int i=1; i<14; i++ ) {
         if (cardFilter[i]) {
@@ -63,9 +63,6 @@ static void CreateCardLibrary(struct Baize *const baize)
         }
     }
 
-    // TODO get PACKS, SUITS, STRIP_CARDS inside Moon:AddPile and pass them as parameters to StockNew
-    size_t packs = MoonGetGlobalInt(baize->L, "PACKS", 1);
-    size_t suits = MoonGetGlobalInt(baize->L, "SUITS", 4);
     size_t cardsRequired = packs * suits * baize->numberOfCardsInSuit;
 
     // first time this is called, baize->cardLibrary will be NULL because we used calloc()
@@ -111,14 +108,14 @@ static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
     }
 }
 
-struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
+struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan, size_t packs, size_t suits, bool cardFilter[14])
 {
     struct Stock* self = calloc(1, sizeof(struct Stock));
     if ( self ) {
         PileCtor(baize, (struct Pile*)self, "Stock", slot, fan);
         self->super.vtable = &stockVtable;
 
-        CreateCardLibrary(baize);
+        CreateCardLibrary(baize, packs, suits, cardFilter);
         FillStockFromLibrary(baize, (struct Pile *const)self);
         ShuffleStock(baize, (struct Pile *const)self);
 

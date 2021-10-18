@@ -1,20 +1,17 @@
 -- Freecell
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 1
-SUITS = 4
 POWERMOVES = true
 EASY_SEEDS = {39675,50060,50419}
--- C sets variable 'BAIZE', 'STOCK', FAN_*
 
-function Build()
+function BuildPiles()
 
   if type(AddPile) ~= "function" then
     io.stderr:write("Build cannot find function AddPile\n")
     return
   end
 
-  STOCK = AddPile("Stock", 5, -5, FAN_NONE)  -- hide the stock off screen
+  STOCK = AddPile("Stock", 5, -5, FAN_NONE, 1, 4)  -- hide the stock off screen
 
   local pile
 
@@ -84,7 +81,7 @@ end
 
 function CanTailBeAppended_Foundation(pile, tail)
     if TailLen(tail) > 1 then
-        return false, "Foundation can only accept a single card"
+        return false, "Foundations can only accept a single card"
     else
         if PileLen(pile) == 0 then
             local c1 = TailGet(tail, 1)

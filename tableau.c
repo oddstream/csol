@@ -146,8 +146,7 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
     struct Baize *const baize = self->owner;
     lua_State *L = baize->L;
 
-    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(L, funcName) != LUA_TFUNCTION) {  // push Lua function name onto the stack
         // fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {

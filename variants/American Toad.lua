@@ -13,15 +13,11 @@ The foundations build up in suit, wrapping from King to Ace as necessary.
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 2
-SUITS = 4
 POWERMOVES = false
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
+function BuildPiles()
 
-function Build()
-
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     local pile
@@ -90,6 +86,9 @@ function CanTailBeMoved_Reserve(tail)
 end
 
 function CanTailBeAppended_Foundation(pile, tail)
+    if TailLen(tail) > 1 then
+        return false, "Foundations can only accept a single card"
+    end
     if PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= FOUNDATION_ACCEPT then
@@ -97,20 +96,17 @@ function CanTailBeAppended_Foundation(pile, tail)
         end
     else
         local c1 = PilePeek(pile)
-        for i = 1, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
-            end
-            if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
-                -- wrap from King to Ace
-            elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
-                -- up, eg 3 on a 2
-            else
-                return false, "Foundations build up"
-            end 
-            c1 = c2
+        local c2 = TailGet(tail, 1)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations must be built in suit"
         end
+        if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
+            -- wrap from King to Ace
+        elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
+            -- up, eg 3 on a 2
+        else
+            return false, "Foundations build up"
+        end 
     end
     return true
 end

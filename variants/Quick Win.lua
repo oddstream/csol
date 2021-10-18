@@ -1,14 +1,11 @@
 -- Quick Win
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 1
-SUITS = 4
 POWERMOVES = false
-STRIP_CARDS = {12,13}
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
-function Build()
+function BuildPiles()
 
     if type(AddPile) ~= "function" then
         io.stderr:write("Build cannot find function AddPile\n")
@@ -16,7 +13,7 @@ function Build()
     end
 
     -- a stock pile is always created first, and filled with PACKS of shuffled cards
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4, {12,13})
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     local pile
@@ -99,7 +96,7 @@ end
 
 function CanTailBeAppended_Foundation(pile, tail)
     if TailLen(tail) > 1 then
-        return false, "Foundation can only accept a single card"
+        return false, "Foundations can only accept a single card"
     elseif PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= 1 then
@@ -107,15 +104,12 @@ function CanTailBeAppended_Foundation(pile, tail)
         end
     else
         local c1 = PilePeek(pile)
-        for i = 1, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
-            end
-            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build up"
-            end
-            c1 = c2
+        local c2 = TailGet(tail, 1)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations must be built in suit"
+        end
+        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+            return false, "Foundations build up"
         end
     end
     return true

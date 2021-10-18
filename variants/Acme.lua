@@ -19,21 +19,14 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 1
-SUITS = 4
 POWERMOVES = false
--- SEED = 3 -- 2 winnable draw three
+SEED=12620
 
 StockDealCards = 1
 
-function Build()
+function BuildPiles()
 
-    if type(AddPile) ~= "function" then
-        io.stderr:write("Build cannot find function AddPile\n")
-        return
-    end
-
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile

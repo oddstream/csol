@@ -66,8 +66,7 @@ bool CanTailBeMoved(struct Array *const tail)
 
     bool result = true;
     lua_State *L = baize->L;
-    int typ = lua_getglobal(L, funcName);  // push Lua function name onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(L, funcName) != LUA_TFUNCTION) {  // push Lua function name onto the stack
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
@@ -98,8 +97,7 @@ bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail)
 
     bool result = true;
     lua_State *L = pile->owner->L;
-    int typ = lua_getglobal(L, funcName);  // push Lua function name (same as this function name) onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(L, funcName) != LUA_TFUNCTION) {  // push Lua function name onto the stack
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {
@@ -127,8 +125,7 @@ bool IsPileConformant(struct Pile *const pile)
 
     bool result = true;
     lua_State *L = pile->owner->L;
-    int typ = lua_getglobal(L, funcName);  // push Lua function name (same as this function name) onto the stack
-    if ( typ != LUA_TFUNCTION ) {
+    if (lua_getglobal(L, funcName) != LUA_TFUNCTION) {  // push Lua function name onto the stack
         fprintf(stderr, "%s is not a function\n", funcName);
         lua_pop(L, 1);  // remove func from stack
     } else {

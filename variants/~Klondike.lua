@@ -1,29 +1,20 @@
 -- Klondike
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 1
-SUITS = 4
 POWERMOVES = false
 -- SEED = 3 -- 2 winnable draw three
 -- SEED = 39880
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
+function BuildPiles()
 
-function Build()
-
-    if type(AddPile) ~= "function" then
-        io.stderr:write("Build cannot find function AddPile\n")
-        return
-    end
-
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE)
+    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
 
     FOUNDATIONS = {}
     for x = 4, 7 do
-        AddPile("Foundation", x, 1, FAN_NONE)
+        pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
         SetPileAccept(pile, 1)
     end
@@ -45,8 +36,8 @@ function Build()
 end
 
 function StartGame()
-  STOCK_RECYCLES = 999
-  SetPileRecycles(STOCK, STOCK_RECYCLES)
+    STOCK_RECYCLES = 999
+    SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 function CanTailBeMoved_Foundation(tail)
@@ -77,7 +68,7 @@ end
 
 function CanTailBeAppended_Foundation(pile, tail)
     if TailLen(tail) > 1 then
-        return false, "Foundation can only accept a single card"
+        return false, "Foundations can only accept a single card"
     elseif PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= 1 then
@@ -85,15 +76,12 @@ function CanTailBeAppended_Foundation(pile, tail)
         end
     else
         local c1 = PilePeek(pile)
-        for i = 1, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
-            end
-            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build up"
-            end
-            c1 = c2
+        local c2 = TailGet(tail, 1)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations must be built in suit"
+        end
+        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+            return false, "Foundations build up"
         end
     end
     return true

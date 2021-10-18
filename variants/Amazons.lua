@@ -6,17 +6,11 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 1
-SUITS = 4
 POWERMOVES = false
-STRIP_CARDS = {2,3,4,5,6,13}
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
+function BuildPiles()
 
-function Build()
-
-    -- a stock pile is always created first, and filled with Packs of shuffled cards
-    STOCK = AddPile(STOCK, 6, 1, FAN_NONE)
+    STOCK = AddPile("Stock", 6, 1, FAN_NONE, 1, 4, {2,3,4,5,6,13})
 
     local pile
 

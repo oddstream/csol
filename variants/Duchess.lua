@@ -8,17 +8,13 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-PACKS = 1
-SUITS = 4
 POWERMOVES = false
 
 StockDealCards = 1
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
+function BuildPiles()
 
-function Build()
-
-    STOCK = AddPile("Stock", 2, 2, FAN_NONE)
+    STOCK = AddPile("Stock", 2, 2, FAN_NONE, 1, 4)
   
     local pile
 
@@ -94,7 +90,7 @@ end
 
 function CanTailBeAppended_Foundation(pile, tail)
     if TailLen(tail) > 1 then
-        return false, "Foundation can only accept a single card"
+        return false, "Foundations can only accept a single card"
     elseif PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if FOUNDATION_ACCEPT == 0 then

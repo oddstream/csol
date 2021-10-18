@@ -20,4 +20,6 @@ char* UtilSuitToLongString(int suit);
 
 uint32_t UtilHash(char *str);
 
+bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer);
+
 #endif
