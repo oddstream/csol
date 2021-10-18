@@ -61,6 +61,15 @@ function StartGame()
   SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
+-- CanTailBeMoved constraints
+
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from the Waste"
+    end
+    return true
+end
+
 function CanTailBeMoved_Foundation(tail)
     return false, "You cannot move cards from a Foundation"
 end
@@ -89,6 +98,15 @@ end
 function CanTailBeMoved_Waste(tail)
     if TailLen(tail) > 1 then
         return false, "Only a single card can be moved from Waste"
+    end
+    return true
+end
+
+-- CanTailBeAppended constraints
+
+function CanTailBeAppended_Waste(pile, tail)
+    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+        return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
@@ -136,6 +154,8 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
+-- IsPileConformant
+
 function IsPileConformant_Foundation(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
@@ -166,6 +186,8 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
+-- SortedAndUnSorted (_Tableau only)
+
 function SortedAndUnsorted_Tableau(pile)
     local sorted = 0
     local unsorted = 0
@@ -184,8 +206,9 @@ function SortedAndUnsorted_Tableau(pile)
     return sorted, unsorted
 end
 
+-- Actions
+
 function CardTapped(card)
-  -- LogCard("CardTapped", card)
   if CardOwner(card) == STOCK then
     for i = 1, StockDealCards do
       MoveCard(STOCK, WASTE)
@@ -194,7 +217,6 @@ function CardTapped(card)
 end
 
 function PileTapped(pile)
-  -- io.stdout:write("PileTapped\n")
   if pile == STOCK then
     if STOCK_RECYCLES == 0 then
       return "No more Stock recycles"
@@ -214,7 +236,6 @@ function PileTapped(pile)
 end
 
 function AfterMove()
-    -- io.stdout:write("AfterMove\n")
     for i = 1, 4 do
         if PileLen(TABLEAUX[i]) == 0 then
             MoveCard(RESERVES[1], TABLEAUX[i])

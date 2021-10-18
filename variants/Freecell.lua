@@ -54,6 +54,8 @@ function BuildPiles()
 
 end
 
+-- CanTailBeMoved constraints
+
 function CanTailBeMoved_Foundation(tail)
     return false, "You cannot move cards from a Foundation"
 end
@@ -78,6 +80,8 @@ function CanTailBeMoved_Tableau(tail)
     end
     return true
 end
+
+-- CanTailBeAppended constraints
 
 function CanTailBeAppended_Foundation(pile, tail)
     if TailLen(tail) > 1 then
@@ -121,20 +125,7 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
-function IsPileConformant_Foundation(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
-        c1 = c2
-    end
-    return true
-end
+-- IsPileConformant (_Tableau only)
 
 function IsPileConformant_Tableau(pile)
     local c1 = PilePeek(pile)
@@ -150,6 +141,8 @@ function IsPileConformant_Tableau(pile)
     end
     return true
 end
+
+-- SortedAndUnSorted (_Tableau only)
 
 function SortedAndUnsorted_Tableau(pile)
     local sorted = 0

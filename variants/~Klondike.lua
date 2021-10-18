@@ -40,6 +40,15 @@ function StartGame()
     SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
+-- CanTailBeMoved constraints
+
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from the Waste"
+    end
+    return true
+end
+
 function CanTailBeMoved_Foundation(tail)
     return false, "You cannot move cards from a Foundation"
 end
@@ -59,9 +68,14 @@ function CanTailBeMoved_Tableau(tail)
     return true
 end
 
-function CanTailBeMoved_Waste(tail)
+-- CanTailBeAppended constraints
+
+function CanTailBeAppended_Waste(pile, tail)
     if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from Waste"
+        return false, "The Waste can only accept a single card"
+    end
+    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+        return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
@@ -109,20 +123,7 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
-function IsPileConformant_Foundation(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
-        c1 = c2
-    end
-    return true
-end
+-- IsPileConformant
 
 function IsPileConformant_Tableau(pile)
     local c1 = PilePeek(pile)
@@ -138,6 +139,8 @@ function IsPileConformant_Tableau(pile)
     end
     return true
 end
+
+-- SortedAndUnSorted (_Tableau only)
 
 function SortedAndUnsorted_Tableau(pile)
     local sorted = 0
@@ -157,6 +160,8 @@ function SortedAndUnsorted_Tableau(pile)
     return sorted, unsorted
 end
 
+-- Actions
+
 function CardTapped(card)
     if CardOwner(card) == STOCK then
         for i = 1, STOCKDEALCARDS do
@@ -166,7 +171,6 @@ function CardTapped(card)
 end
 
 function PileTapped(pile)
-    -- io.stdout:write("PileTapped\n")
     if pile == STOCK then
         if STOCK_RECYCLES == 0 then
           return "No more Stock recycles"

@@ -44,6 +44,15 @@ function CalcPileIndex(piles, pile)
     io.stderr:write("CalcPileIndex cannot find pile\n")
 end
 
+-- CanTailBeMoved constraints
+
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from the Waste"
+    end
+    return true
+end
+
 function CanTailBeMoved_Foundation(tail)
     return false, "You cannot move cards from a Foundation"
 end
@@ -51,6 +60,15 @@ end
 function CanTailBeMoved_Reserve(tail)
     if TailLen(tail) > 1 then
         return false, "You can only move one Reserve card"
+    end
+    return true
+end
+
+-- CanTailBeAppended constraints
+
+function CanTailBeAppended_Waste(pile, tail)
+    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+        return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
@@ -93,6 +111,8 @@ function CanTailBeAppended_Foundation(pile, tail)
     return true
 end
 
+-- Actions
+
 function CardTapped(card)
     if CardOwner(card) == STOCK then
         for _, res in ipairs(RESERVES) do
@@ -113,5 +133,4 @@ function PileTapped(pile)
 end
 
 function AfterMove()
-    -- io.stdout:write("AfterMove\n")
 end

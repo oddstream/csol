@@ -53,6 +53,15 @@ function StartGame()
     SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
+-- CanTailBeMoved constraints
+
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from the Waste"
+    end
+    return true
+end
+
 function CanTailBeMoved_Foundation(tail)
     return false, "You cannot move cards from a Foundation"
 end
@@ -93,6 +102,15 @@ function CanTailBeMoved(tail)
     return true
 end
 ]]
+
+-- CanTailBeAppended constraints
+
+function CanTailBeAppended_Waste(pile, tail)
+    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+        return false, "The Waste can only accept cards from the Stock"
+    end
+    return true
+end
 
 function CanTailBeAppended_Foundation(pile, tail)
     if TailLen(tail) > 1 then
@@ -140,20 +158,7 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
-function IsPileConformant_Foundation(pile)
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations build in suit"
-        end
-        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
-        c1 = c2
-    end
-    return true
-end
+-- IsPileConformant (_Tableau only)
 
 function IsPileConformant_Tableau(pile)
     local c1 = PileGet(pile, 1)
@@ -169,6 +174,8 @@ function IsPileConformant_Tableau(pile)
     end
     return true
 end
+
+-- SortedAndUnSorted (_Tableau only)
 
 function SortedAndUnsorted_Tableau(pile)
     local sorted = 0
@@ -188,6 +195,8 @@ function SortedAndUnsorted_Tableau(pile)
     return sorted, unsorted
 end
 
+-- Actions
+
 function CardTapped(card)
     if CardOwner(card) == STOCK then
         MoveCard(STOCK, WASTE)
@@ -195,7 +204,6 @@ function CardTapped(card)
 end
 
 function PileTapped(pile)
-  -- io.stdout:write("PileTapped\n")
   if pile == STOCK then
     if STOCK_RECYCLES == 0 then
       return "No more Stock recycles"

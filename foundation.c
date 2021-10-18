@@ -46,19 +46,9 @@ bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self,
         return false;
     }
 
-    bool result = false;
-#if 1
     struct Array1 tail =(struct Array1){.size=1, .used=1, .data[0]=c};
-    result = CanTailBeAppended(self, (struct Array*)&tail);
-#else
-    struct Array *tail = ArrayNew(1);
-    if (tail) {
-        tail = ArrayPush(tail, c);
-        result = CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, tail);
-        ArrayFree(tail);
-    }
-#endif
-    return result;
+    return CanTailBeAppended(self, (struct Array*)&tail);
+    // don't need to free an Array1
 }
 
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)

@@ -41,19 +41,10 @@ struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
-    bool result = false;
-#if 1
+
     struct Array1 tail =(struct Array1){.size=1, .used=1, .data[0]=c};
-    result = CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, (struct Array*)&tail);
-#else
-    struct Array *tail = ArrayNew(1);
-    if (tail) {
-        tail = ArrayPush(tail, c);
-        result = CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, tail);
-        ArrayFree(tail);
-    }
-#endif
-    return result;
+    return CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, (struct Array*)&tail);
+    // don't need to free an Array1
 }
 
 static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)

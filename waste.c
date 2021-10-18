@@ -9,6 +9,7 @@
 #include "baize.h"
 #include "pile.h"
 #include "array.h"
+#include "constraint.h"
 #include "waste.h"
 
 static struct PileVtable wasteVtable = {
@@ -38,33 +39,19 @@ struct Waste* WasteNew(struct Baize *const baize, Vector2 slot, enum FanType fan
 
 bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    (void)self;
+    (void)baize;
 
-    if ( PileIsStock(c->owner) ) {
-        // the only place we allow a prone card to be moved/dragged
-        return true;
-    } else {
-        BaizeSetError(baize, "(C) You can only move cards to a Waste pile from the Stock");
-    }
-    return false;
+    struct Array1 tail =(struct Array1){.size=1, .used=1, .data[0]=c};
+    return CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, (struct Array*)&tail);
+    // don't need to free an Array1
 }
 
 bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    (void)self;
-
-    // TODO maybe move three cards
-    if ( ArrayLen(tail) == 1 ) {
-        struct Card *c = ArrayGet(tail, 0);
-        if ( CardValid(c) && PileIsStock(c->owner) ) {
-            return true;
-        } else {
-            BaizeSetError(baize, "(C) You can only move cards to a Waste pile from the Stock");
-        }
-    } else {
-        BaizeSetError(baize, "(C) You can only move one card to a Waste pile");
+    if (ArrayLen(tail) == 1) {
+        return WasteCanAcceptCard(baize, self, ArrayGet(tail, 0));
     }
-    return false;
+    return CanTailBeMoved(tail) && CanTailBeAppended(self, tail);
 }
 
 int WasteCollect(struct Pile *const self)

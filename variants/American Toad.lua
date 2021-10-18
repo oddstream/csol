@@ -58,6 +58,15 @@ function StartGame()
     MoveCard(STOCK, WASTE)
 end
 
+-- CanTailBeMoved constraints
+
+function CanTailBeMoved_Waste(tail)
+    if TailLen(tail) > 1 then
+        return false, "Only a single card can be moved from the Waste"
+    end
+    return true
+end
+
 function CanTailBeMoved_Foundation(tail)
     return false, "You cannot move cards from a Foundation"
 end
@@ -71,16 +80,18 @@ function CanTailBeMoved_Tableau(tail)
     return true
 end
 
-function CanTailBeMoved_Waste(tail)
+function CanTailBeMoved_Reserve(tail)
     if TailLen(tail) > 1 then
-        return false, "Only one Waste card can be moved"
+        return false, "Only one Reserve card can be moved"
     end
     return true
 end
 
-function CanTailBeMoved_Reserve(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only one Reserve card can be moved"
+-- CanTailBeAppended constraints
+
+function CanTailBeAppended_Waste(pile, tail)
+    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+        return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
@@ -134,23 +145,7 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
-function IsPileConformant_Foundation(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
-            -- wrap from King to Ace
-        elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
-            -- up, eg 3 on a 2
-        else
-            return false, "Foundations build up"
-        end 
-        c1 = c2
-    end
-end
+-- IsPileConformant
 
 function IsPileConformant_Tableau(pile)
     local c1 = PilePeek(pile)
@@ -170,6 +165,8 @@ function IsPileConformant_Tableau(pile)
     end
     return true
 end
+
+-- SortedAndUnSorted (_Tableau only)
 
 function SortedAndUnsorted_Tableau(pile)
     local sorted = 0
@@ -192,6 +189,7 @@ function SortedAndUnsorted_Tableau(pile)
     return sorted, unsorted
 end
 
+-- Actions
 
 function CardTapped(card)
   if CardOwner(card) == STOCK then
@@ -200,7 +198,6 @@ function CardTapped(card)
 end
 
 function PileTapped(pile)
---   io.stdout:write("PileTapped\n")
   if pile == STOCK then
     if STOCK_RECYCLES == 0 then
       return "No more Stock recycles"
