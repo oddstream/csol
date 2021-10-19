@@ -14,6 +14,7 @@
 #include "stock.h"
 
 static struct PileVtable stockVtable = {
+    &StockCanMoveTail,
     &StockCanAcceptCard,
     &StockCanAcceptTail,
     &StockCollect,
@@ -124,9 +125,15 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan
     return self;
 }
 
+bool StockCanMoveTail(struct Array *const tail)
+{
+    (void)tail;
+    return true;
+}
+
 bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    BaizeSetError(baize, "(C) You cannot move cards to the Stock");
+    BaizeSetError(baize, "(C) Cannot move cards to the Stock");
 
     (void)baize;
     (void)self;
@@ -136,7 +143,7 @@ bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeSetError(baize, "(C) You cannot move cards to the Stock");
+    BaizeSetError(baize, "(C) Cannot move cards to the Stock");
 
     (void)baize;
     (void)self;

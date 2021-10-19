@@ -40,18 +40,22 @@ function StartGame()
     SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
--- CanTailBeMoved constraints
+-- CanTailBeMoved constraints (_Tableau only)
 
+--[[
 function CanTailBeMoved_Waste(tail)
     if TailLen(tail) > 1 then
         return false, "Only a single card can be moved from the Waste"
     end
     return true
 end
+]]
 
+--[[
 function CanTailBeMoved_Foundation(tail)
-    return false, "You cannot move cards from a Foundation"
+    return false, "Cannot move cards from a Foundation"
 end
+]]
 
 function CanTailBeMoved_Tableau(tail)
     local c1 = TailGet(tail, 1)

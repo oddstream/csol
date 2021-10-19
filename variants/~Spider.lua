@@ -1,5 +1,7 @@
 -- Spider
 
+V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+
 POWERMOVES = false
 
 function BuildPiles()
@@ -36,9 +38,11 @@ function BuildPiles()
     end
 end
 
+--[[
 function CanTailBeMoved_Discard(tail)
-    return false, "You cannot move cards from a Discard"
+    return false, "Cannot move cards from a Discard"
 end
+]]
 
 function CanTailBeMoved_Tableau(tail)
     local c1 = TailGet(tail, 1)
@@ -61,9 +65,9 @@ function CanTailBeAppended_Discard(pile, tail)
     if TailLen(tail) ~= 13 then
         return false, "Discard can only accept 13 cards"
     else
-        local c1 = TailGet(tail, 0)
+        local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= 13 then
-            return false, "Can only discard from a 13"
+            return false, "Can only discard from a 13, not a " .. V[CardOrdinal(c1)]
         end
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)

@@ -57,7 +57,7 @@ end
 -- CanTailBeMoved constraints
 
 function CanTailBeMoved_Foundation(tail)
-    return false, "You cannot move cards from a Foundation"
+    return false, "Cannot move cards from a Foundation"
 end
 
 function CanTailBeMoved_Tableau(tail)

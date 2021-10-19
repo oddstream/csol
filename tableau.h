@@ -16,6 +16,7 @@ struct Tableau {
 };
 
 struct Tableau* TableauNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
+bool TableauCanMoveTail(struct Array *const tail);
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);

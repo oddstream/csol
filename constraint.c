@@ -49,19 +49,10 @@ bool CanTailBeMoved(struct Array *const tail)
         return false;
     }
 
+    // BaizeTouchStop() checks if any tail cards are prone
+
     struct Pile *const pile = c0->owner;
     struct Baize *const baize = pile->owner;
-
-    {
-        size_t index;
-        for ( struct Card *c = ArrayFirst(tail, &index); c; c = ArrayNext(tail, &index) ) {
-            if (c->prone) {
-                BaizeSetError(baize, "(C) You cannot move a face down card");
-                return false;
-            }
-        }
-    }
-
     char funcName[64]; sprintf(funcName, "%s_%s", __func__, pile->category);
 
     bool result = true;

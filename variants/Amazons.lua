@@ -44,8 +44,9 @@ function CalcPileIndex(piles, pile)
     io.stderr:write("CalcPileIndex cannot find pile\n")
 end
 
--- CanTailBeMoved constraints
+-- CanTailBeMoved constraints (_Tableau only)
 
+--[[
 function CanTailBeMoved_Waste(tail)
     if TailLen(tail) > 1 then
         return false, "Only a single card can be moved from the Waste"
@@ -54,15 +55,16 @@ function CanTailBeMoved_Waste(tail)
 end
 
 function CanTailBeMoved_Foundation(tail)
-    return false, "You cannot move cards from a Foundation"
+    return false, "Cannot move cards from a Foundation"
 end
 
 function CanTailBeMoved_Reserve(tail)
     if TailLen(tail) > 1 then
-        return false, "You can only move one Reserve card"
+        return false, "Only one Reserve card can be moved"
     end
     return true
 end
+]]
 
 -- CanTailBeAppended constraints
 

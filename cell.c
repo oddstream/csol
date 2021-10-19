@@ -12,6 +12,7 @@
 #include "cell.h"
 
 static struct PileVtable cellVtable = {
+    &CellCanMoveTail,
     &CellCanAcceptCard,
     &CellCanAcceptTail,
     &CellCollect,
@@ -34,6 +35,12 @@ struct Cell* CellNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
         self->super.vtable = &cellVtable;
     }
     return self;
+}
+
+bool CellCanMoveTail(struct Array *const tail)
+{
+    (void)tail;
+    return true;
 }
 
 bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)

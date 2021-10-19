@@ -14,6 +14,7 @@
 #include "util.h"
 
 static struct PileVtable foundationVtable = {
+    &FoundationCanMoveTail,
     &FoundationCanAcceptCard,
     &FoundationCanAcceptTail,
     &FoundationCollect,
@@ -39,6 +40,15 @@ struct Foundation* FoundationNew(struct Baize *const baize, Vector2 slot, enum F
     return self;
 }
 
+bool FoundationCanMoveTail(struct Array *const tail)
+{
+    struct Card *c = ArrayGet(tail, 0);
+    struct Baize* baize = CardToBaize(c);
+    BaizeSetError(baize, "(C) Cannot move cards from a Foundation");
+    (void)tail;
+    return false;
+}
+
 bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
@@ -53,26 +63,25 @@ bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self,
 
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    if (ArrayLen(self->cards) == baize->numberOfCardsInSuit) {
-        BaizeSetError(baize, "(C) The foundation is full");
-        return false;
-    }
-    if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit) {
-        BaizeSetError(baize, "(C) That would make the foundation over full");
-        return false;
-    }
-    if (ArrayLen(tail) == 1) {
-        return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
-    }
     if (ArrayLen(tail) > 1) {
         BaizeSetError(baize, "(C) Can only move a single card to a Foundation");
         return false;
     }
-    return CanTailBeMoved(tail) && CanTailBeAppended(self, tail);
+    if (ArrayLen(self->cards) == baize->numberOfCardsInSuit) {
+        BaizeSetError(baize, "(C) The Foundation is full");
+        return false;
+    }
+    if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit) {
+        BaizeSetError(baize, "(C) That would over-fill the Foundation");
+        return false;
+    }
+    // ArrayLen(tail) == 1
+    return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
 }
 
 int FoundationCollect(struct Pile *const self)
 {
+    // collecting is done by pulling cards to Foundations, so we do nothing here
     (void)self;
     return 0;
 }
@@ -84,6 +93,7 @@ bool FoundationComplete(struct Pile *const self)
 
 bool FoundationConformant(struct Pile *const self)
 {
+    // a Foundation is always assumed to be conformant, how else did it get built!?
     (void)self;
     return true;
 }
@@ -95,6 +105,7 @@ void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)
 
 void FoundationSetRecycles(struct Pile *const self, int r)
 {
+    // only the Stock can be recycled
     (void)self;
     (void)r;
 }

@@ -33,6 +33,7 @@ struct Pile {
 };
 
 struct PileVtable {
+    bool (*CanMoveTail)(struct Array *const tail);
     bool (*CanAcceptCard)(struct Baize *const baize, struct Pile *const self, struct Card *const c);
     bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
     int (*Collect)(struct Pile *p);

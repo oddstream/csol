@@ -15,6 +15,7 @@ struct Stock {
 };
 
 struct Stock* StockNew(struct Baize *const baize, Vector2 pos, enum FanType fanType, size_t packs, size_t suits, bool cardFilter[14]);
+bool StockCanMoveTail(struct Array *const tail);
 bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int StockCollect(struct Pile *const self);

@@ -14,6 +14,7 @@
 #include "util.h"
 
 static struct PileVtable discardVtable = {
+    &DiscardCanMoveTail,
     &DiscardCanAcceptCard,
     &DiscardCanAcceptTail,
     &DiscardCollect,
@@ -38,6 +39,15 @@ struct Discard* DiscardNew(struct Baize *const baize, Vector2 slot, enum FanType
     return self;
 }
 
+bool DiscardCanMoveTail(struct Array *const tail)
+{
+    struct Card *c = ArrayGet(tail, 0);
+    struct Baize* baize = CardToBaize(c);
+    BaizeSetError(baize, "(C) Cannot move cards from a Discard");
+    (void)tail;
+    return false;
+}
+
 bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
@@ -56,7 +66,7 @@ bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         BaizeSetError(baize, "(C) Can only move a full set of cards to a Discard");
         return false;
     }
-    return CanTailBeMoved(tail);
+    return CanTailBeAppended(self, tail);
 }
 
 int DiscardCollect(struct Pile *const self)

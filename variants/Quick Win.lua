@@ -53,8 +53,9 @@ function StartGame()
     SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
--- CanTailBeMoved constraints
+-- CanTailBeMoved constraints (_Tableau only)
 
+--[[
 function CanTailBeMoved_Waste(tail)
     if TailLen(tail) > 1 then
         return false, "Only a single card can be moved from the Waste"
@@ -63,8 +64,9 @@ function CanTailBeMoved_Waste(tail)
 end
 
 function CanTailBeMoved_Foundation(tail)
-    return false, "You cannot move cards from a Foundation"
+    return false, "Cannot move cards from a Foundation"
 end
+]]
 
 function CanTailBeMoved_Tableau(tail)
     local c1 = TailGet(tail, 1)
@@ -77,13 +79,6 @@ function CanTailBeMoved_Tableau(tail)
             return false, "Moved cards must be in descending order"
         end
         c1 = c2
-    end
-    return true
-end
-
-function CanTailBeMoved_Waste(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from Waste"
     end
     return true
 end

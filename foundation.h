@@ -15,6 +15,7 @@ struct Foundation {
 };
 
 struct Foundation* FoundationNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
+bool FoundationCanMoveTail(struct Array *const tail);
 bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int FoundationCollect(struct Pile *const self);

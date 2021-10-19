@@ -13,6 +13,7 @@
 #include "util.h"
 
 static struct PileVtable tableauVtable = {
+    &TableauCanMoveTail,
     &TableauCanAcceptCard,
     &TableauCanAcceptTail,
     &TableauCollect,
@@ -38,12 +39,17 @@ struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType
     return self;
 }
 
+bool TableauCanMoveTail(struct Array *const tail)
+{
+    return CanTailBeMoved(tail);
+}
+
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
 
     struct Array1 tail =(struct Array1){.size=1, .used=1, .data[0]=c};
-    return CanTailBeMoved((struct Array*)&tail) && CanTailBeAppended(self, (struct Array*)&tail);
+    return CanTailBeAppended(self, (struct Array*)&tail);
     // don't need to free an Array1
 }
 
@@ -88,7 +94,7 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
             }
         }
     }
-    return CanTailBeMoved(tail) && CanTailBeAppended(self, tail);
+    return CanTailBeAppended(self, tail);
 }
 
 int TableauCollect(struct Pile *const self)
@@ -113,7 +119,7 @@ void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)
 
 void TableauSetRecycles(struct Pile *const self, int r)
 {
-    // we don't do that here
+    // only the Stock can be recycled
     (void)self;
     (void)r;
 }

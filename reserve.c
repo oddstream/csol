@@ -12,6 +12,7 @@
 #include "reserve.h"
 
 static struct PileVtable reserveVtable = {
+    &ReserveCanMoveTail,
     &ReserveCanAcceptCard,
     &ReserveCanAcceptTail,
     &ReserveCollect,
@@ -36,6 +37,12 @@ struct Reserve* ReserveNew(struct Baize *const baize, Vector2 slot, enum FanType
     return self;
 }
 
+bool ReserveCanMoveTail(struct Array *const tail)
+{
+    (void)tail;
+    return true;
+}
+
 bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)self;
@@ -46,9 +53,9 @@ bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
 
 bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
+    BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
     (void)self;
     (void)tail;
-    BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
     return false;
 }
 

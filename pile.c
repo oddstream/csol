@@ -101,7 +101,7 @@ bool PileIsStock(struct Pile *const self)
     struct Baize* baize = self->owner;
     if ( !BaizeValid(baize) )
     {
-        fprintf(stderr, "Pile Baize pointer is not valid\n");
+        fprintf(stderr, "ERROR: %s: Pile Baize pointer is not valid\n", __func__);
         return false;
     }
     return self == baize->stock;
@@ -434,7 +434,6 @@ int PileGenericCollect(struct Pile *const self)
                 // this pile is empty
                 return cardsMoved;
             }
-
             if ( !fp->vtable->CanAcceptCard(baize, fp, c) ) {
                 // this Foundation doesn't want this card; onto the next Foundation
                 break;

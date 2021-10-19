@@ -38,6 +38,16 @@ bool CardValid(struct Card *const self)
     return self && self->magic == CARD_MAGIC;
 }
 
+struct Baize *CardToBaize(struct Card *const self)
+{
+    return self->owner->owner;
+}
+
+struct Pile *CardToPile(struct Card *const self)
+{
+    return self->owner;
+}
+
 void CardToString(struct Card *const self, char* z)
 {
     unsigned dw = *((unsigned*)(&self->id));

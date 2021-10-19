@@ -405,6 +405,17 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
     self->lastTouch = touchPosition;
 }
 
+static bool AnyTailCardsProne(struct Array *const tail)
+{
+    size_t index;
+    for ( struct Card *c = ArrayFirst(tail, &index); c; c = ArrayNext(tail, &index) ) {
+        if (c->prone) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
 {
     BaizeResetError(self);
@@ -415,25 +426,34 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
         struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
         struct Card *cHeadOfTail = c;
         if ( CardWasDragged(c) ) {
-            struct Pile* p = largestIntersection(self, c);
+            struct Pile* p = largestIntersection(self, c);      // p is the target/destination pile
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if ( p->vtable->CanAcceptTail(self, p, self->tail) ) {
-                    while ( c ) {
-                        CardStopDrag(c);
-                        c = (struct Card*)ArrayNext(self->tail, &index);
-                    }
-                    // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three)
-                    if ( PileMoveCards(p, cHeadOfTail) ) {
-                        BaizeAfterUserMove(self);
-                    }
-                } else {
-                    if (self->errorString) {
-                        UiToast(self->ui, self->errorString);
-                    }
+                if (!(cHeadOfTail->owner == self->stock && p == self->waste) && AnyTailCardsProne(self->tail)) {
+                    // BaizeSetError(self, "(C) Cannot move a face down card");
+                    UiToast(self->ui, "(C) Cannot move a face down card");
                     while (c) {
                         CardCancelDrag(c);
                         c = (struct Card*)ArrayNext(self->tail, &index);
+                    }
+                } else {
+                    if ( cHeadOfTail->owner->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
+                        while ( c ) {
+                            CardStopDrag(c);
+                            c = (struct Card*)ArrayNext(self->tail, &index);
+                        }
+                        // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three)
+                        if ( PileMoveCards(p, cHeadOfTail) ) {
+                            BaizeAfterUserMove(self);
+                        }
+                    } else {
+                        if (self->errorString) {
+                            UiToast(self->ui, self->errorString);
+                        }
+                        while (c) {
+                            CardCancelDrag(c);
+                            c = (struct Card*)ArrayNext(self->tail, &index);
+                        }
                     }
                 }
             } else {
