@@ -67,7 +67,7 @@ bool CanTailBeMoved(struct Array *const tail)
             fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(L, -1));
             lua_pop(L, 1);  // remove error
         } else {
-            result = getBoolStringReturn(c0->owner->owner, __func__);
+            result = getBoolStringReturn(baize, __func__);
         }
     }
     return result;

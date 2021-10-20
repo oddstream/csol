@@ -4,7 +4,7 @@ V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack"
 POWERMOVES = false
 -- SEED = 3 -- 2 winnable draw three
 -- SEED = 39880
-
+-- SEED=35495
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)

@@ -44,7 +44,6 @@ bool DiscardCanMoveTail(struct Array *const tail)
     struct Card *c = ArrayGet(tail, 0);
     struct Baize* baize = CardToBaize(c);
     BaizeSetError(baize, "(C) Cannot move cards from a Discard");
-    (void)tail;
     return false;
 }
 

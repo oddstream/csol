@@ -61,7 +61,8 @@ Vector2 CardBaizePos(struct Card *const self)
 
 Vector2 CardScreenPos(struct Card *const self)
 {
-    return (Vector2){.x = self->pos.x + self->owner->owner->dragOffset.x, .y = self->pos.y + self->owner->owner->dragOffset.y};
+    struct Baize* baize = CardToBaize(self);
+    return (Vector2){.x = self->pos.x + baize->dragOffset.x, .y = self->pos.y + baize->dragOffset.y};
 }
 
 Rectangle CardBaizeRect(struct Card *const self)
@@ -153,8 +154,8 @@ void CardUpdate(struct Card *const self)
         }
     }
     if ( CardTransitioning(self) ) {
-        self->pos.x = UtilSmootherstep(self->lerpSrc.x, self->lerpDst.x, self->lerpStep);
-        self->pos.y = UtilSmootherstep(self->lerpSrc.y, self->lerpDst.y, self->lerpStep);
+        self->pos.x = UtilSmoothstep(self->lerpSrc.x, self->lerpDst.x, self->lerpStep);
+        self->pos.y = UtilSmoothstep(self->lerpSrc.y, self->lerpDst.y, self->lerpStep);
         self->lerpStep += self->lerpStepAmount;
         if ( self->lerpStep >= 1.0f ) {
             self->pos = self->lerpDst;

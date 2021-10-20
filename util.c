@@ -19,6 +19,13 @@ float UtilLerp(float v0, float v1, float t)
     return (1-t)*v0 + t*v1;
 }
 
+// Smoothstep see http://sol.gfxile.net/interpolation/
+float UtilSmoothstep(float A, float B, float v)
+{
+    v = (v) * (v) * (3.0f - 2.0f * (v));
+    return (B * v) + (A * (1.0f - v));
+}
+
 // Smootherstep see http://sol.gfxile.net/interpolation/
 float UtilSmootherstep(float A, float B, float v)
 {

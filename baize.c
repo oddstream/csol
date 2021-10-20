@@ -421,54 +421,35 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
     BaizeResetError(self);
 
     if (self->tail) {
-        // TODO this could be complicated and optimized by using CanAcceptCard() & PileMoveCard(dst,src) if len tail == 1
-        size_t index;
-        struct Card* c = (struct Card*)ArrayFirst(self->tail, &index);
-        struct Card *cHeadOfTail = c;
+        struct Card *c = ArrayGet(self->tail, 0);   // c is the head of the tail, the card being dragged
         if ( CardWasDragged(c) ) {
-            struct Pile* p = largestIntersection(self, c);      // p is the target/destination pile
+            struct Pile* p = largestIntersection(self, c);  // p is the target/destination pile
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if (!(cHeadOfTail->owner == self->stock && p == self->waste) && AnyTailCardsProne(self->tail)) {
-                    // BaizeSetError(self, "(C) Cannot move a face down card");
+                if (!(c->owner == self->stock && p == self->waste) && AnyTailCardsProne(self->tail)) {
                     UiToast(self->ui, "(C) Cannot move a face down card");
-                    while (c) {
-                        CardCancelDrag(c);
-                        c = (struct Card*)ArrayNext(self->tail, &index);
-                    }
+                    ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                 } else {
-                    if ( cHeadOfTail->owner->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
-                        while ( c ) {
-                            CardStopDrag(c);
-                            c = (struct Card*)ArrayNext(self->tail, &index);
-                        }
-                        // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three)
-                        if ( PileMoveCards(p, cHeadOfTail) ) {
+                    if ( c->owner->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
+                        ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
+                        // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), may trigger two more cards to follow
+                        if ( PileMoveCards(p, c) ) {
                             BaizeAfterUserMove(self);
                         }
                     } else {
                         if (self->errorString) {
                             UiToast(self->ui, self->errorString);
                         }
-                        while (c) {
-                            CardCancelDrag(c);
-                            c = (struct Card*)ArrayNext(self->tail, &index);
-                        }
+                        ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                     }
                 }
             } else {
                 // fprintf(stderr, "No intersection\n");
-                while ( c ) {
-                    CardCancelDrag(c);
-                    c = (struct Card*)ArrayNext(self->tail, &index);
-                }
+                ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
             }
-        } else {    // card was not dragged
-            while ( c ) {
-                CardStopDrag(c);    // CardCancelDrag() would use CardTransitionTo(), and we know the card didn't move
-                c = (struct Card*)ArrayNext(self->tail, &index);
-            }
-            if ( BaizeCardTapped(self, cHeadOfTail) ) {
+        } else {    // card was not dragged, ie it didn't move
+            ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
+            if ( BaizeCardTapped(self, c) ) {
                 BaizeAfterUserMove(self);
             } else {
                 if (self->errorString) {
@@ -476,7 +457,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
                 }
             }
             // needs -C11
-            // char *pt = _Generic(cHeadOfTail->owner,
+            // char *pt = _Generic(c->owner,
             //                 struct Pile* : "Pile",
             //                 struct Tableau* : "Tableau",
             //                 default: "Other");
