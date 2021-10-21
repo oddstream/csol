@@ -52,10 +52,13 @@ static void SavedCardArrayPopAll(struct SavedCardArray *const sca, struct Card *
 
 static void SavedCardArrayWriteToFile(FILE* f, struct SavedCardArray *const sca)
 {
-    fprintf(f, "%lu CARDS:", sca->len);
+    fprintf(f, "%lu:", sca->len);
     for ( size_t i=0; i<sca->len; i++ ) {
-        // TODO could use index<<1 & prone
-        fprintf(f, " %d/%d", sca->sav[i].index, sca->sav[i].prone);
+        unsigned int number = sca->sav[i].index;
+        number <<= 1;
+        number |= sca->sav[i].prone;
+        fprintf(f, " %u", number);
+        // fprintf(f, " %d/%d", sca->sav[i].index, sca->sav[i].prone);
     }
     fprintf(f, "\n");
 }
@@ -68,7 +71,7 @@ static void SavedCardArrayFree(struct SavedCardArray *const sca)
 }
 
 /*
-    A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays of SavedCard objects
+    A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays (of SavedCardArray) of SavedCard objects
 */
 
 static struct Array* SnapshotNew(struct Baize *const self)
@@ -201,11 +204,10 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
     (void)param;
     UiHideDrawers(self->ui); // TODO should this be here?
 
-    fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
+    // fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
 
     if ( self->savedPosition == 0 || self->savedPosition > ArrayLen(self->undoStack) ) {
         UiToast(self->ui, "No bookmark");
-        fprintf(stderr, "*** No bookmark ***\n");
         return;
     }
     if ( BaizeComplete(self) ) {
@@ -224,7 +226,7 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
         SnapshotFree(snapshot);
     }
     BaizeUndoPush(self);    // replace current state
-    fprintf(stderr, "undoStack 2 %lu\n", ArrayLen(self->undoStack));
+    // fprintf(stderr, "undoStack 2 %lu\n", ArrayLen(self->undoStack));
 }
 
 void BaizeRestartDealCommand(struct Baize *const self)
@@ -233,12 +235,12 @@ void BaizeRestartDealCommand(struct Baize *const self)
 
     struct Array *snapshot = NULL;
     while ( ArrayLen(self->undoStack) > 0 ) {
-        if ( snapshot ) {
+        if (snapshot) {
             SnapshotFree(snapshot);
         }
         snapshot = ArrayPop(self->undoStack);
     }
-    if ( snapshot ) {
+    if (snapshot) {
         BaizeUpdateFromSnapshot(self, snapshot);
         SnapshotFree(snapshot);
     }
@@ -248,6 +250,7 @@ void BaizeRestartDealCommand(struct Baize *const self)
     BaizeStartGame(self);
 }
 
+#if 0
 void BaizeUndo(struct Baize *const self)
 {
     struct Array *snapshot = BaizeUndoPop(self);    // removes current state
@@ -260,6 +263,7 @@ void BaizeUndo(struct Baize *const self)
 
     BaizeUndoPush(self);    // replace current state
 }
+#endif
 
 void BaizeUndoCommand(struct Baize *const self, void* param)
 {
@@ -360,7 +364,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
         {
             size_t index;
             for ( struct Array *savedPiles = ArrayFirst(self->undoStack, &index); savedPiles; savedPiles = ArrayNext(self->undoStack, &index) ) {
-                fprintf(f, "SAVEDPILES=%lu\n", index);
+                fprintf(f, "#%lu\n", index);
                 SnapshotWriteToFile(f, savedPiles);
             }
         }
@@ -368,7 +372,6 @@ void BaizeSaveUndoToFile(struct Baize *const self)
     } else {
         fprintf(stderr, "ERROR: %s: could not create %s\n", __func__, fname);
     }
-    
 
     // fprintf(stdout, "GetWorkingDirectory is %s\n", GetWorkingDirectory());
 }
@@ -401,25 +404,25 @@ struct Array* LoadUndoFromFile(char *variantName)
             fprintf(stderr, "ERROR: %s: cannot read VARIANT=\n", __func__);
             return NULL;
         }
-fprintf(stdout, "VARIANT='%s'\n", variantName);
+// fprintf(stdout, "VARIANT='%s'\n", variantName);
         // prepend a space to 'PILES=' to consume \n
         if (fscanf(f, " PILES=%lu", &pileCount) != 1) {
             fprintf(stderr, "ERROR: %s: cannot read PILES=\n", __func__);
             return NULL;
         }
-fprintf(stdout, "PILES='%lu'\n", pileCount);
+// fprintf(stdout, "PILES='%lu'\n", pileCount);
         // prepend a space to 'UNDOSTACK=' to consume \n
         if (fscanf(f, " UNDOSTACK=%lu", &stackDepth) != 1) {
             fprintf(stderr, "ERROR: %s: cannot read UNDOSTACK=\n", __func__);
             return NULL;
         }
-fprintf(stdout, "UNDOSTACK='%lu'\n", stackDepth);
+// fprintf(stdout, "UNDOSTACK='%lu'\n", stackDepth);
 
         undoStack = ArrayNew(stackDepth + 16);
-        for ( size_t n=0; n<pileCount; n++) {
+        for ( size_t n=0; n<stackDepth; n++) {
             size_t ncheck = 0xdeadbeef;
-            // prepend a space to 'SAVEDPILES=' to consume \n
-            if (fscanf(f, " SAVEDPILES=%lu", &ncheck) != 1) {
+            // prepend a space to '#' to consume \n
+            if (fscanf(f, " #%lu", &ncheck) != 1) {
                 fprintf(stderr, "ERROR: %s: no more saved piles\n", __func__);
                 goto fclose_label;
             }
@@ -434,7 +437,7 @@ fprintf(stdout, "UNDOSTACK='%lu'\n", stackDepth);
             for ( size_t m=0; m<pileCount; m++ ) {
                 size_t cards;
                 // prepend a space to consume \n
-                if (fscanf(f, " %lu CARDS:", &cards) != 1) {
+                if (fscanf(f, " %lu:", &cards) != 1) {
                     fprintf(stderr, "ERROR: %s: expecting number of cards\n", __func__);
                     goto fclose_label;
                 }
@@ -444,17 +447,19 @@ fprintf(stdout, "UNDOSTACK='%lu'\n", stackDepth);
                 }
                 for (size_t card=0; card<cards; card++) {
                     int index, prone;
-                    // TODO could use prone = number & 1, index = number >> 1
-                    if (fscanf(f, " %d/%d", &index, &prone) != 2) {
-                        fprintf(stderr, "ERROR: %s: expecting card index/prone\n", __func__);
+                    unsigned int number;
+                    // if (fscanf(f, " %d/%d", &index, &prone) != 2) {
+                    if (fscanf(f, " %u", &number) != 1) {
+                        fprintf(stderr, "ERROR: %s: expecting card index<<1|prone\n", __func__);
                         goto fclose_label;
                     }
+                    index = number >> 1;
+                    prone = number & 1;
                     sca->sav[sca->len++] = (struct SavedCard){.index=index, .prone=prone};
                 }
-
-                ArrayPush(savedPiles, sca);
+                savedPiles = ArrayPush(savedPiles, sca);
             }
-            ArrayPush(undoStack, savedPiles);
+            undoStack = ArrayPush(undoStack, savedPiles);
         }
         fclose_label: fclose(f);
     }
