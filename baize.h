@@ -59,7 +59,7 @@ void BaizeSetError(struct Baize *const self, const char *str);
 void BaizeOpenLua(struct Baize *const self);
 void BaizeCloseLua(struct Baize *const self);
 void BaizeCreatePiles(struct Baize *const self);
-void BaizeResetState(struct Baize *const self);
+void BaizeResetState(struct Baize *const self, struct Array *undoStack);
 void BaizePositionPiles(struct Baize *const self, const int windowWidth);
 void BaizeNewDealCommand(struct Baize *const self, void* param);
 struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);

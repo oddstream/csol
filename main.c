@@ -11,6 +11,7 @@
 #include "baize.h"
 #include "spritesheet.h"
 #include "settings.h"
+#include "undo.h"
 
 #define RETROCARDS 0
 
@@ -183,6 +184,11 @@ int main(int argc, char* argv[], char* envp[])
     // }
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
 
+    {
+        Image img = LoadImage("assets/outline_recycling_white_48dp.png");
+        SetWindowIcon(img);
+        UnloadImage(img);
+    }
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
     fontAcme = LoadFontEx("assets/Acme-Regular.ttf", (int)cardWidth / 2, 0, 0);
     fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
@@ -191,7 +197,7 @@ int main(int argc, char* argv[], char* envp[])
     recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
-    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    SetTargetFPS(60);
 
     // https://draeton.github.io/stitches/
     ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
@@ -208,11 +214,25 @@ int main(int argc, char* argv[], char* envp[])
         fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
         fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());
     }
-    struct Baize* baize = BaizeNew(argc == 2 ? argv[1] : "Klondike");
+
+    char variantName[32];
+    struct Array *undoStack = LoadUndoFromFile(variantName);
+    if (undoStack && variantName[0]) {
+        fprintf(stdout, "INFO: %s: state loaded from file for '%s'\n", __func__, variantName);
+        // that's fine
+    } else {
+        strcpy(variantName, argc == 2 ? argv[1] : "Klondike");
+        fprintf(stdout, "INFO: %s: starting a fresh '%s'\n", __func__, variantName);
+    }
+
+    struct Baize* baize = BaizeNew(variantName);
     if ( BaizeValid(baize) ) {
         BaizeOpenLua(baize);
         BaizeCreatePiles(baize);
-        BaizeResetState(baize);
+        BaizeResetState(baize, undoStack);  // Baize takes ownership of undoStack
+        if (undoStack) {
+            BaizeUndoCommand(baize, NULL);
+        }
         BaizeStartGame(baize);
         BaizeCommandQueue = ArrayNew(8);
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
@@ -232,6 +252,7 @@ int main(int argc, char* argv[], char* envp[])
                 }
             }
         }
+        BaizeSaveUndoToFile(baize);
         ArrayFree(BaizeCommandQueue);
         BaizeCloseLua(baize);
         BaizeFree(baize);

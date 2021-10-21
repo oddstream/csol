@@ -56,7 +56,10 @@ struct Card /* tag */ {
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit);
 bool CardValid(struct Card *const self);
+unsigned CardToUnsigned(struct Card *const self);
+struct CardId UnsignedToCardId(unsigned u);
 void CardToString(struct Card *const self, char* z);
+void CardToShortString(struct Card *const self, char* z);
 struct Baize *CardToBaize(struct Card *const self);
 struct Pile *CardToPile(struct Card *const self);
 Vector2 CardBaizePos(struct Card *const self);

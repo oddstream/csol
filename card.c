@@ -48,10 +48,39 @@ struct Pile *CardToPile(struct Card *const self)
     return self->owner;
 }
 
+unsigned CardToUnsigned(struct Card *const self)
+{
+    // error: dereferencing type-punned pointer will break strict-aliasing rules [-Werror=strict-aliasing]
+    // return *((unsigned*)(&self->id));
+    // also, this makes strings that usually end in 0, which is a waste of space
+
+    // so, write stupid readable code and let the complier optimize it
+    unsigned u;
+    u = self->id.pack << 8; // put less-used pack in high bits to make serialized version shorter
+    u |= self->id.ordinal << 4;
+    u |= self->id.suit;
+    return u;
+}
+
+struct CardId UnsignedToCardId(unsigned u)
+{
+    struct CardId id;
+    id.pack = (u & /*0b111100000000*/0xf00) >> 8;
+    id.ordinal = (u & /*0b11110000*/0xf0) >> 4;
+    id.suit = u & /*0b1111*/0xf;
+    return id;
+}
+
 void CardToString(struct Card *const self, char* z)
 {
-    unsigned dw = *((unsigned*)(&self->id));
-    sprintf(z, "{%x: p=%d o=%s s=%s p=%d}", dw, self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->prone);
+    sprintf(z, "{%x: p=%d o=%s s=%s p=%d}", CardToUnsigned(self), self->id.pack, UtilOrdToShortString(self->id.ordinal), UtilSuitToShortString(self->id.suit), self->prone);
+}
+
+void CardToShortString(struct Card *const self, char* z)
+{
+    z[0] = *UtilOrdToShortString(self->id.ordinal);
+    z[1] = *UtilSuitToShortString(self->id.suit);
+    z[2] = '\0';
 }
 
 Vector2 CardBaizePos(struct Card *const self)

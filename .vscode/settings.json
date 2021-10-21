@@ -12,10 +12,7 @@
         "bit": "c",
         "*.tcc": "c",
         "fstream": "c",
-        "array.h": "c",
-        "stock.h": "c",
         "inttypes.h": "c",
         "raylib.h": "c",
-        "constraint.h": "c"
     }
 }

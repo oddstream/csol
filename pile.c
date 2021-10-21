@@ -181,7 +181,7 @@ Rectangle PileFannedScreenRect(struct Pile *const self) {
 }
 
 Vector2 PilePushedFannedPos(struct Pile *const self)
-{
+{   // In function ‘PilePushedFannedPos’: error: assuming signed overflow does not occur when changing X +- C1 cmp C2 to X cmp C2 -+ C1 [-Werror=strict-overflow]
     extern float cardWidth, cardHeight;
 
     Vector2 pos = self->pos;

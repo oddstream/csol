@@ -156,7 +156,7 @@ void BaizeCreatePiles(struct Baize *const self)
     BaizePositionPiles(self, GetScreenWidth());
 }
 
-void BaizeResetState(struct Baize *const self)
+void BaizeResetState(struct Baize *const self, struct Array *undoStack)
 {
     if ( self->tail ) {
         ArrayFree(self->tail);
@@ -166,7 +166,7 @@ void BaizeResetState(struct Baize *const self)
     if ( self->undoStack ) {
         UndoStackFree(self->undoStack);
     }
-    self->undoStack = UndoStackNew();
+    self->undoStack = undoStack ? undoStack : UndoStackNew();
 
     self->savedPosition = 0;
 
@@ -211,7 +211,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
 
     UiHideDrawers(self->ui);
     BaizeCreatePiles(self);
-    BaizeResetState(self);
+    BaizeResetState(self, NULL);
     BaizeStartGame(self);
 }
 
@@ -361,7 +361,7 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
         self->touchedWidget = w;
     } else {
         struct Card* c = findCardAt(self, touchPosition);
-        if ( c ) {
+        if (c) {
             // record the distance from the card's origin to the tap point
             // dx = touchPosition.x - c->pos.x;
             // dy = touchPosition.y - c->pos.y;
@@ -372,10 +372,11 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
         } else {
             self->touchedPile = findPileAt(self, touchPosition);    // could be NULL
         }
+        // we didn't touch a widget, so have no need for a drawer to be open, shirley?
+        UiHideDrawers(self->ui);
     }
 
     if ( self->tail == NULL && self->touchedPile == NULL && self->touchedWidget == NULL ) {
-        UiHideDrawers(self->ui);
         BaizeStartDrag(self);
     }
     
@@ -616,7 +617,11 @@ void BaizeUpdate(struct Baize *const self)
         BaizeUndoCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_S) ) {
-        BaizeSavePositionCommand(self, NULL);
+        if ( IsKeyDown(KEY_LEFT_SHIFT) ) {
+            BaizeSaveUndoToFile(self);
+        } else {
+            BaizeSavePositionCommand(self, NULL);
+        }
     }
     if ( IsKeyReleased(KEY_L) ) {
         BaizeLoadPositionCommand(self, NULL);
@@ -747,7 +752,7 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
     BaizeCloseLua(self);
     BaizeOpenLua(self);
     BaizeCreatePiles(self);
-    BaizeResetState(self);
+    BaizeResetState(self, NULL);
     BaizeStartGame(self);
 }
 

@@ -11,6 +11,10 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
 void BaizeSavePositionCommand(struct Baize *const self, void* param);
 void BaizeLoadPositionCommand(struct Baize *const self, void* param);
 void BaizeRestartDealCommand(struct Baize *const self, void* param);
+void BaizeUndo(struct Baize *const self);
 void BaizeUndoCommand(struct Baize *const, void* param);
+
+void BaizeSaveUndoToFile(struct Baize *const self);
+struct Array* LoadUndoFromFile(char *variantName);
 
 #endif
