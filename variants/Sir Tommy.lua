@@ -15,12 +15,13 @@
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 
-StockDealCards = 1
+STOCKDEALCARDS = 1
+STOCK_RECYCLES = 0
 
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    SetPileRecycles(STOCK, 0)
+    SetPileRecycles(STOCK, STOCK_RECYCLES)
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
@@ -121,16 +122,11 @@ end
 
 -- Actions
 
-function CardTapped(card)
+function Tapped_Stock(tail)
     -- only allow one card at a time in waste
-    if CardOwner(card) == STOCK then
-        if PileLen(WASTE) == 0 then
-            MoveCard(STOCK, WASTE)
-        else
-            return "The Waste must be emptied first"
-        end
+    if PileLen(WASTE) == 0 then
+        MoveCard(STOCK, WASTE)
+    else
+        return "The Waste must be emptied first"
     end
-end
-
-function PileTapped(pile)
 end

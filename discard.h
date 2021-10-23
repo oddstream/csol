@@ -18,6 +18,7 @@ struct Discard* DiscardNew(struct Baize *const baize, Vector2 pos, enum FanType 
 bool DiscardCanMoveTail(struct Array *const tail);
 bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+bool DiscardTapped(struct Pile *const self, struct Array *const tail);
 int DiscardCollect(struct Pile *const self);
 bool DiscardComplete(struct Pile *const self);
 bool DiscardConformant(struct Pile *const self);

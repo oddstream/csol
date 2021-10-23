@@ -16,6 +16,7 @@ static struct PileVtable tableauVtable = {
     &TableauCanMoveTail,
     &TableauCanAcceptCard,
     &TableauCanAcceptTail,
+    &TableauTapped,
     &TableauCollect,
     &TableauComplete,
     &TableauConformant,
@@ -95,6 +96,13 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         }
     }
     return CanTailBeAppended(self, tail);
+}
+
+bool TableauTapped(struct Pile *const self, struct Array *const tail)
+{
+    (void)self;
+    (void)tail;
+    return false;
 }
 
 int TableauCollect(struct Pile *const self)

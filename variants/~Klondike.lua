@@ -166,28 +166,24 @@ end
 
 -- Actions
 
-function CardTapped(card)
-    if CardOwner(card) == STOCK then
-        for i = 1, STOCKDEALCARDS do
-            MoveCard(STOCK, WASTE)
-        end
-    end
-end
-
-function PileTapped(pile)
-    if pile == STOCK then
+function Tapped_Stock(tail)
+    if tail == nil then
         if STOCK_RECYCLES == 0 then
-          return "No more Stock recycles"
+            return "No more Stock recycles"
+        elseif 1 == STOCK_RECYCLES then
+            Toast("Last Stock recycle")
+        elseif 2 == STOCK_RECYCLES then
+            Toast("One Stock recycle remaining")
         end
         if PileLen(WASTE) > 0 then
-          while PileLen(WASTE) > 0 do
-              MoveCard(WASTE, STOCK)
-          end
-          STOCK_RECYCLES = STOCK_RECYCLES - 1
-          SetPileRecycles(STOCK, STOCK_RECYCLES)
+            while PileLen(WASTE) > 0 do
+                MoveCard(WASTE, STOCK)
+            end
+            STOCK_RECYCLES = STOCK_RECYCLES - 1
+            SetPileRecycles(STOCK, STOCK_RECYCLES)
         end
-    elseif pile == WASTE then
-        if PileLen(STOCK) > 0 then
+    else
+        for i = 1, STOCKDEALCARDS do
             MoveCard(STOCK, WASTE)
         end
     end

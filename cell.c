@@ -15,6 +15,7 @@ static struct PileVtable cellVtable = {
     &CellCanMoveTail,
     &CellCanAcceptCard,
     &CellCanAcceptTail,
+    &CellTapped,
     &CellCollect,
     &CellComplete,
     &CellConformant,
@@ -64,6 +65,13 @@ bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struc
         return false;
     }
     return true;
+}
+
+bool CellTapped(struct Pile *const self, struct Array *const tail)
+{
+    (void)self;
+    (void)tail;
+    return false;
 }
 
 int CellCollect(struct Pile *const self)

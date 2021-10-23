@@ -133,26 +133,29 @@ function SortedAndUnsorted_Tableau(pile)
     return sorted, unsorted
 end
 
-function CardTapped(card)
-    -- LogCard("CardTapped", card)
+function Tapped_Stock(tail)
+
+    if not tail then
+        return "No more cards in Stock"
+    end
+
     local errMsg = nil
     local tabCards = 0
     local emptyTabs = 0
-    if CardOwner(card) == STOCK then
-      for _, tab in ipairs(TABLEAUX) do
+
+    for _, tab in ipairs(TABLEAUX) do
         if PileLen(tab) == 0 then
-          emptyTabs = emptyTabs + 1
+            emptyTabs = emptyTabs + 1
         else
-          tabCards = tabCards + PileLen(tab)
+            tabCards = tabCards + PileLen(tab)
         end
-      end
-      if emptyTabs > 0 and tabCards >= #TABLEAUX then
+    end
+    if emptyTabs > 0 and tabCards >= #TABLEAUX then
         errMsg = "All empty tableaux must be filled before dealing a new row"
-      else
+    else
         for _, tab in ipairs(TABLEAUX) do
-          MoveCard(STOCK, tab)
+            MoveCard(STOCK, tab)
         end
-      end
     end
 
     return errMsg

@@ -2,6 +2,8 @@
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 POWERMOVES = false
+STOCKDEALCARDS = 1
+STOCK_RECYCLES = 3
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -192,38 +194,29 @@ end
 
 -- Actions
 
-function CardTapped(card)
-    if CardOwner(card) == STOCK then
-        MoveCard(STOCK, WASTE)
+function Tapped_Stock(tail)
+    if tail == nil then
+        if STOCK_RECYCLES == 0 then
+            return "No more Stock recycles"
+        elseif 1 == STOCK_RECYCLES then
+            Toast("Last Stock recycle")
+        elseif 2 == STOCK_RECYCLES then
+            Toast("One Stock recycle remaining")
+        end
+        if PileLen(WASTE) > 0 then
+            while PileLen(WASTE) > 0 do
+                MoveCard(WASTE, STOCK)
+            end
+            STOCK_RECYCLES = STOCK_RECYCLES - 1
+            SetPileRecycles(STOCK, STOCK_RECYCLES)
+          end
+      else
+        for i = 1, STOCKDEALCARDS do
+            MoveCard(STOCK, WASTE)
+        end
     end
 end
 
-function PileTapped(pile)
-  if pile == STOCK then
-    if STOCK_RECYCLES == 0 then
-      return "No more Stock recycles"
-    end
-    if PileLen(WASTE) > 0 then
-      while PileLen(WASTE) > 0 do
-        MoveCard(WASTE, STOCK)
-      end
-      STOCK_RECYCLES = STOCK_RECYCLES - 1
-      SetPileRecycles(STOCK, STOCK_RECYCLES)
-      if 0 == STOCK_RECYCLES then
-        Toast("No Stock recycles remaining")
-      elseif 1 == STOCK_RECYCLES then
-        Toast("One Stock recycle remaining")
-      else
-        Toast(STOCK_RECYCLES .. " Stock recycles remaining")
-      end
-    end
-  elseif pile == WASTE then
-    if PileLen(STOCK) > 0 then
-      MoveCard(STOCK, WASTE)
-    end
-  end
-end
-  
 function AfterMove()
   -- io.stdout:write("AfterMove\n")
   for _, pile in ipairs(TABLEAUX) do

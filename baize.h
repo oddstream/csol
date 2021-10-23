@@ -42,15 +42,6 @@ struct Baize {
     char* errorString;
 };
 
-struct Array* BaizeCommandQueue;
-typedef void (*BaizeCommandFunction)(struct Baize *const, void* param);
-struct BaizeCommand {
-    // ISO C forbids conversion of object pointer to function pointer type [-Werror=pedantic]
-    // so we hide our function pointer in a struct
-    BaizeCommandFunction bcf;
-    void *param;
-};
-
 struct Baize* BaizeNew(const char*);
 bool BaizeValid(struct Baize *const self);
 unsigned int BaizeCRC(struct Baize *const self);
@@ -80,7 +71,8 @@ void BaizeUpdate(struct Baize *const self);
 void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
 
-bool BaizeCardTapped(struct Baize *const self, struct Card *const c);
+// bool BaizeCardTapped(struct Baize *const self, struct Card *const c);
+bool BaizeTailTapped(struct Baize *const self);
 bool BaizePileTapped(struct Baize *const self, struct Pile *const c);
 void BaizeStartGame(struct Baize *const self);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);

@@ -145,9 +145,3 @@ function SortedAndUnsorted_Tableau(pile)
 end
 
 -- Actions
-
-function CardTapped(card)
-end
-
-function PileTapped(pile)
-end

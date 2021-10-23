@@ -21,8 +21,7 @@
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 POWERMOVES = false
 SEED=12620
-
-StockDealCards = 1
+STOCKDEALCARDS = 1
 
 function BuildPiles()
 
@@ -205,31 +204,23 @@ end
 
 -- Actions
 
-function CardTapped(card)
-  if CardOwner(card) == STOCK then
-    for i = 1, StockDealCards do
-      MoveCard(STOCK, WASTE)
+function Tapped_Stock(tail)
+    if tail == nil then
+        if STOCK_RECYCLES == 0 then
+            return "No more Stock recycles"
+          end
+          if PileLen(WASTE) > 0 then
+            while PileLen(WASTE) > 0 do
+                MoveCard(WASTE, STOCK)
+            end
+            STOCK_RECYCLES = STOCK_RECYCLES - 1
+            SetPileRecycles(STOCK, STOCK_RECYCLES)
+          end
+      else
+        for i = 1, STOCKDEALCARDS do
+            MoveCard(STOCK, WASTE)
+        end
     end
-  end
-end
-
-function PileTapped(pile)
-  if pile == STOCK then
-    if STOCK_RECYCLES == 0 then
-      return "No more Stock recycles"
-    end
-    if PileLen(WASTE) > 0 then
-      while PileLen(WASTE) > 0 do
-        MoveCard(WASTE, STOCK)
-      end
-      STOCK_RECYCLES = STOCK_RECYCLES - 1
-      SetPileRecycles(STOCK, STOCK_RECYCLES)
-    end
-  elseif pile == WASTE then
-    if PileLen(STOCK) > 0 then
-      MoveCard(STOCK, WASTE)
-    end
-  end
 end
 
 function AfterMove()

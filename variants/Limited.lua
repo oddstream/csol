@@ -3,6 +3,8 @@
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 POWERMOVES = true
 SEED = 4  -- winnable
+STOCKDEALCARDS = 1
+STOCK_RECYCLES = 32767
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
@@ -163,15 +165,20 @@ end
 
 -- Actions
 
-function CardTapped(card)
-    if CardOwner(card) == STOCK then
-        MoveCard(STOCK, WASTE)
-    end
-end
-
-function PileTapped(pile)
-    if pile == WASTE then
-        if PileLen(STOCK) > 0 then
+function Tapped_Stock(tail)
+    if tail == nil then
+        if STOCK_RECYCLES == 0 then
+            return "No more Stock recycles"
+          end
+          if PileLen(WASTE) > 0 then
+            while PileLen(WASTE) > 0 do
+                MoveCard(WASTE, STOCK)
+            end
+            STOCK_RECYCLES = STOCK_RECYCLES - 1
+            SetPileRecycles(STOCK, STOCK_RECYCLES)
+          end
+      else
+        for i = 1, STOCKDEALCARDS do
             MoveCard(STOCK, WASTE)
         end
     end

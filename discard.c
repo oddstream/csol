@@ -17,6 +17,7 @@ static struct PileVtable discardVtable = {
     &DiscardCanMoveTail,
     &DiscardCanAcceptCard,
     &DiscardCanAcceptTail,
+    &DiscardTapped,
     &DiscardCollect,
     &DiscardComplete,
     &DiscardConformant,
@@ -66,6 +67,13 @@ bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         return false;
     }
     return CanTailBeAppended(self, tail);
+}
+
+bool DiscardTapped(struct Pile *const self, struct Array *const tail)
+{
+    (void)self;
+    (void)tail;
+    return false;
 }
 
 int DiscardCollect(struct Pile *const self)

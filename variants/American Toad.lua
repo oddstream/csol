@@ -14,6 +14,7 @@ The foundations build up in suit, wrapping from King to Ace as necessary.
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 POWERMOVES = false
+STOCKDEALCARDS = 1
 
 function BuildPiles()
 
@@ -141,7 +142,7 @@ function CanTailBeAppended_Tableau(pile, tail)
             elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
                 -- down, eg 2 on a 3
             else
-                return false, "Tableaux build up"
+                return false, "Tableaux build down in rank"
             end 
             c1 = c2
         end
@@ -163,7 +164,7 @@ function IsPileConformant_Tableau(pile)
         elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
             -- down, eg 2 on a 3
         else
-            return false, "Tableaux build up"
+            return false, "Tableaux build down in rank"
         end 
         c1 = c2
     end
@@ -195,27 +196,21 @@ end
 
 -- Actions
 
-function CardTapped(card)
-  if CardOwner(card) == STOCK then
-    MoveCard(STOCK, WASTE)
-  end
-end
-
-function PileTapped(pile)
-  if pile == STOCK then
-    if STOCK_RECYCLES == 0 then
-      return "No more Stock recycles"
+function Tapped_Stock(tail)
+    if tail == nil then
+        if STOCK_RECYCLES == 0 then
+            return "No more Stock recycles"
+          end
+          if PileLen(WASTE) > 0 then
+            while PileLen(WASTE) > 0 do
+                MoveCard(WASTE, STOCK)
+            end
+            STOCK_RECYCLES = STOCK_RECYCLES - 1
+            SetPileRecycles(STOCK, STOCK_RECYCLES)
+          end
+      else
+        for i = 1, STOCKDEALCARDS do
+            MoveCard(STOCK, WASTE)
+        end
     end
-    if PileLen(WASTE) > 0 then
-      while PileLen(WASTE) > 0 do
-        MoveCard(WASTE, STOCK)
-      end
-      STOCK_RECYCLES = STOCK_RECYCLES - 1
-      SetPileRecycles(STOCK, STOCK_RECYCLES)
-    end
-  elseif pile == WASTE then
-    if PileLen(STOCK) > 0 then
-      MoveCard(STOCK, WASTE)
-    end
-  end
 end

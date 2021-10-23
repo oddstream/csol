@@ -11,6 +11,7 @@
 #include "tableau.h"
 #include "waste.h"
 
+#include "command.h"
 #include "moon.h"
 #include "spritesheet.h"
 #include "undo.h"

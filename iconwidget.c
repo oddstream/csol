@@ -1,5 +1,6 @@
 /* iconwidget.c */
 
+#include "command.h"
 #include "spritesheet.h"
 #include "ui.h"
 
@@ -9,11 +10,11 @@ static struct WidgetVtable iconWidgetVtable = {
     &WidgetFree,    // nothing extra to free, so use base free
 };
 
-struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, BaizeCommandFunction bcf, void* param)
+struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, CommandFunction cf, void* param)
 {
     struct IconWidget* self = calloc(1, sizeof(struct IconWidget));
     if ( self ) {
-        WidgetCtor((struct Widget*)self, parent, align, bcf, param);
+        WidgetCtor((struct Widget*)self, parent, align, cf, param);
         self->super.vtable = &iconWidgetVtable;
         self->frame = frame;
         ((struct Widget*)self)->rect.width = 36.0f;

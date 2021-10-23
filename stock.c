@@ -17,6 +17,7 @@ static struct PileVtable stockVtable = {
     &StockCanMoveTail,
     &StockCanAcceptCard,
     &StockCanAcceptTail,
+    &StockTapped,
     &StockCollect,
     &StockComplete,
     &StockConformant,
@@ -146,6 +147,13 @@ bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
     BaizeSetError(baize, "(C) Cannot move cards to the Stock");
 
     (void)baize;
+    (void)self;
+    (void)tail;
+    return false;
+}
+
+bool StockTapped(struct Pile *const self, struct Array *const tail)
+{
     (void)self;
     (void)tail;
     return false;

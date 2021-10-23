@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "command.h"
 #include "spritesheet.h"
 #include "util.h"
 #include "ui.h"
@@ -12,11 +13,11 @@ static struct WidgetVtable textWidgetVtable = {
     &TextWidgetFree,
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf, void* param)
+struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, CommandFunction cf, void* param)
 {
     struct TextWidget* self = calloc(1, sizeof(struct TextWidget));
     if ( self ) {
-        WidgetCtor((struct Widget*)self, parent, align, bcf, param);
+        WidgetCtor((struct Widget*)self, parent, align, cf, param);
         self->super.vtable = &textWidgetVtable;
         self->frame = frame;
         self->font = font;

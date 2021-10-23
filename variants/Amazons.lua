@@ -115,24 +115,14 @@ end
 
 -- Actions
 
-function CardTapped(card)
-    if CardOwner(card) == STOCK then
+function Tapped_Stock(tail)
+    if not tail then
+        for _, res in ipairs(RESERVES) do
+            MoveAllCards(res, STOCK)
+        end
+    else
         for _, res in ipairs(RESERVES) do
             MoveCard(STOCK, res)
         end
     end
-end
-
-function PileTapped(pile)
-    if pile == STOCK then
-        for _, res in ipairs(RESERVES) do
-            MoveAllCards(res, STOCK)
-            -- while PileCardCount(res) > 0 do
-            --     MoveCard(res, STOCK)
-            -- end
-        end
-    end
-end
-
-function AfterMove()
 end

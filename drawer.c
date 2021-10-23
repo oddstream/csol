@@ -50,7 +50,7 @@ bool DrawerWasDragged(struct Container *const self, Vector2 pos)
 {
     struct Drawer *const dr = (struct Drawer*)self;
     bool result = !(pos.x == dr->dragStartPos.x && pos.y == dr->dragStartPos.y);
-    fprintf(stdout, "DrawerWasDragged %d\n", result);
+    // fprintf(stdout, "DrawerWasDragged %d\n", result);
     return result;
 }
 

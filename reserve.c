@@ -15,6 +15,7 @@ static struct PileVtable reserveVtable = {
     &ReserveCanMoveTail,
     &ReserveCanAcceptCard,
     &ReserveCanAcceptTail,
+    &ReserveTapped,
     &ReserveCollect,
     &ReserveComplete,
     &ReserveConformant,
@@ -54,6 +55,13 @@ bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
 bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
+    (void)self;
+    (void)tail;
+    return false;
+}
+
+bool ReserveTapped(struct Pile *const self, struct Array *const tail)
+{
     (void)self;
     (void)tail;
     return false;

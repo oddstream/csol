@@ -16,6 +16,7 @@ static struct PileVtable wasteVtable = {
     &WasteCanMoveTail,
     &WasteCanAcceptCard,
     &WasteCanAcceptTail,
+    &WasteTapped,
     &WasteCollect,
     &WasteComplete,
     &WasteConformant,
@@ -64,6 +65,13 @@ bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
         return WasteCanAcceptCard(baize, self, ArrayGet(tail, 0));
     }
     return CanTailBeAppended(self, tail);
+}
+
+bool WasteTapped(struct Pile *const self, struct Array *const tail)
+{
+    (void)self;
+    (void)tail;
+    return false;
 }
 
 int WasteCollect(struct Pile *const self)

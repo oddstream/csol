@@ -8,6 +8,7 @@
 #include <raylib.h>
 
 #include "array.h"
+#include "command.h"
 #include "baize.h"
 
 enum IconName {
@@ -54,12 +55,12 @@ struct Widget {
     struct Container *parent;
     int align;  // alignment in parent container: left=-1, center=0, right=+1
     // bool disabled;
-    BaizeCommandFunction bcf;
+    CommandFunction bcf;
     void* param;        // NULL, or a pointer to a block of memory, owned by the widget
     Rectangle rect;    // x, y relative to parent
 };
 
-void WidgetCtor(struct Widget *const self, struct Container* parent, int align, BaizeCommandFunction bcf, void* param);
+void WidgetCtor(struct Widget *const self, struct Container* parent, int align, CommandFunction bcf, void* param);
 Rectangle WidgetScreenRect(struct Widget *const self);
 void WidgetUpdate(struct Widget *const self);
 void WidgetDraw(struct Widget *const self);
@@ -70,7 +71,7 @@ struct IconWidget {
     enum IconName frame;
 };
 
-struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, BaizeCommandFunction bcf, void* param);
+struct IconWidget* IconWidgetNew(struct Container *parent, int align, enum IconName frame, CommandFunction cf, void* param);
 void IconWidgetDraw(struct Widget *const self);
 
 struct TextWidget {
@@ -81,7 +82,7 @@ struct TextWidget {
     char *text;
 };
 
-struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, BaizeCommandFunction bcf, void* param);
+struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, CommandFunction cf, void* param);
 void TextWidgetSetText(struct TextWidget *const self, const char *text);
 void TextWidgetDraw(struct Widget *const self);
 void TextWidgetFree(struct Widget *const self);

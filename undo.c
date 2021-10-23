@@ -10,6 +10,27 @@
 
 #include "ui.h"
 
+/*
+    BaizeResetState() creates a new, empty undo stack, then does an undo push, to save the starting state.
+
+    The number of user moves is the length of the undo stack minus one.
+
+    After a user move, there is a new undo push, to push the current state on the undo stack.
+
+    So the top of the undo stack is always the "pre move" state shown on the baize.
+
+    An undo command means popping the state from the top of the stack, and throwing it away.
+    A second state is popped, and the baize restored from that. Finally, the current state is pushed back onto the stack.
+
+    Restarting a deal works by popping all the items off the undo stack, restoring the baize from the last-popped state,
+    then pushing a new state onto the stack.
+
+    Bookmarking a position means remembering the current length of the undo stack.
+
+    Going back to a bookmark makes means popping saved states off the undo stack until it's length == the saved length, 
+    restoring the baize from the last-popped state, and then pushing a new state onto the stack.
+*/
+
 // We need to save the Card's prone flag as well as a reference (index) to the card in the card library
 struct SavedCard {
     unsigned int index:15;
@@ -26,7 +47,7 @@ struct SavedCardArray {
 static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct Array *const cards)
 {
     struct SavedCardArray* self = calloc(1, sizeof(struct SavedCardArray) + ArrayLen(cards) * sizeof(struct SavedCard));
-    if ( self ) {
+    if (self) {
         self->len = 0;
         size_t index;
         for ( struct Card *c = ArrayFirst(cards, &index); c; c = ArrayNext(cards, &index) ) {
@@ -36,7 +57,7 @@ static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct
     return self;
 }
 
-static void SavedCardArrayPopAll(struct SavedCardArray *const sca, struct Card *const cardLibrary, struct Pile *const pile)
+static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Card *const cardLibrary, struct Pile *const pile)
 {
     for ( size_t i=0; i<sca->len; i++ ) {
         struct SavedCard sc = sca->sav[i];
@@ -163,13 +184,6 @@ struct Array* BaizeUndoPop(struct Baize *const self)
     return NULL;
 }
 
-static void UpdateFromSavedCardArray(struct Baize *const baize, struct Pile *const pile, struct SavedCardArray *sca)
-{
-    ArrayReset(pile->cards);
-    SavedCardArrayPopAll(sca, baize->cardLibrary, pile);
-    // TODO scrunch this pile
-}
-
 void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
 {
     if ( ArrayLen(self->piles) != ArrayLen(savedPiles) ) {
@@ -179,7 +193,9 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
     for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
         struct SavedCardArray *sca = ArrayGet(savedPiles, i);
         struct Pile* pDst = ArrayGet(self->piles, i);
-        UpdateFromSavedCardArray(self, pDst, sca);
+        ArrayReset(pDst->cards);
+        SavedCardArrayCopyToPile(sca, self->cardLibrary, pDst);
+        // TODO scrunch this pile
     }
 }
 
@@ -187,22 +203,18 @@ void BaizeSavePositionCommand(struct Baize *const self, void* param)
 {
     (void)param;
 
-    UiHideDrawers(self->ui); // TODO should this be here?
-
     if ( BaizeComplete(self) ) {
         UiToast(self->ui, "Cannot bookmark a completed game");
         return;
     }
     self->savedPosition = ArrayLen(self->undoStack);
     UiToast(self->ui, "Position bookmarked");
-    // fprintf(stderr, "*** Position bookmarked ***\n");
-    fprintf(stderr, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
+    // fprintf(stdout, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
 }
 
 void BaizeLoadPositionCommand(struct Baize *const self, void* param)
 {
     (void)param;
-    UiHideDrawers(self->ui); // TODO should this be here?
 
     // fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
 
@@ -229,9 +241,9 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
     // fprintf(stderr, "undoStack 2 %lu\n", ArrayLen(self->undoStack));
 }
 
-void BaizeRestartDealCommand(struct Baize *const self)
+void BaizeRestartDealCommand(struct Baize *const self, void* param)
 {
-    UiHideDrawers(self->ui); // TODO should this be here?
+    (void)param;
 
     struct Array *snapshot = NULL;
     while ( ArrayLen(self->undoStack) > 0 ) {
@@ -249,21 +261,6 @@ void BaizeRestartDealCommand(struct Baize *const self)
 
     BaizeStartGame(self);
 }
-
-#if 0
-void BaizeUndo(struct Baize *const self)
-{
-    struct Array *snapshot = BaizeUndoPop(self);    // removes current state
-    if (!snapshot) {
-        fprintf(stderr, "ERROR: %s: popping from undo stack\n", __func__);
-        return;
-    }
-    BaizeUpdateFromSnapshot(self, snapshot);
-    SnapshotFree(snapshot);
-
-    BaizeUndoPush(self);    // replace current state
-}
-#endif
 
 void BaizeUndoCommand(struct Baize *const self, void* param)
 {

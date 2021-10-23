@@ -1,14 +1,15 @@
 -- Australian
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+STOCKDEALCARDS = 1
+STOCK_RECYCLES = 0
 
--- SEED = 3 -- 2 winnable draw three
--- SEED = 39880
+-- SEED=21960
 
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    SetPileRecycles(STOCK, 0)
+    SetPileRecycles(STOCK, STOCK_RECYCLES)
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
@@ -141,19 +142,20 @@ end
 
 -- Actions
 
-function CardTapped(card)
-    if CardOwner(card) == STOCK then
-        MoveCard(STOCK, WASTE)
-    end
-end
-
-function PileTapped(pile)
-    if pile == STOCK then
+function Tapped_Stock(tail)
+    if tail == nil then
         if STOCK_RECYCLES == 0 then
-          return "No more Stock recycles"
-        end
-    elseif pile == WASTE then
-        if PileLen(STOCK) > 0 then
+            return "No more Stock recycles"
+          end
+          if PileLen(WASTE) > 0 then
+            while PileLen(WASTE) > 0 do
+                MoveCard(WASTE, STOCK)
+            end
+            STOCK_RECYCLES = STOCK_RECYCLES - 1
+            SetPileRecycles(STOCK, STOCK_RECYCLES)
+          end
+      else
+        for i = 1, STOCKDEALCARDS do
             MoveCard(STOCK, WASTE)
         end
     end

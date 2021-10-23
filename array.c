@@ -45,14 +45,14 @@ size_t ArrayCap(struct Array *const self)
     return self->size;
 }
 
-void ArrayDelete(struct Array *const self, size_t n, ArrayFreeFunc f)
+void ArrayDelete(struct Array *const self, size_t n, ArrayFreeFunc ff)
 {
     if (self->used < n) {
         return;
     }
     void *item = self->data[n];
-    if (f) {
-        f(item);
+    if (ff) {
+        ff(item);
     }
     for ( ++n; n<self->used; n++ ) {
         self->data[n-1] = self->data[n];

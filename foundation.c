@@ -17,6 +17,7 @@ static struct PileVtable foundationVtable = {
     &FoundationCanMoveTail,
     &FoundationCanAcceptCard,
     &FoundationCanAcceptTail,
+    &FoundationTapped,
     &FoundationCollect,
     &FoundationComplete,
     &FoundationConformant,
@@ -77,6 +78,13 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
     }
     // ArrayLen(tail) == 1
     return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
+}
+
+bool FoundationTapped(struct Pile *const self, struct Array *const tail)
+{
+    (void)self;
+    (void)tail;
+    return false;
 }
 
 int FoundationCollect(struct Pile *const self)

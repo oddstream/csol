@@ -18,6 +18,7 @@ struct Waste* WasteNew(struct Baize *const baize, Vector2 pos, enum FanType fan)
 bool WasteCanMoveTail(struct Array *const tail);
 bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+bool WasteTapped(struct Pile *const self, struct Array *const tail);
 int WasteCollect(struct Pile *const self);
 bool WasteComplete(struct Pile *const self);
 bool WasteConformant(struct Pile *const self);

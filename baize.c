@@ -209,7 +209,6 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     (void)param;
     // TODO record lost game if this one started
 
-    UiHideDrawers(self->ui);
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
     BaizeStartGame(self);
@@ -450,7 +449,8 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             }
         } else {    // card was not dragged, ie it didn't move
             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
-            if ( BaizeCardTapped(self, c) ) {
+            // if ( BaizeCardTapped(self, c) ) {
+            if (BaizeTailTapped(self)) {
                 BaizeAfterUserMove(self);
             } else {
                 if (self->errorString) {
@@ -471,12 +471,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
         if (!self->touchedWidget->parent->vtable->WasDragged(self->touchedWidget->parent, touchPosition)) {
             // fprintf(stderr, "Widget Command\n");
             if (self->touchedWidget->bcf) {
-                struct BaizeCommand *bc = calloc(1, sizeof(struct BaizeCommand));
-                if ( bc ) {
-                    bc->bcf = self->touchedWidget->bcf;
-                    bc->param = self->touchedWidget->param;
-                    BaizeCommandQueue = ArrayPush(BaizeCommandQueue, bc);
-                }
+                NewCommand(self->touchedWidget->bcf, self->touchedWidget->param);
             }
         }
         self->touchedWidget = NULL;
@@ -613,6 +608,7 @@ void BaizeUpdate(struct Baize *const self)
 
     ArrayForeach(self->piles, (ArrayIterFunc)PileUpdate);
 
+    // TODO these should go through CommandQueue rather than being called directly
     if ( IsKeyReleased(KEY_U) ) {
         BaizeUndoCommand(self, NULL);
     }

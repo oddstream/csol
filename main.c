@@ -9,6 +9,7 @@
 #include <lauxlib.h>
 
 #include "baize.h"
+#include "command.h"
 #include "spritesheet.h"
 #include "settings.h"
 #include "undo.h"
@@ -133,8 +134,6 @@ Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
 Texture2D recycleTexture = {0};
 
-struct Array* BaizeCommandQueue = {0};
-
 // int main(int argc, char* argv[], char* envp[]);
 int main(int argc, char* argv[], char* envp[])
 // int main(void) 
@@ -234,26 +233,15 @@ int main(int argc, char* argv[], char* envp[])
             BaizeUndoCommand(baize, NULL);
         }
         BaizeStartGame(baize);
-        BaizeCommandQueue = ArrayNew(8);
+        StartCommandQueue();
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeLayout(baize, GetScreenWidth(), GetScreenHeight());
             BaizeUpdate(baize);
             BaizeDraw(baize);
-            if ( ArrayLen(BaizeCommandQueue) > 0 ) {
-                // ISO C forbids conversion of object pointer to function pointer type [-Werror=pedantic]
-                struct BaizeCommand *bc = ArrayGet(BaizeCommandQueue, 0);
-                if ( bc ) {
-                    if ( bc->bcf ) {
-                        bc->bcf(baize, bc->param);
-                    }
-                    ArrayDelete(BaizeCommandQueue, 0, free);
-                } else {
-                    ArrayDelete(BaizeCommandQueue, 0, NULL);
-                }
-            }
+            ServiceCommandQueue(baize);
         }
         BaizeSaveUndoToFile(baize);
-        ArrayFree(BaizeCommandQueue);
+        StopCommandQueue();
         BaizeCloseLua(baize);
         BaizeFree(baize);
     }
