@@ -31,8 +31,6 @@ static const struct FunctionToRegister {
     {"PileType", MoonPileType},
     {"PileGet", MoonPileGet},
     {"PileLen", MoonPileLen},
-    {"SetPileAccept", MoonSetPileAccept},
-    {"SetPileRecycles", MoonSetPileRecycles},
     {"PilePeek", MoonPilePeek},
     {"PileDemoteCards", MoonPileDemoteCards},
     {"PilePromoteCards", MoonPilePromoteCards},
@@ -83,16 +81,16 @@ bool MoonGetGlobalBool(lua_State* L, const char* var, const bool def)
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     int typ = lua_getglobal(L, var);    // pushes value onto stack
     if ( typ == LUA_TNIL ) {
-        fprintf(stderr, "%s is nil\n", var);
+        // fprintf(stderr, "%s is nil\n", var);
         result = def;
     } else if ( typ != LUA_TBOOLEAN ) {
-        fprintf(stderr, "%s is not a boolean\n", var);
+        fprintf(stderr, "ERROR: %s: %s is not a boolean\n", __func__, var);
         result = def;
     } else {
         result = lua_toboolean(L, -1); // does not alter stack
     }
     lua_pop(L, 1); // remove boolean from stack
-    fprintf(stderr, "%s=%d\n", var, result);
+    // fprintf(stderr, "%s=%d\n", var, result);
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
 }
@@ -103,7 +101,7 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def)
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     int typ = lua_getglobal(L, var);    // pushes value onto stack
     if ( typ == LUA_TNIL ) {
-        fprintf(stderr, "%s is nil\n", var);
+        // fprintf(stderr, "%s is nil\n", var);
         result = def;
     } else if ( typ != LUA_TNUMBER ) {
         fprintf(stderr, "%s is not a number\n", var);
@@ -112,12 +110,12 @@ int MoonGetGlobalInt(lua_State* L, const char* var, const int def)
         int isnum;
         result = (int)lua_tointegerx(L, -1, &isnum); // does not alter stack
         if ( !isnum ) {
-            fprintf(stderr, "%s cannot be converted to an integer\n", var);
+            fprintf(stderr, "ERROR: %s: %s cannot be converted to an integer\n", __func__, var);
             result = def;
         }
     }
     lua_pop(L, 1); // remove integer from stack
-    fprintf(stderr, "%s=%d\n", var, result);
+    // fprintf(stderr, "%s=%d\n", var, result);
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
 }
@@ -128,7 +126,7 @@ float MoonGetGlobalFloat(lua_State* L, const char* var, const float def)
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     int typ = lua_getglobal(L, var);    // pushes value onto stack
     if ( typ == LUA_TNIL ) {
-        fprintf(stderr, "%s is nil\n", var);
+        // fprintf(stderr, "%s is nil\n", var);
         result = def;
     } else if ( typ != LUA_TNUMBER ) {
         fprintf(stderr, "%s is not a number\n", var);
@@ -137,12 +135,12 @@ float MoonGetGlobalFloat(lua_State* L, const char* var, const float def)
         int isnum;
         result = (float)lua_tonumberx(L, -1, &isnum); // does not alter stack
         if ( !isnum ) {
-            fprintf(stderr, "%s cannot be converted to a number\n", var);
+            fprintf(stderr, "ERROR: %s: %s cannot be converted to a number\n", __func__, var);
             result = def;
         }
     }
     lua_pop(L, 1); // remove integer from stack
-    fprintf(stderr, "%s=%f\n", var, result);
+    // fprintf(stderr, "%s=%f\n", var, result);
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
 }
@@ -158,12 +156,12 @@ const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def)
     } else {
         result = lua_tostring(L, -1); // does not alter stack
         if ( !result ) {
-            fprintf(stderr, "%s cannot be converted to a string\n", var);
+            fprintf(stderr, "ERROR: %s: %s cannot be converted to a string\n", __func__, var);
             result = def;
         }
     }
     lua_pop(L, 1); // remove integer from stack
-    fprintf(stderr, "%s=%s\n", var, result);
+    // fprintf(stderr, "%s=%s\n", var, result);
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
 }
@@ -175,15 +173,15 @@ float MoonGetFieldFloat(lua_State* L, const char* key, const float def)
     int isnum;
     int  typ = lua_getfield(L, -1, key);    // pushes onto the stack the value t[k], where t is the value at the given index
     if ( typ == LUA_TNIL ) {
-        fprintf(stderr, "%s is nil\n", key);
+        // fprintf(stderr, "%s is nil\n", key);
         result = def;
     } else if ( typ != LUA_TNUMBER ) {
-        fprintf(stderr, "%s is not a number\n", key);
+        fprintf(stderr, "ERROR: %s: %s is not a number\n", __func__, key);
         result = def;
     } else {
         result = (float)lua_tonumberx(L, -1, &isnum);    // returns a lua_Number
         if ( !isnum ) {
-            fprintf(stderr, "%s cannot be converted to a number\n", key);
+            fprintf(stderr, "ERROR: %s: %s cannot be converted to a number\n", __func__, key);
             result = def;
         }
     }
@@ -455,30 +453,6 @@ int MoonPileLen(lua_State *L)
         lua_pushinteger(L, 0);
     }
     return 1;
-}
-
-int MoonSetPileAccept(lua_State *L)
-{
-    struct Pile* p = lua_touserdata(L, 1);
-    enum CardOrdinal ord = lua_tointeger(L, 2);
-
-    if ( PileValid(p) ) {
-        p->vtable->SetAccept(p, ord);
-    }
-
-    return 0;
-}
-
-int MoonSetPileRecycles(lua_State *L)
-{
-    struct Pile* p = lua_touserdata(L, 1);
-    int r = lua_tointeger(L, 2);
-
-    if ( PileValid(p) ) {
-        p->vtable->SetRecycles(p, r);
-    }
-
-    return 0;
 }
 
 int MoonPilePeek(lua_State *L)

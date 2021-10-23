@@ -10,6 +10,27 @@
 #include "baize.h"
 #include "moon.h"
 
+void BaizeGetLuaGlobals(struct Baize *const self)
+{
+    self->powerMoves = MoonGetGlobalBool(self->L, "POWER_MOVES", false);
+    self->stock->vtable->SetRecycles(self->stock, MoonGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
+    
+    int accept = MoonGetGlobalInt(self->L, "FOUNDATION_ACCEPT", 32767);
+    if (accept != 32767) {
+        size_t index;
+        for ( struct Pile* p = ArrayFirst(self->foundations, &index); p; p = ArrayNext(self->foundations, &index) ) {
+            p->vtable->SetAccept(p, accept);
+        }
+    }
+    accept = MoonGetGlobalInt(self->L, "TABLEAU_ACCEPT", 32767);
+    if (accept != 32767) {
+        size_t index;
+        for ( struct Pile* p = ArrayFirst(self->tableaux, &index); p; p = ArrayNext(self->tableaux, &index) ) {
+            p->vtable->SetAccept(p, accept);
+        }
+    }
+}
+
 void BaizeStartGame(struct Baize *const self)
 {
     if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
@@ -24,6 +45,8 @@ void BaizeStartGame(struct Baize *const self)
             // nothing
         }
     }
+
+    BaizeGetLuaGlobals(self);
 }
 
 #if 0

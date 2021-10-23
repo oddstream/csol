@@ -1,7 +1,7 @@
 -- Klondike
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
+POWER_MOVES = false
 -- SEED = 3 -- 2 winnable draw three
 -- SEED = 39880
 -- SEED=35495
@@ -16,15 +16,14 @@ function BuildPiles()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         table.insert(TABLEAUX, pile)
-        SetPileAccept(pile, 13)
         for n = 1, deal do
           local c = MoveCard(STOCK, pile)
           SetCardProne(c, true)
@@ -32,12 +31,12 @@ function BuildPiles()
         SetCardProne(PilePeek(pile), false)
         deal = deal + 1
     end
+    TABLEAU_ACCEPT = 13
 
 end
 
 function StartGame()
-    STOCK_RECYCLES = 999
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
+    STOCK_RECYCLES = 32767
 end
 
 -- CanTailBeMoved constraints (_Tableau only)
@@ -180,10 +179,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
         end
     else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

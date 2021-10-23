@@ -5,7 +5,7 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
+POWER_MOVES = false
 -- SEED=32808
 -- SEED=59517
 

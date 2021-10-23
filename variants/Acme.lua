@@ -19,9 +19,9 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
+POWER_MOVES = false
 SEED=12620
-STOCKDEALCARDS = 1
+STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
 
@@ -34,8 +34,8 @@ function BuildPiles()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     RESERVES = {}
     pile = AddPile("Reserve", 1, 2, FAN_DOWN)
@@ -56,8 +56,7 @@ function BuildPiles()
 end
 
 function StartGame()
-  STOCK_RECYCLES = 1
-  SetPileRecycles(STOCK, STOCK_RECYCLES)
+    STOCK_RECYCLES = 1
 end
 
 -- CanTailBeMoved constraints (_Tableau only)
@@ -79,7 +78,7 @@ end
 
 function CanTailBeMoved_Tableau(tail)
     local c1 = TailGet(tail, 1)
-    if POWERMOVES then
+    if POWER_MOVES then
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)
             if CardSuit(c1) ~= CardSuit(c2) then
@@ -214,10 +213,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
           end
       else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

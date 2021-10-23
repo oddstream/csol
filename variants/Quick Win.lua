@@ -1,8 +1,16 @@
 -- Quick Win
 
+--[[
+    Style
+    
+    Lua globals are in UPPER_CASE, and use underscores between words
+    function names are in MixedCase
+    functions that apply to a type of pile are suffixed by _piletype
+]]
+
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
-STOCKDEALCARDS = 1
+POWER_MOVES = false
+STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
@@ -24,8 +32,8 @@ function BuildPiles()
     for x = 7, 10 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     MoveCard(STOCK, FOUNDATIONS[1], 1, 0)
 
@@ -52,7 +60,6 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 3
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 -- CanTailBeMoved constraints (_Tableau only)
@@ -208,10 +215,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
           end
       else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

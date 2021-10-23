@@ -2,12 +2,12 @@
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 
-POWERMOVES = false
+POWER_MOVES = false
+STOCK_RECYCLES = 0
 
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, PACKS, SUITS)
-    SetPileRecycles(STOCK, 0)
 
     local pile
 

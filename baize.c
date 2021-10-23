@@ -108,6 +108,11 @@ void BaizeCreatePiles(struct Baize *const self)
     } else {
         self->foundations = ArrayNew(8);
     }
+    if ( self->tableaux ) {
+        ArrayReset(self->tableaux);
+    } else {
+        self->tableaux = ArrayNew(8);
+    }
     self->stock = NULL;
     self->waste = NULL;
 
@@ -142,6 +147,8 @@ void BaizeCreatePiles(struct Baize *const self)
         for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
             if ( strcmp("Foundation", p->category) == 0 ) {
                 self->foundations = ArrayPush(self->foundations, p);
+            } else if ( strcmp("Tableau", p->category) == 0 ) {
+                self->tableaux = ArrayPush(self->tableaux, p);
             } else if ( strcmp(p->category, "Stock") == 0 ) {
                 self->stock = p;
             } else if ( strcmp(p->category, "Waste") == 0 ) {
@@ -149,8 +156,6 @@ void BaizeCreatePiles(struct Baize *const self)
             }
         }
     }
-
-    self->powerMoves = MoonGetGlobalBool(self->L, "POWERMOVES", false);
 
     // now the piles know their slots, calculate and set their positions
     BaizePositionPiles(self, GetScreenWidth());
@@ -537,7 +542,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
     // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
-    if(lua_getglobal(self->L, "AfterMove") != LUA_TFUNCTION) {  // push Lua function name onto the stack
+    if (lua_getglobal(self->L, "AfterMove") != LUA_TFUNCTION) {  // push Lua function name onto the stack
         // fprintf(stderr, "AfterMove is not a function\n");
         lua_pop(self->L, 1);  // remove func from stack
     } else {
@@ -556,6 +561,8 @@ void BaizeAfterUserMove(struct Baize *const self)
         UiToast(self->ui, "Game complete");
     }
     // TODO test started/complete/conformant
+
+    BaizeGetLuaGlobals(self);
 
     BaizeUndoPush(self);
 }
@@ -712,6 +719,7 @@ void BaizeFree(struct Baize *const self)
     self->magic = 0;
     BaizeResetError(self);
     ArrayFree(self->foundations);
+    ArrayFree(self->tableaux);
     UndoStackFree(self->undoStack);
     ArrayFree(self->tail);
     ArrayForeach(self->piles, (ArrayIterFunc)PileFree);

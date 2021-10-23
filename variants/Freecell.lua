@@ -1,7 +1,7 @@
 -- Freecell
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = true
+POWER_MOVES = true
 EASY_SEEDS = {39675,50060,50419}
 
 function BuildPiles()
@@ -25,8 +25,8 @@ function BuildPiles()
   for x = 5, 8 do
     pile = AddPile("Foundation", x, 1, FAN_NONE)
     table.insert(FOUNDATIONS, pile)
-    SetPileAccept(pile, 1)
   end
+  FOUNDATION_ACCEPT = 1
 
   TABLEAUX = {}
   for x = 1, 4 do
@@ -61,7 +61,7 @@ function CanTailBeMoved_Foundation(tail)
 end
 
 function CanTailBeMoved_Tableau(tail)
-    if POWERMOVES then
+    if POWER_MOVES then
         local c1 = TailGet(tail, 1)
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)

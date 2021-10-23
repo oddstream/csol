@@ -13,8 +13,8 @@ The foundations build up in suit, wrapping from King to Ace as necessary.
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
-STOCKDEALCARDS = 1
+POWER_MOVES = false
+STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
 
@@ -49,13 +49,12 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
     MoveCard(STOCK, FOUNDATIONS[1])
     local c = PilePeek(FOUNDATIONS[1])
     FOUNDATION_ACCEPT = CardOrdinal(c)
-    for i = 1, 8 do
-        SetPileAccept(FOUNDATIONS[i], FOUNDATION_ACCEPT)
-    end
+    -- for i = 1, 8 do
+    --     SetPileAccept(FOUNDATIONS[i], FOUNDATION_ACCEPT)
+    -- end
     MoveCard(STOCK, WASTE)
 end
 
@@ -206,10 +205,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
           end
       else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

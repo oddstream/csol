@@ -1,9 +1,9 @@
 -- Limited
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = true
+POWER_MOVES = true
 SEED = 4  -- winnable
-STOCKDEALCARDS = 1
+STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 32767
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
@@ -11,7 +11,6 @@ STOCK_RECYCLES = 32767
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
-    SetPileRecycles(STOCK, 0)
 
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
 
@@ -21,8 +20,8 @@ function BuildPiles()
     for x = 5, 12 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
     for x = 1, 12 do
@@ -51,7 +50,7 @@ end
 ]]
 
 function CanTailBeMoved_Tableau(tail)
-    if POWERMOVES then
+    if POWER_MOVES then
         local c1 = TailGet(tail, 1)
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)
@@ -175,10 +174,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
           end
       else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

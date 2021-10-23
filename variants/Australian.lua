@@ -1,7 +1,7 @@
 -- Australian
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-STOCKDEALCARDS = 1
+STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
 -- SEED=21960
@@ -9,7 +9,6 @@ STOCK_RECYCLES = 0
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
@@ -18,20 +17,20 @@ function BuildPiles()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         table.insert(TABLEAUX, pile)
-        SetPileAccept(pile, 13)
         for n = 1, 4 do
           local c = MoveCard(STOCK, pile)
           SetCardProne(c, false)
         end
     end
+    TABLEAU_ACCEPT = 13
 
 end
 
@@ -152,10 +151,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
           end
       else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

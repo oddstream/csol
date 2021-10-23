@@ -23,8 +23,6 @@ int MoonFindPile(lua_State* L);
 int MoonPileType(lua_State* L);
 int MoonPileGet(lua_State *L);
 int MoonPileLen(lua_State *L);
-int MoonSetPileAccept(lua_State* L);
-int MoonSetPileRecycles(lua_State* L);
 int MoonPilePeek(lua_State* L);
 int MoonPileDemoteCards(lua_State *L);
 int MoonPilePromoteCards(lua_State *L);

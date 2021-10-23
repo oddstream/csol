@@ -6,7 +6,7 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
+POWER_MOVES = false
 
 function BuildPiles()
 
@@ -18,8 +18,8 @@ function BuildPiles()
     for x = 1, 4 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     RESERVES = {}
     for x = 1, 4 do
@@ -28,11 +28,6 @@ function BuildPiles()
         MoveCard(STOCK, pile)
     end
 
-end
-
-function StartGame()
-    -- STOCK_RECYCLES = 999
-    -- SetPileRecycles(STOCK, STOCK_RECYCLES)
 end
 
 function CalcPileIndex(piles, pile)

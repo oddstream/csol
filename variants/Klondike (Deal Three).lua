@@ -1,5 +1,5 @@
 -- Klondike (Deal Three)
 
-STOCKDEALCARDS = 3
+STOCK_DEAL_CARDS = 3
 
 dofile("variants/~Klondike.lua")

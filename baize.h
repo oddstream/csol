@@ -23,6 +23,7 @@ struct Baize {
     struct Pile *stock;         // a struct Stock*
     struct Pile *waste;         // a struct Waste*, may be NULL, used by status bar
     struct Array *foundations;  // used by collect
+    struct Array *tableaux;
 
     struct Array *tail;
     struct Array *undoStack;
@@ -35,7 +36,7 @@ struct Baize {
     bool dragging;
     Vector2 dragOffset;
 
-    bool powerMoves;    // set from POWERMOVES variable in variant.lua
+    bool powerMoves;    // set from POWER_MOVES variable in variant.lua
 
     struct UI* ui;
 
@@ -71,10 +72,11 @@ void BaizeUpdate(struct Baize *const self);
 void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
 
+void BaizeGetLuaGlobals(struct Baize *const self);
+void BaizeStartGame(struct Baize *const self);
 // bool BaizeCardTapped(struct Baize *const self, struct Card *const c);
 bool BaizeTailTapped(struct Baize *const self);
 bool BaizePileTapped(struct Baize *const self, struct Pile *const c);
-void BaizeStartGame(struct Baize *const self);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);
 void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
 void BaizeFindGameCommand(struct Baize *const self, void* param);

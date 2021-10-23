@@ -8,8 +8,8 @@
 ]]
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
-POWERMOVES = false
-STOCKDEALCARDS = 1
+POWER_MOVES = false
+STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
 
@@ -45,11 +45,10 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
     FOUNDATION_ACCEPT = 0
-    for _, v in pairs(FOUNDATIONS) do
-        SetPileAccept(v, 0)
-    end
+    -- for _, v in pairs(FOUNDATIONS) do
+    --     SetPileAccept(v, 0)
+    -- end
 end
 
 -- CanTailBeMoved constraints (_Tableau only)
@@ -114,9 +113,9 @@ function CanTailBeAppended_Foundation(pile, tail)
                 return false, "The first Foundation card must come from a Reserve"
             end
             FOUNDATION_ACCEPT = CardOrdinal(c1)
-            for _, pile in ipairs(FOUNDATIONS) do
-                SetPileAccept(pile, FOUNDATION_ACCEPT)
-            end
+            -- for _, pile in ipairs(FOUNDATIONS) do
+            --     SetPileAccept(pile, FOUNDATION_ACCEPT)
+            -- end
         end
         if CardOrdinal(c1) ~= FOUNDATION_ACCEPT then
             return false, "Foundation can only accept a " .. V[FOUNDATION_ACCEPT] .. ", not a " .. V[CardOrdinal(c1)]
@@ -221,10 +220,9 @@ function Tapped_Stock(tail)
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-            SetPileRecycles(STOCK, STOCK_RECYCLES)
           end
       else
-        for i = 1, STOCKDEALCARDS do
+        for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end
     end

@@ -15,13 +15,13 @@
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 
-STOCKDEALCARDS = 1
+STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
 function BuildPiles()
 
     STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    SetPileRecycles(STOCK, STOCK_RECYCLES)
+
     WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
@@ -30,8 +30,8 @@ function BuildPiles()
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
-        SetPileAccept(pile, 1)
     end
+    FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
     for x = 4, 7 do
