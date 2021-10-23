@@ -234,6 +234,8 @@ int main(int argc, char* argv[], char* envp[])
             BaizeUndoCommand(baize, NULL);
         }
         BaizeStartGame(baize);
+        BaizeUndoPush(baize);
+
         StartCommandQueue();
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
             BaizeLayout(baize, GetScreenWidth(), GetScreenHeight());
@@ -241,8 +243,9 @@ int main(int argc, char* argv[], char* envp[])
             BaizeDraw(baize);
             ServiceCommandQueue(baize);
         }
-        BaizeSaveUndoToFile(baize);
         StopCommandQueue();
+
+        BaizeSaveUndoToFile(baize);
         BaizeCloseLua(baize);
         BaizeFree(baize);
     }

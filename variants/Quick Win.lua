@@ -59,6 +59,8 @@ function BuildPiles()
 end
 
 function StartGame()
+    io.stderr:write("StartGame\n")
+
     STOCK_RECYCLES = 3
 end
 

@@ -275,9 +275,8 @@ void BaizeRestartDealCommand(struct Baize *const self, void* param)
         SnapshotFree(snapshot);
     }
     self->savedPosition = 0;
-    BaizeUndoPush(self);    // replace current state
-
-    BaizeStartGame(self);
+    // do not run BaizeStartGame(self);!
+    BaizeUndoPush(self);
 }
 
 void BaizeUndoCommand(struct Baize *const self, void* param)

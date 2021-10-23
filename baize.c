@@ -180,8 +180,6 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
 
     self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
     self->dragging = false;
-
-    BaizeUndoPush(self);
 }
 
 void BaizePositionPiles(struct Baize *const self, const int windowWidth)
@@ -217,6 +215,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
     BaizeStartGame(self);
+    BaizeUndoPush(self);
 }
 
 struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
@@ -758,6 +757,7 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
     BaizeStartGame(self);
+    BaizeUndoPush(self);
 }
 
 void BaizeChangeVariantCommand(struct Baize *const self, void* param)

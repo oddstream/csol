@@ -55,7 +55,7 @@ function StartGame()
     -- for i = 1, 8 do
     --     SetPileAccept(FOUNDATIONS[i], FOUNDATION_ACCEPT)
     -- end
-    MoveCard(STOCK, WASTE)
+    -- MoveCard(STOCK, WASTE)
 end
 
 -- CanTailBeMoved constraints (_Tableau only)
