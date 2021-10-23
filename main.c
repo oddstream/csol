@@ -134,23 +134,24 @@ Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
 Texture2D recycleTexture = {0};
 
-// int main(int argc, char* argv[], char* envp[]);
 int main(int argc, char* argv[], char* envp[])
 // int main(void) 
 {
     (void)envp;
 
-    for ( int i=0; i<argc; i++ ) {
-        fprintf(stdout, "%d. %s\n", i, argv[i]);
-    }
-
-    int windowWidth = 640, windowHeight = 480;
-
+#if _DEBUG
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
     fprintf(stderr, "sizeof(void*) == %lu\n", sizeof(void*));
     fprintf(stderr, "sizeof(unsigned int) == %lu\n", sizeof(unsigned int));
     fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
     fprintf(stderr, "sizeof(Card) == %lu\n", sizeof(struct Card));
+
+    for ( int i=0; i<argc; i++ ) {
+        fprintf(stdout, "%d. %s\n", i, argv[i]);
+    }
+#endif
+
+    int windowWidth = 640, windowHeight = 480;
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     baizeHighlightColor = (Color){255,255,255,31};

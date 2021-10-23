@@ -17,4 +17,9 @@ void BaizeUndoCommand(struct Baize *const, void* param);
 void BaizeSaveUndoToFile(struct Baize *const self);
 struct Array* LoadUndoFromFile(char *variantName);
 
+struct Snapshot {
+    int recycles;
+    struct Array *savedPiles;
+};
+
 #endif

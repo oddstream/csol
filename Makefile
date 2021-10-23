@@ -215,7 +215,7 @@ CFLAGS += -D_FORTIFY_SOURCE=2
 CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE 
 
 ifeq ($(BUILD_MODE),DEBUG)
-    CFLAGS += -ggdb3 -O0
+    CFLAGS += -ggdb3 -O0 -D_DEBUG
 else
     CFLAGS += -s -O2
 endif

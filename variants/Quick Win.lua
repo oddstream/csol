@@ -29,7 +29,7 @@ function BuildPiles()
     local pile
 
     FOUNDATIONS = {}
-    for x = 7, 10 do
+    for x = 4, 9, 1.5 do    -- slots don't have to be integers
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
     end

@@ -306,8 +306,8 @@ int MoonAddPile(lua_State* L)
 
     const char* category = lua_tostring(L, 1); // doesn't alter stack
     // the slot numbers in Lua start from 1, and start from 0 in C
-    float x = lua_tonumber(L, 2) - 1; // doesn't alter stack
-    float y = lua_tonumber(L, 3) - 1; // doesn't alter stack
+    float x = lua_tonumber(L, 2) - 1.0f; // doesn't alter stack
+    float y = lua_tonumber(L, 3) - 1.0f; // doesn't alter stack
     enum FanType fan = lua_tointeger(L, 4); // doesn't alter stack
 
     // fprintf(stderr, "PileNew(%s,%f,%f,%d)\n", category, x, y, fan);
