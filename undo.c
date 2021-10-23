@@ -6,6 +6,7 @@
 #include "array.h"
 #include "baize.h"
 #include "stock.h"
+#include "undo.h"
 #include "util.h"
 
 #include "ui.h"
@@ -92,33 +93,43 @@ static void SavedCardArrayFree(struct SavedCardArray *const sca)
 }
 
 /*
-    A snapshot of the baize is an array (that mimics the baize piles array) of pointers to arrays (of SavedCardArray) of SavedCard objects
+    A snapshot of the baize is an object that contains
+        (1) the stock recycles count and
+        (b) an array (that mimics the baize piles array) of pointers to arrays (of SavedCardArray) of SavedCard objects
 */
-
-static struct Array* SnapshotNew(struct Baize *const self)
+static struct Snapshot* SnapshotNew(struct Baize *const self)
 {
-    struct Array *savedPiles = ArrayNew(ArrayLen(self->piles));
-    size_t pindex;
-    for ( struct Pile *p = (struct Pile*)ArrayFirst(self->piles, &pindex); p; p = (struct Pile*)ArrayNext(self->piles, &pindex) ) {
-        struct SavedCardArray* sca = SavedCardArrayNew(self->cardLibrary, p->cards);
-        savedPiles = ArrayPush(savedPiles, sca);
+    struct Snapshot *s = calloc(1, sizeof(struct Snapshot));
+    if (s) {
+        s->recycles = ((struct Stock*)self->stock)->recycles;
+        s->savedPiles = ArrayNew(ArrayLen(self->piles));
+        if (s->savedPiles) {
+            size_t pindex;
+            for ( struct Pile *p = (struct Pile*)ArrayFirst(self->piles, &pindex); p; p = (struct Pile*)ArrayNext(self->piles, &pindex) ) {
+                struct SavedCardArray* sca = SavedCardArrayNew(self->cardLibrary, p->cards);
+                s->savedPiles = ArrayPush(s->savedPiles, sca);
+            }
+        }
     }
-    return savedPiles;
+    return s;
 }
 
-static void SnapshotFree(struct Array* savedPiles)
+static void SnapshotFree(struct Snapshot *s)
 {
     size_t pindex;
-    for ( struct SavedCardArray *sca = ArrayFirst(savedPiles, &pindex); sca; sca = ArrayNext(savedPiles, &pindex) ) {
+    for ( struct SavedCardArray *sca = ArrayFirst(s->savedPiles, &pindex); sca; sca = ArrayNext(s->savedPiles, &pindex) ) {
         SavedCardArrayFree(sca);
     }
-    ArrayFree(savedPiles);
+    ArrayFree(s->savedPiles);
+    free(s);
 }
 
-static void SnapshotWriteToFile(FILE* f, struct Array* savedPiles)
+static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
 {
+    fprintf(f, "#%lu %d\n", index, s->recycles);
+
     size_t pindex;
-    for ( struct SavedCardArray *sca = ArrayFirst(savedPiles, &pindex); sca; sca = ArrayNext(savedPiles, &pindex) ) {
+    for ( struct SavedCardArray *sca = ArrayFirst(s->savedPiles, &pindex); sca; sca = ArrayNext(s->savedPiles, &pindex) ) {
         SavedCardArrayWriteToFile(f, sca);
     }
 }
@@ -130,8 +141,8 @@ struct Array* UndoStackNew(void)
 
 void UndoStackFree(struct Array *stack)
 {
-    for ( struct Array* item = ArrayPop(stack); item; item = ArrayPop(stack) ) {
-        SnapshotFree(item);
+    for ( struct Snapshot* snap = ArrayPop(stack); snap; snap = ArrayPop(stack) ) {
+        SnapshotFree(snap);
     }
     // this would free the piles, but not the cards, so would leak (thank you valgrind)
     // ArrayForeach(stack, (ArrayIterFunc)ArrayFree);
@@ -150,10 +161,11 @@ static int CalcPercentComplete(struct Baize *const self)
 
 void BaizeUndoPush(struct Baize *const self)
 {
-    struct Array* savedPiles = SnapshotNew(self);
-    self->undoStack = ArrayPush(self->undoStack, savedPiles);
-    // mark movable
-    // recalc percent complete
+    struct Snapshot* s = SnapshotNew(self);
+    self->undoStack = ArrayPush(self->undoStack, s);
+
+    // TODO mark movable
+
     char zLeft[64], zCenter[64], zRight[64];
 
     sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
@@ -175,26 +187,32 @@ void BaizeUndoPush(struct Baize *const self)
     }
 }
 
-struct Array* BaizeUndoPop(struct Baize *const self)
+struct Snapshot* BaizeUndoPop(struct Baize *const self)
 {
     if ( ArrayLen(self->undoStack) > 0 ) {
-        struct Array* savedPiles = ArrayPop(self->undoStack);
-        return savedPiles;
+        struct Snapshot* s = ArrayPop(self->undoStack);
+        return s;
     }
     return NULL;
 }
 
-void BaizeUpdateFromSnapshot(struct Baize *const self, struct Array *savedPiles)
+void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *s)
 {
-    if ( ArrayLen(self->piles) != ArrayLen(savedPiles) ) {
+    if ( ArrayLen(self->piles) != ArrayLen(s->savedPiles) ) {
         fprintf(stderr, "Bad snapshot\n");
         return;
     }
     for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
-        struct SavedCardArray *sca = ArrayGet(savedPiles, i);
+        struct SavedCardArray *sca = ArrayGet(s->savedPiles, i);
         struct Pile* pDst = ArrayGet(self->piles, i);
         ArrayReset(pDst->cards);
         SavedCardArrayCopyToPile(sca, self->cardLibrary, pDst);
+
+        if (s->recycles != ((struct Stock*)self->stock)->recycles) {
+            self->stock->vtable->SetRecycles(self->stock, s->recycles);
+            lua_pushinteger(self->L, s->recycles);
+            lua_setglobal(self->L, "STOCK_RECYCLES");
+        }
         // TODO scrunch this pile
     }
 }
@@ -226,14 +244,14 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
         UiToast(self->ui, "Cannot undo a completed game");
         return;
     }
-    struct Array *snapshot = NULL;
+    struct Snapshot *snapshot = NULL;
     while ( ArrayLen(self->undoStack) + 1 > self->savedPosition ) {
         if ( snapshot ) {
             SnapshotFree(snapshot);
         }
         snapshot = ArrayPop(self->undoStack);
     }
-    if ( snapshot ) {
+    if (snapshot) {
         BaizeUpdateFromSnapshot(self, snapshot);
         SnapshotFree(snapshot);
     }
@@ -245,7 +263,7 @@ void BaizeRestartDealCommand(struct Baize *const self, void* param)
 {
     (void)param;
 
-    struct Array *snapshot = NULL;
+    struct Snapshot *snapshot = NULL;
     while ( ArrayLen(self->undoStack) > 0 ) {
         if (snapshot) {
             SnapshotFree(snapshot);
@@ -276,7 +294,7 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
         return;
     }
 
-    struct Array* snapshot = BaizeUndoPop(self);    // removes current state
+    struct Snapshot* snapshot = BaizeUndoPop(self);    // removes current state
     if (!snapshot) {
         fprintf(stderr, "ERROR: %s: popping from undo stack (1)\n", __func__);
         return;
@@ -360,9 +378,8 @@ void BaizeSaveUndoToFile(struct Baize *const self)
         fprintf(f, "UNDOSTACK=%lu\n", ArrayLen(self->undoStack));
         {
             size_t index;
-            for ( struct Array *savedPiles = ArrayFirst(self->undoStack, &index); savedPiles; savedPiles = ArrayNext(self->undoStack, &index) ) {
-                fprintf(f, "#%lu\n", index);
-                SnapshotWriteToFile(f, savedPiles);
+            for ( struct Snapshot *s = ArrayFirst(self->undoStack, &index); s; s = ArrayNext(self->undoStack, &index) ) {
+                SnapshotWriteToFile(f, index, s);
             }
         }
         fclose(f);
@@ -373,7 +390,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
     // fprintf(stdout, "GetWorkingDirectory is %s\n", GetWorkingDirectory());
 }
 
-struct Array* LoadUndoFromFile(char *variantName)
+struct Array* LoadUndoFromFile(char *variantName /* out */)
 {
     char *homeDir;
     if ((homeDir = getenv("HOME")) == NULL) {
@@ -418,8 +435,9 @@ struct Array* LoadUndoFromFile(char *variantName)
         undoStack = ArrayNew(stackDepth + 16);
         for ( size_t n=0; n<stackDepth; n++) {
             size_t ncheck = 0xdeadbeef;
+            int recycles;
             // prepend a space to '#' to consume \n
-            if (fscanf(f, " #%lu", &ncheck) != 1) {
+            if (fscanf(f, " #%lu %d", &ncheck, &recycles) != 2) {
                 fprintf(stderr, "ERROR: %s: no more saved piles\n", __func__);
                 goto fclose_label;
             }
@@ -427,8 +445,14 @@ struct Array* LoadUndoFromFile(char *variantName)
                 fprintf(stderr, "ERROR: %s: saved pile miscount %lu != %lu\n", __func__, n, ncheck);
                 goto fclose_label;
             }
-            struct Array *savedPiles = ArrayNew(pileCount);
-            if (!savedPiles) {
+            struct Snapshot *snap = calloc(1, sizeof(struct Snapshot));
+            if (!snap) {
+                goto fclose_label;
+            }
+            snap->recycles = recycles;
+            snap->savedPiles = ArrayNew(pileCount);
+            if (!snap->savedPiles) {
+                free(snap);
                 goto fclose_label;
             }
             for ( size_t m=0; m<pileCount; m++ ) {
@@ -454,9 +478,9 @@ struct Array* LoadUndoFromFile(char *variantName)
                     prone = number & 1;
                     sca->sav[sca->len++] = (struct SavedCard){.index=index, .prone=prone};
                 }
-                savedPiles = ArrayPush(savedPiles, sca);
+                snap->savedPiles = ArrayPush(snap->savedPiles, sca);
             }
-            undoStack = ArrayPush(undoStack, savedPiles);
+            undoStack = ArrayPush(undoStack, snap);
         }
         fclose_label: fclose(f);
     }

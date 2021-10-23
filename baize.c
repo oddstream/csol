@@ -298,7 +298,7 @@ bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     // }
 
     // find the index of the first tail card
-    size_t iFirst = 2147483647;
+    size_t iFirst = 32767;
     for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
         if (c == cFirst) {
             iFirst = index;

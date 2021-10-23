@@ -121,7 +121,7 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan
         FillStockFromLibrary(baize, (struct Pile *const)self);
         ShuffleStock(baize, (struct Pile *const)self);
 
-        self->recycles = 2147483647;  // infinite by default
+        self->recycles = 32767;  // infinite by default
     }
     return self;
 }
