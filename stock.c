@@ -100,7 +100,10 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
 
 static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
 {
-    unsigned int seed = MoonGetGlobalInt(baize->L, "SEED", time(NULL) & 0xFFFF);
+    unsigned seed = MoonGetGlobalInt(baize->L, "SEED", time(NULL) & 0xFFFF);
+#if _DEBUG
+    fprintf(stdout, "SEED %u\n", seed);
+#endif
     srand(seed);
     // Knuth-Fisher–Yates shuffle
     size_t n = ArrayLen(stock->cards);
@@ -134,7 +137,7 @@ bool StockCanMoveTail(struct Array *const tail)
 
 bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    BaizeSetError(baize, "(C) Cannot move cards to the Stock");
+    BaizeSetError(baize, "(CSOL) Cannot move cards to the Stock");
 
     (void)baize;
     (void)self;
@@ -144,7 +147,7 @@ bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeSetError(baize, "(C) Cannot move cards to the Stock");
+    BaizeSetError(baize, "(CSOL) Cannot move cards to the Stock");
 
     (void)baize;
     (void)self;

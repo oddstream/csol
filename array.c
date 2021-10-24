@@ -77,6 +77,17 @@ void* ArrayGet(struct Array *const self, int pos)
     }
 }
 
+_Bool ArrayIndexOf(struct Array *const self, void *element, size_t *index)
+{
+    for ( size_t i=0; i<self->used; i++ ) {
+        if (self->data[i] == element) {
+            *index = i;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void* ArrayFirst(struct Array *const self, size_t *index)
 {
     if ( self->used == 0 ) {

@@ -48,13 +48,13 @@ bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
 {
     (void)self;
     (void)c;
-    BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
+    BaizeSetError(baize, "(CSOL) Cannot move a card to a Reserve");
     return false;
 }
 
 bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
-    BaizeSetError(baize, "(C) Cannot move a card to a Reserve");
+    BaizeSetError(baize, "(CSOL) Cannot move a card to a Reserve");
     (void)self;
     (void)tail;
     return false;

@@ -118,7 +118,7 @@ bool BaizeTailTapped(struct Baize *const self)
         return pile->vtable->Tapped(pile, self->tail);
     }
 
-    unsigned int crc = BaizeCRC(self);
+    unsigned crc = BaizeCRC(self);
 
     // push one arg, the tail
     lua_pushlightuserdata(L, self->tail);
@@ -156,7 +156,7 @@ bool BaizePileTapped(struct Baize *const self, struct Pile *const pile)
         return pile->vtable->Tapped(pile, NULL);
     }
 
-    unsigned int crc = BaizeCRC(self);
+    unsigned crc = BaizeCRC(self);
 
     // push one arg, the (non existant) tail
     lua_pushnil(L);

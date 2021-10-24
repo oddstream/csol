@@ -45,7 +45,7 @@ bool FoundationCanMoveTail(struct Array *const tail)
 {
     struct Card *c = ArrayGet(tail, 0);
     struct Baize* baize = CardToBaize(c);
-    BaizeSetError(baize, "(C) Cannot move cards from a Foundation");
+    BaizeSetError(baize, "(CSOL) Cannot move cards from a Foundation");
     (void)tail;
     return false;
 }
@@ -53,7 +53,7 @@ bool FoundationCanMoveTail(struct Array *const tail)
 bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "(C) The foundation is full");
+        BaizeSetError(baize, "(CSOL) The foundation is full");
         return false;
     }
 
@@ -65,15 +65,15 @@ bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self,
 bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if (ArrayLen(tail) > 1) {
-        BaizeSetError(baize, "(C) Can only move a single card to a Foundation");
+        BaizeSetError(baize, "(CSOL) Can only move a single card to a Foundation");
         return false;
     }
     if (ArrayLen(self->cards) == baize->numberOfCardsInSuit) {
-        BaizeSetError(baize, "(C) The Foundation is full");
+        BaizeSetError(baize, "(CSOL) The Foundation is full");
         return false;
     }
     if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit) {
-        BaizeSetError(baize, "(C) That would over-fill the Foundation");
+        BaizeSetError(baize, "(CSOL) That would over-fill the Foundation");
         return false;
     }
     // ArrayLen(tail) == 1

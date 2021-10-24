@@ -141,11 +141,7 @@ struct Array* UndoStackNew(void)
 
 void UndoStackFree(struct Array *stack)
 {
-    for ( struct Snapshot* snap = ArrayPop(stack); snap; snap = ArrayPop(stack) ) {
-        SnapshotFree(snap);
-    }
-    // this would free the piles, but not the cards, so would leak (thank you valgrind)
-    // ArrayForeach(stack, (ArrayIterFunc)ArrayFree);
+    ArrayForeach(stack, (ArrayIterFunc)SnapshotFree);
     ArrayFree(stack);
 }
 
@@ -164,7 +160,7 @@ void BaizeUndoPush(struct Baize *const self)
     struct Snapshot* s = SnapshotNew(self);
     self->undoStack = ArrayPush(self->undoStack, s);
 
-    // TODO mark movable
+    // TODO mark movable?
 
     char zLeft[64], zCenter[64], zRight[64];
 

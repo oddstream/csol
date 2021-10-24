@@ -87,9 +87,9 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
             if ( ArrayLen(tail) > moves ) {
                 char z[128];
                 if ( moves == 1 )
-                    sprintf(z, "(C) Only enough space to move 1 card, not %lu", ArrayLen(tail));
+                    sprintf(z, "(CSOL) Only enough space to move 1 card, not %lu", ArrayLen(tail));
                 else
-                    sprintf(z, "(C) Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+                    sprintf(z, "(CSOL) Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
                 BaizeSetError(baize, z);
                 return false;
             }

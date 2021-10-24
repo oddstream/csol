@@ -44,7 +44,7 @@ bool WasteCanMoveTail(struct Array *const tail)
     if (ArrayLen(tail)>1) {
         struct Card *c = ArrayGet(tail, 0);
         struct Baize *baize = CardToBaize(c);
-        BaizeSetError(baize, "(C) Only a single card can be moved from Waste");
+        BaizeSetError(baize, "(CSOL) Only a single card can be moved from Waste");
         return false;
     }
     return true;

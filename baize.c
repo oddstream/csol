@@ -31,12 +31,12 @@ bool BaizeValid(struct Baize *const self)
     return self && self->magic == BAIZE_MAGIC;
 }
 
-unsigned int BaizeCRC(struct Baize *const self)
+unsigned BaizeCRC(struct Baize *const self)
 {
     // calculate a CRC to detect changes to the cards
-    // sizeof(unsigned int) == 4 at the time of writing
+    // sizeof(unsigned) == 4 at the time of writing
     // https://stackoverflow.com/questions/21001659/crc32-algorithm-implementation-in-c-without-a-look-up-table-and-with-a-public-li
-    unsigned int crc = 0xFFFFFFFF, mask;
+    unsigned crc = 0xFFFFFFFF, mask;
     size_t pindex;
     for ( struct Pile* p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
         crc = crc ^ ArrayLen(p->cards);
@@ -286,7 +286,6 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
 
 bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
 {
-    size_t index = 0;
     struct Pile* p = cFirst->owner;
 
     // check no cards in this pile are transitioning
@@ -297,19 +296,13 @@ bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     // }
 
     // find the index of the first tail card
-    size_t iFirst = 32767;
-    for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
-        if (c == cFirst) {
-            iFirst = index;
-            break;
-        }
-    }
-    if (iFirst == 999) {
+    size_t iFirst;
+    if (!ArrayIndexOf(p->cards, cFirst, &iFirst)) {
         fprintf(stderr, "ERROR: %s: card not found in pile\n", __func__);
         return false;
     }
     // free any old tail
-    if ( self->tail ) {
+    if (self->tail) {
         ArrayFree(self->tail);
         self->tail = NULL;
     }
@@ -431,7 +424,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
                 if (!(c->owner == self->stock && p == self->waste) && AnyTailCardsProne(self->tail)) {
-                    UiToast(self->ui, "(C) Cannot move a face down card");
+                    UiToast(self->ui, "(CSOL) Cannot move a face down card");
                     ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                 } else {
                     if ( c->owner->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {

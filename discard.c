@@ -44,7 +44,7 @@ bool DiscardCanMoveTail(struct Array *const tail)
 {
     struct Card *c = ArrayGet(tail, 0);
     struct Baize* baize = CardToBaize(c);
-    BaizeSetError(baize, "(C) Cannot move cards from a Discard");
+    BaizeSetError(baize, "(CSOL) Cannot move cards from a Discard");
     return false;
 }
 
@@ -63,7 +63,7 @@ bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
         return false;
     }
     if ( ArrayLen(tail) != baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "(C) Can only move a full set of cards to a Discard");
+        BaizeSetError(baize, "(CSOL) Can only move a full set of cards to a Discard");
         return false;
     }
     return CanTailBeAppended(self, tail);

@@ -210,10 +210,12 @@ int main(int argc, char* argv[], char* envp[])
     ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", originalCardWidth, originalCardHeight, kenneyBackInfo);
 #endif
 
+#if _DEBUG
     {
         fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
         fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());
     }
+#endif
 
     char variantName[32];
     struct Array *undoStack = LoadUndoFromFile(variantName);
@@ -260,7 +262,7 @@ int main(int argc, char* argv[], char* envp[])
     UnloadFont(fontRobotoMedium24);
     UnloadFont(fontRobotoRegular14);
 
-    CloseWindow();        // Close window and OpenGL context
+    CloseWindow();
 
     return 0;
 }
