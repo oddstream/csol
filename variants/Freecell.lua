@@ -54,19 +54,21 @@ function BuildPiles()
 
 end
 
--- CanTailBeMoved constraints
-
-function CanTailBeMoved_Foundation(tail)
-    return false, "Cannot move cards from a Foundation"
+function StartGame()
+    if EASY then
+        Toast("Kings have been buried and Aces moved to the front")
+    end
 end
 
-function CanTailBeMoved_Tableau(tail)
+-- CanTailBeMoved constraints
+
+function Tableau.CanTailBeMoved(tail)
     if POWER_MOVES then
         local c1 = TailGet(tail, 1)
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)
             if CardColor(c1) == CardColor(c2) then
-                return false, "Card must be in alternating colors"
+                return false, "Cards must be in alternating colors"
             end
             if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
                 return false, "Cards must be in increasing value"
@@ -83,7 +85,7 @@ end
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Foundation(pile, tail)
+function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
         return false, "Foundations can only accept a single card"
     else
@@ -106,7 +108,7 @@ function CanTailBeAppended_Foundation(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     if PileLen(pile) == 0 then
         -- do nothing, empty accept any card
     else
@@ -125,9 +127,9 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
--- IsPileConformant (_Tableau only)
+-- IsPileConformant (Tableau only)
 
-function IsPileConformant_Tableau(pile)
+function Tableau.IsPileConformant(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, n)
@@ -142,9 +144,9 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
--- SortedAndUnSorted (_Tableau only)
+-- SortedAndUnSorted (Tableau only)
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
     local c1 = PileGet(pile, 1)

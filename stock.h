@@ -18,7 +18,7 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 pos, enum FanType fanT
 bool StockCanMoveTail(struct Array *const tail);
 bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
-bool StockTapped(struct Pile *const self, struct Array *const tail);
+void StockTapped(struct Pile *const self, struct Array *const tail);
 int StockCollect(struct Pile *const self);
 bool StockComplete(struct Pile *const self);
 bool StockConformant(struct Pile *const self);

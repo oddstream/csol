@@ -44,12 +44,12 @@ function BuildPiles()
     end
 end
 
-function StartGame()
-end
+-- function StartGame()
+-- end
 
--- CanTailBeMoved constraints (_Tableau only)
+-- CanTailBeMoved constraints (Tableau only)
 
-function CanTailBeMoved_Tableau(tail)
+function Tableau.CanTailBeMoved(tail)
     -- A sequence of cards, decrementing in rank and of the same suit, can be moved as one
     local c1 = TailGet(tail, 1)
     for i = 2, TailLen(tail) do
@@ -68,7 +68,7 @@ end
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Discard(pile, tail)
+function Discard.CanTailBeAppended(pile, tail)
     -- C will have checked that there are (13 - number of cards in a suit) cards in the tail
 
     local c1 = TailGet(tail, 1)
@@ -89,7 +89,7 @@ function CanTailBeAppended_Discard(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     -- A card can be placed on any card on the top of a column whose rank is greater than it by one (with no cards that can be placed above an Ace). 
     if PileLen(pile) == 0 then
         -- An empty column may be filled by any card
@@ -109,7 +109,7 @@ end
 
 -- IsPileConformant
 
-function IsPileConformant_Tableau(pile)
+function Tableau.IsPileConformant(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, n)
@@ -124,9 +124,9 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
--- SortedAndUnSorted (_Tableau only)
+-- SortedAndUnSorted (Tableau only)
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
     local c1 = PileGet(pile, 1)

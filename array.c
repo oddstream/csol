@@ -197,3 +197,16 @@ void ArrayFree(struct Array *const self)
         free(self);
     }
 }
+
+struct ArrayIterator ArrayIterator(struct Array *const self)
+{
+    return (struct ArrayIterator){.a = self, .i = 0};
+}
+
+void* ArrayMoveNext(struct ArrayIterator *self)
+{
+    if (self->a->used > self->i) {
+        return self->a->data[(self->i)++];
+    }
+    return NULL;
+}

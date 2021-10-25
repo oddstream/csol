@@ -4,7 +4,7 @@
 #define UNDO_H
 
 struct Snapshot {
-    int recycles;
+    int recycles, faccept, taccept;
     struct Array *savedPiles;
 };
 
@@ -16,6 +16,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *s);
 void BaizeSavePositionCommand(struct Baize *const self, void* param);
 void BaizeLoadPositionCommand(struct Baize *const self, void* param);
 void BaizeRestartDealCommand(struct Baize *const self, void* param);
+void BaizeUndo0(struct Baize *const self);
 void BaizeUndo(struct Baize *const self);
 void BaizeUndoCommand(struct Baize *const, void* param);
 

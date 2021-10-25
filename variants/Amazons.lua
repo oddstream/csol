@@ -39,38 +39,18 @@ function CalcPileIndex(piles, pile)
     io.stderr:write("CalcPileIndex cannot find pile\n")
 end
 
--- CanTailBeMoved constraints (_Tableau only)
-
---[[
-function CanTailBeMoved_Waste(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from the Waste"
-    end
-    return true
-end
-
-function CanTailBeMoved_Foundation(tail)
-    return false, "Cannot move cards from a Foundation"
-end
-
-function CanTailBeMoved_Reserve(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only one Reserve card can be moved"
-    end
-    return true
-end
-]]
+-- CanTailBeMoved constraints (Tableau only)
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Waste(pile, tail)
+function Waste.CanTailBeAppended(pile, tail)
     if CardOwner(TailGet(tail, 1)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
-function CanTailBeAppended_Foundation(pile, tail)
+function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
         return false, "Foundation can only accept a single card"
     elseif PileLen(pile) == 0 then
@@ -110,7 +90,7 @@ end
 
 -- Actions
 
-function Tapped_Stock(tail)
+function Stock.Tapped(tail)
     if not tail then
         for _, res in ipairs(RESERVES) do
             MoveAllCards(res, STOCK)

@@ -69,11 +69,10 @@ bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
     return CanTailBeAppended(self, tail);
 }
 
-bool DiscardTapped(struct Pile *const self, struct Array *const tail)
+void DiscardTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;
-    return false;
 }
 
 int DiscardCollect(struct Pile *const self)

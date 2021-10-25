@@ -6,6 +6,7 @@
 #include "array.h"
 #include "baize.h"
 #include "stock.h"
+#include "moon.h"
 #include "undo.h"
 #include "util.h"
 
@@ -124,9 +125,12 @@ static void SnapshotFree(struct Snapshot *s)
     free(s);
 }
 
-static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
+static void SnapshotWriteToFile(lua_State *L, FILE* f, size_t index, struct Snapshot *s)
 {
-    fprintf(f, "#%lu %d\n", index, s->recycles);
+    int faccept = MoonGetGlobalInt(L, FOUNDATION_ACCEPT, 0);
+    int taccept = MoonGetGlobalInt(L, TABLEAU_ACCEPT, 0);
+
+    fprintf(f, "#%lu %d %d %d\n", index, s->recycles, faccept, taccept);
 
     size_t pindex;
     for ( struct SavedCardArray *sca = ArrayFirst(s->savedPiles, &pindex); sca; sca = ArrayNext(s->savedPiles, &pindex) ) {
@@ -192,22 +196,42 @@ struct Snapshot* BaizeUndoPop(struct Baize *const self)
     return NULL;
 }
 
-void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *s)
+void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
 {
-    if ( ArrayLen(self->piles) != ArrayLen(s->savedPiles) ) {
-        fprintf(stderr, "Bad snapshot\n");
+    if ( ArrayLen(self->piles) != ArrayLen(snap->savedPiles) ) {
+        fprintf(stderr, "ERROR: %s: Bad snapshot\n", __func__);
         return;
     }
     for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
-        struct SavedCardArray *sca = ArrayGet(s->savedPiles, i);
+        struct SavedCardArray *sca = ArrayGet(snap->savedPiles, i);
         struct Pile* pDst = ArrayGet(self->piles, i);
         ArrayReset(pDst->cards);
         SavedCardArrayCopyToPile(sca, self->cardLibrary, pDst);
 
-        if (s->recycles != ((struct Stock*)self->stock)->recycles) {
-            self->stock->vtable->SetRecycles(self->stock, s->recycles);
-            lua_pushinteger(self->L, s->recycles);
+        if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
+            self->stock->vtable->SetRecycles(self->stock, snap->recycles);
+            lua_pushinteger(self->L, snap->recycles);
             lua_setglobal(self->L, "STOCK_RECYCLES");
+        }
+        int faccept = MoonGetGlobalInt(self->L, FOUNDATION_ACCEPT, 0);
+        if (faccept != snap->faccept) {
+            fprintf(stdout, "INFO: %s: updating %s\n", __func__, FOUNDATION_ACCEPT);
+            size_t index;
+            for ( struct Pile* p = ArrayFirst(self->foundations, &index); p; p = ArrayNext(self->foundations, &index) ) {
+                p->vtable->SetAccept(p, snap->faccept);
+            }
+            lua_pushinteger(self->L, snap->faccept);
+            lua_setglobal(self->L, FOUNDATION_ACCEPT);
+        }
+        int taccept = MoonGetGlobalInt(self->L, TABLEAU_ACCEPT, 0);
+        if (taccept != snap->taccept) {
+            fprintf(stdout, "INFO: %s: updating %s\n", __func__,  TABLEAU_ACCEPT);
+            size_t index;
+            for ( struct Pile* p = ArrayFirst(self->tableaux, &index); p; p = ArrayNext(self->tableaux, &index) ) {
+                p->vtable->SetAccept(p, snap->taccept);
+            }
+            lua_pushinteger(self->L, snap->taccept);
+            lua_setglobal(self->L, TABLEAU_ACCEPT);
         }
         // TODO scrunch this pile
     }
@@ -275,17 +299,21 @@ void BaizeRestartDealCommand(struct Baize *const self, void* param)
     BaizeUndoPush(self);
 }
 
-void BaizeUndoCommand(struct Baize *const self, void* param)
+void BaizeUndo0(struct Baize *const self)
 {
-    (void)param;
-
-    if ( ArrayLen(self->undoStack) < 2 ) {
-        UiToast(self->ui, "Nothing to undo");
+    struct Snapshot *snapshot = BaizeUndoPop(self);    // removes current state
+    if (!snapshot) {
+        fprintf(stderr, "ERROR: %s: popping from undo stack\n", __func__);
         return;
     }
+    BaizeUpdateFromSnapshot(self, snapshot);
+    SnapshotFree(snapshot);
+}
 
-    if ( BaizeComplete(self) ) {
-        UiToast(self->ui, "Cannot undo a completed game");
+void BaizeUndo(struct Baize *const self)
+{
+    if ( ArrayLen(self->undoStack) < 2 ) {
+        fprintf(stderr, "WARNING: %s: Nothing to undo\n", __func__);
         return;
     }
 
@@ -305,6 +333,23 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
     SnapshotFree(snapshot);
 
     BaizeUndoPush(self);    // replace current state
+}
+
+void BaizeUndoCommand(struct Baize *const self, void* param)
+{
+    (void)param;
+
+    if ( ArrayLen(self->undoStack) < 2 ) {
+        UiToast(self->ui, "Nothing to undo");
+        return;
+    }
+
+    if ( BaizeComplete(self) ) {
+        UiToast(self->ui, "Cannot undo a completed game");
+        return;
+    }
+
+    BaizeUndo(self);
 }
 
 #include <sys/types.h>
@@ -374,7 +419,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
         {
             size_t index;
             for ( struct Snapshot *s = ArrayFirst(self->undoStack, &index); s; s = ArrayNext(self->undoStack, &index) ) {
-                SnapshotWriteToFile(f, index, s);
+                SnapshotWriteToFile(self->L, f, index, s);
             }
         }
         fclose(f);
@@ -430,9 +475,9 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
         undoStack = ArrayNew(stackDepth + 16);
         for ( size_t n=0; n<stackDepth; n++) {
             size_t ncheck = 0xdeadbeef;
-            int recycles;
+            int recycles, faccept, taccept;
             // prepend a space to '#' to consume \n
-            if (fscanf(f, " #%lu %d", &ncheck, &recycles) != 2) {
+            if (fscanf(f, " #%lu %d %d %d", &ncheck, &recycles, &faccept, &taccept) != 4) {
                 fprintf(stderr, "ERROR: %s: no more saved piles\n", __func__);
                 goto fclose_label;
             }
@@ -445,6 +490,8 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                 goto fclose_label;
             }
             snap->recycles = recycles;
+            snap->faccept = faccept;
+            snap->taccept = taccept;
             snap->savedPiles = ArrayNew(pileCount);
             if (!snap->savedPiles) {
                 free(snap);

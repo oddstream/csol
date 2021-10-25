@@ -42,9 +42,9 @@ function BuildPiles()
     table.insert(RESERVES, pile)
     for n = 1, 13 do
         local c = MoveCard(STOCK, pile)
-        SetCardProne(c, true)
+        CardProne(c, true)
     end
-    SetCardProne(PilePeek(pile), false)
+    CardProne(PilePeek(pile), false)
 
     TABLEAUX = {}
     for x = 4, 7 do
@@ -59,24 +59,9 @@ function StartGame()
     STOCK_RECYCLES = 1
 end
 
--- CanTailBeMoved constraints (_Tableau only)
+-- CanTailBeMoved constraints (Tableau only)
 
---[[
-function CanTailBeMoved_Waste(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from the Waste"
-    end
-    return true
-end
-]]
-
---[[
-function CanTailBeMoved_Foundation(tail)
-    return false, "Cannot move cards from a Foundation"
-end
-]]
-
-function CanTailBeMoved_Tableau(tail)
+function Tableau.CanTailBeMoved(tail)
     local c1 = TailGet(tail, 1)
     if POWER_MOVES then
         for i = 2, TailLen(tail) do
@@ -99,14 +84,14 @@ end
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Waste(pile, tail)
+function Waste.CanTailBeAppended(pile, tail)
     if CardOwner(TailGet(tail, 1)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
-function CanTailBeAppended_Foundation(pile, tail)
+function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
         return false, "Foundation can only accept a single card"
     else
@@ -129,7 +114,7 @@ function CanTailBeAppended_Foundation(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     if PileLen(pile) == 0 then
         -- do nothing, empty accept any card
     else
@@ -151,22 +136,22 @@ end
 
 -- IsPileConformant
 
-function IsPileConformant_Foundation(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
-        c1 = c2
-    end
-    return true
-end
+-- function Foundation.IsPileConformant(pile)
+--     local c1 = PilePeek(pile)
+--     for i = 2, PileLen(pile) do
+--         local c2 = PileGet(pile, n)
+--         if CardSuit(c1) ~= CardSuit(c2) then
+--             return false, "Foundations must be built in suit"
+--         end
+--         if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+--             return false, "Foundations build up"
+--         end
+--         c1 = c2
+--     end
+--     return true
+-- end
 
-function IsPileConformant_Tableau(pile)
+function Tableau.IsPileConformant(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, n)
@@ -181,9 +166,9 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
--- SortedAndUnSorted (_Tableau only)
+-- SortedAndUnSorted (Tableau only)
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
     local c1 = PileGet(pile, 1)
@@ -203,18 +188,19 @@ end
 
 -- Actions
 
-function Tapped_Stock(tail)
+function Stock.Tapped(tail)
     if tail == nil then
         if STOCK_RECYCLES == 0 then
-            return "No more Stock recycles"
-          end
-          if PileLen(WASTE) > 0 then
+            Toast("No more Stock recycles")
+            return
+        end
+        if PileLen(WASTE) > 0 then
             while PileLen(WASTE) > 0 do
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
-          end
-      else
+        end
+    else
         for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end

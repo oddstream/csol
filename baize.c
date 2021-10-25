@@ -73,13 +73,21 @@ void BaizeOpenLua(struct Baize *const self)
     // create a handle to this Baize inside Lua TODO maybe not needed
     lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
 
-    lua_pushinteger(self->L, FAN_NONE);    lua_setglobal(self->L, "FAN_NONE");
-    lua_pushinteger(self->L, FAN_DOWN);    lua_setglobal(self->L, "FAN_DOWN");
-    lua_pushinteger(self->L, FAN_LEFT);    lua_setglobal(self->L, "FAN_LEFT");
-    lua_pushinteger(self->L, FAN_RIGHT);   lua_setglobal(self->L, "FAN_RIGHT");
-    lua_pushinteger(self->L, FAN_DOWN3);   lua_setglobal(self->L, "FAN_DOWN3");
-    lua_pushinteger(self->L, FAN_LEFT3);   lua_setglobal(self->L, "FAN_LEFT3");
-    lua_pushinteger(self->L, FAN_RIGHT3);  lua_setglobal(self->L, "FAN_RIGHT3");
+    lua_pushinteger(self->L, FAN_NONE);     lua_setglobal(self->L, "FAN_NONE");
+    lua_pushinteger(self->L, FAN_DOWN);     lua_setglobal(self->L, "FAN_DOWN");
+    lua_pushinteger(self->L, FAN_LEFT);     lua_setglobal(self->L, "FAN_LEFT");
+    lua_pushinteger(self->L, FAN_RIGHT);    lua_setglobal(self->L, "FAN_RIGHT");
+    lua_pushinteger(self->L, FAN_DOWN3);    lua_setglobal(self->L, "FAN_DOWN3");
+    lua_pushinteger(self->L, FAN_LEFT3);    lua_setglobal(self->L, "FAN_LEFT3");
+    lua_pushinteger(self->L, FAN_RIGHT3);   lua_setglobal(self->L, "FAN_RIGHT3");
+
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Cell");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Discard");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Foundation");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Reserve");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Stock");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Tableau");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Waste");
 }
 
 void BaizeCloseLua(struct Baize *const self)
@@ -92,23 +100,20 @@ void BaizeCloseLua(struct Baize *const self)
 
 void BaizeCreatePiles(struct Baize *const self)
 {
-    // reset the old piles
-    if ( self->piles ) {
-        size_t pindex;
-        for ( struct Pile* p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
-            PileFree(p);
-        }
+    // reset any old piles
+    if (self->piles) {
+        ArrayForeach(self->piles, (ArrayIterFunc)PileFree);
         ArrayReset(self->piles);
     } else {
         self->piles = ArrayNew(8);
     }
 
-    if ( self->foundations ) {
+    if (self->foundations) {
         ArrayReset(self->foundations);
     } else {
         self->foundations = ArrayNew(8);
     }
-    if ( self->tableaux ) {
+    if (self->tableaux) {
         ArrayReset(self->tableaux);
     } else {
         self->tableaux = ArrayNew(8);
@@ -143,8 +148,11 @@ void BaizeCreatePiles(struct Baize *const self)
 
     // setup useful shortcuts for collect (to foundations) and statusbar
     {   // scope for pindex
-        size_t pindex;
-        for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
+        // size_t pindex;
+        // for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
+        struct Pile* p;
+        struct ArrayIterator iter = ArrayIterator(self->piles);
+        while ( (p = ArrayMoveNext(&iter)) ) {
             if ( strcmp("Foundation", p->category) == 0 ) {
                 self->foundations = ArrayPush(self->foundations, p);
             } else if ( strcmp("Tableau", p->category) == 0 ) {
@@ -215,6 +223,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
     BaizeStartGame(self);
+    BaizeGetLuaGlobals(self);
     BaizeUndoPush(self);
 }
 
@@ -446,13 +455,13 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             }
         } else {    // card was not dragged, ie it didn't move
             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
-            // if ( BaizeCardTapped(self, c) ) {
-            if (BaizeTailTapped(self)) {
+            unsigned crc = BaizeCRC(self);
+            BaizeTailTapped(self);
+            if (BaizeCRC(self) != crc) {
                 BaizeAfterUserMove(self);
-            } else {
-                if (self->errorString) {
-                    UiToast(self->ui, self->errorString);
-                }
+            }
+            if (self->errorString) {
+                UiToast(self->ui, self->errorString);
             }
             // needs -C11
             // char *pt = _Generic(c->owner,
@@ -473,12 +482,13 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
         }
         self->touchedWidget = NULL;
     } else if ( self->touchedPile ) {
-        if ( BaizePileTapped(self, self->touchedPile) ) {
+        unsigned crc = BaizeCRC(self);
+        BaizePileTapped(self, self->touchedPile);
+        if (BaizeCRC(self) != crc) {
             BaizeAfterUserMove(self);
-        } else {
-            if (self->errorString) {
-                UiToast(self->ui, self->errorString);
-            }
+        }
+        if (self->errorString) {
+            UiToast(self->ui, self->errorString);
         }
         self->touchedPile = NULL;
     } else if ( self->dragging ) {
@@ -750,6 +760,7 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
     BaizeStartGame(self);
+    BaizeGetLuaGlobals(self);
     BaizeUndoPush(self);
 }
 

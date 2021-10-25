@@ -23,7 +23,7 @@ function BuildPiles()
         table.insert(TABLEAUX, pile)
         for n=1,4 do
           local c = MoveCard(STOCK, pile)
-          SetCardProne(c, true)
+          CardProne(c, true)
         end
         MoveCard(STOCK, pile)
     end
@@ -32,19 +32,13 @@ function BuildPiles()
         table.insert(TABLEAUX, pile)
         for n=1,3 do
           local c = MoveCard(STOCK, pile)
-          SetCardProne(c, true)
+          CardProne(c, true)
         end
         MoveCard(STOCK, pile)
     end
 end
 
---[[
-function CanTailBeMoved_Discard(tail)
-    return false, "Cannot move cards from a Discard"
-end
-]]
-
-function CanTailBeMoved_Tableau(tail)
+function Tableau.CanTailBeMoved(tail)
     local c1 = TailGet(tail, 1)
     for i = 2, TailLen(tail) do
         local c2 = TailGet(tail, i)
@@ -61,7 +55,7 @@ function CanTailBeMoved_Tableau(tail)
     return true
 end
 
-function CanTailBeAppended_Discard(pile, tail)
+function Discard.CanTailBeAppended(pile, tail)
     if TailLen(tail) ~= 13 then
         return false, "Discard can only accept 13 cards"
     else
@@ -83,7 +77,7 @@ function CanTailBeAppended_Discard(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     if PileLen(pile) == 0 then
         -- accept any card
     else
@@ -96,7 +90,7 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
-function IsPileConformant_Discard(pile)
+function Discard.IsPileConformant(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, n)
@@ -111,11 +105,11 @@ function IsPileConformant_Discard(pile)
     return true
 end
 
-function IsPileConformant_Tableau(pile)
+function Tableau.IsPileConformant(pile)
     return IsPileConformant_Discard(pile)
 end
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
     local c1 = PileGet(pile, 1)
@@ -133,10 +127,11 @@ function SortedAndUnsorted_Tableau(pile)
     return sorted, unsorted
 end
 
-function Tapped_Stock(tail)
+function Stock.Tapped(tail)
 
     if not tail then
-        return "No more cards in Stock"
+        Toast("No more cards in Stock")
+        return
     end
 
     local errMsg = nil
@@ -151,12 +146,10 @@ function Tapped_Stock(tail)
         end
     end
     if emptyTabs > 0 and tabCards >= #TABLEAUX then
-        errMsg = "All empty tableaux must be filled before dealing a new row"
+        Toast("All empty tableaux must be filled before dealing a new row")
     else
         for _, tab in ipairs(TABLEAUX) do
             MoveCard(STOCK, tab)
         end
     end
-
-    return errMsg
 end

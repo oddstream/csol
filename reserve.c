@@ -60,11 +60,10 @@ bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
     return false;
 }
 
-bool ReserveTapped(struct Pile *const self, struct Array *const tail)
+void ReserveTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;
-    return false;
 }
 
 int ReserveCollect(struct Pile *const self)

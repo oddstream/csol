@@ -67,11 +67,10 @@ bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struc
     return true;
 }
 
-bool CellTapped(struct Pile *const self, struct Array *const tail)
+void CellTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;
-    return false;
 }
 
 int CellCollect(struct Pile *const self)

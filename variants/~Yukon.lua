@@ -1,37 +1,58 @@
--- Australian
+-- Yukon
+
+-- https://en.wikipedia.org/wiki/Yukon_(solitaire)
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
--- SEED=21960
-
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    STOCK = AddPile("Stock", -5, -5, FAN_NONE, 1, 4)
     
     local pile
+    local card
 
     FOUNDATIONS = {}
-    for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+    for y = 1, 4 do
+        pile = AddPile("Foundation", 8.5, y, FAN_NONE)
         table.insert(FOUNDATIONS, pile)
     end
     FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
-    local deal = 1
-    for x = 1, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
-        for n = 1, 4 do
-          local c = MoveCard(STOCK, pile)
-        --   CardProne(c, false)
-        end
-    end
-    TABLEAU_ACCEPT = 13
+    pile = AddPile("Tableau", 1, 1, FAN_DOWN)
+    table.insert(TABLEAUX, pile)
+    card = MoveCard(STOCK, pile)
 
+    local dealDown = 1
+    local dealUp = 5
+    for x = 2, 7 do
+        pile = AddPile("Tableau", x, 1, FAN_DOWN)
+        table.insert(TABLEAUX, pile)
+        for c = 1, dealDown do
+            card = MoveCard(STOCK, pile)
+            CardProne(card, true)
+        end
+        for c = 1, dealUp do
+            card = MoveCard(STOCK, pile)
+            -- CardProne(card, false)
+        end
+        dealDown = dealDown + 1
+    end
+    if not RELAXED then
+        TABLEAU_ACCEPT = 13
+    end
+
+    if PileLen(STOCK) > 0 then
+        io.stderr:write("Oops! There are still " .. PileLen(STOCK) .. " cards in the Stock\n")
+    end
+end
+
+function StartGame()
+    if RELAXED then
+        Toast("Relaxed version - any card may be placed in an empty pile")
+    end
 end
 
 -- CanTailBeMoved constraints (Tableau only)
@@ -41,13 +62,6 @@ function Tableau.CanTailBeMoved(tail)
 end
 
 -- CanTailBeAppended constraints
-
-function Waste.CanTailBeAppended(pile, tail)
-    if CardOwner(TailGet(tail, 1)) ~= STOCK then
-        return false, "The Waste can only accept cards from the Stock"
-    end
-    return true
-end
 
 function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
@@ -72,15 +86,17 @@ end
 
 function Tableau.CanTailBeAppended(pile, tail)
     if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
-        if CardOrdinal(c1) ~= 13 then
-            return false, "Empty Tableaux can only accept a King, not a " .. V[CardOrdinal(c1)]
+        if not RELAXED then
+            local c1 = TailGet(tail, 1)
+            if CardOrdinal(c1) ~= 13 then
+                return false, "Empty Tableaux can only accept a King, not a " .. V[CardOrdinal(c1)]
+            end
         end
     else
         local c1 = PilePeek(pile)
         local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
+        if CardColor(c1) == CardColor(c2) then
+            return false, "Tableaux build in alternating color"
         end
         if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
             return false, "Tableaux build down"
@@ -95,8 +111,8 @@ function Tableau.IsPileConformant(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
+        if CardColor(c1) == CardColor(c2) then
+            return false, "Tableaux build in alternating color"
         end
         if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
             return false, "Tableaux build down"
@@ -114,7 +130,7 @@ function Tableau.SortedAndUnsorted(pile)
     local c1 = PileGet(pile, 1)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
+        if CardColor(c1) == CardColor(c2) then
             unsorted = unsorted + 1
         elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
             sorted = sorted + 1
@@ -127,22 +143,3 @@ function Tableau.SortedAndUnsorted(pile)
 end
 
 -- Actions
-
-function Stock.Tapped(tail)
-    if tail == nil then
-        if STOCK_RECYCLES == 0 then
-            Toast("No more Stock recycles")
-            return
-        end
-        if PileLen(WASTE) > 0 then
-            while PileLen(WASTE) > 0 do
-                MoveCard(WASTE, STOCK)
-            end
-            STOCK_RECYCLES = STOCK_RECYCLES - 1
-        end
-    else
-        for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(STOCK, WASTE)
-        end
-    end
-end

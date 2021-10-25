@@ -13,7 +13,7 @@ POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*
+-- C sets variables 'BAIZE', 'STOCK', FAN_*, and tables to hold pile functions
 
 function BuildPiles()
 
@@ -64,22 +64,11 @@ function StartGame()
     STOCK_RECYCLES = 3
 end
 
--- CanTailBeMoved constraints (_Tableau only)
+-- CanTailBeMoved constraints (Tableau only)
 
---[[
-function CanTailBeMoved_Waste(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from the Waste"
-    end
-    return true
-end
+function Tableau.CanTailBeMoved(tail)
+    io.stderr:write("Tableau.CanTailBeMoved\n")
 
-function CanTailBeMoved_Foundation(tail)
-    return false, "Cannot move cards from a Foundation"
-end
-]]
-
-function CanTailBeMoved_Tableau(tail)
     local c1 = TailGet(tail, 1)
     for i = 2, TailLen(tail) do
         local c2 = TailGet(tail, i)
@@ -111,14 +100,14 @@ end
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Waste(pile, tail)
+function Waste.CanTailBeAppended(pile, tail)
     if CardOwner(TailGet(tail, 1)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
-function CanTailBeAppended_Foundation(pile, tail)
+function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
         return false, "Foundations can only accept a single card"
     elseif PileLen(pile) == 0 then
@@ -139,7 +128,7 @@ function CanTailBeAppended_Foundation(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     if PileLen(pile) == 0 then
         -- do nothing, empty accept any card
     else
@@ -164,9 +153,9 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
--- IsPileConformant (_Tableau only)
+-- IsPileConformant (Tableau only)
 
-function IsPileConformant_Tableau(pile)
+function Tableau.IsPileConformant(pile)
     local c1 = PileGet(pile, 1)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, i)
@@ -181,9 +170,9 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
--- SortedAndUnSorted (_Tableau only)
+-- SortedAndUnSorted (Tableau only)
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
     local c1 = PileGet(pile, 1)
@@ -203,7 +192,7 @@ end
 
 -- Actions
 
-function Tapped_Stock(tail)
+function Stock.Tapped(tail)
     if tail == nil then
         if STOCK_RECYCLES == 0 then
             return "No more Stock recycles"
@@ -218,7 +207,7 @@ function Tapped_Stock(tail)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
           end
-      else
+    else
         for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
         end

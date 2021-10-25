@@ -41,4 +41,12 @@ struct Array* ArrayClone(struct Array *const self);
 void ArrayReset(struct Array *const dst);
 void ArrayFree(struct Array *const self);
 
+struct ArrayIterator {
+    struct Array *a;
+    size_t i;
+};
+
+struct ArrayIterator ArrayIterator(struct Array *const self);
+void *ArrayMoveNext(struct ArrayIterator* self);
+
 #endif

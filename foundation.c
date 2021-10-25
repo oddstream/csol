@@ -80,11 +80,10 @@ bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self,
     return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
 }
 
-bool FoundationTapped(struct Pile *const self, struct Array *const tail)
+void FoundationTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;
-    return false;
 }
 
 int FoundationCollect(struct Pile *const self)

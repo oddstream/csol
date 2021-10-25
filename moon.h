@@ -6,6 +6,9 @@
 #include "array.h"
 #include "card.h"
 
+#define FOUNDATION_ACCEPT "FOUNDATION_ACCEPT"
+#define TABLEAU_ACCEPT "TABLEAU_ACCEPT"
+
 void MoonRegisterFunctions(lua_State* L);
 
 bool MoonGetGlobalBool(lua_State* L, const char* var, const bool def);
@@ -35,7 +38,6 @@ int MoonCardOwner(lua_State* L);
 int MoonCardProne(lua_State* L);
 int MoonCardSuit(lua_State* L);
 // int MoonCardToTable(lua_State *L);
-int MoonSetCardProne(lua_State* L);
 
 int MoonTailGet(lua_State* L);
 int MoonTailLen(lua_State* L);

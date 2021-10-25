@@ -218,8 +218,8 @@ int main(int argc, char* argv[], char* envp[])
 #endif
 
     char variantName[32];
-    struct Array *undoStack = LoadUndoFromFile(variantName);
-    if (undoStack && variantName[0]) {
+    struct Array *loadedUndoStack = LoadUndoFromFile(variantName);
+    if (loadedUndoStack && variantName[0]) {
         fprintf(stdout, "INFO: %s: state loaded from file for '%s'\n", __func__, variantName);
         // that's fine
     } else {
@@ -231,11 +231,13 @@ int main(int argc, char* argv[], char* envp[])
     if ( BaizeValid(baize) ) {
         BaizeOpenLua(baize);
         BaizeCreatePiles(baize);
-        BaizeResetState(baize, undoStack);  // Baize takes ownership of undoStack
-        if (undoStack) {
-            BaizeUndoCommand(baize, NULL);
+        BaizeResetState(baize, loadedUndoStack);  // Baize takes ownership of loadedUndoStack
+        if (loadedUndoStack) {
+            BaizeUndo0(baize);
+        } else {
+            BaizeStartGame(baize);
         }
-        BaizeStartGame(baize);
+        BaizeGetLuaGlobals(baize);
         BaizeUndoPush(baize);
 
         StartCommandQueue();

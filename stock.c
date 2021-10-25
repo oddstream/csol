@@ -155,11 +155,10 @@ bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
     return false;
 }
 
-bool StockTapped(struct Pile *const self, struct Array *const tail)
+void StockTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;
-    return false;
 }
 
 int StockCollect(struct Pile *const self)

@@ -98,11 +98,10 @@ bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, st
     return CanTailBeAppended(self, tail);
 }
 
-bool TableauTapped(struct Pile *const self, struct Array *const tail)
+void TableauTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;
-    return false;
 }
 
 int TableauCollect(struct Pile *const self)
@@ -132,6 +131,23 @@ void TableauSetRecycles(struct Pile *const self, int r)
     (void)r;
 }
 
+static bool setupTableMethod(lua_State *L, const char *table, const char *method)
+{   // TODO refactor out duplicate in constraint.c - need luautils.c?
+    int typ = lua_getglobal(L, table);
+    if (typ != LUA_TTABLE) {
+        fprintf(stderr, "ERROR: %s: %s is not a table\n", __func__, table);
+        lua_pop(L, 1);  // remove table name
+        return false;
+    }
+    typ = lua_getfield(L, -1, method);
+    if (typ != LUA_TFUNCTION) {
+        fprintf(stderr, "ERROR: %s: %s.%s is not a function\n", __func__, table, method);
+        lua_pop(L, 2);  // remove table and method names
+        return false;
+    }
+    return true;
+}
+
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
 {
     // some optimizations
@@ -147,14 +163,10 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
     (void)sorted;
     (void)unsorted;
 #else
-    char funcName[64]; sprintf(funcName, "SortedAndUnsorted_%s", self->category);
     struct Baize *const baize = self->owner;
     lua_State *L = baize->L;
 
-    if (lua_getglobal(L, funcName) != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        // fprintf(stderr, "%s is not a function\n", funcName);
-        lua_pop(L, 1);  // remove func from stack
-    } else {
+    if (setupTableMethod(L, "Tableau", "SortedAndUnsorted")) {
         lua_pushlightuserdata(L, self);
         // one arg (pile), two returns (number, number)
         if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {

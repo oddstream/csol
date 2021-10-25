@@ -43,7 +43,6 @@ static const struct FunctionToRegister {
     {"CardProne", MoonCardProne},
     {"CardSuit", MoonCardSuit},
     // {"CardToTable", MoonCardToTable},
-    {"SetCardProne", MoonSetCardProne},
 
     {"TailGet", MoonTailGet},
     {"TailLen", MoonTailLen},
@@ -649,6 +648,14 @@ int MoonCardProne(lua_State *L)
         lua_pushboolean(L, 0);
         return 1;
     }
+    if (lua_gettop(L) == 2 && lua_isboolean(L, 2)) {
+        bool prone = lua_toboolean(L, 2);
+        if ( prone ) {
+            CardFlipDown(c);
+        } else {
+            CardFlipUp(c);
+        }
+    }
     lua_pushboolean(L, c->prone);
     return 1;
 }
@@ -678,22 +685,6 @@ int MoonCardToTable(lua_State *L)
     return 1;
 }
 #endif
-
-int MoonSetCardProne(lua_State *L)
-{
-    struct Card* c = lua_touserdata(L, 1);
-    if ( !CardValid(c) ) {
-        fprintf(stderr, "WARNING: %s: invalid card\n", __func__);
-        return 0;
-    }
-    bool prone = lua_toboolean(L, 2);
-    if ( prone ) {
-        CardFlipDown(c);
-    } else {
-        CardFlipUp(c);
-    }
-    return 0;
-}
 
 int MoonTailGet(lua_State* L)
 {

@@ -19,7 +19,7 @@ struct Tableau* TableauNew(struct Baize *const baize, Vector2 pos, enum FanType 
 bool TableauCanMoveTail(struct Array *const tail);
 bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
-bool TableauTapped(struct Pile *const self, struct Array *const tail);
+void TableauTapped(struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);
 bool TableauComplete(struct Pile *const self);
 bool TableauConformant(struct Pile *const self);

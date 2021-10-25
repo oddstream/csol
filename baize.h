@@ -74,9 +74,8 @@ void BaizeFree(struct Baize *const self);
 
 void BaizeGetLuaGlobals(struct Baize *const self);
 void BaizeStartGame(struct Baize *const self);
-// bool BaizeCardTapped(struct Baize *const self, struct Card *const c);
-bool BaizeTailTapped(struct Baize *const self);
-bool BaizePileTapped(struct Baize *const self, struct Pile *const c);
+void BaizeTailTapped(struct Baize *const self);
+void BaizePileTapped(struct Baize *const self, struct Pile *const c);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);
 void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
 void BaizeFindGameCommand(struct Baize *const self, void* param);

@@ -44,22 +44,9 @@ end
 function StartGame()
 end
 
--- CanTailBeMoved constraints (_Tableau only)
+-- CanTailBeMoved constraints (Tableau only)
 
---[[
-function CanTailBeMoved_Waste(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from the Waste"
-    end
-    return true
-end
-
-function CanTailBeMoved_Foundation(tail)
-    return false, "Cannot move cards from a Foundation"
-end
-]]
-
-function CanTailBeMoved_Tableau(tail)
+function Tableau.CanTailBeMoved(tail)
     local c1 = TailGet(tail, 1)
     if TailLen(tail) > 1 then
         return false, "Can only move a single card"
@@ -69,7 +56,7 @@ end
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Waste(pile, tail)
+function Waste.CanTailBeAppended(pile, tail)
     if PileLen(pile) > 0 then
         return false, "The Waste already contains a card"
     end
@@ -82,7 +69,7 @@ function CanTailBeAppended_Waste(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Foundation(pile, tail)
+function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
         return false, "Foundation can only accept a single card"
     else
@@ -103,7 +90,7 @@ function CanTailBeAppended_Foundation(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     local c1 = PilePeek(pile)
     local c2 = TailGet(tail, 1)
     if CardOwner(c2) ~= WASTE then
@@ -112,21 +99,21 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
--- IsPileConformant (_Tableau only)
+-- IsPileConformant (Tableau only)
 
--- SortedAndUnSorted (_Tableau only)
+-- SortedAndUnSorted (Tableau only)
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     return 0, PileLen(pile)
 end
 
 -- Actions
 
-function Tapped_Stock(tail)
+function Stock.Tapped(tail)
     -- only allow one card at a time in waste
     if PileLen(WASTE) == 0 then
         MoveCard(STOCK, WASTE)
     else
-        return "The Waste must be emptied first"
+        Toast("The Waste must be emptied first")
     end
 end

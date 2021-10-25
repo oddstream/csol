@@ -36,20 +36,7 @@ end
 
 -- CanTailBeMoved constraints (_Tableau only)
 
---[[
-function CanTailBeMoved_Waste(tail)
-    if TailLen(tail) > 1 then
-        return false, "Only a single card can be moved from the Waste"
-    end
-    return true
-end
-
-function CanTailBeMoved_Foundation(tail)
-    return false, "Cannot move cards from a Foundation"
-end
-]]
-
-function CanTailBeMoved_Tableau(tail)
+function Tableau.CanTailBeMoved(tail)
     if POWER_MOVES then
         local c1 = TailGet(tail, 1)
         for i = 2, TailLen(tail) do
@@ -72,14 +59,14 @@ end
 
 -- CanTailBeAppended constraints
 
-function CanTailBeAppended_Waste(pile, tail)
+function Waste.CanTailBeAppended(pile, tail)
     if CardOwner(TailGet(tail, 1)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
-function CanTailBeAppended_Foundation(pile, tail)
+function Foundation.CanTailBeAppended(pile, tail)
     if TailLen(tail) > 1 then
         return false, "Foundations can only accept a single card"
     else
@@ -102,7 +89,7 @@ function CanTailBeAppended_Foundation(pile, tail)
     return true
 end
 
-function CanTailBeAppended_Tableau(pile, tail)
+function Tableau.CanTailBeAppended(pile, tail)
     if PileLen(pile) == 0 then
         -- do nothing, empty accept any card
     else
@@ -125,9 +112,9 @@ function CanTailBeAppended_Tableau(pile, tail)
     return true
 end
 
--- IsPileConformant (_Tableau only)
+-- IsPileConformant (Tableau only)
 
-function IsPileConformant_Tableau(pile)
+function Tableau.IsPileConformant(pile)
     local c1 = PilePeek(pile)
     for i = 2, PileLen(pile) do
         local c2 = PileGet(pile, n)
@@ -142,9 +129,9 @@ function IsPileConformant_Tableau(pile)
     return true
 end
 
--- SortedAndUnSorted (_Tableau only)
+-- SortedAndUnSorted (Tableau only)
 
-function SortedAndUnsorted_Tableau(pile)
+function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
     local c1 = PileGet(pile, 1)
@@ -164,12 +151,13 @@ end
 
 -- Actions
 
-function Tapped_Stock(tail)
+function Stock.Tapped(tail)
     if tail == nil then
         if STOCK_RECYCLES == 0 then
-            return "No more Stock recycles"
-          end
-          if PileLen(WASTE) > 0 then
+            Toast("No more Stock recycles")
+            return
+        end
+        if PileLen(WASTE) > 0 then
             while PileLen(WASTE) > 0 do
                 MoveCard(WASTE, STOCK)
             end
