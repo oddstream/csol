@@ -8,12 +8,12 @@
 #include <lua.h>
 
 #include "baize.h"
-#include "moon.h"
+#include "luautil.h"
 
 void BaizeGetLuaGlobals(struct Baize *const self)
 {
-    self->powerMoves = MoonGetGlobalBool(self->L, "POWER_MOVES", false);
-    self->stock->vtable->SetRecycles(self->stock, MoonGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
+    self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
+    self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
 
     // CELL_ACCEPT, DISCARD_ACCEPT, RESERVE_ACCEPT, STOCK_ACCEPT, WASTE_ACCEPT don't count
     // FOUNDATION_ACCEPT, TABLEAU_ACCEPT do count
@@ -24,11 +24,11 @@ void BaizeGetLuaGlobals(struct Baize *const self)
     size_t index;
 
     // by default, accept anything (that's what 0 means)
-    accept = MoonGetGlobalInt(self->L, FOUNDATION_ACCEPT, 0);
+    accept = LuaUtilGetGlobalInt(self->L, FOUNDATION_ACCEPT, 0);
     for ( struct Pile* p = ArrayFirst(self->foundations, &index); p; p = ArrayNext(self->foundations, &index) ) {
         p->vtable->SetAccept(p, accept);
     }
-    accept = MoonGetGlobalInt(self->L, TABLEAU_ACCEPT, 0);
+    accept = LuaUtilGetGlobalInt(self->L, TABLEAU_ACCEPT, 0);
     for ( struct Pile* p = ArrayFirst(self->tableaux, &index); p; p = ArrayNext(self->tableaux, &index) ) {
         p->vtable->SetAccept(p, accept);
     }
@@ -56,23 +56,6 @@ void BaizeStartGame(struct Baize *const self)
     }
 }
 
-static bool setupTableMethod(lua_State *L, const char *table, const char *method)
-{   // TODO refactor out this duplicate
-    int typ = lua_getglobal(L, table);
-    if (typ != LUA_TTABLE) {
-        fprintf(stderr, "ERROR: %s: %s is not a table\n", __func__, table);
-        lua_pop(L, 1);  // remove table name
-        return false;
-    }
-    typ = lua_getfield(L, -1, method);
-    if (typ != LUA_TFUNCTION) {
-        // fprintf(stderr, "WARNING: %s: %s.%s is not a function\n", __func__, table, method);
-        lua_pop(L, 2);  // remove table and method names
-        return false;
-    }
-    return true;
-}
-
 void BaizeTailTapped(struct Baize *const self)
 {
     if (!self->tail || ArrayLen(self->tail)==0) {
@@ -83,7 +66,7 @@ void BaizeTailTapped(struct Baize *const self)
     struct Card* c0 = ArrayGet(self->tail, 0);
     struct Pile* pile = c0->owner;
 
-    if (!setupTableMethod(L, pile->category, "Tapped")) {
+    if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
         fprintf(stderr, "%s.Tapped is not a function, reverting to internal default (tail len %lu)\n", pile->category, ArrayLen(self->tail));
         pile->vtable->Tapped(pile, self->tail);
     } else {
@@ -101,7 +84,7 @@ void BaizePileTapped(struct Baize *const self, struct Pile *const pile)
 {
     lua_State *L = self->L;
 
-    if (!setupTableMethod(L, pile->category, "Tapped")) {
+    if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
         fprintf(stderr, "%s.Tapped is not a function, reverting to internal default (nil tail)\n", pile->category);
         pile->vtable->Tapped(pile, NULL);
     } else {

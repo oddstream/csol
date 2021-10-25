@@ -10,7 +10,7 @@
 #include "baize.h"
 #include "pile.h"
 #include "array.h"
-#include "moon.h"
+#include "luautil.h"
 #include "stock.h"
 
 static struct PileVtable stockVtable = {
@@ -100,7 +100,7 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
 
 static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
 {
-    unsigned seed = MoonGetGlobalInt(baize->L, "SEED", time(NULL) & 0xFFFF);
+    unsigned seed = LuaUtilGetGlobalInt(baize->L, "SEED", time(NULL) & 0xFFFF);
 #if _DEBUG
     fprintf(stdout, "SEED %u\n", seed);
 #endif

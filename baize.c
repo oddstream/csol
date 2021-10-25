@@ -4,12 +4,18 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include <raylib.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
-#include "csol.h"
+#include <raylib.h>
+
+#include "baize.h"
+#include "moon.h"
+#include "undo.h"
+#include "util.h"
+#include "ui.h"
 
 #define BAIZE_MAGIC (0x19910920)
 

@@ -6,7 +6,7 @@
 #include "array.h"
 #include "baize.h"
 #include "stock.h"
-#include "moon.h"
+#include "luautil.h"
 #include "undo.h"
 #include "util.h"
 
@@ -127,8 +127,8 @@ static void SnapshotFree(struct Snapshot *s)
 
 static void SnapshotWriteToFile(lua_State *L, FILE* f, size_t index, struct Snapshot *s)
 {
-    int faccept = MoonGetGlobalInt(L, FOUNDATION_ACCEPT, 0);
-    int taccept = MoonGetGlobalInt(L, TABLEAU_ACCEPT, 0);
+    int faccept = LuaUtilGetGlobalInt(L, FOUNDATION_ACCEPT, 0);
+    int taccept = LuaUtilGetGlobalInt(L, TABLEAU_ACCEPT, 0);
 
     fprintf(f, "#%lu %d %d %d\n", index, s->recycles, faccept, taccept);
 
@@ -213,7 +213,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
             lua_pushinteger(self->L, snap->recycles);
             lua_setglobal(self->L, "STOCK_RECYCLES");
         }
-        int faccept = MoonGetGlobalInt(self->L, FOUNDATION_ACCEPT, 0);
+        int faccept = LuaUtilGetGlobalInt(self->L, FOUNDATION_ACCEPT, 0);
         if (faccept != snap->faccept) {
             fprintf(stdout, "INFO: %s: updating %s\n", __func__, FOUNDATION_ACCEPT);
             size_t index;
@@ -223,7 +223,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
             lua_pushinteger(self->L, snap->faccept);
             lua_setglobal(self->L, FOUNDATION_ACCEPT);
         }
-        int taccept = MoonGetGlobalInt(self->L, TABLEAU_ACCEPT, 0);
+        int taccept = LuaUtilGetGlobalInt(self->L, TABLEAU_ACCEPT, 0);
         if (taccept != snap->taccept) {
             fprintf(stdout, "INFO: %s: updating %s\n", __func__,  TABLEAU_ACCEPT);
             size_t index;

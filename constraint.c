@@ -10,24 +10,8 @@
 #include "array.h"
 #include "baize.h"
 #include "constraint.h"
+#include "luautil.h"
 #include "moon.h"
-
-static bool setupTableMethod(lua_State *L, const char *table, const char *method)
-{
-    int typ = lua_getglobal(L, table);
-    if (typ != LUA_TTABLE) {
-        fprintf(stderr, "ERROR: %s: %s is not a table\n", __func__, table);
-        lua_pop(L, 1);  // remove table name
-        return false;
-    }
-    typ = lua_getfield(L, -1, method);
-    if (typ != LUA_TFUNCTION) {
-        fprintf(stderr, "ERROR: %s: %s.%s is not a function\n", __func__, table, method);
-        lua_pop(L, 2);  // remove table and method names
-        return false;
-    }
-    return true;
-}
 
 static bool getBoolStringReturn(struct Baize *const baize, const char *func)
 {
@@ -74,7 +58,7 @@ bool CanTailBeMoved(struct Array *const tail)
     bool result = true;
     lua_State *L = baize->L;
 
-    if (setupTableMethod(L, pile->category, __func__)) {
+    if (LuaUtilSetupTableMethod(L, pile->category, __func__)) {
         lua_pushlightuserdata(L, tail);
         // one arg (tail), two returns (boolean, error string)
         if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
@@ -100,7 +84,7 @@ bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail)
 
     bool result = true;
     lua_State *L = pile->owner->L;
-    if (setupTableMethod(L, pile->category, __func__)) {
+    if (LuaUtilSetupTableMethod(L, pile->category, __func__)) {
         lua_pushlightuserdata(L, pile);
         lua_pushlightuserdata(L, tail);
         // two args (pile, tail), two returns (boolean, error string)
@@ -125,7 +109,7 @@ bool IsPileConformant(struct Pile *const pile)
     bool result = true;
     lua_State *L = pile->owner->L;
 
-    if (setupTableMethod(L, pile->category, __func__)) {
+    if (LuaUtilSetupTableMethod(L, pile->category, __func__)) {
         lua_pushlightuserdata(L, pile);
         // one arg (pile), two returns (boolean, error string)
         if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {

@@ -3,19 +3,8 @@
 #ifndef MOON_H
 #define MOON_H
 
-#include "array.h"
-#include "card.h"
-
-#define FOUNDATION_ACCEPT "FOUNDATION_ACCEPT"
-#define TABLEAU_ACCEPT "TABLEAU_ACCEPT"
-
 void MoonRegisterFunctions(lua_State* L);
 
-bool MoonGetGlobalBool(lua_State* L, const char* var, const bool def);
-int MoonGetGlobalInt(lua_State* L, const char* var, const int def);
-float MoonGetGlobalFloat(lua_State* L, const char* var, const float def);
-const char* MoonGetGlobalString(lua_State* L, const char* var, const char* def);
-float MoonGetFieldFloat(lua_State* L, const char* key, const float def);
 // void MoonPushCardAsTable(lua_State *L, struct Card *const c);
 // void MoonPushTailAsTable(lua_State *L, struct Array *const tail);
 // void MoonPushArrayAsGlobalArray(lua_State *L, const char *name, struct Array *const a);

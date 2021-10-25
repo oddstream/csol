@@ -8,7 +8,7 @@
 
 #include <raylib.h>
 
-#include "moon.h"
+#include "luautil.h"
 
 extern float cardScale;
 extern Color baizeColor;
@@ -21,16 +21,16 @@ void LoadSettings(int *windowWidth, int *windowHeight)
         fprintf(stderr, "ERROR: %s: col.settings.lua: %s\n", __func__, lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
-        *windowWidth = MoonGetGlobalInt(L, "WindowWidth", 640);
-        *windowHeight = MoonGetGlobalInt(L, "WindowHeight", 480);
-        cardScale = MoonGetGlobalFloat(L, "CardScale", 1.0f);
+        *windowWidth = LuaUtilGetGlobalInt(L, "WindowWidth", 640);
+        *windowHeight = LuaUtilGetGlobalInt(L, "WindowHeight", 480);
+        cardScale = LuaUtilGetGlobalFloat(L, "CardScale", 1.0f);
         int typ = lua_getglobal(L, "BaizeColor");
         if ( typ == LUA_TTABLE ) {
             float r, g, b, a;
-            r = MoonGetFieldFloat(L, "red", 1);
-            g = MoonGetFieldFloat(L, "green", 1);
-            b = MoonGetFieldFloat(L, "blue", 1);
-            a = MoonGetFieldFloat(L, "alpha", 1);
+            r = LuaUtilGetFieldFloat(L, "red", 1);
+            g = LuaUtilGetFieldFloat(L, "green", 1);
+            b = LuaUtilGetFieldFloat(L, "blue", 1);
+            a = LuaUtilGetFieldFloat(L, "alpha", 1);
             baizeColor = (Color){.r=r*255, .g=g*255, .b=b*255, .a=a*255};
         } else {
             baizeColor = DARKGREEN;
