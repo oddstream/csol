@@ -14,24 +14,6 @@ void BaizeGetLuaGlobals(struct Baize *const self)
 {
     self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
     self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
-
-    // CELL_ACCEPT, DISCARD_ACCEPT, RESERVE_ACCEPT, STOCK_ACCEPT, WASTE_ACCEPT don't count
-    // FOUNDATION_ACCEPT, TABLEAU_ACCEPT do count
-
-    // TODO think about individual foundations/tableau having their own accept, rather than applying globally to all
-
-    int accept;
-    size_t index;
-
-    // by default, accept anything (that's what 0 means)
-    accept = LuaUtilGetGlobalInt(self->L, FOUNDATION_ACCEPT, 0);
-    for ( struct Pile* p = ArrayFirst(self->foundations, &index); p; p = ArrayNext(self->foundations, &index) ) {
-        p->vtable->SetAccept(p, accept);
-    }
-    accept = LuaUtilGetGlobalInt(self->L, TABLEAU_ACCEPT, 0);
-    for ( struct Pile* p = ArrayFirst(self->tableaux, &index); p; p = ArrayNext(self->tableaux, &index) ) {
-        p->vtable->SetAccept(p, accept);
-    }
 }
 
 void BaizeStartGame(struct Baize *const self)

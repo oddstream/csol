@@ -45,10 +45,9 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
-    FOUNDATION_ACCEPT = 0
-    -- for _, v in pairs(FOUNDATIONS) do
-    --     SetPileAccept(v, 0)
-    -- end
+    for _, pile in ipairs(FOUNDATIONS) do
+        PileAccept(pile, 0)
+    end
 end
 
 -- CanTailBeMoved constraints (Tableau only)
@@ -84,19 +83,18 @@ function Foundation.CanTailBeAppended(pile, tail)
         return false, "Foundations can only accept a single card"
     elseif PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
-        if FOUNDATION_ACCEPT == 0 then
+        if PileAccept(pile) == 0 then
             -- To start the game, the player will choose among the top cards of the reserve fans which will start the first foundation pile.
             -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
             if PileType(CardOwner(c1)) ~= "Reserve" then
                 return false, "The first Foundation card must come from a Reserve"
             end
-            FOUNDATION_ACCEPT = CardOrdinal(c1)
-            -- for _, pile in ipairs(FOUNDATIONS) do
-            --     SetPileAccept(pile, FOUNDATION_ACCEPT)
-            -- end
+            for _, pile in ipairs(FOUNDATIONS) do
+                PileAccept(pile, CardOrdinal(c1))
+            end
         end
-        if CardOrdinal(c1) ~= FOUNDATION_ACCEPT then
-            return false, "Foundation can only accept a " .. V[FOUNDATION_ACCEPT] .. ", not a " .. V[CardOrdinal(c1)]
+        if CardOrdinal(c1) ~= PileAccept(pile) then
+            return false, "Foundation can only accept a " .. V[PileAccept(pile)] .. ", not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = PilePeek(pile)

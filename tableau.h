@@ -23,6 +23,7 @@ void TableauTapped(struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);
 bool TableauComplete(struct Pile *const self);
 bool TableauConformant(struct Pile *const self);
+enum CardOrdinal TableauAccept(struct Pile *const self);
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void TableauSetRecycles(struct Pile *const self, int r);
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);

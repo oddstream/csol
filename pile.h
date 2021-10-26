@@ -40,6 +40,7 @@ struct PileVtable {
     int (*Collect)(struct Pile *p);
     bool (*Complete)(struct Pile *p);
     bool (*Conformant)(struct Pile *p);
+    enum CardOrdinal (*Accept)(struct Pile *const self);
     void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
     void (*SetRecycles)(struct Pile *const self, int r);
     void (*CountSortedAndUnsorted)(struct Pile *const self, int *sorted, int *unsorted);

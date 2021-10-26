@@ -21,6 +21,7 @@ static struct PileVtable tableauVtable = {
     &TableauCollect,
     &TableauComplete,
     &TableauConformant,
+    &TableauAccept,
     &TableauSetAccept,
     &TableauSetRecycles,
     &TableauCountSortedAndUnsorted,
@@ -118,6 +119,11 @@ bool TableauComplete(struct Pile *const self)
 bool TableauConformant(struct Pile *const self)
 {
     return IsPileConformant(self);
+}
+
+enum CardOrdinal TableauAccept(struct Pile *const self)
+{
+    return ((struct Tableau*)self)->accept;
 }
 
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)

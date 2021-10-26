@@ -16,12 +16,15 @@ function BuildPiles()
     FOUNDATIONS = {}
     for y = 1, 4 do
         pile = AddPile("Foundation", 8.5, y, FAN_NONE)
+        PileAccept(pile, 1)
         table.insert(FOUNDATIONS, pile)
     end
-    FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
     pile = AddPile("Tableau", 1, 1, FAN_DOWN)
+    if not RELAXED then
+        PileAccept(pile, 13)
+    end
     table.insert(TABLEAUX, pile)
     card = MoveCard(STOCK, pile)
 
@@ -29,6 +32,9 @@ function BuildPiles()
     local dealUp = 5
     for x = 2, 7 do
         pile = AddPile("Tableau", x, 1, FAN_DOWN)
+        if not RELAXED then
+            PileAccept(pile, 13)
+        end
         table.insert(TABLEAUX, pile)
         for c = 1, dealDown do
             card = MoveCard(STOCK, pile)
@@ -39,9 +45,6 @@ function BuildPiles()
             -- CardProne(card, false)
         end
         dealDown = dealDown + 1
-    end
-    if not RELAXED then
-        TABLEAU_ACCEPT = 13
     end
 
     if PileLen(STOCK) > 0 then

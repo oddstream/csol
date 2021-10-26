@@ -17,15 +17,17 @@ function BuildPiles()
     FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
+        PileAccept(pile, 1)
         table.insert(FOUNDATIONS, pile)
     end
-    FOUNDATION_ACCEPT = 1
 
     TABLEAUX = {}
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        PileAccept(pile, 13)
         table.insert(TABLEAUX, pile)
+
         for n = 1, deal do
           local c = MoveCard(STOCK, pile)
           CardProne(c, true)
@@ -33,7 +35,6 @@ function BuildPiles()
         CardProne(PilePeek(pile), false)
         deal = deal + 1
     end
-    TABLEAU_ACCEPT = 13
 
 end
 

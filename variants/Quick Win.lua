@@ -31,9 +31,9 @@ function BuildPiles()
     FOUNDATIONS = {}
     for x = 4, 9, 1.5 do    -- slots don't have to be integers
         pile = AddPile("Foundation", x, 1, FAN_NONE)
+        PileAccept(pile, 1)
         table.insert(FOUNDATIONS, pile)
     end
-    FOUNDATION_ACCEPT = 1
 
     MoveCard(STOCK, FOUNDATIONS[1], 1, 0)
 
@@ -60,7 +60,6 @@ end
 
 function StartGame()
     io.stderr:write("StartGame\n")
-
     STOCK_RECYCLES = 3
 end
 
@@ -87,7 +86,7 @@ end
 function CanTailBeMoved(tail)
     local c1 = TailGet(tail, 1)
     local pile = CardOwner(c1)
-    local fn = "CanTailBeMoved_" .. PileType(pile) 
+    local fn = PileType(pile) .. ".CanTailBeMoved"
     -- io.stderr:write("type(" .. fn .. ") == " .. type(_G[fn]) .. "\n")
     if type(_G[fn]) == "function" then
         return _G[fn](pile, tail)
@@ -216,16 +215,16 @@ end
 
 function AfterMove()
   -- io.stdout:write("AfterMove\n")
-  for _, pile in ipairs(TABLEAUX) do
-    if PileLen(pile) == 0 then
-      if PileLen(WASTE) > 0 then
-        MoveCard(WASTE, pile)
-      elseif PileLen(STOCK) > 0 then
-        MoveCard(STOCK, pile)
-      end
+    for _, pile in ipairs(TABLEAUX) do
+        if PileLen(pile) == 0 then
+            if PileLen(WASTE) > 0 then
+                MoveCard(WASTE, pile)
+            elseif PileLen(STOCK) > 0 then
+                MoveCard(STOCK, pile)
+            end
+        end
     end
-  end
-  if PileLen(WASTE) == 0 then
-    MoveCard(STOCK, WASTE)
-  end
+    if PileLen(WASTE) == 0 then
+        MoveCard(STOCK, WASTE)
+    end
 end

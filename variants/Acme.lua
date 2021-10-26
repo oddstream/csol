@@ -33,9 +33,9 @@ function BuildPiles()
     FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
+        PileAccept(pile, 1)
         table.insert(FOUNDATIONS, pile)
     end
-    FOUNDATION_ACCEPT = 1
 
     RESERVES = {}
     pile = AddPile("Reserve", 1, 2, FAN_DOWN)

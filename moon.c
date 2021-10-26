@@ -28,6 +28,7 @@ static const struct FunctionToRegister {
     {"AddPile", MoonAddPile},
     {"FindPile", MoonFindPile},
     // {"PileMoveTo", MoonPileMoveTo},
+    {"PileAccept", MoonPileAccept},
     {"PileType", MoonPileType},
     {"PileGet", MoonPileGet},
     {"PileLen", MoonPileLen},
@@ -282,6 +283,21 @@ int MoonPileMoveTo(lua_State* L)
     return 0;
 }
 #endif
+
+int MoonPileAccept(lua_State *L)
+{
+    struct Pile *const p = lua_touserdata(L, 1);
+    if ( !PileValid(p) ) {
+        fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
+        return 0;
+    }
+    if (lua_gettop(L) == 2 && lua_isnumber(L, 2)) {
+        enum CardOrdinal accept = lua_tonumber(L, 2);
+        p->vtable->SetAccept(p, accept);
+    }
+    lua_pushnumber(L, p->vtable->Accept(p));
+    return 1;
+}
 
 int MoonPileType(lua_State *L)
 {

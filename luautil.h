@@ -3,9 +3,6 @@
 #ifndef LUAUTIL_H
 #define LUAUTIL_H
 
-#define FOUNDATION_ACCEPT "FOUNDATION_ACCEPT"
-#define TABLEAU_ACCEPT "TABLEAU_ACCEPT"
-
 _Bool LuaUtilGetGlobalBool(lua_State* L, const char* var, const _Bool def);
 int LuaUtilGetGlobalInt(lua_State* L, const char* var, const int def);
 float LuaUtilGetGlobalFloat(lua_State* L, const char* var, const float def);

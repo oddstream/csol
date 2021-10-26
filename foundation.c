@@ -21,6 +21,7 @@ static struct PileVtable foundationVtable = {
     &FoundationCollect,
     &FoundationComplete,
     &FoundationConformant,
+    &FoundationAccept,
     &FoundationSetAccept,
     &FoundationSetRecycles,
     &FoundationCountSortedAndUnsorted,
@@ -103,6 +104,11 @@ bool FoundationConformant(struct Pile *const self)
     // a Foundation is always assumed to be conformant, how else did it get built!?
     (void)self;
     return true;
+}
+
+enum CardOrdinal FoundationAccept(struct Pile *const self)
+{
+    return ((struct Foundation*)self)->accept;
 }
 
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)

@@ -4,14 +4,13 @@
 #define UNDO_H
 
 struct Snapshot {
-    int recycles, faccept, taccept;
+    int recycles;
     struct Array *savedPiles;
 };
 
 struct Array* UndoStackNew(void);
 void UndoStackFree(struct Array *stack);
 void BaizeUndoPush(struct Baize *const self);
-struct Snapshot* BaizeUndoPop(struct Baize *const self);
 void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *s);
 void BaizeSavePositionCommand(struct Baize *const self, void* param);
 void BaizeLoadPositionCommand(struct Baize *const self, void* param);

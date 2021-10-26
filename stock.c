@@ -21,6 +21,7 @@ static struct PileVtable stockVtable = {
     &StockCollect,
     &StockComplete,
     &StockConformant,
+    &StockAccept,
     &StockSetAccept,
     &StockSetRecycles,
     &StockCountSortedAndUnsorted,
@@ -175,6 +176,12 @@ bool StockComplete(struct Pile *const self)
 bool StockConformant(struct Pile *const self)
 {
     return PileEmpty(self);
+}
+
+enum CardOrdinal StockAccept(struct Pile *const self)
+{
+    (void)self;
+    return 0;
 }
 
 void StockSetAccept(struct Pile *const self, enum CardOrdinal ord)

@@ -22,6 +22,7 @@ void ReserveTapped(struct Pile *const self, struct Array *const tail);
 int ReserveCollect(struct Pile *const self);
 bool ReserveComplete(struct Pile *const self);
 bool ReserveConformant(struct Pile *const self);
+enum CardOrdinal ReserveAccept(struct Pile *const self);
 void ReserveSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void ReserveSetRecycles(struct Pile *const self, int r);
 void ReserveCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);

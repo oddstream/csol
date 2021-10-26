@@ -44,6 +44,10 @@ static bool getBoolStringReturn(struct Baize *const baize, const char *func)
 
 bool CanTailBeMoved(struct Array *const tail)
 {
+    if (!tail) {
+        fprintf(stderr, "ERROR: %s: passed invalid tail\n", __func__);
+        return false;
+    }
     struct Card *const c0 = ArrayGet(tail, 0);
     if (!CardValid(c0)) {
         fprintf(stderr, "ERROR: %s: passed invalid card\n", __func__);

@@ -22,6 +22,7 @@ void FoundationTapped(struct Pile *const self, struct Array *const tail);
 int FoundationCollect(struct Pile *const self);
 bool FoundationComplete(struct Pile *const self);
 bool FoundationConformant(struct Pile *const self);
+enum CardOrdinal FoundationAccept(struct Pile *const self);
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void FoundationSetRecycles(struct Pile *const self, int r);
 void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);

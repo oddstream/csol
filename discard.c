@@ -21,6 +21,7 @@ static struct PileVtable discardVtable = {
     &DiscardCollect,
     &DiscardComplete,
     &DiscardConformant,
+    &DiscardAccept,
     &DiscardSetAccept,
     &DiscardSetRecycles,
     &DiscardCountSortedAndUnsorted,
@@ -89,6 +90,12 @@ bool DiscardComplete(struct Pile *const self)
 bool DiscardConformant(struct Pile *const self)
 {
     return PileEmpty(self) || PileLen(self) == self->owner->numberOfCardsInSuit;
+}
+
+enum CardOrdinal DiscardAccept(struct Pile *const self)
+{
+    (void)self;
+    return 0;
 }
 
 void DiscardSetAccept(struct Pile *const self, enum CardOrdinal ord)

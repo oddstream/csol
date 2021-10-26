@@ -24,9 +24,9 @@ function BuildPiles()
   FOUNDATIONS = {}
   for x = 5, 8 do
     pile = AddPile("Foundation", x, 1, FAN_NONE)
+    PileAccept(pile, 1)
     table.insert(FOUNDATIONS, pile)
   end
-  FOUNDATION_ACCEPT = 1
 
   TABLEAUX = {}
   for x = 1, 4 do

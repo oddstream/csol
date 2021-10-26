@@ -51,7 +51,9 @@ function StartGame()
     STOCK_RECYCLES = 1
     MoveCard(STOCK, FOUNDATIONS[1])
     local c = PilePeek(FOUNDATIONS[1])
-    FOUNDATION_ACCEPT = CardOrdinal(c)
+    for _, pile in ipairs(FOUNDATIONS) do
+        PileAccept(pile, CardOrdinal(c))
+    end
 end
 
 -- CanTailBeMoved constraints (Tableau only)
@@ -80,8 +82,8 @@ function Foundation.CanTailBeAppended(pile, tail)
     end
     if PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
-        if CardOrdinal(c1) ~= FOUNDATION_ACCEPT then
-            return false, "An empty Foundation can only accept a " .. V[FOUNDATION_ACCEPT] .. " not a " .. V[CardOrdinal(c1)]
+        if CardOrdinal(c1) ~= PileAccept(pile) then
+            return false, "An empty Foundation can only accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = PilePeek(pile)

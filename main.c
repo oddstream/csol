@@ -219,8 +219,11 @@ int main(int argc, char* argv[], char* envp[])
 
     char variantName[32];
     struct Array *loadedUndoStack = LoadUndoFromFile(variantName);
-    if (loadedUndoStack && variantName[0]) {
+    if (loadedUndoStack) {
         fprintf(stdout, "INFO: %s: state loaded from file for '%s'\n", __func__, variantName);
+        if (variantName[0] == '\0') {
+            fprintf(stderr, "ERROR: %s: variantName not set\n", __func__);
+        }
         // that's fine
     } else {
         strcpy(variantName, argc == 2 ? argv[1] : "Klondike");
@@ -234,6 +237,9 @@ int main(int argc, char* argv[], char* envp[])
         BaizeResetState(baize, loadedUndoStack);  // Baize takes ownership of loadedUndoStack
         if (loadedUndoStack) {
             BaizeUndo0(baize);
+            if (ArrayLen(baize->undoStack) == 1) {
+                BaizeStartGame(baize);
+            }
         } else {
             BaizeStartGame(baize);
         }
