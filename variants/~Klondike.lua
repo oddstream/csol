@@ -49,10 +49,10 @@ function Tableau.CanTailBeMoved(tail)
     for i = 2, TailLen(tail) do
         local c2 = TailGet(tail, i)
         if CardColor(c1) == CardColor(c2) then
-            return false, "Card must be in alternating colors"
+            return false, "Moved cards must be in alternating colors"
         end
         if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Cards must be in increasing value"
+            return false, "Moved cards must be in descending rank"
         end
         c1 = c2
     end
@@ -72,9 +72,7 @@ function Waste.CanTailBeAppended(pile, tail)
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if TailLen(tail) > 1 then
-        return false, "Foundations can only accept a single card"
-    elseif PileLen(pile) == 0 then
+    if PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= 1 then
             return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
@@ -100,15 +98,12 @@ function Tableau.CanTailBeAppended(pile, tail)
         end
     else
         local c1 = PilePeek(pile)
-        for i = 1, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardColor(c1) == CardColor(c2) then
-                return false, "Tableaux build in alternate color"
-            end
-            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                return false, "Tableaux build down"
-            end
-            c1 = c2
+        local c2 = TailGet(tail, 1)
+        if CardColor(c1) == CardColor(c2) then
+            return false, "Tableaux build in alternate color"
+        end
+        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            return false, "Tableaux build down"
         end
     end
     return true

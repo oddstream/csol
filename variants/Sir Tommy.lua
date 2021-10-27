@@ -70,21 +70,17 @@ function Waste.CanTailBeAppended(pile, tail)
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if TailLen(tail) > 1 then
-        return false, "Foundation can only accept a single card"
+    if PileLen(pile) == 0 then
+        local c1 = TailGet(tail, 1)
+        if CardOrdinal(c1) ~= 1 then
+            return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+        end
     else
-        if PileLen(pile) == 0 then
-            local c1 = TailGet(tail, 1)
-            if CardOrdinal(c1) ~= 1 then
-                return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
-            end
-        else
-            -- build up regardless of suit
-            local c1 = PilePeek(pile)
-            local c2 = TailGet(tail, 1)
-            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build up"
-            end
+        -- build up regardless of suit
+        local c1 = PilePeek(pile)
+        local c2 = TailGet(tail, 1)
+        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+            return false, "Foundations build up"
         end
     end
     return true

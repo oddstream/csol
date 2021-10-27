@@ -47,7 +47,7 @@ function Tableau.CanTailBeMoved(tail)
             return false, "Moved cards must all have the same suit"
         end
         if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Moved cards must be in descending order"
+            return false, "Moved cards must be in descending rank"
         end
 
         c1 = c2

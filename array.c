@@ -14,6 +14,7 @@ struct Array* ArrayNew(size_t initialSize)
     // self->data = calloc(initialSize, sizeof(void*));
     struct Array *self = calloc(1, sizeof(struct Array) + sizeof(void*[initialSize]));
     if (self) {
+        self->magic = 0xdeadfeed;
         self->used = 0;
         self->size = initialSize;
     }
@@ -34,6 +35,12 @@ struct Array* ArrayNewTmp1(void *element)
     return self;
 }
 */
+
+_Bool ArrayValid(struct Array *const self)
+{
+    // TODO consider using majic
+    return self && self->magic == ARRAY_MAGIC && self->used <= self->size;
+}
 
 size_t ArrayLen(struct Array *const self)
 {
@@ -193,6 +200,7 @@ void ArrayReset(struct Array *const self)
 void ArrayFree(struct Array *const self)
 {
     if ( self ) {
+        self->magic = 0;
         // free(self->data);
         free(self);
     }

@@ -59,10 +59,27 @@ end
 -- CanTailBeMoved constraints (Tableau only)
 
 function Tableau.CanTailBeMoved(tail)
+    if TailLen(tail) == 1 then
+        return true
+    end
     local c1 = TailGet(tail, 1)
-    local pile = CardOwner(c1)
-    if not (TailLen(tail) == 1 or TailLen(tail) == PileLen(pile)) then
+    if TailLen(tail) ~= PileLen(CardOwner(c1)) then
         return false, "Can only move one card, or the whole pile"
+    else
+        for i = 2, TailLen(tail) do
+            local c2 = TailGet(tail, i)
+            if CardSuit(c1) ~= CardSuit(c2) then
+                return false, "Moved cards must be all be the same suit"
+            end
+            if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+                -- wrap from Ace to King
+            elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+                -- down, eg 2 on a 3
+            else
+                return false, "Moved cards must descend in rank"
+            end 
+            c1 = c2
+        end
     end
     return true
 end
@@ -77,9 +94,6 @@ function Waste.CanTailBeAppended(pile, tail)
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if TailLen(tail) > 1 then
-        return false, "Foundations can only accept a single card"
-    end
     if PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= PileAccept(pile) then
@@ -107,20 +121,17 @@ function Tableau.CanTailBeAppended(pile, tail)
         -- do nothing, empty accept any card
     else
         local c1 = PilePeek(pile)
-        for i = 1, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Tableaux must be built in suit"
-            end
-            if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-                -- wrap from Ace to King
-            elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-                -- down, eg 2 on a 3
-            else
-                return false, "Tableaux build down in rank"
-            end 
-            c1 = c2
+        local c2 = TailGet(tail, 1)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Tableaux must be built in suit"
         end
+        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+            -- wrap from Ace to King
+        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+            -- down, eg 2 on a 3
+        else
+            return false, "Tableaux build down in rank"
+        end 
     end
     return true
 end

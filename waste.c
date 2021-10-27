@@ -55,7 +55,7 @@ bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 {
     (void)baize;
 
-    struct Array1 tail =(struct Array1){.size=1, .used=1, .data[0]=c};
+    struct Array1 tail =(struct Array1){.magic=ARRAY_MAGIC, .size=1, .used=1, .data[0]=c};
     return CanTailBeAppended(self, (struct Array*)&tail);
     // don't need to free an Array1
 }

@@ -42,10 +42,10 @@ function Tableau.CanTailBeMoved(tail)
         for i = 2, TailLen(tail) do
             local c2 = TailGet(tail, i)
             if CardSuit(c1) ~= CardSuit(c2) then
-                return false
+                return false, "Moved cards must be the same suit"
             end
             if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                return false
+                return false, "Moved cards must be in descending rank"
             end
             c1 = c2
         end
@@ -67,23 +67,19 @@ function Waste.CanTailBeAppended(pile, tail)
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if TailLen(tail) > 1 then
-        return false, "Foundations can only accept a single card"
+    if PileLen(pile) == 0 then
+        local c1 = TailGet(tail, 1)
+        if CardOrdinal(c1) ~= 1 then
+            return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+        end
     else
-        if PileLen(pile) == 0 then
-            local c1 = TailGet(tail, 1)
-            if CardOrdinal(c1) ~= 1 then
-                return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
-            end
-        else
-            local c1 = PilePeek(pile)
-            local c2 = TailGet(tail, 1)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
-            end
-            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build up"
-            end
+        local c1 = PilePeek(pile)
+        local c2 = TailGet(tail, 1)
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Foundations must be built in suit"
+        end
+        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+            return false, "Foundations build up"
         end
     end
     return true
@@ -94,19 +90,16 @@ function Tableau.CanTailBeAppended(pile, tail)
         -- do nothing, empty accept any card
     else
         local c1 = PilePeek(pile)
-        for i = 1, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if not c2 then
-                io.stderr:write("CanTailBeAppended: nil tail card at index " .. i .. "\n")
-                break
-            end
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Tableaux build in suit"
-            end
-            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                return false, "Tableaux build down"
-            end
-            c1 = c2
+        local c2 = TailGet(tail, 1)
+        -- if not c2 then
+        --     io.stderr:write("CanTailBeAppended: nil tail card at index " .. i .. "\n")
+        --     break
+        -- end
+        if CardSuit(c1) ~= CardSuit(c2) then
+            return false, "Tableaux build in suit"
+        end
+        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+            return false, "Tableaux build down"
         end
     end
     return true

@@ -93,16 +93,13 @@ function Tableau.CanTailBeAppended(pile, tail)
     -- A card can be placed on any card on the top of a column whose rank is greater than it by one (with no cards that can be placed above an Ace). 
     if PileLen(pile) == 0 then
         -- An empty column may be filled by any card
-        return true
-    end
-    local c1 = PilePeek(pile)
-    for i = 1, TailLen(tail) do
-        local c2 = TailGet(tail, i)
-        -- K Q J 10 9 .. 2 1
+    else
+        local c1 = PilePeek(pile)
+        local c2 = TailGet(tail, 1)
+            -- K Q J 10 9 .. 2 1
         if CardOrdinal(c1) - 1 ~= CardOrdinal(c2) then
             return false, "Tableaux build down in rank"
         end
-        c1 = c2
     end
     return true
 end

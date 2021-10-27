@@ -50,9 +50,7 @@ function Waste.CanTailBeAppended(pile, tail)
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if TailLen(tail) > 1 then
-        return false, "Foundations can only accept a single card"
-    elseif PileLen(pile) == 0 then
+    if PileLen(pile) == 0 then
         local c1 = TailGet(tail, 1)
         if CardOrdinal(c1) ~= 1 then
             return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
