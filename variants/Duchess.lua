@@ -7,7 +7,8 @@
     It is closely related to Canfield.
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 
@@ -53,17 +54,11 @@ end
 -- CanTailBeMoved constraints (Tableau only)
 
 function Tableau.CanTailBeMoved(tail)
-    local c1 = TailGet(tail, 1)
-    for i = 2, TailLen(tail) do
-        local c2 = TailGet(tail, i)
-        if CardColor(c1) == CardColor(c2) then
-            return false, "Card must be in alternating colors"
-        end
-        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            -- Ranking is continuous in the tableau as Kings can be placed over Aces.
-        elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Cards must be in descending rank"
-        end
+    local c1 = Get(tail, 1)
+    for i = 2, Len(tail) do
+        local c2 = Get(tail, i)
+        -- Ranking is continuous in the tableau as Kings can be placed over Aces.
+        local err = DownAltColorWrap(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -72,15 +67,15 @@ end
 -- CanTailBeAppended constraints
 
 function Waste.CanTailBeAppended(pile, tail)
-    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+    if CardOwner(First(tail)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
+    if Empty(pile) then
+        local c1 = First(tail)
         if PileAccept(pile) == 0 then
             -- To start the game, the player will choose among the top cards of the reserve fans which will start the first foundation pile.
             -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
@@ -95,44 +90,30 @@ function Foundation.CanTailBeAppended(pile, tail)
             return false, "Foundation can only accept a " .. V[PileAccept(pile)] .. ", not a " .. V[CardOrdinal(c1)]
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
+        local c1 = Last(pile)
+        local c2 = First(tail)
         -- The foundations are built up by suit and ranking is continuous as Aces are placed over Kings. 
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
-            -- 
-        elseif CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
+        local err = UpSuitWrap(c1, c2) if err then return false, err end
     end
     return true
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    local c1 = TailGet(tail, 1)
-    if PileLen(pile) == 0 then
+    local c1 = First(tail)
+    if Empty(pile) then
         -- Spaces that occur on the tableau are filled with any top card in the reserve.
         -- If the entire reserve is exhausted however, it is not replenished; spaces that occur after this point have to be filled with cards from the waste pile or, if a wastepile has not been made yet, the stock.
         if PileType(CardOwner(c1)) == "Waste" then
             for _, res in ipairs(RESERVES) do
-                if PileLen(res) > 0 then
+                if Len(res) > 0 then
                     return false, "An empty Tableau must be filled from a Reserve"
                 end
             end
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardColor(c1) == CardColor(c2) then
-            return false, "Tableaux build in alternate color"
-        end
-        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            --
-        elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
-        end
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = DownAltColorWrap(c1, c2) if err then return false, err end
     end
     return true
 end
@@ -140,17 +121,10 @@ end
 -- IsPileConformant
 
 function Tableau.IsPileConformant(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(tail, n)
-        if CardColor(c1) == CardColor(c2) then
-            return false, "Tableaux build in alternate color"
-        end
-        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            -- wrap from Ace to King
-        elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
-        end
+    local c1 = First(pile)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, n)
+        local err = DownAltColorWrap(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -161,18 +135,14 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardColor(c1) == CardColor(c2) then
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = DownAltColorWrap(c1, c2)
+        if err then
             unsorted = unsorted + 1
-        elseif CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            -- wrap from Ace to King
-            sorted = sorted + 1
-        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-            sorted = sorted + 1
         else
-            unsorted = unsorted + 1
+            sorted = sorted + 1
         end
         c1 = c2
     end
@@ -187,8 +157,8 @@ function Stock.Tapped(tail)
             Toast("No more Stock recycles")
             return
         end
-        if PileLen(WASTE) > 0 then
-            while PileLen(WASTE) > 0 do
+        if Len(WASTE) > 0 then
+            while Len(WASTE) > 0 do
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
@@ -203,7 +173,7 @@ end
 function AfterMove()
     -- io.stdout:write("AfterMove\n")
     -- for i = 1, 4 do
-    --     if PileLen(TABLEAUX[i]) == 0 then
+    --     if Empty(TABLEAUX[i]) then
     --         MoveCard(RESERVE, TABLEAUX[i])
     --     end
     -- end

@@ -2,7 +2,8 @@
 
 -- https://en.wikipedia.org/wiki/Yukon_(solitaire)
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
@@ -47,8 +48,8 @@ function BuildPiles()
         dealDown = dealDown + 1
     end
 
-    if PileLen(STOCK) > 0 then
-        io.stderr:write("Oops! There are still " .. PileLen(STOCK) .. " cards in the Stock\n")
+    if not Empty(STOCK) then
+        io.stderr:write("Oops! There are still " .. Len(STOCK) .. " cards in the Stock\n")
     end
 end
 
@@ -67,41 +68,31 @@ end
 -- CanTailBeAppended constraints
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
+    if Len(pile) == 0 then
+        local c1 = Get(tail, 1)
         if CardOrdinal(c1) ~= 1 then
             return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = UpSuit(c1, c2) if err then return false, err end
     end
     return true
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
+    if Empty(pile) then
         if not RELAXED then
-            local c1 = TailGet(tail, 1)
+            local c1 = Get(tail, 1)
             if CardOrdinal(c1) ~= 13 then
                 return false, "Empty Tableaux can only accept a King, not a " .. V[CardOrdinal(c1)]
             end
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardColor(c1) == CardColor(c2) then
-            return false, "Tableaux build in alternating color"
-        end
-        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
-        end
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = DownAltColor(c1, c2) if err then return false, err end
     end
     return true
 end
@@ -109,15 +100,10 @@ end
 -- IsPileConformant
 
 function Tableau.IsPileConformant(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardColor(c1) == CardColor(c2) then
-            return false, "Tableaux build in alternating color"
-        end
-        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
-        end
+    local c1 = First(pile)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, n)
+        local err = DownAltColor(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -128,15 +114,14 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardColor(c1) == CardColor(c2) then
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = DownAltColor(c1, c2)
+        if err then
             unsorted = unsorted + 1
-        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-            sorted = sorted + 1
         else
-            unsorted = unsorted + 1
+            sorted = sorted + 1
         end
         c1 = c2
     end

@@ -18,7 +18,8 @@
   Only two passes are allowed, so the deck should be used wisely.
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 POWER_MOVES = false
 SEED=12620
 STOCK_DEAL_CARDS = 1
@@ -44,7 +45,7 @@ function BuildPiles()
         local c = MoveCard(STOCK, pile)
         CardProne(c, true)
     end
-    CardProne(PilePeek(pile), false)
+    CardProne(Last(pile), false)
 
     TABLEAUX = {}
     for x = 4, 7 do
@@ -62,20 +63,15 @@ end
 -- CanTailBeMoved constraints (Tableau only)
 
 function Tableau.CanTailBeMoved(tail)
-    local c1 = TailGet(tail, 1)
+    local c1 = Get(tail, 1)
     if POWER_MOVES then
-        for i = 2, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Moved cards must be built in suit"
-            end
-            if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-                return false, "Moved cards must be in descending rank"
-            end
+        for i = 2, Len(tail) do
+            local c2 = Get(tail, i)
+            local err = DownSuit(c1, c2) if err then return false, err end
             c1 = c2
         end
     else
-        if TailLen(tail) > 1 then
+        if Len(tail) > 1 then
             return false, "Can only move a single card"
         end
     end
@@ -85,74 +81,44 @@ end
 -- CanTailBeAppended constraints
 
 function Waste.CanTailBeAppended(pile, tail)
-    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+    if CardOwner(First(tail)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
+    if Len(pile) == 0 then
+        local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
             return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
-        end
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = UpSuit(c1, c2) if err then return false, err end
     end
     return true
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
+    if Len(pile) == 0 then
         -- do nothing, empty accept any card
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
-        end
-        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
-        end
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = DownSuit(c1, c2) if err then return false, err end
     end
     return true
 end
 
 -- IsPileConformant
 
--- function Foundation.IsPileConformant(pile)
---     local c1 = PilePeek(pile)
---     for i = 2, PileLen(pile) do
---         local c2 = PileGet(pile, n)
---         if CardSuit(c1) ~= CardSuit(c2) then
---             return false, "Foundations must be built in suit"
---         end
---         if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
---             return false, "Foundations build up"
---         end
---         c1 = c2
---     end
---     return true
--- end
-
 function Tableau.IsPileConformant(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
-        end
-        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
-        end
+    local c1 = First(pile)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, n)
+        local err = DownSuit(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -163,12 +129,11 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            unsorted = unsorted + 1
-        elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = DownSuit(c1, c2)
+        if err then
             unsorted = unsorted + 1
         else
             sorted = sorted + 1
@@ -186,8 +151,8 @@ function Stock.Tapped(tail)
             Toast("No more Stock recycles")
             return
         end
-        if PileLen(WASTE) > 0 then
-            while PileLen(WASTE) > 0 do
+        if Len(WASTE) > 0 then
+            while Len(WASTE) > 0 do
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
@@ -201,7 +166,7 @@ end
 
 function AfterMove()
     for i = 1, 4 do
-        if PileLen(TABLEAUX[i]) == 0 then
+        if Len(TABLEAUX[i]) == 0 then
             MoveCard(RESERVES[1], TABLEAUX[i])
         end
     end

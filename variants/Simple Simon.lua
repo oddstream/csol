@@ -4,7 +4,8 @@
     https://en.wikipedia.org/wiki/Simple_Simon_(solitaire)
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 POWER_MOVES = false
 -- SEED=32808
 -- SEED=59517
@@ -39,8 +40,8 @@ function BuildPiles()
         deal = deal - 1
     end
 
-    if PileLen(STOCK) ~= 0 then
-        io.stdout:write("Oops, there are " .. PileLen(STOCK) .. " cards still in the Stock\n")
+    if Len(STOCK) ~= 0 then
+        io.stdout:write("Oops, there are " .. Len(STOCK) .. " cards still in the Stock\n")
     end
 end
 
@@ -51,16 +52,10 @@ end
 
 function Tableau.CanTailBeMoved(tail)
     -- A sequence of cards, decrementing in rank and of the same suit, can be moved as one
-    local c1 = TailGet(tail, 1)
-    for i = 2, TailLen(tail) do
-        local c2 = TailGet(tail, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Moved cards must all the the same suit"
-        end
-        -- K Q J 10 9 .. 2 1
-        if CardOrdinal(c1) - 1 ~= CardOrdinal(c2) then
-            return false, "Moved cards must descend in rank"
-        end
+    local c1 = Get(tail, 1)
+    for i = 2, Len(tail) do
+        local c2 = Get(tail, i)
+        local err = DownSuit(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -71,19 +66,13 @@ end
 function Discard.CanTailBeAppended(pile, tail)
     -- C will have checked that there are (13 - number of cards in a suit) cards in the tail
 
-    local c1 = TailGet(tail, 1)
+    local c1 = Get(tail, 1)
     if CardOrdinal(c1) ~= 13 then
         return false, "Can only discard from a King, not a " .. V[CardOrdinal(c1)]
     end
-    for i = 2, TailLen(tail) do
-        local c2 = TailGet(tail, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Discarded piles must be all the same suit"
-        end
-        -- K Q J 10 9 .. 2 1
-        if CardOrdinal(c1) - 1 ~= CardOrdinal(c2) then
-            return false, "Discarded piles must build down in rank"
-        end
+    for i = 2, TaiLen(tail) do
+        local c2 = TaiGet(tail, i)
+        local err = DownSuit(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -91,11 +80,11 @@ end
 
 function Tableau.CanTailBeAppended(pile, tail)
     -- A card can be placed on any card on the top of a column whose rank is greater than it by one (with no cards that can be placed above an Ace). 
-    if PileLen(pile) == 0 then
+    if Empty(pile) then
         -- An empty column may be filled by any card
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
+        local c1 = Last(pile)
+        local c2 = First(tail, 1)
             -- K Q J 10 9 .. 2 1
         if CardOrdinal(c1) - 1 ~= CardOrdinal(c2) then
             return false, "Tableaux build down in rank"
@@ -107,15 +96,10 @@ end
 -- IsPileConformant
 
 function Tableau.IsPileConformant(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
-        end
-        if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down in rank"
-        end
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, n)
+        local err = DownSuit(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -126,15 +110,14 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = DownSuit(c1, c2)
+        if err then
             unsorted = unsorted + 1
-        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-            sorted = sorted + 1
         else
-            unsorted = unsorted + 1
+            sorted = sorted + 1
         end
         c1 = c2
     end

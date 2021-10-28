@@ -10,7 +10,6 @@
 
 dofile("variants/~Library.lua")
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
@@ -74,12 +73,6 @@ function Tableau.CanTailBeMoved(tail)
     local c1 = Get(tail, 1)
     for i = 2, Len(tail) do
         local c2 = Get(tail, i)
-        -- if CardSuit(c1) ~= CardSuit(c2) then
-        --     return false, "Moved cards must be the same suit"
-        -- end
-        -- if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-        --     return false, "Moved cards must descend in rank"
-        -- end
         err = DownSuit(c1, c2) if err then return false, err end
         c1 = c2
     end
@@ -120,35 +113,18 @@ function Foundation.CanTailBeAppended(pile, tail)
     else
         local c1 = Last(pile)
         local c2 = First(tail, 1)
-        -- if CardSuit(c1) ~= CardSuit(c2) then
-        --     return false, "Foundations must be built in suit"
-        -- end
-        -- if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-        --     return false, "Foundations build up"
-        -- end
         err = UpSuit(c1, c2) if err then return false, err end
     end
     return true
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    local err
-    if PileLen(pile) == 0 then
+    if Empty(pile) then
         -- do nothing, empty accept any card
     else
         local c1 = Last(pile)
-        local c2 = First(tail, 1)
-        -- if not c2 then
-        --     io.stderr:write("CanTailBeAppended: nil tail card at index " .. i .. "\n")
-        --     break
-        -- end
-        -- if CardSuit(c1) ~= CardSuit(c2) then
-        --     return false, "Tableaux build in suit"
-        -- end
-        -- if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-        --     return false, "Tableaux build down"
-        -- end
-        err = DownSuit(c1, c2) if err then return false, err end
+        local c2 = First(tail)
+        local err = DownSuit(c1, c2) if err then return false, err end
     end
     return true
 end
@@ -160,12 +136,6 @@ function Tableau.IsPileConformant(pile)
     local c1 = Get(pile, 1)
     for i = 2, Len(pile) do
         local c2 = Get(pile, i)
-        -- if CardSuit(c1) ~= CardSuit(c2) then
-        --     return false, "Tableaux build in suit"
-        -- end
-        -- if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-        --     return false, "Tableaux build down"
-        -- end
         err = DownSuit(c1, c2) if err then return false, err end
         c1 = c2
     end
@@ -180,11 +150,8 @@ function Tableau.SortedAndUnsorted(pile)
     local c1 = Get(pile, 1)
     for i = 2, Len(pile) do
         local c2 = Get(pile, i)
-        -- if CardSuit(c1) ~= CardSuit(c2) then
-        --     unsorted = unsorted + 1
-        -- elseif CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-        --     unsorted = unsorted + 1
-        if DownSuit(c1, c2) == nil then
+        local err = DownSuit(c1, c2)
+        if not err then
             sorted = sorted + 1
         else
             unsorted = unsorted + 1
@@ -205,8 +172,8 @@ function Stock.Tapped(tail)
         elseif 2 == STOCK_RECYCLES then
             Toast("One Stock recycle remaining")
         end
-        if PileLen(WASTE) > 0 then
-            while PileLen(WASTE) > 0 do
+        if Len(WASTE) > 0 then
+            while Len(WASTE) > 0 do
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
@@ -221,15 +188,15 @@ end
 function AfterMove()
   -- io.stdout:write("AfterMove\n")
     for _, pile in ipairs(TABLEAUX) do
-        if PileLen(pile) == 0 then
-            if PileLen(WASTE) > 0 then
+        if Len(pile) == 0 then
+            if Len(WASTE) > 0 then
                 MoveCard(WASTE, pile)
-            elseif PileLen(STOCK) > 0 then
+            elseif Len(STOCK) > 0 then
                 MoveCard(STOCK, pile)
             end
         end
     end
-    if PileLen(WASTE) == 0 then
+    if Len(WASTE) == 0 then
         MoveCard(STOCK, WASTE)
     end
 end

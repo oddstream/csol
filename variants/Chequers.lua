@@ -5,7 +5,8 @@
     https://politaire.com/help/chequers
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 POWER_MOVES = false
 STOCK_RECYCLES = 0
 
@@ -108,10 +109,10 @@ Once on any foundation, cards may not be moved back off.
         card = MoveCard(STOCK, RESERVE)
         CardProne(card, true)
     end
-    CardProne(PilePeek(RESERVE), false)
+    CardProne(Last(RESERVE), false)
 
-    if PileLen(STOCK) > 0 then
-        io.stderr:write("Oops - there are still " .. PileLen(STOCK) .. " cards in the Stock\n")
+    if not Empty(STOCK) then
+        io.stderr:write("Oops - there are still " .. Len(STOCK) .. " cards in the Stock\n")
     end
 end
 
@@ -119,7 +120,7 @@ end
 
 function Tableau.CanTailBeMoved(tail)
     -- Only one card may moved at a time, never sequences.
-    if TailLen(tail) > 1 then
+    if Len(tail) > 1 then
         return false, "Can only move a single card"
     end
     return true
@@ -129,36 +130,26 @@ end
 
 function Foundation.CanTailBeAppended(pile, tail)
     if table.contains(ACE_FOUNDATIONS, pile) then
-        if PileLen(pile) == 0 then
-            local c1 = TailGet(tail, 1)
+        if Empty(pile) then
+            local c1 = First(tail)
             if CardOrdinal(c1) ~= 1 then
                 return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
             end
         else
-            local c1 = PilePeek(pile)
-            local c2 = TailGet(tail, 1)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
-            end
-            if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build up"
-            end
+            local c1 = Last(pile)
+            local c2 = First(tail)
+            local err = UpSuit(c1, c2) if err then return false, err end
         end
     elseif table.contains(KING_FOUNDATIONS, pile) then
-        if PileLen(pile) == 0 then
-            local c1 = TailGet(tail, 1)
+        if Empty(pile) then
+            local c1 = First(tail)
             if CardOrdinal(c1) ~= 13 then
                 return false, "Foundation can only accept a King, not a " .. V[CardOrdinal(c1)]
             end
         else
-            local c1 = PilePeek(pile)
-            local c2 = TailGet(tail, 1)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Foundations must be built in suit"
-            end
-            if CardOrdinal(c1) - 1 ~= CardOrdinal(c2) then
-                return false, "Foundations build down"
-            end
+            local c1 = Last(pile)
+            local c2 = First(tail)
+            local err = DownSuit(c1, c2) if err then return false, err end
         end
     else
         io.stderr:write("Oops - is the pile not aFoundation?\n")
@@ -167,17 +158,12 @@ function Foundation.CanTailBeAppended(pile, tail)
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
+    if Empty(pile) then
         -- do nothing, empty accept any card
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
-        end
-        if not PlusMinusOneAndWrap(c1, c2) then
-            return false, "Tableaux build up or down by one"
-        end
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = PlusMinusOneSuitWrap(c1, c2) if err then return false, err end
     end
     return true
 end
@@ -185,15 +171,10 @@ end
 -- IsPileConformant (Tableau only)
 
 function Tableau.IsPileConformant(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, n)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux build in suit"
-        end
-        if not PlusMinusOneAndWrap(c1, c2) then
-            return false, "Tableaux build up or down by one"
-        end
+    local c1 = First(pile)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, n)
+        local err = PlusMinusOneSuitWrap(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -204,15 +185,14 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = PlusMinusOneSuitWrap(c1, c2)
+        if err then
             unsorted = unsorted + 1
-        elseif PlusMinusOneAndWrap(c1, c2) then
-            sorted = sorted + 1
         else
-            unsorted = unsorted + 1
+            sorted = sorted + 1
         end
         c1 = c2
     end
@@ -224,9 +204,9 @@ end
 function AfterMove()
     -- Empty spaces in the tableau are automatically filled with a card from the reserve.
     -- If the reserve is empty, then empty spaces in the tableau may be filled by any card.
-    if PileLen(RESERVE) > 0 then
+    if Len(RESERVE) > 0 then
         for _, pile in ipairs(TABLEAUX) do
-            if PileLen(pile) == 0 then
+            if Empty(pile) then
                 MoveCard(RESERVE, pile)
             end
         end

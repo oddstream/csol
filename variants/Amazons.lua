@@ -5,7 +5,8 @@
     Morehead and Mott-Smith, p179
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 POWER_MOVES = false
 
 function BuildPiles()
@@ -44,15 +45,15 @@ end
 -- CanTailBeAppended constraints
 
 function Waste.CanTailBeAppended(pile, tail)
-    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+    if CardOwner(First(tail)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
+    if Empty(pile) then
+        local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
             return false, "An empty Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
@@ -62,8 +63,8 @@ function Foundation.CanTailBeAppended(pile, tail)
             return false, "Aces can only be placed on the Foundation above"
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
+        local c1 = Last(pile)
+        local c2 = First(tail)
         -- work out the index of the target pile
         if CardOrdinal(c2) ~= 12 then
             local itarget = CalcPileIndex(FOUNDATIONS, CardOwner(c1))

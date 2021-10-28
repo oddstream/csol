@@ -109,7 +109,6 @@ bool IsPileConformant(struct Pile *const pile)
         return false;
     }
 
-
     bool result = true;
     lua_State *L = pile->owner->L;
 

@@ -12,7 +12,8 @@ One card is dealt onto the first foundation. This rank will be used as a base fo
 The foundations build up in suit, wrapping from King to Ace as necessary. 
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
+
 POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 
@@ -30,7 +31,7 @@ function BuildPiles()
         local c = MoveCard(STOCK, pile)
         CardProne(c, true)
     end
-    CardProne(PilePeek(pile), false)
+    CardProne(Last(pile), false)
     
     FOUNDATIONS = {}
     for x = 1, 8 do
@@ -50,7 +51,7 @@ end
 function StartGame()
     STOCK_RECYCLES = 1
     MoveCard(STOCK, FOUNDATIONS[1])
-    local c = PilePeek(FOUNDATIONS[1])
+    local c = First(FOUNDATIONS[1])
     for _, pile in ipairs(FOUNDATIONS) do
         PileAccept(pile, CardOrdinal(c))
     end
@@ -59,25 +60,16 @@ end
 -- CanTailBeMoved constraints (Tableau only)
 
 function Tableau.CanTailBeMoved(tail)
-    if TailLen(tail) == 1 then
+    if Len(tail) == 1 then
         return true
     end
-    local c1 = TailGet(tail, 1)
-    if TailLen(tail) ~= PileLen(CardOwner(c1)) then
+    local c1 = First(tail)
+    if Len(tail) ~= Len(CardOwner(c1)) then
         return false, "Can only move one card, or the whole pile"
     else
-        for i = 2, TailLen(tail) do
-            local c2 = TailGet(tail, i)
-            if CardSuit(c1) ~= CardSuit(c2) then
-                return false, "Moved cards must be all be the same suit"
-            end
-            if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-                -- wrap from Ace to King
-            elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-                -- down, eg 2 on a 3
-            else
-                return false, "Moved cards must descend in rank"
-            end 
+        for i = 2, Len(tail) do
+            local c2 = Get(tail, i)
+            local err = DownSuitWrap(c1, c2) if err then return false, err end
             c1 = c2
         end
     end
@@ -87,51 +79,33 @@ end
 -- CanTailBeAppended constraints
 
 function Waste.CanTailBeAppended(pile, tail)
-    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+    if CardOwner(First(tail)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
+    if Empty(pile) then
+        local c1 = First(tail)
         if CardOrdinal(c1) ~= PileAccept(pile) then
             return false, "An empty Foundation can only accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c1)]
         end
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations must be built in suit"
-        end
-        if CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
-            -- wrap from King to Ace
-        elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
-            -- up, eg 3 on a 2
-        else
-            return false, "Foundations build up"
-        end 
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = UpSuitWrap(c1, c2) if err then return false, err end
     end
     return true
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
+    if Empty(pile) then
         -- do nothing, empty accept any card
     else
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux must be built in suit"
-        end
-        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            -- wrap from Ace to King
-        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-            -- down, eg 2 on a 3
-        else
-            return false, "Tableaux build down in rank"
-        end 
+        local c1 = Last(pile)
+        local c2 = First(tail)
+        local err = DownSuitWrap(c1, c2) if err then return false, err end
     end
     return true
 end
@@ -139,19 +113,10 @@ end
 -- IsPileConformant
 
 function Tableau.IsPileConformant(pile)
-    local c1 = PilePeek(pile)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Tableaux must be built in suit"
-        end
-        if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            -- wrap from Ace to King
-        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-            -- down, eg 2 on a 3
-        else
-            return false, "Tableaux build down in rank"
-        end 
+    local c1 = First(pile)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = DownSuitWrap(c1, c2) if err then return false, err end
         c1 = c2
     end
     return true
@@ -162,18 +127,14 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = PileGet(pile, 1)
-    for i = 2, PileLen(pile) do
-        local c2 = PileGet(pile, i)
-        if CardSuit(c1) ~= CardSuit(c2) then
+    local c1 = Get(pile, 1)
+    for i = 2, Len(pile) do
+        local c2 = Get(pile, i)
+        local err = DownSuitWrap(c1, c2)
+        if err then
             unsorted = unsorted + 1
-        elseif CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
-            -- wrap from Ace to King
-            sorted = sorted + 1
-        elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
-            sorted = sorted + 1
         else
-            unsorted = unsorted + 1
+            sorted = sorted + 1
         end
         c1 = c2
     end
@@ -188,8 +149,8 @@ function Stock.Tapped(tail)
             Toast("No more Stock recycles")
             return
         end
-        if PileLen(WASTE) > 0 then
-            while PileLen(WASTE) > 0 do
+        if Len(WASTE) > 0 then
+            while Len(WASTE) > 0 do
                 MoveCard(WASTE, STOCK)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1

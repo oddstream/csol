@@ -291,6 +291,10 @@ int MoonPileMoveTo(lua_State* L)
 
 int MoonPileAccept(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *const p = lua_touserdata(L, 1);
     if ( !PileValid(p) ) {
         fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
@@ -330,6 +334,10 @@ int MoonPileType(lua_State *L)
 
 int MoonPileGet(lua_State* L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *const p = lua_touserdata(L, 1);
     if (!PileValid(p)) {
         fprintf(stderr, "WARNING: %s: invalid pile\n", __func__);
@@ -351,6 +359,10 @@ int MoonPileGet(lua_State* L)
 
 int MoonPileLen(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile* p = lua_touserdata(L, 1);
     if ( PileValid(p) ) {
         lua_pushinteger(L, ArrayLen(p->cards));
@@ -363,6 +375,10 @@ int MoonPileLen(lua_State *L)
 
 int MoonPilePeek(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *p = lua_touserdata(L, 1);
 
     if ( !PileValid(p) ) {
@@ -376,6 +392,10 @@ int MoonPilePeek(lua_State *L)
 
 int MoonPileDemoteCards(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *p = lua_touserdata(L, 1);
     if ( !PileValid(p) ) {
         fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
@@ -412,6 +432,10 @@ int MoonPileDemoteCards(lua_State *L)
 
 int MoonPilePromoteCards(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *p = lua_touserdata(L, 1);
     if ( !PileValid(p) ) {
         fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
@@ -448,6 +472,14 @@ int MoonPilePromoteCards(lua_State *L)
 
 int MoonMoveCard(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
+    if (!lua_islightuserdata(L, 2)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *src = lua_touserdata(L, 1);
     struct Pile* dst = lua_touserdata(L, 2);
 
@@ -490,6 +522,14 @@ int MoonMoveCard(lua_State *L)
 
 int MoonMoveAllCards(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
+    if (!lua_islightuserdata(L, 2)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Pile *src = lua_touserdata(L, 1);
     struct Pile* dst = lua_touserdata(L, 2);
 
@@ -513,6 +553,10 @@ int MoonMoveAllCards(lua_State *L)
 
 int MoonCardColor(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
@@ -525,6 +569,10 @@ int MoonCardColor(lua_State *L)
 
 int MoonCardOrdinal(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
@@ -537,6 +585,10 @@ int MoonCardOrdinal(lua_State *L)
 
 int MoonCardOwner(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Card* c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
@@ -549,6 +601,10 @@ int MoonCardOwner(lua_State *L)
 
 int MoonCardProne(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
@@ -569,6 +625,10 @@ int MoonCardProne(lua_State *L)
 
 int MoonCardSuit(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
@@ -595,8 +655,12 @@ int MoonCardToTable(lua_State *L)
 
 int MoonTailGet(lua_State* L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     struct Array *const a = lua_touserdata(L, 1);
-    if (!a) {
+    if (!ArrayValid(a)) {
         fprintf(stderr, "WARNING: %s: invalid tail\n", __func__);
         return 0;
     }
@@ -630,6 +694,10 @@ int MoonTailLen(lua_State* L)
 
 int MoonGet(lua_State* L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     void* thing = lua_touserdata(L, 1);
     if (!thing) {
         fprintf(stderr, "WARNING: %s: invalid thing\n", __func__);
@@ -661,6 +729,10 @@ int MoonGet(lua_State* L)
 
 int MoonPeek(lua_State* L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     void* thing = lua_touserdata(L, 1);
     if (!thing) {
         fprintf(stderr, "WARNING: %s: invalid thing\n", __func__);
@@ -685,6 +757,10 @@ int MoonPeek(lua_State* L)
 
 int MoonLen(lua_State *L)
 {
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
     void *thing = lua_touserdata(L, 1);
     if (!thing) {
         fprintf(stderr, "WARNING: %s: invalid thing\n", __func__);

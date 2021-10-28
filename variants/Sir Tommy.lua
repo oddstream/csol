@@ -13,7 +13,7 @@
   The game is won if all cards are emptied from the wastepiles and built on the foundations.
 ]]
 
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+dofile("variants/~Library.lua")
 
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
@@ -41,14 +41,13 @@ function BuildPiles()
 
 end
 
-function StartGame()
-end
+-- function StartGame()
+-- end
 
 -- CanTailBeMoved constraints (Tableau only)
 
 function Tableau.CanTailBeMoved(tail)
-    local c1 = TailGet(tail, 1)
-    if TailLen(tail) > 1 then
+    if Len(tail) > 1 then
         return false, "Can only move a single card"
     end
     return true
@@ -57,28 +56,28 @@ end
 -- CanTailBeAppended constraints
 
 function Waste.CanTailBeAppended(pile, tail)
-    if PileLen(pile) > 0 then
+    if Len(pile) > 0 then
         return false, "The Waste already contains a card"
     end
-    if TailLen(tail) > 1 then
+    if Len(tail) > 1 then
         return false, "The Waste can only accept a single card"
     end
-    if CardOwner(TailGet(tail, 1)) ~= STOCK then
+    if CardOwner(First(tail)) ~= STOCK then
         return false, "The Waste can only accept cards from the Stock"
     end
     return true
 end
 
 function Foundation.CanTailBeAppended(pile, tail)
-    if PileLen(pile) == 0 then
-        local c1 = TailGet(tail, 1)
+    if Empty(pile) then
+        local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
             return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
         -- build up regardless of suit
-        local c1 = PilePeek(pile)
-        local c2 = TailGet(tail, 1)
+        local c1 = Last(pile)
+        local c2 = First(tail)
         if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
             return false, "Foundations build up"
         end
@@ -87,9 +86,7 @@ function Foundation.CanTailBeAppended(pile, tail)
 end
 
 function Tableau.CanTailBeAppended(pile, tail)
-    local c1 = PilePeek(pile)
-    local c2 = TailGet(tail, 1)
-    if CardOwner(c2) ~= WASTE then
+    if CardOwner(First(tail)) ~= WASTE then
         return false, "Cards can only be moved here from the Waste"
     end
     return true
@@ -100,14 +97,14 @@ end
 -- SortedAndUnSorted (Tableau only)
 
 function Tableau.SortedAndUnsorted(pile)
-    return 0, PileLen(pile)
+    return 0, Len(pile)
 end
 
 -- Actions
 
 function Stock.Tapped(tail)
     -- only allow one card at a time in waste
-    if PileLen(WASTE) == 0 then
+    if Len(WASTE) == 0 then
         MoveCard(STOCK, WASTE)
     else
         Toast("The Waste must be emptied first")
