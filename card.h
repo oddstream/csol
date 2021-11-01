@@ -1,9 +1,13 @@
 /* Card.h */
 
+#pragma once
+
 #ifndef CARD_H
 #define CARD_H
 
 #include <stdlib.h>
+
+#include "util.h"
 
 enum CardOrdinal {
     ACE = 1,
@@ -37,25 +41,25 @@ struct CardId {
 struct Card /* tag */ {
     unsigned magic;
     struct CardId id;
-    bool prone;
+    _Bool prone;
     Vector2 pos;
     struct Pile* owner;
 
     int frame;  // spritesheet frame, index into Info Vector2D struct
 
-    bool dragging;
+    _Bool dragging;
     Vector2 dragStartPos;
     Vector2 lerpSrc, lerpDst;
     float lerpStep, lerpStepAmount;
+    EasingFunc lerpFunc;
 
     float flipStep, flipWidth;
 } /* variable definition */;
 
-#define FLIPSTEPAMOUNT (0.075f)
 #define LOGCARD(c)              { char z[64]; CardToString(c, z); fprintf(stdout, "%s\n", z); }
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit);
-bool CardValid(struct Card *const self);
+_Bool CardValid(struct Card *const self);
 unsigned CardToUnsigned(struct Card *const self);
 struct CardId UnsignedToCardId(unsigned u);
 void CardToString(struct Card *const self, char* z);
@@ -68,18 +72,17 @@ Rectangle CardBaizeRect(struct Card *const self);
 Rectangle CardScreenRect(struct Card *const self);
 void CardMovePositionBy(struct Card *const self, Vector2 delta);
 void CardTransitionTo(struct Card *const self, Vector2 pos);
-bool CardTransitioning(struct Card *const self);
+_Bool CardTransitioning(struct Card *const self);
 void CardStartDrag(struct Card *const self);
 void CardStopDrag(struct Card *const self);
 void CardCancelDrag(struct Card *const self);
-bool CardWasDragged(struct Card *const self);
-bool CardDragging(struct Card *const self);
+_Bool CardWasDragged(struct Card *const self);
+_Bool CardDragging(struct Card *const self);
 void CardFlipUp(struct Card *const self);
 void CardFlipDown(struct Card *const self);
-bool CardFlipping(struct Card *const self);
+_Bool CardFlipping(struct Card *const self);
 void CardUpdate(struct Card *const self);
 void CardDraw(struct Card *const self);
 void CardFree(struct Card *const self);
-// void CardDrawRect(struct Card *const self, int x, int y);
 
 #endif

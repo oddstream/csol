@@ -207,6 +207,7 @@ CFLAGS += -Werror
 CFLAGS += -Wall -Wextra -Wpedantic -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security -Wnull-dereference -Wtrampolines -Walloca -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2 -Wcast-qual -Wstringop-overflow=4 -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=5 -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wcast-align=strict
 # if using alloca don't add these
 CFLAGS += -Wstack-protector -Wstack-usage=1000000
+CFLAGS += -fsanitize=undefined
 
 # https://kristerw.github.io/2021/10/19/fast-math/
 CFLAGS += -ffast-math

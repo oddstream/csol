@@ -41,7 +41,7 @@ struct Discard* DiscardNew(struct Baize *const baize, Vector2 slot, enum FanType
     return self;
 }
 
-bool DiscardCanMoveTail(struct Array *const tail)
+_Bool DiscardCanMoveTail(struct Array *const tail)
 {
     struct Card *c = ArrayGet(tail, 0);
     struct Baize* baize = CardToBaize(c);
@@ -49,7 +49,7 @@ bool DiscardCanMoveTail(struct Array *const tail)
     return false;
 }
 
-bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
     (void)self;
@@ -58,7 +58,7 @@ bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
     return false;
 }
 
-bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( !PileEmpty(self) ) {
         return false;
@@ -82,12 +82,12 @@ int DiscardCollect(struct Pile *const self)
     return 0;
 }
 
-bool DiscardComplete(struct Pile *const self)
+_Bool DiscardComplete(struct Pile *const self)
 {
     return PileLen(self) == self->owner->numberOfCardsInSuit;
 }
 
-bool DiscardConformant(struct Pile *const self)
+_Bool DiscardConformant(struct Pile *const self)
 {
     return PileEmpty(self) || PileLen(self) == self->owner->numberOfCardsInSuit;
 }
@@ -122,11 +122,11 @@ void DiscardDraw(struct Pile *const self)
     extern Font fontAcme;
     extern float cardWidth;
 
-    PileDraw(self);
-
     float fontSize = cardWidth / 2.0f;
     Vector2 pos = PileScreenPos(self);
     pos.x += cardWidth / 8.0f;
     pos.y += cardWidth / 16.0f;
     DrawTextEx(fontAcme, "=", pos, fontSize, 0, baizeHighlightColor);
+
+    PileDraw(self);
 }

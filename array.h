@@ -1,9 +1,9 @@
 /* array.h */
 
+#pragma once
+
 #ifndef ARRAY_H
 #define ARRAY_H
-
-#define ARRAY_MAGIC (0xfeedface)
 
 struct Array  {
     unsigned magic;
@@ -26,6 +26,7 @@ typedef void (*ArrayIterFunc)(void*);
 typedef void (*ArrayFreeFunc)(void*);
 
 struct Array* ArrayNew(size_t initialSize);
+struct Array1 Array1New(void* element);
 _Bool ArrayValid(struct Array *const self);
 size_t ArrayLen(struct Array *const self);
 size_t ArrayCap(struct Array *const self);

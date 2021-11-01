@@ -13,16 +13,17 @@
 #include "util.h"
 
 #define CARD_MAGIC (0x29041962)
-#define DEBUG_SPEED  (0.0025f)
-#define SLOW_SPEED (0.010f)
+#define FLIPSTEPAMOUNT (0.075f)
+#define DEBUG_SPEED  (0.005f)
+#define SLOW_SPEED (0.01f)
 #define NORMAL_SPEED (0.02f)
-#define FAST_SPEED (0.040f)
+#define FAST_SPEED (0.04f)
 
 extern struct Spritesheet *ssFace, *ssBack;
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
-    struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .prone = 1, .dragging = false};
+    struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .prone = 1, .dragging = 0};
     self.frame = (suit * 13) + (ord - 1); // index into Vector2D info struct, or retro spritesheet
     self.pos = (Vector2){.x=0.0f,.y=0.0f};
     self.flipWidth = 1.0f;
@@ -33,7 +34,7 @@ struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
     return self;    // return whole struct by value, gets saved into cardLibrary[]
 }
 
-bool CardValid(struct Card *const self)
+_Bool CardValid(struct Card *const self)
 {
     return self && self->magic == CARD_MAGIC;
 }
@@ -116,6 +117,8 @@ void CardMovePositionBy(struct Card *const self, Vector2 delta)
 
 void CardTransitionTo(struct Card *const self, Vector2 pos)
 {
+    extern float cardWidth;
+
     if ( pos.x == self->pos.x && pos.y == self->pos.y ) {
         self->lerpStep = 1.0f;    // stop any current lerp
         return;
@@ -123,7 +126,13 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpSrc = self->pos;
     self->lerpDst = pos;
 #if 1
-    self->lerpStepAmount = NORMAL_SPEED;
+    if (UtilDistance(self->pos, pos) < cardWidth) {
+        self->lerpStepAmount = FAST_SPEED;
+        self->lerpFunc = &UtilLerp;
+    } else {
+        self->lerpStepAmount = NORMAL_SPEED;
+        self->lerpFunc = &UtilSmoothstep;
+    }
 #else
     // doing this makes the transition drawing order look wrong and ugly
     const float speed = 5.0f;
@@ -133,7 +142,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpStep = 0.0f;       // trigger a lerp
 }
 
-bool CardTransitioning(struct Card *const self)
+_Bool CardTransitioning(struct Card *const self)
 {
     return self->lerpStep < 1.0f;
 }
@@ -147,26 +156,26 @@ void CardStartDrag(struct Card *const self)
     } else {
         self->dragStartPos = self->pos;
     }
-    self->dragging = true;
+    self->dragging = 1;
 }
 
 void CardStopDrag(struct Card *const self)
 {
-    self->dragging = false;
+    self->dragging = 0;
 }
 
 void CardCancelDrag(struct Card *const self)
 {
-    self->dragging = false;
+    self->dragging = 0;
     CardTransitionTo(self, self->dragStartPos);
 }
 
-bool CardWasDragged(struct Card *const self)
+_Bool CardWasDragged(struct Card *const self)
 {
     return self->pos.x != self->dragStartPos.x || self->pos.y != self->dragStartPos.y;
 }
 
-bool CardDragging(struct Card *const self)
+_Bool CardDragging(struct Card *const self)
 {
     return self->dragging;
 }
@@ -183,11 +192,22 @@ void CardUpdate(struct Card *const self)
         }
     }
     if ( CardTransitioning(self) ) {
-        self->pos.x = UtilSmoothstep(self->lerpSrc.x, self->lerpDst.x, self->lerpStep);
-        self->pos.y = UtilSmoothstep(self->lerpSrc.y, self->lerpDst.y, self->lerpStep);
-        self->lerpStep += self->lerpStepAmount;
-        if ( self->lerpStep >= 1.0f ) {
-            self->pos = self->lerpDst;
+        /*
+        extern float cardWidth;
+        if (UtilDistance(self->pos, self->lerpDst) < cardWidth / 4.0f) {
+            // self->pos = self->lerpDst;
+            // self->lerpStep = 1.0f;
+            // TODO make a nice snap sound
+            self->lerpStepAmount = FAST_SPEED;
+        }
+        */
+        {
+            self->pos.x = UtilSmoothstep(self->lerpSrc.x, self->lerpDst.x, self->lerpStep);
+            self->pos.y = UtilSmoothstep(self->lerpSrc.y, self->lerpDst.y, self->lerpStep);
+            self->lerpStep += self->lerpStepAmount;
+            if ( self->lerpStep >= 1.0f ) {
+                self->pos = self->lerpDst;
+            }
         }
     }
 }
@@ -196,59 +216,66 @@ void CardDraw(struct Card *const self)
 {
     // BeginDrawing() has been called by BaizeDraw()
 
-    bool showFace;
+    _Bool showFace;
 
     // card prone has already been set to destination state
     if ( self->flipStep < 0.0f ) {
         if ( self->prone ) {
             // card is getting narrower, and it's going to show face down, but show face up
-            showFace = true;
+            showFace = 1;
         } else {
             // card is getting narrower, and it's going to show face up, but show face down
-            showFace = false;
+            showFace = 0;
         }
     } else {
         if ( self->prone ) {
-            showFace = false;
+            showFace = 0;
         } else {
-            showFace = true;
+            showFace = 1;
         }
     }
 
-    Rectangle rectCard = CardScreenRect(self);
+    Rectangle r = CardScreenRect(self);
 
     if ( CardDragging(self) ) {
         // || CardTransitioning(self) 
-        rectCard.x += 2.0f;
-        rectCard.y += 2.0f;
-        DrawRectangleRounded(rectCard, 0.05, 9, (Color){0,0,0,63});
-        rectCard.x -= 4.0f;
-        rectCard.y -= 4.0f;
-    }/* else if ( CheckCollisionPointRec(GetMousePosition(), rectCard) ) {
-        rectCard.x += 2.0f;
-        rectCard.y += 2.0f;
-    }*/
+        r.x += 2.0f;
+        r.y += 2.0f;
+        DrawRectangleRounded(r, 0.05, 9, (Color){0,0,0,63});
+        r.x -= 4.0f;
+        r.y -= 4.0f;
+    }
 
-    if ( showFace ) {
-        SpritesheetDraw(ssFace, self->frame, self->flipWidth, rectCard);
+#if 0
+    /*
+        experimental feature; make the cards move a little when the mouse cursor is over them
+        + indicates that the cards can be moved, provides visual feedback
+        - seems a little naff, of course the cards can be moved
+    */
+    if (!self->owner->owner->tail) {
+    // if (!(CardDragging(self) || CardTransitioning(self))) {
+        if (PileFindLastCardUnderPoint(self->owner, GetMousePosition()) == self) {
+            r.x -= 1.0f;
+            r.y -= 1.0f;
+        }
+    }
+#endif
+
+    /*
+        tried angling the card if it was dragging or transitioning,
+        but it brought out the jaggies and looked a bit gimmicky
+    */
+    if (showFace) {
+        SpritesheetDraw(ssFace, self->frame, self->flipWidth, 0.0f, r);
     } else {
-        SpritesheetDraw(ssBack, 2, self->flipWidth, rectCard);
+        SpritesheetDraw(ssBack, 2, self->flipWidth, 0.0f, r);
     }
 }
-
-// void CardDrawRect(struct Card *const self, int x, int y)
-// {
-//     extern float cardWidth, cardHeight;
-//     char z[64], buf[104];
-//     CardToString(self, z);
-//     sprintf(buf, "%s %f,%f,%f,%f", z, self->pos.x, self->pos.y, cardWidth, cardHeight);
-//     DrawText(buf, x, y, 24, WHITE);
-// }
 
 void CardFlipUp(struct Card *const self)
 {
     if ( self->prone ) {
-        self->prone = false;
+        self->prone = 0;
         self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
         self->flipWidth = 1.0f;             // ... from it's full width
     }
@@ -257,13 +284,13 @@ void CardFlipUp(struct Card *const self)
 void CardFlipDown(struct Card *const self)
 {
     if ( !self->prone ) {
-        self->prone = true;
+        self->prone = 1;
         self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
         self->flipWidth = 1.0f;             // ... from it's full width
     }
 }
 
-bool CardFlipping(struct Card *const self)
+_Bool CardFlipping(struct Card *const self)
 {
     return self->flipStep != 0.0f;
 }

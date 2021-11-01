@@ -32,7 +32,7 @@ struct Baize* BaizeNew(const char *variant)
     return self;
 }
 
-bool BaizeValid(struct Baize *const self)
+_Bool BaizeValid(struct Baize *const self)
 {
     return self && self->magic == BAIZE_MAGIC;
 }
@@ -139,7 +139,7 @@ void BaizeCreatePiles(struct Baize *const self)
     }
 
     if (lua_getglobal(self->L, "BuildPiles") != LUA_TFUNCTION) { // push value of "BuildPiles" onto the stack, return type
-        fprintf(stderr, "ERROR: %s: Build is not a function\n", __func__);
+        fprintf(stderr, "ERROR: %s: BuildPiles is not a function\n", __func__);
         lua_pop(self->L, 1);    // remove "BuildPiles" from stack
     } else {
         if (lua_pcall(self->L, 0, 0, 0) != LUA_OK) {
@@ -193,7 +193,7 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
     self->touchedWidget = NULL;
 
     self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
-    self->dragging = false;
+    self->dragging = 0;
 }
 
 void BaizePositionPiles(struct Baize *const self, const int windowWidth)
@@ -233,6 +233,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     BaizeUndoPush(self);
 }
 
+#if 0
 struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
 {
     size_t index;
@@ -248,6 +249,7 @@ struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
     }
     return NULL;
 }
+#endif
 
 static struct Card* findCardAt(struct Baize *const self, Vector2 pos)
 {
@@ -271,7 +273,7 @@ static struct Pile* findPileAt(struct Baize *const self, Vector2 pos)
     size_t pindex;
     struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &pindex);
     while ( p ) {
-        if ( PileIsAt(p, pos) ) {
+        if ( CheckCollisionPointRec(pos, PileScreenRect(p)) ) {
             return p;
         }
         p = (struct Pile*)ArrayNext(self->piles, &pindex);
@@ -299,14 +301,14 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
     return pile;
 }
 
-bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
+_Bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
 {
     struct Pile* p = cFirst->owner;
 
     // check no cards in this pile are transitioning
     // for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
     //     if (CardTransitioning(c)) {
-    //         return false;
+    //         return 0;
     //     }
     // }
 
@@ -314,7 +316,7 @@ bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     size_t iFirst;
     if (!ArrayIndexOf(p->cards, cFirst, &iFirst)) {
         fprintf(stderr, "ERROR: %s: card not found in pile\n", __func__);
-        return false;
+        return 0;
     }
     // free any old tail
     if (self->tail) {
@@ -329,13 +331,13 @@ bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     return ArrayLen(self->tail) > 0;
 }
 
-bool BaizeDragging(struct Baize *const self) {
+_Bool BaizeDragging(struct Baize *const self) {
     return !(self->dragOffset.x == 0.0f && self->dragOffset.y == 0.0f);
 }
 
 void BaizeStartDrag(struct Baize *const self) {
     // fprintf(stdout, "BaizeStartDrag\n");
-    self->dragging = true;
+    self->dragging = 1;
 }
 
 void BaizeDragBy(struct Baize *const self, Vector2 delta) {
@@ -354,13 +356,13 @@ void BaizeDragBy(struct Baize *const self, Vector2 delta) {
 
 void BaizeStopDrag(struct Baize *const self) {
     // fprintf(stdout, "BaizeStopDrag\n");
-    self->dragging = false;
+    self->dragging = 0;
 }
 
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
 {
-    if ( self->tail ) {
-        fprintf(stderr, "ERROR: touch when there is a tail\n");
+    if (self->tail) {
+        fprintf(stderr, "ERROR: %s: touch when there is a tail\n", __func__);
     }
 
     // the UI is on top of the baize, so gets first dibs
@@ -417,15 +419,15 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
     self->lastTouch = touchPosition;
 }
 
-static bool AnyTailCardsProne(struct Array *const tail)
+static _Bool AnyTailCardsProne(struct Array *const tail)
 {
     size_t index;
     for ( struct Card *c = ArrayFirst(tail, &index); c; c = ArrayNext(tail, &index) ) {
         if (c->prone) {
-            return true;
+            return 1;
         }
     }
-    return false;
+    return 0;
 }
 
 void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
@@ -463,6 +465,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
             unsigned crc = BaizeCRC(self);
             BaizeTailTapped(self);
+            BaizeResetError(self);// wipe any error messages otherwise they look a bit odd
             if (BaizeCRC(self) != crc) {
                 BaizeAfterUserMove(self);
             }
@@ -523,26 +526,26 @@ void BaizeCollectCommand(struct Baize *const self, void* param)
     }
 }
 
-bool BaizeComplete(struct Baize *const self)
+_Bool BaizeComplete(struct Baize *const self)
 {
     size_t index;
     for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         if ( !p->vtable->Complete(p) ) {
-            return false;
+            return 0;
         }
     }
-    return true;
+    return 1;
 }
 
-bool BaizeConformant(struct Baize *const self)
+_Bool BaizeConformant(struct Baize *const self)
 {
     size_t index;
     for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         if ( !p->vtable->Conformant(p) ) {
-            return false;
+            return 0;
         }
     }
-    return true;
+    return 1;
 }
 
 void BaizeAfterUserMove(struct Baize *const self)
@@ -551,7 +554,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
     if (lua_getglobal(self->L, "AfterMove") != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        // fprintf(stderr, "AfterMove is not a function\n");
+        // fprintf(stderr, "INFO: %s: AfterMove is not a function\n", __func__);
         lua_pop(self->L, 1);  // remove func from stack
     } else {
         // no args, no returns
@@ -577,8 +580,7 @@ void BaizeAfterUserMove(struct Baize *const self)
 
 void BaizeLayout(struct Baize *const self, const int windowWidth, const int windowHeight)
 {
-    static int oldWidth = 0;
-    static int oldHeight = 0;
+    static int oldWidth = 0, oldHeight = 0;
 
     if ( oldWidth != windowWidth || oldHeight != windowHeight ) {
         BaizePositionPiles(self, windowWidth);
@@ -664,43 +666,44 @@ void BaizeDraw(struct Baize *const self)
     ClearBackground(baizeColor);
     BeginDrawing();
 
-    struct Card* c;
-    size_t pindex, cindex;
-    struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &pindex);
-    while ( p ) {
+    size_t cindex, pindex;
+    struct Card *c;
+    struct Pile* p = ArrayFirst(self->piles, &pindex);
+    while (p) {
         p->vtable->Draw(p);
-        c = (struct Card*)ArrayFirst(p->cards, &cindex);
-        while ( c ) {
+
+        c = ArrayFirst(p->cards, &cindex);
+        while (c) {
             if ( !(CardTransitioning(c) || CardDragging(c)) ) {
                 CardDraw(c);
             }
-            c = (struct Card*)ArrayNext(p->cards, &cindex);
+            c = ArrayNext(p->cards, &cindex);
         }
-        p = (struct Pile*)ArrayNext(self->piles, &pindex);
+        p = ArrayNext(self->piles, &pindex);
     }
 
-    p = (struct Pile*)ArrayFirst(self->piles, &pindex);
-    while ( p ) {
-        c = (struct Card*)ArrayFirst(p->cards, &cindex);
-        while ( c ) {
-            if ( CardTransitioning(c) ) {
+    p = ArrayFirst(self->piles, &pindex);
+    while (p) {
+        c = ArrayFirst(p->cards, &cindex);
+        while (c) {
+            if (CardTransitioning(c)) {
                 CardDraw(c);
             }
-            c = (struct Card*)ArrayNext(p->cards, &cindex);
+            c = ArrayNext(p->cards, &cindex);
         }
-        p = (struct Pile*)ArrayNext(self->piles, &pindex);
+        p = ArrayNext(self->piles, &pindex);
     }
 
-    p = (struct Pile*)ArrayFirst(self->piles, &pindex);
-    while ( p ) {
-        c = (struct Card*)ArrayFirst(p->cards, &cindex);
-        while ( c ) {
-            if ( CardDragging(c) ) {
+    p = ArrayFirst(self->piles, &pindex);
+    while (p) {
+        c = ArrayFirst(p->cards, &cindex);
+        while (c) {
+            if (CardDragging(c)) {
                 CardDraw(c);
             }
-            c = (struct Card*)ArrayNext(p->cards, &cindex);
+            c = ArrayNext(p->cards, &cindex);
         }
-        p = (struct Pile*)ArrayNext(self->piles, &pindex);
+        p = ArrayNext(self->piles, &pindex);
     }
 
     // {

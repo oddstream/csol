@@ -65,11 +65,10 @@ void SpritesheetFree(struct Spritesheet *const self)
     free(self);
 }
 
-void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, Rectangle r)
+void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, float ang, Rectangle r)
 {
     Rectangle rSrc, rDst;
     const float yScale = 1.0f;
-    const float ang = 0.0f;
     const Color c = WHITE;
 
     if ( self->coords ) {

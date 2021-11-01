@@ -61,61 +61,61 @@ function StartGame()
     end
 end
 
--- CanTailBeMoved constraints
+-- TailMoveError constraints
 
-function Tableau.CanTailBeMoved(tail)
+function Tableau.TailMoveError(tail)
     if POWER_MOVES then
         local c1 = Get(tail, 1)
         for i = 2, Len(tail) do
             local c2 = Get(tail, i)
-            local err = DownAltColor(c1, c2) if err then return false, err end
+            local err = DownAltColor(c1, c2) if err then return err end
             c1 = c2
         end
     else
         if Len(tail) > 1 then
-            return false, "Can only move a single card"
+            return "Can only move a single card"
         end
     end
-    return true
+    return nil
 end
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Foundation.CanTailBeAppended(pile, tail)
+function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
-            return false, "Foundations can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            return "Foundations can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = UpSuit(c1, c2) if err then return false, err end
+        local err = UpSuit(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     if Empty(pile) then
         -- do nothing, empty accept any card
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = DownAltColor(c1, c2) if err then return false, err end
+        local err = DownAltColor(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
--- IsPileConformant (Tableau only)
+-- PileConformantError (Tableau only)
 
-function Tableau.IsPileConformant(pile)
+function Tableau.PileConformantError(pile)
     local c1 = First(pile)
     for i = 2, Len(pile) do
         local c2 = Get(pile, n)
-        local err = DownAltColor(c1, c2) if err then return false, err end
+        local err = DownAltColor(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
 -- SortedAndUnSorted (Tableau only)

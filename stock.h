@@ -14,14 +14,14 @@ struct Stock {
     int recycles;
 };
 
-struct Stock* StockNew(struct Baize *const baize, Vector2 pos, enum FanType fanType, size_t packs, size_t suits, bool cardFilter[14]);
-bool StockCanMoveTail(struct Array *const tail);
-bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
-bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+struct Stock* StockNew(struct Baize *const baize, Vector2 pos, enum FanType fanType, size_t packs, size_t suits, _Bool cardFilter[14]);
+_Bool StockCanMoveTail(struct Array *const tail);
+_Bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+_Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void StockTapped(struct Pile *const self, struct Array *const tail);
 int StockCollect(struct Pile *const self);
-bool StockComplete(struct Pile *const self);
-bool StockConformant(struct Pile *const self);
+_Bool StockComplete(struct Pile *const self);
+_Bool StockConformant(struct Pile *const self);
 enum CardOrdinal StockAccept(struct Pile *const self);
 void StockSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void StockSetRecycles(struct Pile *const self, int r);

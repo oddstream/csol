@@ -40,27 +40,27 @@ function CalcPileIndex(piles, pile)
     io.stderr:write("CalcPileIndex cannot find pile\n")
 end
 
--- CanTailBeMoved constraints (Tableau only)
+-- TailMoveError constraints (Tableau only)
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Waste.CanTailBeAppended(pile, tail)
+function Waste.TailAppendError(pile, tail)
     if CardOwner(First(tail)) ~= STOCK then
-        return false, "The Waste can only accept cards from the Stock"
+        return "The Waste can only accept cards from the Stock"
     end
-    return true
+    return nil
 end
 
-function Foundation.CanTailBeAppended(pile, tail)
+function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
-            return false, "An empty Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            return "An empty Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
         local itarget = CalcPileIndex(FOUNDATIONS, pile)
         local isource = CalcPileIndex(RESERVES, CardOwner(c1))
         if isource ~= itarget then
-            return false, "Aces can only be placed on the Foundation above"
+            return "Aces can only be placed on the Foundation above"
         end
     else
         local c1 = Last(pile)
@@ -70,21 +70,21 @@ function Foundation.CanTailBeAppended(pile, tail)
             local itarget = CalcPileIndex(FOUNDATIONS, CardOwner(c1))
             local isource = CalcPileIndex(RESERVES, CardOwner(c2))
             if isource ~= itarget then
-                return false, "Cards can only be placed on the Foundation above"
+                return "Cards can only be placed on the Foundation above"
             end
         end
         if CardSuit(c1) ~= CardSuit(c2) then
-            return false, "Foundations build in suit"
+            return "Foundations build in suit"
         end
         if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 7 then
-            return true
+            return nil
         elseif CardOrdinal(c1) + 1 == CardOrdinal(c2) then
-            return true
+            return nil
         else
-            return false, "Foundations build up"
+            return "Foundations build up"
         end
     end
-    return true
+    return nil
 end
 
 -- Actions

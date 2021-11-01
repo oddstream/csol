@@ -36,6 +36,8 @@ int MoonGet(lua_State* L);
 int MoonLen(lua_State* L);
 int MoonPeek(lua_State* L);
 
+int MoonCardPairs(lua_State *L);
+
 int MoonToast(lua_State *L);
 
 #endif

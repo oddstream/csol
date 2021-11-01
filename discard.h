@@ -15,13 +15,13 @@ struct Discard {
 };
 
 struct Discard* DiscardNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
-bool DiscardCanMoveTail(struct Array *const tail);
-bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
-bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+_Bool DiscardCanMoveTail(struct Array *const tail);
+_Bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+_Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void DiscardTapped(struct Pile *const self, struct Array *const tail);
 int DiscardCollect(struct Pile *const self);
-bool DiscardComplete(struct Pile *const self);
-bool DiscardConformant(struct Pile *const self);
+_Bool DiscardComplete(struct Pile *const self);
+_Bool DiscardConformant(struct Pile *const self);
 enum CardOrdinal DiscardAccept(struct Pile *const self);
 void DiscardSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void DiscardSetRecycles(struct Pile *const self, int r);

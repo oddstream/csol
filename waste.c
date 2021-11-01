@@ -16,7 +16,7 @@ static struct PileVtable wasteVtable = {
     &WasteCanMoveTail,
     &WasteCanAcceptCard,
     &WasteCanAcceptTail,
-    &WasteTapped,
+    &PileGenericTapped,
     &WasteCollect,
     &WasteComplete,
     &WasteConformant,
@@ -40,7 +40,7 @@ struct Waste* WasteNew(struct Baize *const baize, Vector2 slot, enum FanType fan
     return self;
 }
 
-bool WasteCanMoveTail(struct Array *const tail)
+_Bool WasteCanMoveTail(struct Array *const tail)
 {
     if (ArrayLen(tail)>1) {
         struct Card *c = ArrayGet(tail, 0);
@@ -51,16 +51,16 @@ bool WasteCanMoveTail(struct Array *const tail)
     return true;
 }
 
-bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
 
-    struct Array1 tail =(struct Array1){.magic=ARRAY_MAGIC, .size=1, .used=1, .data[0]=c};
+    struct Array1 tail = Array1New(c);
     return CanTailBeAppended(self, (struct Array*)&tail);
     // don't need to free an Array1
 }
 
-bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if (ArrayLen(tail) == 1) {
         return WasteCanAcceptCard(baize, self, ArrayGet(tail, 0));
@@ -79,12 +79,12 @@ int WasteCollect(struct Pile *const self)
     return PileGenericCollect(self);
 }
 
-bool WasteComplete(struct Pile *const self)
+_Bool WasteComplete(struct Pile *const self)
 {
     return PileEmpty(self);
 }
 
-bool WasteConformant(struct Pile *const self)
+_Bool WasteConformant(struct Pile *const self)
 {
     return PileEmpty(self);
 }

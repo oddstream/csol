@@ -35,17 +35,17 @@ void PileCtor(struct Baize *const baize, struct Pile *const self, const char* ca
     self->cards = ArrayNew(52);
 }
 
-bool PileValid(struct Pile *const self)
+_Bool PileValid(struct Pile *const self)
 {
     return self && self->magic == PILE_MAGIC;
 }
 
-bool PileHidden(struct Pile *const self)
+_Bool PileHidden(struct Pile *const self)
 {
     return self->slot.x < 0.0f || self->slot.y < 0.0f;
 }
 
-bool PileEmpty(struct Pile *const self)
+_Bool PileEmpty(struct Pile *const self)
 {
     return ArrayLen(self->cards) == 0;
 }
@@ -96,7 +96,19 @@ struct CardAndIndex PileFindCard(struct Pile *const self, enum CardOrdinal ord, 
     return (struct CardAndIndex){.card=NULL, .index=0};
 }
 
-bool PileIsStock(struct Pile *const self)
+struct Card* PileFindLastCardUnderPoint(struct Pile *const self, Vector2 pt)
+{
+    struct Card *last = NULL;
+    size_t index;
+    for ( struct Card *c = ArrayFirst(self->cards, &index); c; c = ArrayNext(self->cards, &index) ) {
+        if (CheckCollisionPointRec(pt, CardScreenRect(c))) {
+            last = c;
+        }
+    }
+    return last;
+}
+
+_Bool PileIsStock(struct Pile *const self)
 {
     struct Baize* baize = self->owner;
     if ( !BaizeValid(baize) )
@@ -296,7 +308,7 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
     return pos;
 }
 
-bool PileMoveCard(struct Pile *const self, struct Pile *const src)
+_Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
 {
     // an optimized, single card version of PileMoveCards
     struct Card *const c = PilePopCard(src);
@@ -323,7 +335,7 @@ bool PileMoveCard(struct Pile *const self, struct Pile *const src)
     return true;
 }
 
-bool PileMoveCards(struct Pile *const self, struct Card const* c)
+_Bool PileMoveCards(struct Pile *const self, struct Card const* c)
 {
     // move cards to this pile
 
@@ -393,14 +405,6 @@ bool PileMoveCards(struct Pile *const self, struct Card const* c)
     return newSrcLen != oldSrcLen;
 }
 
-bool PileIsAt(struct Pile *const self, Vector2 point)
-{
-    extern float cardWidth, cardHeight;
-    Vector2 r = PileScreenPos(self);
-    Rectangle rect = {.x=r.x, .y=r.y, .width=cardWidth, .height=cardHeight};
-    return CheckCollisionPointRec(point, rect);
-}
-
 void PileRepushAllCards(struct Pile *const self)
 {
     if (PileEmpty(self)) {
@@ -414,6 +418,19 @@ void PileRepushAllCards(struct Pile *const self)
         PilePushCard(self, c);
     }
     ArrayFree(tmp);
+}
+
+void PileGenericTapped(struct Pile *const self, struct Array *const tail)
+{
+    struct Baize* baize = self->owner;
+    size_t index;
+    for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
+        if ( fp->vtable->CanAcceptTail(baize, fp, tail) ) {
+            struct Card *c = ArrayGet(tail, 0);
+            PileMoveCard(fp, c->owner);
+            break;
+        }
+    }
 }
 
 int PileGenericCollect(struct Pile *const self)

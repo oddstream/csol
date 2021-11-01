@@ -48,37 +48,37 @@ end
 -- function StartGame()
 -- end
 
--- CanTailBeMoved constraints (Tableau only)
+-- TailMoveError constraints (Tableau only)
 
-function Tableau.CanTailBeMoved(tail)
+function Tableau.TailMoveError(tail)
     -- A sequence of cards, decrementing in rank and of the same suit, can be moved as one
     local c1 = Get(tail, 1)
     for i = 2, Len(tail) do
         local c2 = Get(tail, i)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Discard.CanTailBeAppended(pile, tail)
+function Discard.TailAppendError(pile, tail)
     -- C will have checked that there are (13 - number of cards in a suit) cards in the tail
 
     local c1 = Get(tail, 1)
     if CardOrdinal(c1) ~= 13 then
-        return false, "Can only discard from a King, not a " .. V[CardOrdinal(c1)]
+        return "Can only discard from a King, not a " .. V[CardOrdinal(c1)]
     end
     for i = 2, TaiLen(tail) do
         local c2 = TaiGet(tail, i)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     -- A card can be placed on any card on the top of a column whose rank is greater than it by one (with no cards that can be placed above an Ace). 
     if Empty(pile) then
         -- An empty column may be filled by any card
@@ -87,22 +87,22 @@ function Tableau.CanTailBeAppended(pile, tail)
         local c2 = First(tail, 1)
             -- K Q J 10 9 .. 2 1
         if CardOrdinal(c1) - 1 ~= CardOrdinal(c2) then
-            return false, "Tableaux build down in rank"
+            return "Tableaux build down in rank"
         end
     end
-    return true
+    return nil
 end
 
--- IsPileConformant
+-- PileConformantError
 
-function Tableau.IsPileConformant(pile)
+function Tableau.PileConformantError(pile)
     local c1 = Get(pile, 1)
     for i = 2, Len(pile) do
         local c2 = Get(pile, n)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
 -- SortedAndUnSorted (Tableau only)
@@ -125,3 +125,7 @@ function Tableau.SortedAndUnsorted(pile)
 end
 
 -- Actions
+
+function Tableau.Tapped(tail)
+    -- do nothing
+end

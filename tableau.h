@@ -16,13 +16,13 @@ struct Tableau {
 };
 
 struct Tableau* TableauNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
-bool TableauCanMoveTail(struct Array *const tail);
-bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
-bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+_Bool TableauCanMoveTail(struct Array *const tail);
+_Bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+_Bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void TableauTapped(struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);
-bool TableauComplete(struct Pile *const self);
-bool TableauConformant(struct Pile *const self);
+_Bool TableauComplete(struct Pile *const self);
+_Bool TableauConformant(struct Pile *const self);
 enum CardOrdinal TableauAccept(struct Pile *const self);
 void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void TableauSetRecycles(struct Pile *const self, int r);

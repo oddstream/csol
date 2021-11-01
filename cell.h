@@ -15,13 +15,13 @@ struct Cell {
 };
 
 struct Cell* CellNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
-bool CellCanMoveTail(struct Array *const tail);
-bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
-bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+_Bool CellCanMoveTail(struct Array *const tail);
+_Bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+_Bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void CellTapped(struct Pile *const self, struct Array *const tail);
 int CellCollect(struct Pile *const self);
-bool CellComplete(struct Pile *const self);
-bool CellConformant(struct Pile *const self);
+_Bool CellComplete(struct Pile *const self);
+_Bool CellConformant(struct Pile *const self);
 enum CardOrdinal CellAccept(struct Pile *const self);
 void CellSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void CellSetRecycles(struct Pile *const self, int r);

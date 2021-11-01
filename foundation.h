@@ -15,13 +15,13 @@ struct Foundation {
 };
 
 struct Foundation* FoundationNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
-bool FoundationCanMoveTail(struct Array *const tail);
-bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
-bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+_Bool FoundationCanMoveTail(struct Array *const tail);
+_Bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+_Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 void FoundationTapped(struct Pile *const self, struct Array *const tail);
 int FoundationCollect(struct Pile *const self);
-bool FoundationComplete(struct Pile *const self);
-bool FoundationConformant(struct Pile *const self);
+_Bool FoundationComplete(struct Pile *const self);
+_Bool FoundationConformant(struct Pile *const self);
 enum CardOrdinal FoundationAccept(struct Pile *const self);
 void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void FoundationSetRecycles(struct Pile *const self, int r);

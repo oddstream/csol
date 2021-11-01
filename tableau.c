@@ -17,7 +17,7 @@ static struct PileVtable tableauVtable = {
     &TableauCanMoveTail,
     &TableauCanAcceptCard,
     &TableauCanAcceptTail,
-    &TableauTapped,
+    &PileGenericTapped,
     &TableauCollect,
     &TableauComplete,
     &TableauConformant,
@@ -42,16 +42,16 @@ struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType
     return self;
 }
 
-bool TableauCanMoveTail(struct Array *const tail)
+_Bool TableauCanMoveTail(struct Array *const tail)
 {
     return CanTailBeMoved(tail);
 }
 
-bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
 
-    struct Array1 tail =(struct Array1){.magic=ARRAY_MAGIC, .size=1, .used=1, .data[0]=c};
+    struct Array1 tail = Array1New(c);
     return CanTailBeAppended(self, (struct Array*)&tail);
     // don't need to free an Array1
 }
@@ -78,7 +78,7 @@ static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
     return (size_t)n;
 }
 
-bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if (ArrayLen(tail) == 1) {
         return TableauCanAcceptCard(baize, self, ArrayGet(tail, 0));
@@ -111,12 +111,12 @@ int TableauCollect(struct Pile *const self)
     return PileGenericCollect(self);
 }
 
-bool TableauComplete(struct Pile *const self)
+_Bool TableauComplete(struct Pile *const self)
 {
     return PileEmpty(self);
 }
 
-bool TableauConformant(struct Pile *const self)
+_Bool TableauConformant(struct Pile *const self)
 {
     return IsPileConformant(self);
 }
@@ -179,8 +179,6 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 
 void TableauDraw(struct Pile *const self)
 {
-    PileDraw(self);
-
     struct Tableau* t = (struct Tableau*)self;
     if ( t->accept != 0 ) {
         extern float cardWidth;
@@ -193,4 +191,7 @@ void TableauDraw(struct Pile *const self)
         pos.y += cardWidth / 16.0f;
         DrawTextEx(fontAcme, UtilOrdToShortString(t->accept), pos, fontSize, 0, baizeHighlightColor);
     }
+
+    PileDraw(self);
 }
+

@@ -33,10 +33,10 @@ struct Baize {
 
     struct Widget *touchedWidget;
 
-    bool dragging;
+    _Bool dragging;
     Vector2 dragOffset;
 
-    bool powerMoves;    // set from POWER_MOVES variable in variant.lua
+    _Bool powerMoves;    // set from POWER_MOVES variable in variant.lua
 
     struct UI* ui;
 
@@ -44,7 +44,7 @@ struct Baize {
 };
 
 struct Baize* BaizeNew(const char*);
-bool BaizeValid(struct Baize *const self);
+_Bool BaizeValid(struct Baize *const self);
 unsigned BaizeCRC(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);
 void BaizeSetError(struct Baize *const self, const char *str);
@@ -54,9 +54,9 @@ void BaizeCreatePiles(struct Baize *const self);
 void BaizeResetState(struct Baize *const self, struct Array *undoStack);
 void BaizePositionPiles(struct Baize *const self, const int windowWidth);
 void BaizeNewDealCommand(struct Baize *const self, void* param);
-struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);
-bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
-bool BaizeDragging(struct Baize *const self);
+// struct Pile* BaizeFindPile(struct Baize* self, const char *category, int n);
+_Bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst);
+_Bool BaizeDragging(struct Baize *const self);
 void BaizeStartDrag(struct Baize *const self);
 void BaizeDragBy(struct Baize *const self, Vector2 delta);
 void BaizeStopDrag(struct Baize *const self);
@@ -64,8 +64,8 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition);
 void BaizeCollectCommand(struct Baize *const self, void* param);
-bool BaizeComplete(struct Baize *const self);
-bool BaizeConformant(struct Baize *const self);
+_Bool BaizeComplete(struct Baize *const self);
+_Bool BaizeConformant(struct Baize *const self);
 void BaizeAfterUserMove(struct Baize *const self);
 void BaizeLayout(struct Baize *const self, const int width, const int height);
 void BaizeUpdate(struct Baize *const self);

@@ -15,7 +15,7 @@ static struct PileVtable cellVtable = {
     &CellCanMoveTail,
     &CellCanAcceptCard,
     &CellCanAcceptTail,
-    &CellTapped,
+    &PileGenericTapped,
     &CellCollect,
     &CellComplete,
     &CellConformant,
@@ -39,13 +39,13 @@ struct Cell* CellNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
     return self;
 }
 
-bool CellCanMoveTail(struct Array *const tail)
+_Bool CellCanMoveTail(struct Array *const tail)
 {
     (void)tail;
     return true;
 }
 
-bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)c;
     if ( !PileEmpty(self) ) {
@@ -55,7 +55,7 @@ bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struc
     return true;
 }
 
-bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( ArrayLen(tail) != 1 ) {
         BaizeSetError(baize, "(CSOL) Can only move a single card to a Cell");
@@ -79,12 +79,12 @@ int CellCollect(struct Pile *const self)
     return PileGenericCollect(self);
 }
 
-bool CellComplete(struct Pile *const self)
+_Bool CellComplete(struct Pile *const self)
 {
     return PileEmpty(self);
 }
 
-bool CellConformant(struct Pile *const self)
+_Bool CellConformant(struct Pile *const self)
 {
     (void)self;
     return true;

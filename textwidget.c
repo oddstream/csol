@@ -71,7 +71,7 @@ void TextWidgetDraw(struct Widget *const self)
             rectIcon.x += 2.0f;
             rectIcon.y += 2.0f;
         }
-        SpritesheetDraw(ssIcons, tw->frame, 1.0f, rectIcon);
+        SpritesheetDraw(ssIcons, tw->frame, 1.0f, 0.0f, rectIcon);
 
         pos.x += ICON_SIZE;
     }
@@ -90,6 +90,13 @@ void TextWidgetDraw(struct Widget *const self)
         }
         DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, 1.2f, uiTextColor);
     }
+
+#if 0
+    {
+        Rectangle r = WidgetScreenRect((struct Widget*)tw);
+        DrawRectangleLines(r.x, r.y, r.width, r.height, RED);
+    }
+#endif
 }
 
 void TextWidgetFree(struct Widget *const self)

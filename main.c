@@ -141,10 +141,14 @@ int main(int argc, char* argv[], char* envp[])
 
 #if _DEBUG
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
+    fprintf(stderr, "sizeof(int) == %lu\n", sizeof(int));
+    fprintf(stderr, "sizeof(float) == %lu\n", sizeof(float));
     fprintf(stderr, "sizeof(void*) == %lu\n", sizeof(void*));
-    fprintf(stderr, "sizeof(unsigned int) == %lu\n", sizeof(unsigned int));
-    fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
+    fprintf(stderr, "sizeof(size_t) == %lu\n", sizeof(size_t));
+    fprintf(stderr, "sizeof(Array) == %lu\n", sizeof(struct Array));
     fprintf(stderr, "sizeof(Card) == %lu\n", sizeof(struct Card));
+    fprintf(stderr, "sizeof(Pile) == %lu\n", sizeof(struct Pile));
+    fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
 
     for ( int i=0; i<argc; i++ ) {
         fprintf(stdout, "%d. %s\n", i, argv[i]);

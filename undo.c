@@ -324,7 +324,7 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
 #include <sys/stat.h>
 #include <unistd.h>
 
-static bool createDirectories(char *src)
+static _Bool createDirectories(char *src)
 {
     if (!src || *src != '/') {
         fprintf(stderr, "ERROR: %s: bad input\n", __func__);
@@ -349,7 +349,7 @@ static bool createDirectories(char *src)
                 fprintf(stderr, "INFO: %s: %s created\n", __func__, dirName);
             }
         } else {
-            fprintf(stdout, "INFO: %s: %s exists\n", __func__, dirName);
+            // fprintf(stdout, "INFO: %s: %s exists\n", __func__, dirName);
         }
     }
     return true;
@@ -392,7 +392,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
         }
         fclose(f);
     } else {
-        fprintf(stderr, "ERROR: %s: could not create %s\n", __func__, fname);
+        fprintf(stderr, "WARNING: %s: could not create %s\n", __func__, fname);
     }
 
     // fprintf(stdout, "GetWorkingDirectory is %s\n", GetWorkingDirectory());

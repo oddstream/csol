@@ -41,5 +41,5 @@ void IconWidgetDraw(struct Widget *const self)
         iconRect.x += 2.0f;
         iconRect.y += 2.0f;
     }
-    SpritesheetDraw(ssIcons, iw->frame, 1.0f, iconRect);
+    SpritesheetDraw(ssIcons, iw->frame, 1.0f, 0.0f, iconRect);
 }

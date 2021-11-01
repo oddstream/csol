@@ -46,10 +46,10 @@ void DrawerStopDrag(struct Container *const self, Vector2 pos)
     (void)pos;
 }
 
-bool DrawerWasDragged(struct Container *const self, Vector2 pos)
+_Bool DrawerWasDragged(struct Container *const self, Vector2 pos)
 {
     struct Drawer *const dr = (struct Drawer*)self;
-    bool result = !(pos.x == dr->dragStartPos.x && pos.y == dr->dragStartPos.y);
+    _Bool result = !(pos.x == dr->dragStartPos.x && pos.y == dr->dragStartPos.y);
     // fprintf(stdout, "DrawerWasDragged %d\n", result);
     return result;
 }
@@ -57,7 +57,6 @@ bool DrawerWasDragged(struct Container *const self, Vector2 pos)
 void DrawerLayoutWidgets(struct Container *const self)
 {
     // arrange widgets vertically, stacked top to bottom
-    // ignore widget align
 
     float x = WIDGET_PADDING;
     float y = WIDGET_PADDING;
@@ -66,6 +65,12 @@ void DrawerLayoutWidgets(struct Container *const self)
     for ( struct Widget *w = ArrayFirst(dr->super.widgets, &index); w; w = ArrayNext(dr->super.widgets, &index) ) {
         w->rect.x = x + dr->dragOffset.x;
         w->rect.y = y + dr->dragOffset.y;
+        /*
+            make the drawer text widgets span the width of the drawer, rather than just
+            being confined to the text dimensions, otherwise drawer dragging requires
+            the touch be over the text, not just in the drawer
+        */
+        w->rect.width = dr->super.rect.width - WIDGET_PADDING * 2.0f;
         y += w->rect.height + WIDGET_PADDING;
     }
 }
@@ -120,7 +125,7 @@ void DrawerFree(struct Container *const self)
     ContainerFree(self);
 }
 
-bool DrawerVisible(struct Drawer *const self)
+_Bool DrawerVisible(struct Drawer *const self)
 {
     // return self->super.rect.x > -1.0f;   // don't compare a float with 0
     return self->super.rect.x > -DRAWER_WIDTH / 2.0f;

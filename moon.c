@@ -35,8 +35,10 @@ static const struct FunctionToRegister {
     {"PilePeek", MoonPilePeek},
     {"PileDemoteCards", MoonPileDemoteCards},
     {"PilePromoteCards", MoonPilePromoteCards},
+
     {"MoveCard", MoonMoveCard},
     {"MoveAllCards", MoonMoveAllCards},
+    {"CardPairs", MoonCardPairs},
 
     {"CardColor", MoonCardColor},
     {"CardOrdinal", MoonCardOrdinal},
@@ -73,7 +75,8 @@ static struct Baize* getBaize(lua_State* L)
 
 void MoonRegisterFunctions(lua_State* L)
 {
-    for ( size_t i=0; i<sizeof(FunctionsToRegister) / sizeof(struct FunctionToRegister); i++ ) {
+    // for ( int i = 0; i<ARRAY_SIZE(FunctionsToRegister); i++ ) {
+   for ( size_t i=0; i<sizeof(FunctionsToRegister) / sizeof(struct FunctionToRegister); i++ ) {
         lua_pushcfunction(L, FunctionsToRegister[i].cFunction);
         lua_setglobal(L, FunctionsToRegister[i].luaFunction);
     }
@@ -103,7 +106,7 @@ void MoonPushCardAsTable(lua_State *L, struct Card *const c)
         lua_pushinteger(L, c->id.suit == DIAMOND || c->id.suit == HEART ? 1 : 0);
         lua_setfield(L, -2, "color");   // table["color"] == [0|1], pops key value
 
-        lua_pushboolean(L, c->prone);
+        lua_push_Boolean(L, c->prone);
         lua_setfield(L, -2, "prone");   // table["prone"] = c->prone, pops key value
 
         lua_pushlightuserdata(L, c->owner);
@@ -148,7 +151,7 @@ void MoonPushArrayAsGlobalArray(lua_State *L, const char* name, struct Array *co
 }
 #endif
 
-static void parseCardFilter(lua_State *L, bool cardFilter[14])
+static void parseCardFilter(lua_State *L, _Bool cardFilter[14])
 {
     // on entry, the thing on the top of the stack (position 7) is a table
 
@@ -215,7 +218,7 @@ int MoonAddPile(lua_State* L)
         } else {
             suits = 4;
         }
-        bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+        _Bool cardFilter[14] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1};
         if (lua_istable(L, 7)) {
             parseCardFilter(L, cardFilter);
         }
@@ -304,7 +307,7 @@ int MoonPileAccept(lua_State *L)
         enum CardOrdinal accept = lua_tonumber(L, 2);
         p->vtable->SetAccept(p, accept);
     }
-    lua_pushnumber(L, p->vtable->Accept(p));
+    lua_pushinteger(L, p->vtable->Accept(p));
     return 1;
 }
 
@@ -473,23 +476,23 @@ int MoonPilePromoteCards(lua_State *L)
 int MoonMoveCard(lua_State *L)
 {
     if (!lua_islightuserdata(L, 1)) {
-        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        fprintf(stderr, "ERROR: %s: expecting lightuserdata\n", __func__);
         return 0;
     }
     if (!lua_islightuserdata(L, 2)) {
-        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        fprintf(stderr, "ERROR: %s: expecting lightuserdata\n", __func__);
         return 0;
     }
     struct Pile *src = lua_touserdata(L, 1);
     struct Pile* dst = lua_touserdata(L, 2);
 
     if ( !PileValid(src) ) {
-        fprintf(stderr, "WARNING: %s invalid source pile\n", __func__);
+        fprintf(stderr, "ERROR: %s invalid source pile\n", __func__);
         return 0;
     }
 
     if ( !PileValid(dst) ) {
-        fprintf(stderr, "WARNING: %s invalid destination pile\n", __func__);
+        fprintf(stderr, "ERROR: %s invalid destination pile\n", __func__);
         return 0;
     }
 
@@ -560,10 +563,10 @@ int MoonCardColor(lua_State *L)
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
-        lua_pushnumber(L, 0);
+        lua_pushinteger(L, 0);
         return 1;
     }
-    lua_pushnumber(L, c->id.suit == CLUB || c->id.suit == SPADE ? 0 : 1);
+    lua_pushinteger(L, c->id.suit == CLUB || c->id.suit == SPADE ? 0 : 1);
     return 1;
 }
 
@@ -576,10 +579,10 @@ int MoonCardOrdinal(lua_State *L)
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
-        lua_pushnumber(L, 0);
+        lua_pushinteger(L, 0);
         return 1;
     }
-    lua_pushnumber(L, c->id.ordinal);
+    lua_pushinteger(L, c->id.ordinal);
     return 1;
 }
 
@@ -612,7 +615,7 @@ int MoonCardProne(lua_State *L)
         return 1;
     }
     if (lua_gettop(L) == 2 && lua_isboolean(L, 2)) {
-        bool prone = lua_toboolean(L, 2);
+        _Bool prone = lua_toboolean(L, 2);
         if ( prone ) {
             CardFlipDown(c);
         } else {
@@ -632,10 +635,10 @@ int MoonCardSuit(lua_State *L)
     struct Card *const c = lua_touserdata(L, 1);
     if ( !CardValid(c) ) {
         fprintf(stderr, "ERROR: %s: invalid card\n", __func__);
-        lua_pushnumber(L, 0);
+        lua_pushinteger(L, 0);
         return 1;
     }
-    lua_pushnumber(L, c->id.suit);
+    lua_pushinteger(L, c->id.suit);
     return 1;
 }
 
@@ -688,7 +691,7 @@ int MoonTailLen(lua_State* L)
         fprintf(stderr, "WARNING: %s: invalid tail\n", __func__);
         return 0;
     }
-    lua_pushnumber(L, ArrayLen(a));
+    lua_pushinteger(L, ArrayLen(a));
     return 1;
 }
 
@@ -775,8 +778,46 @@ int MoonLen(lua_State *L)
         fprintf(stderr, "WARNING: %s: Len(Card) is a bit odd\n", __func__);
         len = 1;
     }
-    lua_pushnumber(L, len);
+    lua_pushinteger(L, len);
     return 1;
+}
+
+int MoonCardPairs(lua_State *L)
+{
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "ERROR: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
+    void *thing = lua_touserdata(L, 1);
+    if (!thing) {
+        fprintf(stderr, "ERROR: %s: null thing\n", __func__);
+        return 0;
+    }
+
+    struct Array *cards = NULL;
+    if (PileValid(thing)) {
+        cards = ((struct Pile*)thing)->cards;
+    } else if (ArrayValid(thing)) {
+        cards = ((struct Array *)thing);
+    } else {
+        fprintf(stderr, "ERROR: %s: unknown thing\n", __func__);
+        return 0;
+    }
+    lua_createtable(L, ArrayLen(cards), 0);
+    if (ArrayLen(cards) > 1) {
+        struct Card *c1 = ArrayGet(cards, 0);
+        for ( size_t i=1; i<ArrayLen(cards); i++ ) {
+            struct Card *c2 = ArrayGet(cards, i);
+            lua_createtable(L, 2, 0);   // 2 array elements, 0 table elements
+            lua_pushlightuserdata(L, c1);
+            lua_seti(L, -2, 1);   // pops lightuserdata from stack
+            lua_pushlightuserdata(L, c2);
+            lua_seti(L, -2, 2);   // pops lightuserdata from stack
+            c1 = c2;
+            lua_seti(L, -2, i);   // we start from 1, which is a nice coincidence
+        }
+    }
+    return 1; // we created 1 array table (of card pair array tables)
 }
 
 int MoonToast(lua_State *L)

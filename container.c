@@ -33,7 +33,7 @@ void ContainerStopDrag(struct Container *const self, Vector2 pos)
     (void)pos;
 }
 
-bool ContainerWasDragged(struct Container *const self, Vector2 pos)
+_Bool ContainerWasDragged(struct Container *const self, Vector2 pos)
 {
     (void)self;
     (void)pos;

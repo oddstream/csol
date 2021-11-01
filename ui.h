@@ -54,7 +54,7 @@ struct Widget {
     struct WidgetVtable *vtable;
     struct Container *parent;
     int align;  // alignment in parent container: left=-1, center=0, right=+1
-    // bool disabled;
+    // _Bool disabled;
     CommandFunction bcf;
     void* param;        // NULL, or a pointer to a block of memory, owned by the widget
     Rectangle rect;    // x, y relative to parent
@@ -93,8 +93,8 @@ struct ContainerVtable {
     void (*StartDrag)(struct Container *const self, Vector2 pos);
     void (*DragBy)(struct Container *const self, Vector2 delta);
     void (*StopDrag)(struct Container *const self, Vector2 pos);
-    bool (*WasDragged)(struct Container *const self, Vector2 pos);
-    // bool (*Visible)(struct Container *const self);
+    _Bool (*WasDragged)(struct Container *const self, Vector2 pos);
+    // _Bool (*Visible)(struct Container *const self);
     // void (*Show)(struct Container *const self);
     // void (*Hide)(struct Container *const self);
     void (*Layout)(struct Container *const self, const int windowWidth, const int windowHeight);
@@ -114,7 +114,7 @@ void ContainerCtor(struct Container *const self, Rectangle r);
 void ContainerStartDrag(struct Container *const self, Vector2 pos);
 void ContainerDragBy(struct Container *const self, Vector2 delta);
 void ContainerStopDrag(struct Container *const self, Vector2 pos);
-bool ContainerWasDragged(struct Container *const self, Vector2 pos);
+_Bool ContainerWasDragged(struct Container *const self, Vector2 pos);
 void ContainerUpdate(struct Container *const self);
 void ContainerDraw(struct Container *const self);
 void ContainerFree(struct Container *const self);
@@ -136,14 +136,14 @@ void DrawerCtor(struct Drawer *const self, Rectangle r);
 void DrawerStartDrag(struct Container *const self, Vector2 pos);
 void DrawerDragBy(struct Container *const self, Vector2 delta);
 void DrawerStopDrag(struct Container *const self, Vector2 pos);
-bool DrawerWasDragged(struct Container *const self, Vector2 pos);
+_Bool DrawerWasDragged(struct Container *const self, Vector2 pos);
 void DrawerLayoutWidgets(struct Container *const self);
 void DrawerLayout(struct Container *const self, const int windowWidth, const int windowHeight);
 void DrawerUpdate(struct Container *const self);
 void DrawerDraw(struct Container *const self);
 void DrawerFree(struct Container *const self);
 
-bool DrawerVisible(struct Drawer *const self);
+_Bool DrawerVisible(struct Drawer *const self);
 void DrawerHide(struct Drawer *const self);
 void DrawerShow(struct Drawer *const self);
 

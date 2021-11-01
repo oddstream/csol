@@ -42,7 +42,7 @@ function BuildPiles()
     for x = 1, 10 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         table.insert(TABLEAUX, pile)
-        for n = 1, 2 do
+        for n = 1, 3 do
           MoveCard(STOCK, pile)
         end
         PileDemoteCards(pile, 13)
@@ -51,7 +51,7 @@ function BuildPiles()
     for x = 1, 10 do
         pile = AddPile("Tableau", x, 4, FAN_DOWN)
         table.insert(TABLEAUX, pile)
-        for n = 1, 2 do
+        for n = 1, 1 do
           MoveCard(STOCK, pile)
         end
         PileDemoteCards(pile, 13)
@@ -62,84 +62,99 @@ end
 function StartGame()
     io.stderr:write("StartGame\n")
     STOCK_RECYCLES = 3
+
+    local cp = CardPairs(TABLEAUX[1])
+    io.stderr:write("#CardPairs ", #cp .. "\n");
+    for _, v in pairs(cp) do
+        assert(v[1])
+        assert(v[2])
+        -- io.stderr:write("#Pair ", #v .. "\n");
+        -- io.stderr:write("1 " .. CardOrdinal(v[1]) .. "\n");
+        -- io.stderr:write("2 " .. CardOrdinal(v[2]) .. "\n");
+        io.stderr:write("{" .. CardOrdinal(v[1]) .. "," .. CardOrdinal(v[2]) .. "}\n")
+    end
+
+    cp = CardPairs(WASTE)
+    io.stderr:write("#CardPairs ", #cp .. "\n");
+    for _, v in pairs(cp) do
+        io.stderr:write("{" .. CardOrdinal(v[1]) .. "," .. CardOrdinal(v[2]) .. "}\n")
+    end
 end
 
--- CanTailBeMoved constraints (Tableau only)
+-- TailMoveError
 
-function Tableau.CanTailBeMoved(tail)
-    io.stderr:write("Tableau.CanTailBeMoved\n")
-
+function Tableau.TailMoveError(tail)
+    io.stderr:write("Tableau.TailMoveError\n")
+--[[
     local err
     local c1 = Get(tail, 1)
     for i = 2, Len(tail) do
         local c2 = Get(tail, i)
-        err = DownSuit(c1, c2) if err then return false, err end
+        err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+]]
+    for _, c in ipairs(CardPairs(tail)) do
+        local err = DownSuit(c[1], c[2]) if err then return err end
+    end
+    return nil
 end
 
 --[[
-function CanTailBeMoved(tail)
+function TailMoveError(tail)
     local c1 = TailGet(tail, 1)
     local pile = CardOwner(c1)
-    local fn = PileType(pile) .. ".CanTailBeMoved"
+    local fn = PileType(pile) .. ".TailMoveError"
     -- io.stderr:write("type(" .. fn .. ") == " .. type(_G[fn]) .. "\n")
     if type(_G[fn]) == "function" then
         return _G[fn](pile, tail)
     else
         io.stderr:write(fn .. " is not a function\n")
     end
-    return true
+    return nil
 end
 ]]
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Waste.CanTailBeAppended(pile, tail)
+function Waste.TailAppendError(pile, tail)
+    io.stderr:write("Waste.TailAppendError\n")
     if CardOwner(First(tail)) ~= STOCK then
-        return false, "The Waste can only accept cards from the Stock"
+        return "The Waste can only accept cards from the Stock"
     end
-    return true
+    return nil
 end
 
-function Foundation.CanTailBeAppended(pile, tail)
-    local err
-    if Len(pile) == 0 then
+function Foundation.TailAppendError(pile, tail)
+    io.stderr:write("Foundation.TailAppendError\n")
+    if Empty(pile) then
         local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
-            return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            return "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
-        local c1 = Last(pile)
-        local c2 = First(tail, 1)
-        err = UpSuit(c1, c2) if err then return false, err end
+        local err = UpSuit(Last(pile), First(tail)) if err then return err end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
+    io.stderr:write("Tableau.TailAppendError\n")
     if Empty(pile) then
         -- do nothing, empty accept any card
     else
-        local c1 = Last(pile)
-        local c2 = First(tail)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(Last(pile), First(tail)) if err then return err end
     end
-    return true
+    return nil
 end
 
--- IsPileConformant (Tableau only)
+-- PileConformantError (Tableau only)
 
-function Tableau.IsPileConformant(pile)
-    local err
-    local c1 = Get(pile, 1)
-    for i = 2, Len(pile) do
-        local c2 = Get(pile, i)
-        err = DownSuit(c1, c2) if err then return false, err end
-        c1 = c2
+function Tableau.PileConformantError(pile)
+    for _, c in ipairs(CardPairs(pile)) do
+        local err = DownSuit(c[1], c[2]) if err then return err end
     end
-    return true
+    return nil
 end
 
 -- SortedAndUnSorted (Tableau only)
@@ -147,16 +162,13 @@ end
 function Tableau.SortedAndUnsorted(pile)
     local sorted = 0
     local unsorted = 0
-    local c1 = Get(pile, 1)
-    for i = 2, Len(pile) do
-        local c2 = Get(pile, i)
-        local err = DownSuit(c1, c2)
-        if not err then
-            sorted = sorted + 1
-        else
+    for _, c in ipairs(CardPairs(pile)) do
+        local err = DownSuit(c[1], c[2])
+        if err then
             unsorted = unsorted + 1
+        else
+            sorted = sorted + 1
         end
-        c1 = c2
     end
     return sorted, unsorted
 end
@@ -181,6 +193,30 @@ function Stock.Tapped(tail)
     else
         for i = 1, STOCK_DEAL_CARDS do
             MoveCard(STOCK, WASTE)
+        end
+    end
+end
+
+function Waste.Tapped(tail)
+    if not tail or Len(tail) > 1 then
+        return
+    end
+    for _, pile in ipairs(FOUNDATIONS) do
+        if Foundation.TailAppendError(pile, tail) then
+            MoveCard(CardOwner(First(tail)), pile)
+            break
+        end
+    end
+end
+
+function Tableau.Tapped(tail)
+    if not tail or Len(tail) > 1 then
+        return
+    end
+    for _, pile in ipairs(FOUNDATIONS) do
+        if Foundation.TailAppendError(pile, tail) then
+            MoveCard(CardOwner(First(tail)), pile)
+            break
         end
     end
 end

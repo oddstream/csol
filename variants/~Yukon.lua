@@ -59,54 +59,54 @@ function StartGame()
     end
 end
 
--- CanTailBeMoved constraints (Tableau only)
+-- TailMoveError constraints (Tableau only)
 
-function Tableau.CanTailBeMoved(tail)
-    return true
+function Tableau.TailMoveError(tail)
+    return nil
 end
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Foundation.CanTailBeAppended(pile, tail)
+function Foundation.TailAppendError(pile, tail)
     if Len(pile) == 0 then
         local c1 = Get(tail, 1)
         if CardOrdinal(c1) ~= 1 then
-            return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            return "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = UpSuit(c1, c2) if err then return false, err end
+        local err = UpSuit(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     if Empty(pile) then
         if not RELAXED then
             local c1 = Get(tail, 1)
             if CardOrdinal(c1) ~= 13 then
-                return false, "Empty Tableaux can only accept a King, not a " .. V[CardOrdinal(c1)]
+                return "Empty Tableaux can only accept a King, not a " .. V[CardOrdinal(c1)]
             end
         end
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = DownAltColor(c1, c2) if err then return false, err end
+        local err = DownAltColor(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
--- IsPileConformant
+-- PileConformantError
 
-function Tableau.IsPileConformant(pile)
+function Tableau.PileConformantError(pile)
     local c1 = First(pile)
     for i = 2, Len(pile) do
         local c2 = Get(pile, n)
-        local err = DownAltColor(c1, c2) if err then return false, err end
+        local err = DownAltColor(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
 -- SortedAndUnSorted (Tableau only)

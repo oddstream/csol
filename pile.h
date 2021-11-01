@@ -1,5 +1,7 @@
 /* pile.h */
 
+#pragma once
+
 #ifndef PILE_H
 #define PILE_H
 
@@ -33,13 +35,13 @@ struct Pile {
 };
 
 struct PileVtable {
-    bool (*CanMoveTail)(struct Array *const tail);
-    bool (*CanAcceptCard)(struct Baize *const baize, struct Pile *const self, struct Card *const c);
-    bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+    _Bool (*CanMoveTail)(struct Array *const tail);
+    _Bool (*CanAcceptCard)(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+    _Bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
     void (*Tapped)(struct Pile *const self, struct Array *const tail);
     int (*Collect)(struct Pile *p);
-    bool (*Complete)(struct Pile *p);
-    bool (*Conformant)(struct Pile *p);
+    _Bool (*Complete)(struct Pile *p);
+    _Bool (*Conformant)(struct Pile *p);
     enum CardOrdinal (*Accept)(struct Pile *const self);
     void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
     void (*SetRecycles)(struct Pile *const self, int r);
@@ -52,15 +54,16 @@ struct PileVtable {
 struct CardAndIndex {struct Card* card; size_t index;};
 
 void PileCtor(struct Baize *const baize, struct Pile *const self, const char* category, Vector2 slot, enum FanType fan);
-bool PileValid(struct Pile *const self);
-bool PileHidden(struct Pile *const self);
-bool PileEmpty(struct Pile *const self);
+_Bool PileValid(struct Pile *const self);
+_Bool PileHidden(struct Pile *const self);
+_Bool PileEmpty(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);
 struct Card* PilePopCard(struct Pile *const self);
 struct Card* PilePeekCard(struct Pile *const self);
 struct CardAndIndex PileFindCard(struct Pile *const self, enum CardOrdinal ord, enum CardSuit suit);
-bool PileIsStock(struct Pile *const self);
+struct Card* PileFindLastCardUnderPoint(struct Pile *const self, Vector2 pt);
+_Bool PileIsStock(struct Pile *const self);
 Rectangle PileBaizeRect(struct Pile *const self);
 Rectangle PileScreenRect(struct Pile *const self);
 Vector2 PileBaizePos(struct Pile *const self);
@@ -69,10 +72,10 @@ Vector2 PileCalculatePosFromSlot(struct Pile *const self);
 Rectangle PileFannedBaizeRect(struct Pile *const self);
 Rectangle PileFannedScreenRect(struct Pile *const self);
 Vector2 PilePushedFannedPos(struct Pile *const self);
-bool PileMoveCard(struct Pile *const self, struct Pile *const src);
-bool PileMoveCards(struct Pile *const self, struct Card const* c);
-bool PileIsAt(struct Pile *const self, Vector2 point);
+_Bool PileMoveCard(struct Pile *const self, struct Pile *const src);
+_Bool PileMoveCards(struct Pile *const self, struct Card const* c);
 void PileRepushAllCards(struct Pile *const self);
+void PileGenericTapped(struct Pile *const self, struct Array *const tail);
 int PileGenericCollect(struct Pile *const self);
 void PileUpdate(struct Pile *const self);
 void PileDraw(struct Pile *const self);

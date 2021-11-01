@@ -6,7 +6,7 @@ dofile("variants/~Library.lua")
 
 POWER_MOVES = false
 
-SEED = 4072
+-- SEED = 4072
 
 function BuildPiles()
 
@@ -86,58 +86,58 @@ function BuildPiles()
 
 end
 
--- CanTailBeMoved constraints
+-- TailMoveError constraints
 
-function Tableau.CanTailBeMoved(tail)
+function Tableau.TailMoveError(tail)
     local c1 = Get(tail, 1)
     for i = 2, Len(tail) do
         local c2 = Get(tail, i)
-        local err = DownSuitWrap(c1, c2) if err then return false, err end
+        local err = DownSuitWrap(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Foundation.CanTailBeAppended(pile, tail)
+function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
         if CardOrdinal(c1) ~= PileAccept(pile) then
-            return false, "Foundation can only accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c1)]
+            return "Foundation can only accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = UpSuitWrap(c1, c2) if err then return false, err end
+        local err = UpSuitWrap(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     if Empty(pile) then
         local c2 = First(tail)
         if CardOrdinal(c2) ~= PileAccept(pile) then
-            return false, "Empty Tableau can accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c2)]
+            return "Empty Tableau can accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c2)]
         end
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = DownSuitWrap(c1, c2) if err then return false, err end
+        local err = DownSuitWrap(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
--- IsPileConformant (Tableau only)
+-- PileConformantError (Tableau only)
 
-function Tableau.IsPileConformant(pile)
+function Tableau.PileConformantError(pile)
     local c1 = First(pile)
     for i = 2, Len(pile) do
         local c2 = Get(pile, n)
-        local err = DownSuitWrap(c1, c2) if err then return false, err end
+        local err = DownSuitWrap(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
 -- SortedAndUnSorted (Tableau only)

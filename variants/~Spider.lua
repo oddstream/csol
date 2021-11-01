@@ -38,58 +38,58 @@ function BuildPiles()
     end
 end
 
-function Tableau.CanTailBeMoved(tail)
+function Tableau.TailMoveError(tail)
     local c1 = Get(tail, 1)
     for i = 2, Len(tail) do
         local c2 = Get(tail, i)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
-function Discard.CanTailBeAppended(pile, tail)
+function Discard.TailAppendError(pile, tail)
     if Len(tail) ~= 13 then
-        return false, "Discard can only accept 13 cards"
+        return "Discard can only accept 13 cards"
     else
         local c1 = First(tail)
         if CardOrdinal(c1) ~= 13 then
-            return false, "Can only discard from a 13, not a " .. V[CardOrdinal(c1)]
+            return "Can only discard from a 13, not a " .. V[CardOrdinal(c1)]
         end
         for i = 2, Len(tail) do
             local c2 = Get(tail, i)
-            local err = DownSuit(c1, c2) if err then return false, err end
+            local err = DownSuit(c1, c2) if err then return err end
             c1 = c2
         end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     if Len(pile) == 0 then
         -- accept any card
     else
         local c1 = Last(pile)
         local c2 = First(tail)
         if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
-            return false, "Tableaux build down"
+            return "Tableaux build down"
         end
     end
-    return true
+    return nil
 end
 
-function Discard.IsPileConformant(pile)
+function Discard.PileConformantError(pile)
     local c1 = Get(pile, 1)
     for i = 2, Len(pile) do
         local c2 = Get(pile, n)
-        local err = DownSuit(c1, c2) if err then return false end
+        local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
-function Tableau.IsPileConformant(pile)
-    return Discard.IsPileConformant(pile)
+function Tableau.PileConformantError(pile)
+    return Discard.PileConformantError(pile)
 end
 
 function Tableau.SortedAndUnsorted(pile)

@@ -42,7 +42,7 @@ struct Foundation* FoundationNew(struct Baize *const baize, Vector2 slot, enum F
     return self;
 }
 
-bool FoundationCanMoveTail(struct Array *const tail)
+_Bool FoundationCanMoveTail(struct Array *const tail)
 {
     struct Card *c = ArrayGet(tail, 0);
     struct Baize* baize = CardToBaize(c);
@@ -51,19 +51,19 @@ bool FoundationCanMoveTail(struct Array *const tail)
     return false;
 }
 
-bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "(CSOL) The foundation is full");
         return false;
     }
 
-    struct Array1 tail =(struct Array1){.magic=ARRAY_MAGIC, .size=1, .used=1, .data[0]=c};
+    struct Array1 tail = Array1New(c);
     return CanTailBeAppended(self, (struct Array*)&tail);
     // don't need to free an Array1
 }
 
-bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if (ArrayLen(tail) > 1) {
         BaizeSetError(baize, "(CSOL) Can only move a single card to a Foundation");
@@ -94,12 +94,12 @@ int FoundationCollect(struct Pile *const self)
     return 0;
 }
 
-bool FoundationComplete(struct Pile *const self)
+_Bool FoundationComplete(struct Pile *const self)
 {
     return PileLen(self) == self->owner->numberOfCardsInSuit;
 }
 
-bool FoundationConformant(struct Pile *const self)
+_Bool FoundationConformant(struct Pile *const self)
 {
     // a Foundation is always assumed to be conformant, how else did it get built!?
     (void)self;
@@ -131,8 +131,6 @@ void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int 
 
 void FoundationDraw(struct Pile *const self)
 {
-    PileDraw(self);
-
     struct Foundation* f = (struct Foundation*)self;
     if ( f->accept != 0 ) {
         extern float cardWidth;
@@ -144,4 +142,6 @@ void FoundationDraw(struct Pile *const self)
         pos.y += cardWidth / 16.0f;
         DrawTextEx(fontAcme, UtilOrdToShortString(f->accept), pos, fontSize, 0, baizeHighlightColor);
     }
+
+    PileDraw(self);
 }

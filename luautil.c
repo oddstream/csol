@@ -18,12 +18,12 @@ _Bool LuaUtilGetGlobalBool(lua_State* L, const char* var, const _Bool def)
         // fprintf(stderr, "%s is nil\n", var);
         result = def;
     } else if ( typ != LUA_TBOOLEAN ) {
-        fprintf(stderr, "ERROR: %s: %s is not a boolean\n", __func__, var);
+        fprintf(stderr, "ERROR: %s: %s is not a _Boolean\n", __func__, var);
         result = def;
     } else {
         result = lua_toboolean(L, -1); // does not alter stack
     }
-    lua_pop(L, 1); // remove boolean from stack
+    lua_pop(L, 1); // remove _Boolean from stack
     // fprintf(stderr, "%s=%d\n", var, result);
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
     return result;
@@ -127,13 +127,13 @@ _Bool LuaUtilSetupTableMethod(lua_State *L, const char *table, const char *metho
 {
     int typ = lua_getglobal(L, table);
     if (typ != LUA_TTABLE) {
-        fprintf(stderr, "ERROR: %s: %s is not a table\n", __func__, table);
+        fprintf(stderr, "INFO: %s: %s is not a table\n", __func__, table);
         lua_pop(L, 1);  // remove table name
         return 0;
     }
     typ = lua_getfield(L, -1, method);
     if (typ != LUA_TFUNCTION) {
-        fprintf(stderr, "ERROR: %s: %s.%s is not a function\n", __func__, table, method);
+        fprintf(stderr, "INFO: %s: %s.%s is not a function\n", __func__, table, method);
         lua_pop(L, 2);  // remove table and method names
         return 0;
     }

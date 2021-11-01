@@ -32,7 +32,7 @@ static struct PileVtable stockVtable = {
 };
 
 #if 0
-static void ParseCardFilter(lua_State *L, bool cardFilter[14])
+static void ParseCardFilter(lua_State *L, _Bool cardFilter[14])
 {
     if ( lua_getglobal(L, "STRIP_CARDS") != LUA_TTABLE ) {
         fprintf(stdout, "STRIP_CARDS is not set\n");
@@ -57,7 +57,7 @@ static void ParseCardFilter(lua_State *L, bool cardFilter[14])
 }
 #endif
 
-static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t suits, bool cardFilter[14])
+static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t suits, _Bool cardFilter[14])
 {
     baize->numberOfCardsInSuit = 0;
     for ( int i=1; i<14; i++ ) {
@@ -114,7 +114,7 @@ static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
     }
 }
 
-struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan, size_t packs, size_t suits, bool cardFilter[14])
+struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan, size_t packs, size_t suits, _Bool cardFilter[14])
 {
     struct Stock* self = calloc(1, sizeof(struct Stock));
     if ( self ) {
@@ -130,13 +130,13 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan
     return self;
 }
 
-bool StockCanMoveTail(struct Array *const tail)
+_Bool StockCanMoveTail(struct Array *const tail)
 {
     (void)tail;
     return true;
 }
 
-bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     BaizeSetError(baize, "(CSOL) Cannot move cards to the Stock");
 
@@ -146,7 +146,7 @@ bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
     return false;
 }
 
-bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     BaizeSetError(baize, "(CSOL) Cannot move cards to the Stock");
 
@@ -168,12 +168,12 @@ int StockCollect(struct Pile *const self)
     return 0;
 }
 
-bool StockComplete(struct Pile *const self)
+_Bool StockComplete(struct Pile *const self)
 {
     return PileEmpty(self);
 }
 
-bool StockConformant(struct Pile *const self)
+_Bool StockConformant(struct Pile *const self)
 {
     return PileEmpty(self);
 }
@@ -208,8 +208,6 @@ void StockDraw(struct Pile *const self)
     extern Texture2D recycleTexture;
     extern Color baizeHighlightColor;
     // extern Font fontAcme;
-
-    PileDraw(self);
 
     // icon is 96x96
     // card is, say, 100x120
@@ -246,4 +244,6 @@ void StockDraw(struct Pile *const self)
         //     DrawTextEx(fontAcme, str, pos, 24.0f, 0.0f, baizeHighlightColor);
         // }
     }
+
+    PileDraw(self);
 }

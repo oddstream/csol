@@ -16,7 +16,19 @@ float UtilDistance(Vector2 a, Vector2 b)
 // Lerp see https://en.wikipedia.org/wiki/Linear_interpolation
 float UtilLerp(float v0, float v1, float t)
 {
-    return (1-t)*v0 + t*v1;
+    return (1.0f - t) * v0 + t * v1;
+}
+
+float UtilEaseInSine(float A, float B, float v)
+{
+    v = 1.0f - cosf((v * PI) / 2.0f);        // easings.net
+    return (B * v) + (A * (1.0f - v));
+}
+
+float UtilEaseInCubic(float A, float B, float v)
+{
+    v = v * v * v;
+    return (B * v) + (A * (1.0f - v));
 }
 
 // Smoothstep see http://sol.gfxile.net/interpolation/
@@ -94,7 +106,7 @@ uint32_t UtilHash(char *str)
     return hash;
 }
 
-bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer)
+_Bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer)
 {
     if (inner.x < outer.x || inner.y < outer.y) {
         return false;

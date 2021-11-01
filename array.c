@@ -6,6 +6,8 @@
 
 #include "array.h"
 
+#define ARRAY_MAGIC (0xfeedface)
+
 struct Array* ArrayNew(size_t initialSize)
 {
     // struct Array* self = calloc(1, sizeof(struct Array));
@@ -19,6 +21,11 @@ struct Array* ArrayNew(size_t initialSize)
         self->size = initialSize;
     }
     return self;
+}
+
+struct Array1 Array1New(void* element)
+{
+    return (struct Array1){.magic=ARRAY_MAGIC, .used=1, .size=1, .data[0]=element};
 }
 
 /*

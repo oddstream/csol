@@ -44,55 +44,55 @@ end
 -- function StartGame()
 -- end
 
--- CanTailBeMoved constraints (Tableau only)
+-- TailMoveError constraints (Tableau only)
 
-function Tableau.CanTailBeMoved(tail)
+function Tableau.TailMoveError(tail)
     if Len(tail) > 1 then
-        return false, "Can only move a single card"
+        return "Can only move a single card"
     end
-    return true
+    return nil
 end
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Waste.CanTailBeAppended(pile, tail)
+function Waste.TailAppendError(pile, tail)
     if Len(pile) > 0 then
-        return false, "The Waste already contains a card"
+        return "The Waste already contains a card"
     end
     if Len(tail) > 1 then
-        return false, "The Waste can only accept a single card"
+        return "The Waste can only accept a single card"
     end
     if CardOwner(First(tail)) ~= STOCK then
-        return false, "The Waste can only accept cards from the Stock"
+        return "The Waste can only accept cards from the Stock"
     end
-    return true
+    return nil
 end
 
-function Foundation.CanTailBeAppended(pile, tail)
+function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
-            return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            return "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
         -- build up regardless of suit
         local c1 = Last(pile)
         local c2 = First(tail)
         if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
-            return false, "Foundations build up"
+            return "Foundations build up"
         end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     if CardOwner(First(tail)) ~= WASTE then
-        return false, "Cards can only be moved here from the Waste"
+        return "Cards can only be moved here from the Waste"
     end
-    return true
+    return nil
 end
 
--- IsPileConformant (Tableau only)
+-- PileConformantError (Tableau only)
 
 -- SortedAndUnSorted (Tableau only)
 

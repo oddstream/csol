@@ -60,68 +60,68 @@ function StartGame()
     STOCK_RECYCLES = 1
 end
 
--- CanTailBeMoved constraints (Tableau only)
+-- TailMoveError constraints (Tableau only)
 
-function Tableau.CanTailBeMoved(tail)
+function Tableau.TailMoveError(tail)
     local c1 = Get(tail, 1)
     if POWER_MOVES then
         for i = 2, Len(tail) do
             local c2 = Get(tail, i)
-            local err = DownSuit(c1, c2) if err then return false, err end
+            local err = DownSuit(c1, c2) if err then return err end
             c1 = c2
         end
     else
         if Len(tail) > 1 then
-            return false, "Can only move a single card"
+            return "Can only move a single card"
         end
     end
-    return true
+    return nil
 end
 
--- CanTailBeAppended constraints
+-- TailAppendError constraints
 
-function Waste.CanTailBeAppended(pile, tail)
+function Waste.TailAppendError(pile, tail)
     if CardOwner(First(tail)) ~= STOCK then
-        return false, "The Waste can only accept cards from the Stock"
+        return "The Waste can only accept cards from the Stock"
     end
-    return true
+    return nil
 end
 
-function Foundation.CanTailBeAppended(pile, tail)
+function Foundation.TailAppendError(pile, tail)
     if Len(pile) == 0 then
         local c1 = First(tail)
         if CardOrdinal(c1) ~= 1 then
-            return false, "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
+            return "Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = UpSuit(c1, c2) if err then return false, err end
+        local err = UpSuit(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
-function Tableau.CanTailBeAppended(pile, tail)
+function Tableau.TailAppendError(pile, tail)
     if Len(pile) == 0 then
         -- do nothing, empty accept any card
     else
         local c1 = Last(pile)
         local c2 = First(tail)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(c1, c2) if err then return err end
     end
-    return true
+    return nil
 end
 
--- IsPileConformant
+-- PileConformantError
 
-function Tableau.IsPileConformant(pile)
+function Tableau.PileConformantError(pile)
     local c1 = First(pile)
     for i = 2, Len(pile) do
         local c2 = Get(pile, n)
-        local err = DownSuit(c1, c2) if err then return false, err end
+        local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end
-    return true
+    return nil
 end
 
 -- SortedAndUnSorted (Tableau only)

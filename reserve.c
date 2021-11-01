@@ -15,7 +15,7 @@ static struct PileVtable reserveVtable = {
     &ReserveCanMoveTail,
     &ReserveCanAcceptCard,
     &ReserveCanAcceptTail,
-    &ReserveTapped,
+    &PileGenericTapped,
     &ReserveCollect,
     &ReserveComplete,
     &ReserveConformant,
@@ -39,13 +39,13 @@ struct Reserve* ReserveNew(struct Baize *const baize, Vector2 slot, enum FanType
     return self;
 }
 
-bool ReserveCanMoveTail(struct Array *const tail)
+_Bool ReserveCanMoveTail(struct Array *const tail)
 {
     (void)tail;
     return true;
 }
 
-bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+_Bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)self;
     (void)c;
@@ -53,7 +53,7 @@ bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, st
     return false;
 }
 
-bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+_Bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     BaizeSetError(baize, "(CSOL) Cannot move a card to a Reserve");
     (void)self;
@@ -72,12 +72,12 @@ int ReserveCollect(struct Pile *const self)
     return PileGenericCollect(self);
 }
 
-bool ReserveComplete(struct Pile *const self)
+_Bool ReserveComplete(struct Pile *const self)
 {
     return PileEmpty(self);
 }
 
-bool ReserveConformant(struct Pile *const self)
+_Bool ReserveConformant(struct Pile *const self)
 {
     return PileEmpty(self);
 }

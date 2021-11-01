@@ -277,9 +277,11 @@ struct Widget* UiFindWidgetAt(struct UI *const self, Vector2 pos)
     if (con) {
         size_t windex;
         for ( struct Widget *w = ArrayFirst(con->widgets, &windex); w; w = ArrayNext(con->widgets, &windex) ) {
-            Rectangle r = w->rect;
-            r.x += con->rect.x;
-            r.y += con->rect.y;
+            // widget screen rects are relative to their container's rect
+            // Rectangle r = w->rect;
+            // r.x += con->rect.x;
+            // r.y += con->rect.y;
+            Rectangle r = WidgetScreenRect(w);
             if ( CheckCollisionPointRec(pos, r) ) {
                 // fprintf(stdout, "Tapped on a widget\n");
                 return w;
