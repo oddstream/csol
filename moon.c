@@ -419,12 +419,12 @@ int MoonPileDemoteCards(lua_State *L)
         ArrayReset(p->cards);
         size_t index;
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
-            if (c->id.ordinal == ord) {
+            if (CardOrdinal(c) == ord) {
                 p->cards = ArrayPush(p->cards, c);
             }
         }
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
-            if (c->id.ordinal != ord) {
+            if (CardOrdinal(c) != ord) {
                 p->cards = ArrayPush(p->cards, c);
             }
         }
@@ -459,12 +459,12 @@ int MoonPilePromoteCards(lua_State *L)
         ArrayReset(p->cards);
         size_t index;
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
-            if (c->id.ordinal != ord) {
+            if (CardOrdinal(c) != ord) {
                 p->cards = ArrayPush(p->cards, c);
             }
         }
         for ( struct Card *c=ArrayFirst(tmp, &index); c; c=ArrayNext(tmp, &index) ) {
-            if (c->id.ordinal == ord) {
+            if (CardOrdinal(c) == ord) {
                 p->cards = ArrayPush(p->cards, c);
             }
         }
@@ -566,7 +566,7 @@ int MoonCardColor(lua_State *L)
         lua_pushinteger(L, 0);
         return 1;
     }
-    lua_pushinteger(L, c->id.suit == CLUB || c->id.suit == SPADE ? 0 : 1);
+    lua_pushinteger(L, CardSuit(c) == CLUB || CardSuit(c) == SPADE ? 0 : 1);
     return 1;
 }
 
@@ -582,7 +582,7 @@ int MoonCardOrdinal(lua_State *L)
         lua_pushinteger(L, 0);
         return 1;
     }
-    lua_pushinteger(L, c->id.ordinal);
+    lua_pushinteger(L, CardOrdinal(c));
     return 1;
 }
 
@@ -598,7 +598,7 @@ int MoonCardOwner(lua_State *L)
         lua_pushnil(L);
         return 1;
     }
-    lua_pushlightuserdata(L, c->owner);
+    lua_pushlightuserdata(L, CardOwner(c));
     return 1;
 }
 
@@ -622,7 +622,7 @@ int MoonCardProne(lua_State *L)
             CardFlipUp(c);
         }
     }
-    lua_pushboolean(L, c->prone);
+    lua_pushboolean(L, CardProne(c));
     return 1;
 }
 
@@ -638,7 +638,7 @@ int MoonCardSuit(lua_State *L)
         lua_pushinteger(L, 0);
         return 1;
     }
-    lua_pushinteger(L, c->id.suit);
+    lua_pushinteger(L, CardSuit(c));
     return 1;
 }
 

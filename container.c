@@ -37,7 +37,7 @@ _Bool ContainerWasDragged(struct Container *const self, Vector2 pos)
 {
     (void)self;
     (void)pos;
-    return false;
+    return 0;
 }
 
 void ContainerUpdate(struct Container *const self)

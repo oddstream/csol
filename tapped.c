@@ -50,7 +50,7 @@ void BaizeTailTapped(struct Baize *const self)
 
     lua_State *L = self->L;
     struct Card* c0 = ArrayGet(self->tail, 0);
-    struct Pile* pile = c0->owner;
+    struct Pile* pile = CardOwner(c0);
 
     if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
         fprintf(stderr, "INFO: %s: %s.Tapped is not a function, reverting to internal default (tail len %lu)\n", __func__, pile->category, ArrayLen(self->tail));

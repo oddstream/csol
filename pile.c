@@ -40,6 +40,11 @@ _Bool PileValid(struct Pile *const self)
     return self && self->magic == PILE_MAGIC;
 }
 
+struct Baize* PileOwner(struct Pile *const self)
+{
+    return self->owner;
+}
+
 _Bool PileHidden(struct Pile *const self)
 {
     return self->slot.x < 0.0f || self->slot.y < 0.0f;
@@ -60,7 +65,7 @@ void PilePushCard(struct Pile *const self, struct Card* c)
     if ( PileIsStock(self) ) {
         CardFlipDown(c);
     }
-    c->owner = self;
+    CardSetOwner(c, self);
     Vector2 fannedPos = PilePushedFannedPos(self); // get this *before* pushing card to pile
     // if ( strcmp(self->category, "Waste") == 0 ) {
     //     fprintf(stdout, "Push from %.0f, %.0f to %.0f, %.0f\n", c->pos.x, c->pos.y, fannedPos.x, fannedPos.y);
@@ -74,7 +79,7 @@ struct Card* PilePopCard(struct Pile *const self)
 {
     struct Card* c = (struct Card*)ArrayPop(self->cards);
     if ( CardValid(c) ) {
-        c->owner = NULL;
+        CardSetOwner(c, NULL);
         CardFlipUp(c);
     }
     return c;
@@ -114,7 +119,7 @@ _Bool PileIsStock(struct Pile *const self)
     if ( !BaizeValid(baize) )
     {
         fprintf(stderr, "ERROR: %s: Pile Baize pointer is not valid\n", __func__);
-        return false;
+        return 0;
     }
     return self == baize->stock;
 }
@@ -314,7 +319,7 @@ _Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
     struct Card *const c = PilePopCard(src);
     if (!c) {
         // fprintf(stderr, "WARNING: %s: source pile is empty\n", __func__);
-        return false;
+        return 0;
     }
 
     PilePushCard(self, c);
@@ -332,21 +337,22 @@ _Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
         PileRepushAllCards(src);
     }
 
-    return true;
+    return 1;
 }
 
 _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
 {
     // move cards to this pile
 
-    struct Pile* src = c->owner;
+    struct Pile *src = c->owner;    // TODO const errors when using CardOwner()
     if (src==self) {
         fprintf(stderr, "ERROR: %s: src and dst are the same\n", __func__);
-        return false;
+        return 0;
     }
     size_t oldSrcLen = PileLen(src);
-
+#if 0
     // find the new length of the source pile
+    // TODO could use ArrayIndexOf for this; index == newSrcLen?, retire pc
     size_t newSrcLen = 0, index;
     struct Card* pc = ArrayFirst(src->cards, &index);
     while (pc) {
@@ -359,8 +365,15 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
 
     if (!pc) {
         fprintf(stderr, "ERROR: %s: could not find card in pile\n", __func__);
-        return false;
+        return 0;
     }
+#else
+    size_t newSrcLen;
+    if (!ArrayIndexOf(src->cards, c, &newSrcLen)) {
+        fprintf(stderr, "ERROR: %s: could not find card in pile\n", __func__);
+        return 0;
+    }
+#endif
 
     // pop the tail off the source and push onto tmp stack
     struct Array* tmp = ArrayNew(PileLen(self) + PileLen(src));
@@ -399,7 +412,7 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
 
     if (newSrcLen == oldSrcLen) {
         fprintf(stderr, "WARNING: %s did nothing?\n", __func__);
-        return false;
+        return 0;
     }
 
     return newSrcLen != oldSrcLen;

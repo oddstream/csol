@@ -133,7 +133,7 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan
 _Bool StockCanMoveTail(struct Array *const tail)
 {
     (void)tail;
-    return true;
+    return 1;
 }
 
 _Bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
@@ -143,7 +143,7 @@ _Bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, str
     (void)baize;
     (void)self;
     (void)c;
-    return false;
+    return 0;
 }
 
 _Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
@@ -153,7 +153,7 @@ _Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, str
     (void)baize;
     (void)self;
     (void)tail;
-    return false;
+    return 0;
 }
 
 void StockTapped(struct Pile *const self, struct Array *const tail)

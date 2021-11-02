@@ -109,17 +109,17 @@ uint32_t UtilHash(char *str)
 _Bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer)
 {
     if (inner.x < outer.x || inner.y < outer.y) {
-        return false;
+        return 0;
     }
     float innerRight = inner.x + inner.width;
     float outerRight = outer.x + outer.width;
     if (innerRight > outerRight) {
-        return false;
+        return 0;
     }
     float innerBottom = inner.y + inner.height;
     float outerBottom = outer.y + outer.height;
     if (innerBottom > outerBottom) {
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }

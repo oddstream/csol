@@ -42,7 +42,7 @@ struct Cell* CellNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
 _Bool CellCanMoveTail(struct Array *const tail)
 {
     (void)tail;
-    return true;
+    return 1;
 }
 
 _Bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
@@ -50,22 +50,22 @@ _Bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
     (void)c;
     if ( !PileEmpty(self) ) {
         BaizeSetError(baize, "(CSOL) Can only move a card to an empty Cell");
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }
 
 _Bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( ArrayLen(tail) != 1 ) {
         BaizeSetError(baize, "(CSOL) Can only move a single card to a Cell");
-        return false;
+        return 0;
     }
     if ( !PileEmpty(self) ) {
         BaizeSetError(baize, "(CSOL) Can only move a card to an empty Cell");
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }
 
 void CellTapped(struct Pile *const self, struct Array *const tail)
@@ -87,7 +87,7 @@ _Bool CellComplete(struct Pile *const self)
 _Bool CellConformant(struct Pile *const self)
 {
     (void)self;
-    return true;
+    return 1;
 }
 
 enum CardOrdinal CellAccept(struct Pile *const self)

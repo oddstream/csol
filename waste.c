@@ -44,11 +44,11 @@ _Bool WasteCanMoveTail(struct Array *const tail)
 {
     if (ArrayLen(tail)>1) {
         struct Card *c = ArrayGet(tail, 0);
-        struct Baize *baize = CardToBaize(c);
+        struct Baize *baize = PileOwner(CardOwner(c));
         BaizeSetError(baize, "(CSOL) Only a single card can be moved from Waste");
-        return false;
+        return 0;
     }
-    return true;
+    return 1;
 }
 
 _Bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)

@@ -8,6 +8,17 @@
 
 #define ARRAY_MAGIC (0xfeedface)
 
+// define the struct Array here so it's opaque
+struct Array {
+    unsigned magic;
+    size_t used;
+    size_t size;
+    void* data[];  // void** so we can dereference it (eg use data[i])
+    // using data[] (an 'incompete type'), instead of void**, then self changes when we realloc
+    // which means ArrayPush() &c may change self
+    // so we have to use eg piles->array = ArrayPush(piles->array, p)
+};
+
 struct Array* ArrayNew(size_t initialSize)
 {
     // struct Array* self = calloc(1, sizeof(struct Array));
@@ -102,7 +113,7 @@ void* ArrayGet(struct Array *const self, int pos)
     }
 }
 
-_Bool ArrayIndexOf(struct Array *const self, void *element, size_t *index)
+_Bool ArrayIndexOf(struct Array *const self, const void * element, size_t *index)
 {
     for ( size_t i=0; i<self->used; i++ ) {
         if (self->data[i] == element) {

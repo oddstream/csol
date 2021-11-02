@@ -42,7 +42,7 @@ struct Reserve* ReserveNew(struct Baize *const baize, Vector2 slot, enum FanType
 _Bool ReserveCanMoveTail(struct Array *const tail)
 {
     (void)tail;
-    return true;
+    return 1;
 }
 
 _Bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
@@ -50,7 +50,7 @@ _Bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, s
     (void)self;
     (void)c;
     BaizeSetError(baize, "(CSOL) Cannot move a card to a Reserve");
-    return false;
+    return 0;
 }
 
 _Bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
@@ -58,7 +58,7 @@ _Bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
     BaizeSetError(baize, "(CSOL) Cannot move a card to a Reserve");
     (void)self;
     (void)tail;
-    return false;
+    return 0;
 }
 
 void ReserveTapped(struct Pile *const self, struct Array *const tail)

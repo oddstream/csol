@@ -44,9 +44,9 @@ struct Discard* DiscardNew(struct Baize *const baize, Vector2 slot, enum FanType
 _Bool DiscardCanMoveTail(struct Array *const tail)
 {
     struct Card *c = ArrayGet(tail, 0);
-    struct Baize* baize = CardToBaize(c);
+    struct Baize* baize = PileOwner(CardOwner(c));
     BaizeSetError(baize, "(CSOL) Cannot move cards from a Discard");
-    return false;
+    return 0;
 }
 
 _Bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
@@ -55,17 +55,17 @@ _Bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, s
     (void)self;
     (void)c;
 
-    return false;
+    return 0;
 }
 
 _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( !PileEmpty(self) ) {
-        return false;
+        return 0;
     }
     if ( ArrayLen(tail) != baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "(CSOL) Can only move a full set of cards to a Discard");
-        return false;
+        return 0;
     }
     return CanTailBeAppended(self, tail);
 }

@@ -39,14 +39,29 @@ _Bool CardValid(struct Card *const self)
     return self && self->magic == CARD_MAGIC;
 }
 
-struct Baize *CardToBaize(struct Card *const self)
+void CardSetOwner(struct Card *const self, struct Pile *const pile)
 {
-    return self->owner->owner;
+    self->owner = pile;
 }
 
-struct Pile *CardToPile(struct Card *const self)
+struct Pile* CardOwner(struct Card *const self)
 {
     return self->owner;
+}
+
+enum CardOrdinal CardOrdinal(struct Card *const self)
+{
+    return self->id.ordinal;
+}
+
+enum CardSuit CardSuit(struct Card *const self)
+{
+    return self->id.suit;
+}
+
+_Bool CardProne(struct Card *const self)
+{
+    return self->prone;
 }
 
 unsigned CardToUnsigned(struct Card *const self)
@@ -91,7 +106,7 @@ Vector2 CardBaizePos(struct Card *const self)
 
 Vector2 CardScreenPos(struct Card *const self)
 {
-    struct Baize* baize = CardToBaize(self);
+    struct Baize* baize = PileOwner(CardOwner(self));
     return (Vector2){.x = self->pos.x + baize->dragOffset.x, .y = self->pos.y + baize->dragOffset.y};
 }
 

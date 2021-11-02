@@ -55,7 +55,7 @@ static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct
         self->len = 0;
         size_t index;
         for ( struct Card *c = ArrayFirst(pile->cards, &index); c; c = ArrayNext(pile->cards, &index) ) {
-            self->sav[self->len++] = (struct SavedCard){.index = c - cardLibrary, .prone = c->prone};
+            self->sav[self->len++] = (struct SavedCard){.index = c - cardLibrary, .prone = CardProne(c)};
         }
     }
     return self;
@@ -328,7 +328,7 @@ static _Bool createDirectories(char *src)
 {
     if (!src || *src != '/') {
         fprintf(stderr, "ERROR: %s: bad input\n", __func__);
-        return false;
+        return 0;
     }
     struct stat st = {0};
     char dirName[256];
@@ -344,7 +344,7 @@ static _Bool createDirectories(char *src)
             fprintf(stderr, "INFO: %s: %s does not exist\n", __func__, dirName);
             if (mkdir(dirName, 0700) == -1) {
                 fprintf(stderr, "ERROR: %s: cannot create %s\n", __func__, dirName);
-                return false;
+                return 0;
             } else {
                 fprintf(stderr, "INFO: %s: %s created\n", __func__, dirName);
             }
@@ -352,7 +352,7 @@ static _Bool createDirectories(char *src)
             // fprintf(stdout, "INFO: %s: %s exists\n", __func__, dirName);
         }
     }
-    return true;
+    return 1;
 }
 
 void BaizeSaveUndoToFile(struct Baize *const self)

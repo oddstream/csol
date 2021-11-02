@@ -93,7 +93,7 @@ _Bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
                 else
                     sprintf(z, "(CSOL) Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
                 BaizeSetError(baize, z);
-                return false;
+                return 0;
             }
         }
     }

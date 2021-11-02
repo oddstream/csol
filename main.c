@@ -145,8 +145,8 @@ int main(int argc, char* argv[], char* envp[])
     fprintf(stderr, "sizeof(float) == %lu\n", sizeof(float));
     fprintf(stderr, "sizeof(void*) == %lu\n", sizeof(void*));
     fprintf(stderr, "sizeof(size_t) == %lu\n", sizeof(size_t));
-    fprintf(stderr, "sizeof(Array) == %lu\n", sizeof(struct Array));
-    fprintf(stderr, "sizeof(Card) == %lu\n", sizeof(struct Card));
+    // fprintf(stderr, "sizeof(Array) == %lu\n", sizeof(struct Array));
+    // fprintf(stderr, "sizeof(Card) == %lu\n", sizeof(struct Card));
     fprintf(stderr, "sizeof(Pile) == %lu\n", sizeof(struct Pile));
     fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
 

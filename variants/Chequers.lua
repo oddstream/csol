@@ -139,7 +139,7 @@ function Foundation.TailAppendError(pile, tail)
     else
         io.stderr:write("Oops - is the pile not aFoundation?\n")
     end
-    return true
+    return nil
 end
 
 function Tableau.TailAppendError(pile, tail)

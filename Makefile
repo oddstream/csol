@@ -215,6 +215,8 @@ CFLAGS += -ffast-math
 CFLAGS += -D_FORTIFY_SOURCE=2
 CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE 
 
+# CFLAGS += -DLIL_ENABLE_POOLS
+
 ifeq ($(BUILD_MODE),DEBUG)
     CFLAGS += -ggdb3 -O0 -D_DEBUG
 else

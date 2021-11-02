@@ -288,7 +288,7 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
     Rectangle rectCard = CardBaizeRect(c);
     size_t index;
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        if ( p == c->owner ) {
+        if ( p == CardOwner(c) ) {
             continue;
         }
         Rectangle rectPile = PileFannedBaizeRect(p);
@@ -303,7 +303,7 @@ static struct Pile* largestIntersection(struct Baize *const self, struct Card *c
 
 _Bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
 {
-    struct Pile* p = cFirst->owner;
+    struct Pile* p = CardOwner(cFirst);
 
     // check no cards in this pile are transitioning
     // for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
@@ -423,7 +423,7 @@ static _Bool AnyTailCardsProne(struct Array *const tail)
 {
     size_t index;
     for ( struct Card *c = ArrayFirst(tail, &index); c; c = ArrayNext(tail, &index) ) {
-        if (c->prone) {
+        if (CardProne(c)) {
             return 1;
         }
     }
@@ -440,11 +440,11 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             struct Pile* p = largestIntersection(self, c);  // p is the target/destination pile
             if ( p ) {
                 // fprintf(stderr, "Intersection with %s\n", p->category);
-                if (!(c->owner == self->stock && p == self->waste) && AnyTailCardsProne(self->tail)) {
+                if (!(CardOwner(c) == self->stock && p == self->waste) && AnyTailCardsProne(self->tail)) {
                     UiToast(self->ui, "(CSOL) Cannot move a face down card");
                     ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                 } else {
-                    if ( c->owner->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
+                    if ( CardOwner(c)->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
                         ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
                         // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), may trigger two more cards to follow
                         if ( PileMoveCards(p, c) ) {

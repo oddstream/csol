@@ -45,17 +45,17 @@ struct Foundation* FoundationNew(struct Baize *const baize, Vector2 slot, enum F
 _Bool FoundationCanMoveTail(struct Array *const tail)
 {
     struct Card *c = ArrayGet(tail, 0);
-    struct Baize* baize = CardToBaize(c);
+    struct Baize* baize = PileOwner(CardOwner(c));
     BaizeSetError(baize, "(CSOL) Cannot move cards from a Foundation");
     (void)tail;
-    return false;
+    return 0;
 }
 
 _Bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
         BaizeSetError(baize, "(CSOL) The foundation is full");
-        return false;
+        return 0;
     }
 
     struct Array1 tail = Array1New(c);
@@ -67,15 +67,15 @@ _Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self
 {
     if (ArrayLen(tail) > 1) {
         BaizeSetError(baize, "(CSOL) Can only move a single card to a Foundation");
-        return false;
+        return 0;
     }
     if (ArrayLen(self->cards) == baize->numberOfCardsInSuit) {
         BaizeSetError(baize, "(CSOL) The Foundation is full");
-        return false;
+        return 0;
     }
     if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit) {
         BaizeSetError(baize, "(CSOL) That would over-fill the Foundation");
-        return false;
+        return 0;
     }
     // ArrayLen(tail) == 1
     return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
@@ -103,7 +103,7 @@ _Bool FoundationConformant(struct Pile *const self)
 {
     // a Foundation is always assumed to be conformant, how else did it get built!?
     (void)self;
-    return true;
+    return 1;
 }
 
 enum CardOrdinal FoundationAccept(struct Pile *const self)

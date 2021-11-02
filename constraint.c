@@ -58,8 +58,8 @@ _Bool CanTailBeMoved(struct Array *const tail)
 
     // BaizeTouchStop() checks if any tail cards are prone
 
-    struct Pile *const pile = c0->owner;
-    struct Baize *const baize = pile->owner;
+    struct Pile *const pile = CardOwner(c0);
+    struct Baize *const baize = PileOwner(pile);
 
     _Bool result = 1;
     lua_State *L = baize->L;

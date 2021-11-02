@@ -55,6 +55,7 @@ struct CardAndIndex {struct Card* card; size_t index;};
 
 void PileCtor(struct Baize *const baize, struct Pile *const self, const char* category, Vector2 slot, enum FanType fan);
 _Bool PileValid(struct Pile *const self);
+struct Baize* PileOwner(struct Pile *const self);
 _Bool PileHidden(struct Pile *const self);
 _Bool PileEmpty(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
