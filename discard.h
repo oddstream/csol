@@ -22,10 +22,7 @@ void DiscardTapped(struct Pile *const self, struct Array *const tail);
 int DiscardCollect(struct Pile *const self);
 _Bool DiscardComplete(struct Pile *const self);
 _Bool DiscardConformant(struct Pile *const self);
-enum CardOrdinal DiscardAccept(struct Pile *const self);
-void DiscardSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void DiscardSetRecycles(struct Pile *const self, int r);
 void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
-void DiscardDraw(struct Pile *const self);
 
 #endif

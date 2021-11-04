@@ -22,8 +22,6 @@ void WasteTapped(struct Pile *const self, struct Array *const tail);
 int WasteCollect(struct Pile *const self);
 _Bool WasteComplete(struct Pile *const self);
 _Bool WasteConformant(struct Pile *const self);
-enum CardOrdinal WasteAccept(struct Pile *const self);
-void WasteSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void WasteSetRecycles(struct Pile *const self, int r);
 void WasteCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 

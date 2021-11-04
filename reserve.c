@@ -19,8 +19,6 @@ static struct PileVtable reserveVtable = {
     &ReserveCollect,
     &ReserveComplete,
     &ReserveConformant,
-    &ReserveAccept,
-    &ReserveSetAccept,
     &ReserveSetRecycles,
     &ReserveCountSortedAndUnsorted,
 
@@ -80,19 +78,6 @@ _Bool ReserveComplete(struct Pile *const self)
 _Bool ReserveConformant(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-enum CardOrdinal ReserveAccept(struct Pile *const self)
-{
-    (void)self;
-    return 0;
-}
-
-void ReserveSetAccept(struct Pile *const self, enum CardOrdinal ord)
-{
-    // we don't do that here
-    (void)self;
-    (void)ord;
 }
 
 void ReserveSetRecycles(struct Pile *const self, int r)

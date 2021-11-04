@@ -41,7 +41,7 @@ end
 function StartGame()
     STOCK_RECYCLES = 1
     for _, pile in ipairs(Foundation.Piles) do
-        PileAccept(pile, 0)
+        PileLabel(pile, "")
     end
 end
 
@@ -70,18 +70,18 @@ end
 function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
-        if PileAccept(pile) == 0 then
+        if PileLabel(pile) == "" then
             -- To start the game, the player will choose among the top cards of the reserve fans which will start the first foundation pile.
             -- Once he/she makes that decision and picks a card, the three other cards with the same rank, whenever they become available, will start the other three foundations.
             if PileType(CardOwner(c1)) ~= "Reserve" then
                 return "The first Foundation card must come from a Reserve"
             end
             for _, pile in ipairs(Foundation.Piles) do
-                PileAccept(pile, CardOrdinal(c1))
+                PileLabel(pile, U[CardOrdinal(c1)])
             end
         end
-        if CardOrdinal(c1) ~= PileAccept(pile) then
-            return "Foundation can only accept a " .. V[PileAccept(pile)] .. ", not a " .. V[CardOrdinal(c1)]
+        if U[CardOrdinal(c1)] ~= PileLabel(pile) then
+            return "Foundation can only accept a " .. PileLabel(pile) .. ", not a " .. V[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)

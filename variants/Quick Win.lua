@@ -54,7 +54,7 @@ function BuildPiles()
 
     for x = 4, 9, 1.5 do    -- slots don't have to be integers
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        PileAccept(pile, 1)
+        PileLabel(pile, U[1])
     end
 
     MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)

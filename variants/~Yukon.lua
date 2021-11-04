@@ -16,12 +16,12 @@ function BuildPiles()
 
     for y = 1, 4 do
         pile = AddPile("Foundation", 8.5, y, FAN_NONE)
-        PileAccept(pile, 1)
+        PileLabel(pile, U[1])
     end
 
     pile = AddPile("Tableau", 1, 1, FAN_DOWN)
     if not RELAXED then
-        PileAccept(pile, 13)
+        PileLabel(pile, U[13])
     end
     card = MoveCard(Stock.Pile, pile)
 
@@ -30,7 +30,7 @@ function BuildPiles()
     for x = 2, 7 do
         pile = AddPile("Tableau", x, 1, FAN_DOWN)
         if not RELAXED then
-            PileAccept(pile, 13)
+            PileLabel(pile, U[13])
         end
         for c = 1, dealDown do
             card = MoveCard(Stock.Pile, pile)

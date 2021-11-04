@@ -58,13 +58,13 @@ Once on any foundation, cards may not be moved back off.
     ACE_FOUNDATIONS = {}
     for x = 1, 4 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        PileAccept(pile, 1)
+        PileLabel(pile, U[1])
         table.insert(ACE_FOUNDATIONS, pile)
     end
     KING_FOUNDATIONS = {}
     for x = 10, 13 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        PileAccept(pile, 13)
+        PileLabel(pile, U[13])
         table.insert(KING_FOUNDATIONS, pile)
     end
 

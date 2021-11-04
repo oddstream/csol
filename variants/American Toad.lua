@@ -47,7 +47,7 @@ function StartGame()
     MoveCard(Stock.Pile, Foundation.Piles[1])
     local c = First(Foundation.Piles[1])
     for _, pile in ipairs(Foundation.Piles) do
-        PileAccept(pile, CardOrdinal(c))
+        PileLabel(pile, U[CardOrdinal(c)])
     end
 end
 
@@ -82,8 +82,8 @@ end
 function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
-        if CardOrdinal(c1) ~= PileAccept(pile) then
-            return "An empty Foundation can only accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c1)]
+        if U[CardOrdinal(c1)] ~= PileLabel(pile) then
+            return "An empty Foundation can only accept a " .. PileLabel(pile) .. " not a " .. U[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)

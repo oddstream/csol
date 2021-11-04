@@ -22,8 +22,6 @@ void CellTapped(struct Pile *const self, struct Array *const tail);
 int CellCollect(struct Pile *const self);
 _Bool CellComplete(struct Pile *const self);
 _Bool CellConformant(struct Pile *const self);
-enum CardOrdinal CellAccept(struct Pile *const self);
-void CellSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void CellSetRecycles(struct Pile *const self, int r);
 void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 

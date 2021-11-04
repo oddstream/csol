@@ -37,7 +37,7 @@ function BuildPiles()
   local fnext = 1
   local faccept = CardOrdinal(Last(Stock.Pile))
   for _, f in ipairs(Foundation.Piles) do
-    PileAccept(f, faccept)
+    PileLabel(f, U[faccept])
   end
   MoveCard(Stock.Pile, Tableau.Piles[1])
 
@@ -75,7 +75,7 @@ function BuildPiles()
     taccept = 13
   end
   for _, tabpile in ipairs(Tableau.Piles) do
-    PileAccept(tabpile, taccept)
+    PileLabel(tabpile, U[taccept])
   end
 
 end
@@ -97,8 +97,8 @@ end
 function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
-        if CardOrdinal(c1) ~= PileAccept(pile) then
-            return "Foundation can only accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c1)]
+        if U[CardOrdinal(c1)] ~= PileLabel(pile) then
+            return "Foundation can only accept a " .. PileLabel(pile) .. " not a " .. U[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)
@@ -111,8 +111,8 @@ end
 function Tableau.TailAppendError(pile, tail)
     if Empty(pile) then
         local c2 = First(tail)
-        if CardOrdinal(c2) ~= PileAccept(pile) then
-            return "Empty Tableau can accept a " .. V[PileAccept(pile)] .. " not a " .. V[CardOrdinal(c2)]
+        if U[CardOrdinal(c2)] ~= PileLabel(pile) then
+            return "Empty Tableau can accept a " .. PileLabel(pile) .. " not a " .. U[CardOrdinal(c2)]
         end
     else
         local c1 = Last(pile)

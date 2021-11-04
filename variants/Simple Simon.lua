@@ -19,6 +19,7 @@ function BuildPiles()
 
     for x = 4, 7 do
         pile = AddPile("Discard", x, 1, FAN_NONE)
+        PileLabel(pile, "=")
     end
 
     for x = 1, 3 do

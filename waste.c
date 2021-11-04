@@ -20,8 +20,6 @@ static struct PileVtable wasteVtable = {
     &WasteCollect,
     &WasteComplete,
     &WasteConformant,
-    &WasteAccept,
-    &WasteSetAccept,
     &WasteSetRecycles,
     &WasteCountSortedAndUnsorted,
 
@@ -87,19 +85,6 @@ _Bool WasteComplete(struct Pile *const self)
 _Bool WasteConformant(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-enum CardOrdinal WasteAccept(struct Pile *const self)
-{
-    (void)self;
-    return 0;
-}
-
-void WasteSetAccept(struct Pile *const self, enum CardOrdinal ord)
-{
-    // we don't do that here
-    (void)self;
-    (void)ord;
 }
 
 void WasteSetRecycles(struct Pile *const self, int r)

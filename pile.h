@@ -31,6 +31,7 @@ struct Pile {
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
+    char label[8];
     struct Array *cards;
 };
 
@@ -42,8 +43,6 @@ struct PileVtable {
     int (*Collect)(struct Pile *p);
     _Bool (*Complete)(struct Pile *p);
     _Bool (*Conformant)(struct Pile *p);
-    enum CardOrdinal (*Accept)(struct Pile *const self);
-    void (*SetAccept)(struct Pile *const self, enum CardOrdinal ord);
     void (*SetRecycles)(struct Pile *const self, int r);
     void (*CountSortedAndUnsorted)(struct Pile *const self, int *sorted, int *unsorted);
     void (*Update)(struct Pile *const self);

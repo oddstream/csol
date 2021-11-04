@@ -12,7 +12,6 @@
 
 struct Tableau {
     struct Pile super;
-    enum CardOrdinal accept;
 };
 
 struct Tableau* TableauNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
@@ -23,10 +22,7 @@ void TableauTapped(struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);
 _Bool TableauComplete(struct Pile *const self);
 _Bool TableauConformant(struct Pile *const self);
-enum CardOrdinal TableauAccept(struct Pile *const self);
-void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void TableauSetRecycles(struct Pile *const self, int r);
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
-void TableauDraw(struct Pile *const self);
 
 #endif

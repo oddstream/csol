@@ -21,13 +21,11 @@ static struct PileVtable tableauVtable = {
     &TableauCollect,
     &TableauComplete,
     &TableauConformant,
-    &TableauAccept,
-    &TableauSetAccept,
     &TableauSetRecycles,
     &TableauCountSortedAndUnsorted,
 
     &PileUpdate,
-    &TableauDraw,
+    &PileDraw,
     &PileFree,
 };
 
@@ -37,7 +35,6 @@ struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType
     if ( self ) {
         PileCtor(baize, (struct Pile*)self, "Tableau", slot, fan);
         self->super.vtable = &tableauVtable;
-        self->accept = 0;   // accept any by default
     }
     return self;
 }
@@ -67,8 +64,7 @@ static size_t PowerMoves(struct Baize *const self, struct Pile *const dstPile)
                 emptyCells++;
             } else if ( strcmp(p->category, "Tableau") == 0 ) {
                 // 'If you are moving into an empty column, then the column you are moving into does not count as empty column.'
-                struct Tableau *t = (struct Tableau*)p;
-                if ( t->accept == 0 && p != dstPile ) {
+                if ( p->label[0] == '\0' && p != dstPile ) {
                     emptyCols++;
                 }
             }
@@ -121,16 +117,6 @@ _Bool TableauConformant(struct Pile *const self)
     return IsPileConformant(self);
 }
 
-enum CardOrdinal TableauAccept(struct Pile *const self)
-{
-    return ((struct Tableau*)self)->accept;
-}
-
-void TableauSetAccept(struct Pile *const self, enum CardOrdinal ord)
-{
-    ((struct Tableau*)self)->accept = ord;
-}
-
 void TableauSetRecycles(struct Pile *const self, int r)
 {
     // only the Stock can be recycled
@@ -176,22 +162,3 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
     }
 #endif
 }
-
-void TableauDraw(struct Pile *const self)
-{
-    struct Tableau* t = (struct Tableau*)self;
-    if ( t->accept != 0 ) {
-        extern float cardWidth;
-        extern Font fontAcme;
-        extern Color baizeHighlightColor;
-
-        float fontSize = cardWidth / 2.0f;
-        Vector2 pos = PileScreenPos(self);
-        pos.x += cardWidth / 8.0f;
-        pos.y += cardWidth / 16.0f;
-        DrawTextEx(fontAcme, UtilOrdToShortString(t->accept), pos, fontSize, 0, baizeHighlightColor);
-    }
-
-    PileDraw(self);
-}
-

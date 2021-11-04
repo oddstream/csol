@@ -21,13 +21,11 @@ static struct PileVtable foundationVtable = {
     &FoundationCollect,
     &FoundationComplete,
     &FoundationConformant,
-    &FoundationAccept,
-    &FoundationSetAccept,
     &FoundationSetRecycles,
     &FoundationCountSortedAndUnsorted,
 
     &PileUpdate,
-    &FoundationDraw,
+    &PileDraw,
     &PileFree,
 };
 
@@ -37,7 +35,6 @@ struct Foundation* FoundationNew(struct Baize *const baize, Vector2 slot, enum F
     if ( self ) {
         PileCtor(baize, (struct Pile*)self, "Foundation", slot, fan);
         self->super.vtable = &foundationVtable;
-        self->accept = 0; // accept any by default
     }
     return self;
 }
@@ -107,16 +104,6 @@ _Bool FoundationConformant(struct Pile *const self)
     return 1;
 }
 
-enum CardOrdinal FoundationAccept(struct Pile *const self)
-{
-    return ((struct Foundation*)self)->accept;
-}
-
-void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord)
-{
-    ((struct Foundation*)self)->accept = ord;
-}
-
 void FoundationSetRecycles(struct Pile *const self, int r)
 {
     // only the Stock can be recycled
@@ -128,21 +115,4 @@ void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int 
 {
     (void)unsorted;
     *sorted += ArrayLen(self->cards);
-}
-
-void FoundationDraw(struct Pile *const self)
-{
-    struct Foundation* f = (struct Foundation*)self;
-    if ( f->accept != 0 ) {
-        extern float cardWidth;
-        extern Color baizeHighlightColor;
-        extern Font fontAcme;
-        float fontSize = cardWidth / 2.0f;
-        Vector2 pos = PileScreenPos(self);
-        pos.x += cardWidth / 8.0f;
-        pos.y += cardWidth / 16.0f;
-        DrawTextEx(fontAcme, UtilOrdToShortString(f->accept), pos, fontSize, 0, baizeHighlightColor);
-    }
-
-    PileDraw(self);
 }

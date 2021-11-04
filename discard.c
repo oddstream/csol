@@ -21,13 +21,11 @@ static struct PileVtable discardVtable = {
     &DiscardCollect,
     &DiscardComplete,
     &DiscardConformant,
-    &DiscardAccept,
-    &DiscardSetAccept,
     &DiscardSetRecycles,
     &DiscardCountSortedAndUnsorted,
 
     &PileUpdate,
-    &DiscardDraw,
+    &PileDraw,
     &PileFree,
 };
 
@@ -106,18 +104,6 @@ _Bool DiscardConformant(struct Pile *const self)
     return 0;
 }
 
-enum CardOrdinal DiscardAccept(struct Pile *const self)
-{
-    (void)self;
-    return 0;
-}
-
-void DiscardSetAccept(struct Pile *const self, enum CardOrdinal ord)
-{
-    (void)self;
-    (void)ord;
-}
-
 void DiscardSetRecycles(struct Pile *const self, int r)
 {
     (void)self;
@@ -128,19 +114,4 @@ void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 {
     (void)unsorted;
     *sorted += ArrayLen(self->cards);
-}
-
-void DiscardDraw(struct Pile *const self)
-{
-    extern Color baizeHighlightColor;
-    extern Font fontAcme;
-    extern float cardWidth;
-
-    float fontSize = cardWidth / 2.0f;
-    Vector2 pos = PileScreenPos(self);
-    pos.x += cardWidth / 8.0f;
-    pos.y += cardWidth / 16.0f;
-    DrawTextEx(fontAcme, "=", pos, fontSize, 0, baizeHighlightColor);
-
-    PileDraw(self);
 }

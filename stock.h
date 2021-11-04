@@ -22,8 +22,6 @@ void StockTapped(struct Pile *const self, struct Array *const tail);
 int StockCollect(struct Pile *const self);
 _Bool StockComplete(struct Pile *const self);
 _Bool StockConformant(struct Pile *const self);
-enum CardOrdinal StockAccept(struct Pile *const self);
-void StockSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void StockSetRecycles(struct Pile *const self, int r);
 void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 void StockDraw(struct Pile *const self);

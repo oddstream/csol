@@ -11,7 +11,6 @@
 
 struct Foundation {
     struct Pile super;
-    enum CardOrdinal accept;
 };
 
 struct Foundation* FoundationNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
@@ -22,10 +21,7 @@ void FoundationTapped(struct Pile *const self, struct Array *const tail);
 int FoundationCollect(struct Pile *const self);
 _Bool FoundationComplete(struct Pile *const self);
 _Bool FoundationConformant(struct Pile *const self);
-enum CardOrdinal FoundationAccept(struct Pile *const self);
-void FoundationSetAccept(struct Pile *const self, enum CardOrdinal ord);
 void FoundationSetRecycles(struct Pile *const self, int r);
 void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
-void FoundationDraw(struct Pile *const self);
 
 #endif

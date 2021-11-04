@@ -19,7 +19,7 @@ function BuildPiles()
 
     for x = 5, 12 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        PileAccept(pile, 1)
+        PileLabel(pile, U[1])
     end
 
     for x = 1, 12 do

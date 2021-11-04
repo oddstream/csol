@@ -42,7 +42,7 @@ struct SavedCard {
 // Array functions store arrays of void* pointers, but we need to store arrays of indexes into the card library,
 // so we have to make a new struct to avoid upsetting the compiler
 struct SavedCardArray {
-    enum CardOrdinal accept;
+    char label[8];
     size_t len;
     struct SavedCard sav[];
 };
@@ -51,7 +51,7 @@ static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct
 {
     struct SavedCardArray* self = calloc(1, sizeof(struct SavedCardArray) + ArrayLen(pile->cards) * sizeof(struct SavedCard));
     if (self) {
-        self->accept = pile->vtable->Accept(pile);
+        strcpy(self->label, pile->label);   // pile->label may be empty
         self->len = 0;
         size_t index;
         for ( struct Card *c = ArrayFirst(pile->cards, &index); c; c = ArrayNext(pile->cards, &index) ) {
@@ -77,7 +77,7 @@ static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Ca
 
 static void SavedCardArrayWriteToFile(FILE* f, struct SavedCardArray *const sca)
 {
-    fprintf(f, "%u %lu:", sca->accept, sca->len);
+    fprintf(f, "%s %lu:", sca->label[0] == '\0' ? "-" : sca->label, sca->len);
     for ( size_t i=0; i<sca->len; i++ ) {
         unsigned int number = sca->sav[i].index;
         number <<= 1;
@@ -196,7 +196,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
         struct SavedCardArray *sca = ArrayGet(snap->savedPiles, i);
         struct Pile* dstPile = ArrayGet(self->piles, i);
         ArrayReset(dstPile->cards);
-        dstPile->vtable->SetAccept(dstPile, sca->accept);
+        strncpy(dstPile->label, sca->label, sizeof(dstPile->label) - 1);
         SavedCardArrayCopyToPile(sca, self->cardLibrary, dstPile);
 
         if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
@@ -464,18 +464,18 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                 goto fclose_label;
             }
             for ( size_t m=0; m<pileCount; m++ ) {
-                enum CardOrdinal accept;
+                char label[8];
                 size_t cards;
                 // prepend a space to consume \n
-                if (fscanf(f, "%u %lu:", &accept, &cards) != 2) {
-                    fprintf(stderr, "ERROR: %s: expecting accept and number of cards\n", __func__);
+                if (fscanf(f, "%s %lu:", label, &cards) != 2) {
+                    fprintf(stderr, "ERROR: %s: expecting label and number of cards\n", __func__);
                     goto fclose_label;
                 }
                 struct SavedCardArray *sca = calloc(1, sizeof(struct SavedCardArray) + cards * sizeof(struct SavedCard));
                 if (!sca) {
                     goto fclose_label;
                 }
-                sca->accept = accept;
+                strcpy(sca->label, label[0] == '-' ? "" : label);
                 for (size_t card=0; card<cards; card++) {
                     int index, prone;
                     unsigned int number;

@@ -19,8 +19,6 @@ static struct PileVtable cellVtable = {
     &CellCollect,
     &CellComplete,
     &CellConformant,
-    &CellAccept,
-    &CellSetAccept,
     &CellSetRecycles,
     &CellCountSortedAndUnsorted,
 
@@ -88,19 +86,6 @@ _Bool CellConformant(struct Pile *const self)
 {
     (void)self;
     return 1;
-}
-
-enum CardOrdinal CellAccept(struct Pile *const self)
-{
-    (void)self;
-    return 0;
-}
-
-void CellSetAccept(struct Pile *const self, enum CardOrdinal ord)
-{
-    // we don't do that here
-    (void)self;
-    (void)ord;
 }
 
 void CellSetRecycles(struct Pile *const self, int r)

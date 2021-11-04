@@ -16,13 +16,13 @@ function BuildPiles()
 
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
-        PileAccept(pile, 1)
+        PileLabel(pile, U[1])
     end
 
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        PileAccept(pile, 13)
+        PileLabel(pile, U[13])
         for n = 1, 4 do
           local c = MoveCard(Stock.Pile, pile)
         end

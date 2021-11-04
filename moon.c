@@ -28,7 +28,7 @@ static const struct FunctionToRegister {
     {"AddPile", MoonAddPile},
     // {"FindPile", MoonFindPile},
     // {"PileMoveTo", MoonPileMoveTo},
-    {"PileAccept", MoonPileAccept},
+    {"PileLabel", MoonPileLabel},
     {"PileType", MoonPileType},
     {"PileGet", MoonPileGet},   // deprecated
     {"PileLen", MoonPileLen},   // deprecated
@@ -337,7 +337,7 @@ int MoonPileMoveTo(lua_State* L)
 }
 #endif
 
-int MoonPileAccept(lua_State *L)
+int MoonPileLabel(lua_State *L)
 {
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
@@ -348,11 +348,10 @@ int MoonPileAccept(lua_State *L)
         fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
         return 0;
     }
-    if (lua_gettop(L) == 2 && lua_isnumber(L, 2)) {
-        enum CardOrdinal accept = lua_tonumber(L, 2);
-        p->vtable->SetAccept(p, accept);
+    if (lua_gettop(L) == 2 && lua_isstring(L, 2)) {
+        strncpy(p->label, lua_tostring(L, 2), sizeof(p->label) - 1);
     }
-    lua_pushinteger(L, p->vtable->Accept(p));
+    lua_pushstring(L, p->label);
     return 1;
 }
 

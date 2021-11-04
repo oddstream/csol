@@ -495,12 +495,22 @@ void PileUpdate(struct Pile *const self)
 
 void PileDraw(struct Pile *const self)
 {
+    extern float cardWidth;
     extern Color baizeHighlightColor;
+    extern Font fontAcme;
 
     // BeginDrawing() has been called by BaizeDraw()
     // Rectangle r = PileFannedScreenRect(self);
     Rectangle r = PileScreenRect(self);
     DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
+
+    if ( self->label[0] ) {
+        float fontSize = strlen(self->label) > 2 ? cardWidth / 4.0f : cardWidth / 2.0f;
+        Vector2 pos = PileScreenPos(self);
+        pos.x += cardWidth / 8.0f;
+        pos.y += cardWidth / 16.0f;
+        DrawTextEx(fontAcme, self->label, pos, fontSize, 0, baizeHighlightColor);
+    }
 }
 
 void PileFree(struct Pile *const self)
