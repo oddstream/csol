@@ -57,7 +57,7 @@ unsigned BaizeCRC(struct Baize *const self)
 void BaizeSetError(struct Baize *const self, const char *str)
 {
     BaizeResetError(self);
-    self->errorString = strdup(str);
+    if (str) self->errorString = strdup(str);
 }
 
 void BaizeResetError(struct Baize *const self)
@@ -168,6 +168,12 @@ void BaizeCreatePiles(struct Baize *const self)
             } else if ( strcmp(p->category, "Waste") == 0 ) {
                 self->waste = p;
             }
+        }
+        if (self->stock == NULL) {
+            fprintf(stderr, "ERROR: %s: no stock\n", __func__);
+        }
+        if (ArrayLen(self->foundations) == 0) {
+            fprintf(stderr, "ERROR: %s: no foundations - will divide by zero\n", __func__);
         }
     }
 

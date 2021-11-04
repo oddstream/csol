@@ -14,31 +14,25 @@ STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 2, 2, FAN_NONE, 1, 4)
+    AddPile("Stock", 2, 2, FAN_NONE, 1, 4)
   
     local pile
 
-    RESERVES = {}
     for i = 1, 4 do
         pile = AddPile("Reserve", (i*2), 1, FAN_RIGHT3)
-        table.insert(RESERVES, pile)
         for j = 1, 3 do
-            MoveCard(STOCK, pile)
+            MoveCard(Stock.Pile, pile)
         end
     end
 
-    WASTE = AddPile("Waste", 2, 3, FAN_DOWN3)
+    AddPile("Waste", 2, 3, FAN_DOWN3)
     
-    FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 2, FAN_NONE)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     for x = 4, 7 do
         pile = AddPile("Tableau", x, 3, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         MoveCard(STOCK, pile)
     end
 
@@ -46,7 +40,7 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
-    for _, pile in ipairs(FOUNDATIONS) do
+    for _, pile in ipairs(Foundation.Piles) do
         PileAccept(pile, 0)
     end
 end
@@ -82,7 +76,7 @@ function Foundation.TailAppendError(pile, tail)
             if PileType(CardOwner(c1)) ~= "Reserve" then
                 return "The first Foundation card must come from a Reserve"
             end
-            for _, pile in ipairs(FOUNDATIONS) do
+            for _, pile in ipairs(Foundation.Piles) do
                 PileAccept(pile, CardOrdinal(c1))
             end
         end
@@ -103,8 +97,8 @@ function Tableau.TailAppendError(pile, tail)
     if Empty(pile) then
         -- Spaces that occur on the tableau are filled with any top card in the reserve.
         -- If the entire reserve is exhausted however, it is not replenished; spaces that occur after this point have to be filled with cards from the waste pile or, if a wastepile has not been made yet, the stock.
-        if PileType(CardOwner(c1)) == "Waste" then
-            for _, res in ipairs(RESERVES) do
+        if CardOwner(c1) == Waste.Pile then
+            for _, res in ipairs(Reserve.Piles) do
                 if Len(res) > 0 then
                     return "An empty Tableau must be filled from a Reserve"
                 end
@@ -157,15 +151,15 @@ function Stock.Tapped(tail)
             Toast("No more Stock recycles")
             return
         end
-        if Len(WASTE) > 0 then
-            while Len(WASTE) > 0 do
-                MoveCard(WASTE, STOCK)
+        if Len(Waste.Pile) > 0 then
+            while Len(Waste.Pile) > 0 do
+                MoveCard(Waste.Pile, Stock.Pile)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
           end
       else
         for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(STOCK, WASTE)
+            MoveCard(Stock.Pile, Waste.Pile)
         end
     end
 end
@@ -173,8 +167,8 @@ end
 function AfterMove()
     -- io.stdout:write("AfterMove\n")
     -- for i = 1, 4 do
-    --     if Empty(TABLEAUX[i]) then
-    --         MoveCard(RESERVE, TABLEAUX[i])
+    --     if Empty(Tableau.Piles[i]) then
+    --         MoveCard(Reserve.Pile, Tableau.Piles[i])
     --     end
     -- end
 end

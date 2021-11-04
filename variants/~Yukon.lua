@@ -9,25 +9,21 @@ STOCK_RECYCLES = 0
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", -5, -5, FAN_NONE, 1, 4)
+    AddPile("Stock", -5, -5, FAN_NONE, 1, 4)
     
     local pile
     local card
 
-    FOUNDATIONS = {}
     for y = 1, 4 do
         pile = AddPile("Foundation", 8.5, y, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     pile = AddPile("Tableau", 1, 1, FAN_DOWN)
     if not RELAXED then
         PileAccept(pile, 13)
     end
-    table.insert(TABLEAUX, pile)
-    card = MoveCard(STOCK, pile)
+    card = MoveCard(Stock.Pile, pile)
 
     local dealDown = 1
     local dealUp = 5
@@ -36,20 +32,19 @@ function BuildPiles()
         if not RELAXED then
             PileAccept(pile, 13)
         end
-        table.insert(TABLEAUX, pile)
         for c = 1, dealDown do
-            card = MoveCard(STOCK, pile)
+            card = MoveCard(Stock.Pile, pile)
             CardProne(card, true)
         end
         for c = 1, dealUp do
-            card = MoveCard(STOCK, pile)
+            card = MoveCard(Stock.Pile, pile)
             -- CardProne(card, false)
         end
         dealDown = dealDown + 1
     end
 
-    if not Empty(STOCK) then
-        io.stderr:write("Oops! There are still " .. Len(STOCK) .. " cards in the Stock\n")
+    if not Empty(Stock.Pile) then
+        io.stderr:write("Oops! There are still " .. Len(Stock.Pile) .. " cards in the Stock\n")
     end
 end
 

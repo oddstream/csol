@@ -12,29 +12,23 @@ function BuildPiles()
     return
   end
 
-  STOCK = AddPile("Stock", 5, -5, FAN_NONE, 1, 4)  -- hide the stock off screen
+  AddPile("Stock", 5, -5, FAN_NONE, 1, 4)  -- hide the stock off screen
 
   local pile
 
-  CELLS = {}
   for x = 1, 4 do
     pile = AddPile("Cell", x, 1, FAN_NONE)
-    table.insert(CELLS, pile)
   end
 
-  FOUNDATIONS = {}
   for x = 5, 8 do
     pile = AddPile("Foundation", x, 1, FAN_NONE)
     PileAccept(pile, 1)
-    table.insert(FOUNDATIONS, pile)
   end
 
-  TABLEAUX = {}
   for x = 1, 4 do
     pile = AddPile("Tableau", x, 2, FAN_DOWN)
-    table.insert(TABLEAUX, pile)
     for n = 1, 7 do
-      MoveCard(STOCK, pile)
+      MoveCard(Stock.Pile, pile)
     end
     if EASY then
       PileDemoteCards(pile, 13)
@@ -43,9 +37,8 @@ function BuildPiles()
   end
   for x = 5, 8 do
     pile = AddPile("Tableau", x, 2, FAN_DOWN)
-    table.insert(TABLEAUX, pile)
     for n = 1, 6 do
-      MoveCard(STOCK, pile)
+      MoveCard(Stock.Pile, pile)
     end
     if EASY then
       PileDemoteCards(pile, 13)

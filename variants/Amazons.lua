@@ -11,22 +11,18 @@ POWER_MOVES = false
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 6, 1, FAN_NONE, 1, 4, {2,3,4,5,6,13})
+    AddPile("Stock", 6, 1, FAN_NONE, 1, 4, {2,3,4,5,6,13})
 
     local pile
 
-    FOUNDATIONS = {}
     for x = 1, 4 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    RESERVES = {}
     for x = 1, 4 do
         pile = AddPile("Reserve", x, 2, FAN_DOWN)
-        table.insert(RESERVES, pile)
-        MoveCard(STOCK, pile)
+        MoveCard(Stock.Pile, pile)
     end
 
 end
@@ -45,7 +41,7 @@ end
 -- TailAppendError constraints
 
 function Waste.TailAppendError(pile, tail)
-    if CardOwner(First(tail)) ~= STOCK then
+    if CardOwner(First(tail)) ~= Stock.Pile then
         return "The Waste can only accept cards from the Stock"
     end
     return nil
@@ -57,8 +53,8 @@ function Foundation.TailAppendError(pile, tail)
         if CardOrdinal(c1) ~= 1 then
             return "An empty Foundation can only accept an Ace, not a " .. V[CardOrdinal(c1)]
         end
-        local itarget = CalcPileIndex(FOUNDATIONS, pile)
-        local isource = CalcPileIndex(RESERVES, CardOwner(c1))
+        local itarget = CalcPileIndex(Foundation.Piles, pile)
+        local isource = CalcPileIndex(Reserve.Piles, CardOwner(c1))
         if isource ~= itarget then
             return "Aces can only be placed on the Foundation above"
         end
@@ -67,8 +63,8 @@ function Foundation.TailAppendError(pile, tail)
         local c2 = First(tail)
         -- work out the index of the target pile
         if CardOrdinal(c2) ~= 12 then
-            local itarget = CalcPileIndex(FOUNDATIONS, CardOwner(c1))
-            local isource = CalcPileIndex(RESERVES, CardOwner(c2))
+            local itarget = CalcPileIndex(Foundation.Piles, CardOwner(c1))
+            local isource = CalcPileIndex(Reserve.Piles, CardOwner(c2))
             if isource ~= itarget then
                 return "Cards can only be placed on the Foundation above"
             end
@@ -91,12 +87,12 @@ end
 
 function Stock.Tapped(tail)
     if not tail then
-        for _, res in ipairs(RESERVES) do
-            MoveAllCards(res, STOCK)
+        for _, res in ipairs(Reserve.Piles) do
+            MoveAllCards(res, Stock.Pile)
         end
     else
-        for _, res in ipairs(RESERVES) do
-            MoveCard(STOCK, res)
+        for _, res in ipairs(Reserve.Piles) do
+            MoveCard(Stock.Pile, res)
         end
     end
 end

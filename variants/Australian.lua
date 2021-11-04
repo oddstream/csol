@@ -9,26 +9,22 @@ STOCK_RECYCLES = 0
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
+    AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
 
-    FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         PileAccept(pile, 13)
-        table.insert(TABLEAUX, pile)
         for n = 1, 4 do
-          local c = MoveCard(STOCK, pile)
+          local c = MoveCard(Stock.Pile, pile)
         end
     end
 
@@ -43,7 +39,7 @@ end
 -- TailAppendError constraints
 
 function Waste.TailAppendError(pile, tail)
-    if CardOwner(First(tail)) ~= STOCK then
+    if CardOwner(First(tail)) ~= Stock.Pile then
         return "The Waste can only accept cards from the Stock"
     end
     return nil
@@ -116,15 +112,15 @@ function Stock.Tapped(tail)
             Toast("No more Stock recycles")
             return
         end
-        if Len(WASTE) > 0 then
-            while Len(WASTE) > 0 do
-                MoveCard(WASTE, STOCK)
+        if Len(Waste.Pile) > 0 then
+            while Len(Waste.Pile) > 0 do
+                MoveCard(Waste.Pile, Stock.Pile)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
         end
     else
         for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(STOCK, WASTE)
+            MoveCard(Stock.Pile, Waste.Pile)
         end
     end
 end

@@ -64,7 +64,7 @@ function BuildPiles()
         for n = 1, 3 do
           MoveCard(Stock.Pile, pile)
         end
-        PileDemoteCards(pile, 13)
+        PileDemoteCards(pile, 11)
         PilePromoteCards(pile, 1)
     end
     for x = 1, 10 do
@@ -72,7 +72,7 @@ function BuildPiles()
         for n = 1, 1 do
           MoveCard(Stock.Pile, pile)
         end
-        PileDemoteCards(pile, 13)
+        PileDemoteCards(pile, 11)
         PilePromoteCards(pile, 1)
     end
 end

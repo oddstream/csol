@@ -90,7 +90,18 @@ function DownSuitWrap(c1, c2)
     return nil
 end
 
-function PlusMinusOneSuitWrap(c1, c2)
+function PlusMinusOne(c1, c2)
+    if CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+        -- build up one
+    elseif CardOrdinal(c1) == CardOrdinal(c2) - 1 then
+        -- build down one
+    else
+        return "Cards must be plus/minus one in rank"
+    end
+    return nil
+end
+
+function PlusMinusOneWrap(c1, c2)
     if CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
         -- wrap from Ace to King
     elseif CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
@@ -100,7 +111,24 @@ function PlusMinusOneSuitWrap(c1, c2)
     elseif CardOrdinal(c1) == CardOrdinal(c2) - 1 then
         -- build down one
     else
-        return "Cards must be same suit and plus/minus one in rank"
+        return "Cards must be plus/minus one in rank"
+    end
+    return nil
+end
+
+function PlusMinusOneSuitWrap(c1, c2)
+    if CardSuit(c1) ~= CardSuit(c2) then
+        return "Cards must be the same suit"
+    elseif CardOrdinal(c1) == 1 and CardOrdinal(c2) == 13 then
+        -- wrap from Ace to King
+    elseif CardOrdinal(c1) == 13 and CardOrdinal(c2) == 1 then
+        -- wrap from King to Ace
+    elseif CardOrdinal(c1) == CardOrdinal(c2) + 1 then
+        -- build up one
+    elseif CardOrdinal(c1) == CardOrdinal(c2) - 1 then
+        -- build down one
+    else
+        return "Cards must be plus/minus one in rank"
     end
     return nil
 end

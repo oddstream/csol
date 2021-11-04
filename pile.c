@@ -11,7 +11,8 @@
 
 #define PILE_MAGIC (0xdeadbeef)
 
-#define CARD_FACE_FAN_FACTOR (3.0f)
+#define CARD_FACE_FAN_FACTOR_V (3.0f)
+#define CARD_FACE_FAN_FACTOR_H (4.0f)
 #define CARD_BACK_FAN_FACTOR (5.0f)
 
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
@@ -157,6 +158,9 @@ Vector2 PileCalculatePosFromSlot(struct Pile *const self)
             };
 }
 
+/*
+    Used to draw the Pile rounded rect, and to detect card drops on this pile
+*/
 Rectangle PileFannedBaizeRect(struct Pile *const self)
 {
     // cannot use position of top card, in case it's being dragged
@@ -198,6 +202,12 @@ Rectangle PileFannedScreenRect(struct Pile *const self) {
     return r;
 }
 
+/*
+    Used to determine the position of the next card to be pushed onto this pile
+    It also does the waste pile style re-fanning
+    TODO do we really need to examine all the cards in a non-waste pile?
+    Why not just the pile rect and peeked card rect?
+*/
 Vector2 PilePushedFannedPos(struct Pile *const self)
 {   // In function ‘PilePushedFannedPos’: error: assuming signed overflow does not occur when changing X +- C1 cmp C2 to X cmp C2 -+ C1 [-Werror=strict-overflow]
     extern float cardWidth, cardHeight;
@@ -211,40 +221,76 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
         case FAN_NONE:
             // do nothing
             break;
-        case FAN_RIGHT:
-            faceDelta = cardWidth / CARD_FACE_FAN_FACTOR;
-            backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
-            c = (struct Card*)ArrayFirst(self->cards, &index);
+        case FAN_DOWN:
+            faceDelta = cardHeight / CARD_FACE_FAN_FACTOR_V;
+            backDelta = cardHeight / CARD_BACK_FAN_FACTOR;
+            c = ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.x += c->prone ? backDelta : faceDelta;
-                c = (struct Card*)ArrayNext(self->cards, &index);
+                pos.y += c->prone ? backDelta : faceDelta;
+                c = ArrayNext(self->cards, &index);
             }
             break;
         case FAN_LEFT:
-            faceDelta = cardWidth / CARD_FACE_FAN_FACTOR;
+            faceDelta = cardWidth / CARD_FACE_FAN_FACTOR_H;
             backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
-            c = (struct Card*)ArrayFirst(self->cards, &index);
+            c = ArrayFirst(self->cards, &index);
             while ( c ) {
                 pos.x -= c->prone ? backDelta : faceDelta;
-                c = (struct Card*)ArrayNext(self->cards, &index);
+                c = ArrayNext(self->cards, &index);
             }
             break;
-        case FAN_DOWN:
-            faceDelta = cardHeight / CARD_FACE_FAN_FACTOR;
-            backDelta = cardHeight / CARD_BACK_FAN_FACTOR;
-            c = (struct Card*)ArrayFirst(self->cards, &index);
+        case FAN_RIGHT:
+            faceDelta = cardWidth / CARD_FACE_FAN_FACTOR_H;
+            backDelta = cardWidth / CARD_BACK_FAN_FACTOR;
+            c = ArrayFirst(self->cards, &index);
             while ( c ) {
-                pos.y += c->prone ? backDelta : faceDelta;
-                c = (struct Card*)ArrayNext(self->cards, &index);
+                pos.x += c->prone ? backDelta : faceDelta;
+                c = ArrayNext(self->cards, &index);
             }
+            break;
+        case FAN_DOWN3:
+            {
+                float x0 = pos.x;
+                float y0 = pos.y;
+                float y1 = y0 + cardHeight / CARD_FACE_FAN_FACTOR_V;
+                float y2 = y1 + cardHeight / CARD_FACE_FAN_FACTOR_V;
+                switch ( ArrayLen(self->cards) ) {
+                    case 0:
+                        // do nothing, incoming card will be at pos
+                        break;
+                    case 1:
+                        // incoming card at slot[1]
+                        pos.y = y1;
+                        break;
+                    case 2:
+                        // incoming card at slot[2]
+                        pos.y = y2;
+                        break;
+                    default:
+                        // >= 3 cards
+                        // incoming card at slot[2]
+                        pos.y = y2;
+                        // top card needs to transition from slot[2] to slot[1]
+                        int i = (int)ArrayLen(self->cards) - 1;
+                        CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y1});
+                        // mid card needs to transition from slot[1] to slot[0]
+                        for ( --i; i>= 0; i-- ) {
+                            CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y0});
+                        }
+                        break;
+                }
+            }
+            break;
+        case FAN_LEFT3:
+            // TODO
             break;
         case FAN_RIGHT3:
             // fprintf(stdout, "Waste Right before %.0f,%.0f\n", pos.x, pos.y);
             {
                 float x0 = pos.x;
                 float y0 = pos.y;
-                float x1 = x0 + cardWidth / CARD_FACE_FAN_FACTOR;
-                float x2 = x1 + cardWidth / CARD_FACE_FAN_FACTOR;
+                float x1 = x0 + cardWidth / CARD_FACE_FAN_FACTOR_H;
+                float x2 = x1 + cardWidth / CARD_FACE_FAN_FACTOR_H;
                 switch ( ArrayLen(self->cards) ) {
                     case 0:
                         // do nothing, incoming card will be at pos
@@ -272,41 +318,6 @@ Vector2 PilePushedFannedPos(struct Pile *const self)
                 }
             }
             // fprintf(stdout, "Waste Right after  %.0f,%.0f\n", pos.x, pos.y);
-            break;
-        case FAN_LEFT3:
-            break;
-        case FAN_DOWN3:
-            {
-                float x0 = pos.x;
-                float y0 = pos.y;
-                float y1 = y0 + cardHeight / CARD_FACE_FAN_FACTOR;
-                float y2 = y1 + cardHeight / CARD_FACE_FAN_FACTOR;
-                switch ( ArrayLen(self->cards) ) {
-                    case 0:
-                        // do nothing, incoming card will be at pos
-                        break;
-                    case 1:
-                        // incoming card at slot[1]
-                        pos.y = y1;
-                        break;
-                    case 2:
-                        // incoming card at slot[2]
-                        pos.y = y2;
-                        break;
-                    default:
-                        // >= 3 cards
-                        // incoming card at slot[2]
-                        pos.y = y2;
-                        // top card needs to transition from slot[2] to slot[1]
-                        int i = (int)ArrayLen(self->cards) - 1;
-                        CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y1});
-                        // mid card needs to transition from slot[1] to slot[0]
-                        for ( --i; i>= 0; i-- ) {
-                            CardTransitionTo(ArrayGet(self->cards, i), (Vector2){.x=x0, .y=y0});
-                        }
-                        break;
-                }
-            }
             break;
         default:
             break;

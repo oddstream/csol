@@ -14,6 +14,7 @@ void BaizeGetLuaGlobals(struct Baize *const self)
 {
     if (!self->stock) {
         fprintf(stderr, "ERROR: %s: Baize not formed\n", __func__);
+        exit(666);
         return;
     }
     self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);

@@ -7,34 +7,29 @@ STOCK_RECYCLES = 0
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, PACKS, SUITS)
+    AddPile("Stock", 1, 1, FAN_NONE, PACKS, SUITS)
 
     local pile
 
-    DISCARDS = {}
     for x = 3, 10 do
         pile = AddPile("Discard", x, 1, FAN_NONE)
-        table.insert(DISCARDS, pile)
     end
 
-    TABLEAUX = {}
     for x = 1, 4 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n=1,4 do
-          local c = MoveCard(STOCK, pile)
+          local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
         end
-        MoveCard(STOCK, pile)
+        MoveCard(Stock.Pile, pile)
     end
     for x = 5, 10 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n=1,3 do
-          local c = MoveCard(STOCK, pile)
+          local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
         end
-        MoveCard(STOCK, pile)
+        MoveCard(Stock.Pile, pile)
     end
 end
 
@@ -120,18 +115,18 @@ function Stock.Tapped(tail)
     local tabCards = 0
     local emptyTabs = 0
 
-    for _, tab in ipairs(TABLEAUX) do
+    for _, tab in ipairs(Tableau.Piles) do
         if Len(tab) == 0 then
             emptyTabs = emptyTabs + 1
         else
             tabCards = tabCards + Len(tab)
         end
     end
-    if emptyTabs > 0 and tabCards >= #TABLEAUX then
+    if emptyTabs > 0 and tabCards >= #Tableau.Piles then
         Toast("All empty tableaux must be filled before dealing a new row")
     else
-        for _, tab in ipairs(TABLEAUX) do
-            MoveCard(STOCK, tab)
+        for _, tab in ipairs(Tableau.Piles) do
+            MoveCard(Stock.Pile, tab)
         end
     end
 end

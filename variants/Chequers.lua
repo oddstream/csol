@@ -25,7 +25,7 @@ end
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", -5, -5, FAN_NONE, 2, 4)
+    AddPile("Stock", -5, -5, FAN_NONE, 2, 4)
 
     local pile
     local card
@@ -69,19 +69,16 @@ Once on any foundation, cards may not be moved back off.
     end
 
     -- Twenty-five tableau piles of four cards each, splayed downward. All cards are dealt face up.
-    TABLEAUX = {}
     for x = 1, 13 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for i = 1, 4 do
-            MoveCard(STOCK, pile)
+            MoveCard(Stock.Pile, pile)
         end
     end
     for x = 1.5, 12.5 do
         pile = AddPile("Tableau", x, 5, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for i = 1, 4 do
-            MoveCard(STOCK, pile)
+            MoveCard(Stock.Pile, pile)
         end
     end
 
@@ -89,15 +86,15 @@ Once on any foundation, cards may not be moved back off.
     -- The top card in the pile is dealt face up, all others are face down.
     -- It is not possible to move any cards into the reserve.
     -- The top card of the reserve can be played to the tableau or the foundation.
-    RESERVE = AddPile("Reserve", 7, 1, FAN_RIGHT)
+    AddPile("Reserve", 7, 1, FAN_RIGHT)
     for i = 1, 4 do
-        card = MoveCard(STOCK, RESERVE)
+        card = MoveCard(Stock.Pile, Reserve.Pile)
         CardProne(card, true)
     end
-    CardProne(Last(RESERVE), false)
+    CardProne(Last(Reserve.Pile), false)
 
-    if not Empty(STOCK) then
-        io.stderr:write("Oops - there are still " .. Len(STOCK) .. " cards in the Stock\n")
+    if not Empty(Stock.Pile) then
+        io.stderr:write("Oops - there are still " .. Len(Stock.Pile) .. " cards in the Stock\n")
     end
 end
 
@@ -189,10 +186,10 @@ end
 function AfterMove()
     -- Empty spaces in the tableau are automatically filled with a card from the reserve.
     -- If the reserve is empty, then empty spaces in the tableau may be filled by any card.
-    if Len(RESERVE) > 0 then
-        for _, pile in ipairs(TABLEAUX) do
+    if Len(Reserve.Pile) > 0 then
+        for _, pile in ipairs(Tableau.Piles) do
             if Empty(pile) then
-                MoveCard(RESERVE, pile)
+                MoveCard(Reserve.Pile, pile)
             end
         end
     end

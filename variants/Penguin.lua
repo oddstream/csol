@@ -15,60 +15,54 @@ function BuildPiles()
     return
   end
 
-  STOCK = AddPile("Stock", 5, -5, FAN_NONE, 1, 4)  -- hide the stock off screen
+  AddPile("Stock", 5, -5, FAN_NONE, 1, 4)  -- hide the stock off screen
 
   local pile
 
   -- the flipper, seven cells
-  CELLS = {}
   for x = 1, 7 do
     pile = AddPile("Cell", x, 1, FAN_NONE)
-    table.insert(CELLS, pile)
   end
 
-  FOUNDATIONS = {}
   for y = 1, 4 do
     pile = AddPile("Foundation", 8.5, y, FAN_NONE)
-    table.insert(FOUNDATIONS, pile)
   end
 
-  TABLEAUX = {}
   for x = 1, 7 do
     pile = AddPile("Tableau", x, 2, FAN_DOWN)
-    table.insert(TABLEAUX, pile)
   end
 
   -- Shuffle a 52-card pack and deal the first card face up to the top left of the board.
   -- This card is called the Beak.
   local fnext = 1
-  local faccept = CardOrdinal(Last(STOCK))
-  for _, f in ipairs(FOUNDATIONS) do
+  local faccept = CardOrdinal(Last(Stock.Pile))
+  for _, f in ipairs(Foundation.Piles) do
     PileAccept(f, faccept)
   end
-  MoveCard(STOCK, TABLEAUX[1])
+  MoveCard(Stock.Pile, Tableau.Piles[1])
 
   -- 49-card layout consisting of seven rows and seven columns
-  for _, pile in ipairs(TABLEAUX) do
+  for _, pile in ipairs(Tableau.Piles) do
     while Len(pile) < 7 do
-        if Empty(STOCK) then
+        if Empty(Stock.Pile) then
             io.stderr:write("Oops - Stock is empty\n")
             break
         end
         -- As and when the other three cards of the same rank turn up in the deal,
         -- take them out and set them apart as foundations.
-        if CardOrdinal(Last(STOCK)) == faccept then
-            MoveCard(STOCK, FOUNDATIONS[fnext])
+        if CardOrdinal(Last(Stock.Pile)) == faccept then
+            MoveCard(Stock.Pile, Foundation.Piles[fnext])
             fnext = fnext + 1
 -- io.stderr:write("moved to foundation[" ..fnext .. "] " .. V[CardOrdinal(card)] .. "\n")
         else
-            MoveCard(STOCK, pile)
+            MoveCard(Stock.Pile, pile)
 -- io.stderr:write("moved to " .. PileType(pile) .. "[" .. x .. "] ordinal ".. V[CardOrdinal(card)] .. "\n")
         end
     end
   end
 
-  if Len(STOCK) > 0 then
-    io.stderr:write("Oops - there are still " .. Len(STOCK) .. " cards in the Stock\n")
+  if Len(Stock.Pile) > 0 then
+    io.stderr:write("Oops - there are still " .. Len(Stock.Pile) .. " cards in the Stock\n")
   end
 
   -- When you empty a column, you may fill the space it leaves with a card one rank lower than the rank of the beak,
@@ -80,7 +74,7 @@ function BuildPiles()
   if taccept == 0 then
     taccept = 13
   end
-  for _, tabpile in ipairs(TABLEAUX) do
+  for _, tabpile in ipairs(Tableau.Piles) do
     PileAccept(tabpile, taccept)
   end
 

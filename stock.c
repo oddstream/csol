@@ -33,14 +33,14 @@ static struct PileVtable stockVtable = {
 
 static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t suits, _Bool cardFilter[14])
 {
-    baize->numberOfCardsInSuit = 0;
+    size_t numberOfCardsInSuit = 0;
     for ( int i=1; i<14; i++ ) {
         if (cardFilter[i]) {
-            baize->numberOfCardsInSuit += 1;
+            numberOfCardsInSuit += 1;
         }
     }
 
-    size_t cardsRequired = packs * suits * baize->numberOfCardsInSuit;
+    size_t cardsRequired = packs * suits * numberOfCardsInSuit;
 
     // first time this is called, baize->cardLibrary will be NULL because we used calloc()
     if (baize->cardLibrary) {

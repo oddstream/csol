@@ -2,7 +2,7 @@
 
 dofile("variants/~Library.lua")
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*, and tables to hold pile functions
+-- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions and piles
 
 POWER_MOVES = false
 -- SEED = 3 -- 2 winnable draw three
@@ -12,27 +12,23 @@ STOCK_RECYCLES = 32767
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
+    AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
 
-    FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         PileAccept(pile, 13)
-        table.insert(TABLEAUX, pile)
 
         for n = 1, deal do
-          local c = MoveCard(STOCK, pile)
+          local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
         end
         CardProne(Last(pile), false)
@@ -63,7 +59,7 @@ function Waste.TailAppendError(pile, tail)
     if Len(tail) > 1 then
         return "The Waste can only accept a single card"
     end
-    if CardOwner(Get(tail, 1)) ~= STOCK then
+    if CardOwner(Get(tail, 1)) ~= Stock.Pile then
         return "The Waste can only accept cards from the Stock"
     end
     return nil
@@ -139,15 +135,15 @@ function Stock.Tapped(tail)
         elseif 2 == STOCK_RECYCLES then
             Toast("One Stock recycle remaining")
         end
-        if Len(WASTE) > 0 then
-            while Len(WASTE) > 0 do
-                MoveCard(WASTE, STOCK)
+        if Len(Waste.Pile) > 0 then
+            while Len(Waste.Pile) > 0 do
+                MoveCard(Waste.Pile, Stock.Pile)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
         end
     else
         for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(STOCK, WASTE)
+            MoveCard(Stock.Pile, Waste.Pile)
         end
     end
 end

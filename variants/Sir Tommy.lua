@@ -20,23 +20,19 @@ STOCK_RECYCLES = 0
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
+    AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
 
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    AddPile("Waste", 2, 1, FAN_RIGHT3)
     
     local pile
 
-    FOUNDATIONS = {}
     for x = 4, 7 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     for x = 4, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
     end
 
 end
@@ -104,8 +100,8 @@ end
 
 function Stock.Tapped(tail)
     -- only allow one card at a time in waste
-    if Len(WASTE) == 0 then
-        MoveCard(STOCK, WASTE)
+    if Empty(Waste.Pile) then
+        MoveCard(Stock.Pile, Waste.Pile)
     else
         Toast("The Waste must be emptied first")
     end

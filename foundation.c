@@ -53,7 +53,7 @@ _Bool FoundationCanMoveTail(struct Array *const tail)
 
 _Bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    if ( ArrayLen(self->cards) == baize->numberOfCardsInSuit ) {
+    if ( ArrayLen(self->cards) == baize->numberOfCardsInLibrary / ArrayLen(baize->foundations) ) {
         BaizeSetError(baize, "(CSOL) The foundation is full");
         return 0;
     }
@@ -69,11 +69,11 @@ _Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self
         BaizeSetError(baize, "(CSOL) Can only move a single card to a Foundation");
         return 0;
     }
-    if (ArrayLen(self->cards) == baize->numberOfCardsInSuit) {
+    if (ArrayLen(self->cards) == baize->numberOfCardsInLibrary / ArrayLen(baize->foundations)) {
         BaizeSetError(baize, "(CSOL) The Foundation is full");
         return 0;
     }
-    if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInSuit) {
+    if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInLibrary / ArrayLen(baize->foundations)) {
         BaizeSetError(baize, "(CSOL) That would over-fill the Foundation");
         return 0;
     }
@@ -96,7 +96,8 @@ int FoundationCollect(struct Pile *const self)
 
 _Bool FoundationComplete(struct Pile *const self)
 {
-    return PileLen(self) == self->owner->numberOfCardsInSuit;
+    struct Baize *baize = self->owner;
+    return PileLen(self) == baize->numberOfCardsInLibrary / ArrayLen(baize->foundations);
 }
 
 _Bool FoundationConformant(struct Pile *const self)

@@ -61,11 +61,15 @@ _Bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, s
 _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( !PileEmpty(self) ) {
+        BaizeSetError(baize, "(CSOL) Can only move cards to an empty Discard");
         return 0;
     }
-    if ( ArrayLen(tail) != baize->numberOfCardsInSuit ) {
-        BaizeSetError(baize, "(CSOL) Can only move a full set of cards to a Discard");
-        return 0;
+    int ndiscards = BaizeCountPiles(baize, self->category);
+    if (ndiscards) {
+        if ( ArrayLen(tail) != baize->numberOfCardsInLibrary / ndiscards ) {
+            BaizeSetError(baize, "(CSOL) Can only move a full set of cards to a Discard");
+            return 0;
+        }
     }
     return CanTailBeAppended(self, tail);
 }
@@ -84,12 +88,22 @@ int DiscardCollect(struct Pile *const self)
 
 _Bool DiscardComplete(struct Pile *const self)
 {
-    return PileLen(self) == self->owner->numberOfCardsInSuit;
+    struct Baize *baize = self->owner;
+    int ndiscards = BaizeCountPiles(baize, self->category);
+    if (ndiscards) {
+        return PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
+    }
+    return 0;
 }
 
 _Bool DiscardConformant(struct Pile *const self)
 {
-    return PileEmpty(self) || PileLen(self) == self->owner->numberOfCardsInSuit;
+    struct Baize *baize = self->owner;
+    int ndiscards = BaizeCountPiles(baize, self->category);
+    if (ndiscards) {
+        return PileEmpty(self) || PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
+    }
+    return 0;
 }
 
 enum CardOrdinal DiscardAccept(struct Pile *const self)

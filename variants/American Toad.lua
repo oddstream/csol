@@ -19,40 +19,34 @@ STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
+    AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     local pile
 
-    RESERVES = {}
     pile = AddPile("Reserve", 4, 1, FAN_RIGHT)
-    table.insert(RESERVES, pile)
     for n = 1, 20 do
-        local c = MoveCard(STOCK, pile)
+        local c = MoveCard(Stock.Pile, pile)
         CardProne(c, true)
     end
     CardProne(Last(pile), false)
     
-    FOUNDATIONS = {}
     for x = 1, 8 do
         pile = AddPile("Foundation", x, 2, FAN_NONE)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     for x = 1, 8 do
         pile = AddPile("Tableau", x, 3, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
-        MoveCard(STOCK, pile)
+        MoveCard(Stock.Pile, pile)
     end
 
 end
 
 function StartGame()
     STOCK_RECYCLES = 1
-    MoveCard(STOCK, FOUNDATIONS[1])
-    local c = First(FOUNDATIONS[1])
-    for _, pile in ipairs(FOUNDATIONS) do
+    MoveCard(Stock.Pile, Foundation.Piles[1])
+    local c = First(Foundation.Piles[1])
+    for _, pile in ipairs(Foundation.Piles) do
         PileAccept(pile, CardOrdinal(c))
     end
 end
@@ -149,15 +143,15 @@ function Stock.Tapped(tail)
             Toast("No more Stock recycles")
             return
         end
-        if Len(WASTE) > 0 then
-            while Len(WASTE) > 0 do
-                MoveCard(WASTE, STOCK)
+        if Len(Waste.Pile) > 0 then
+            while Len(Waste.Pile) > 0 do
+                MoveCard(Waste.Pile, Stock.Pile)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
         end
     else
         for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(STOCK, WASTE)
+            MoveCard(Stock.Pile, Waste.Pile)
         end
     end
 end

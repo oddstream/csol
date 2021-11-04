@@ -13,36 +13,31 @@ POWER_MOVES = false
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", -5, -5, FAN_NONE, 1, 4)    -- hidden off screen
+    AddPile("Stock", -5, -5, FAN_NONE, 1, 4)    -- hidden off screen
     
     local pile
 
-    DISCARDS = {}
     for x = 4, 7 do
         pile = AddPile("Discard", x, 1, FAN_NONE)
-        table.insert(DISCARDS, pile)
     end
 
-    TABLEAUX = {}
     for x = 1, 3 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n = 1, 8 do
-            MoveCard(STOCK, pile)
+            MoveCard(Stock.Pile, pile)
         end
     end
     local deal = 7
     for x = 4, 10 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n = 1, deal do
-          local c = MoveCard(STOCK, pile)
+          local c = MoveCard(Stock.Pile, pile)
         end
         deal = deal - 1
     end
 
-    if Len(STOCK) ~= 0 then
-        io.stdout:write("Oops, there are " .. Len(STOCK) .. " cards still in the Stock\n")
+    if Len(Stock.Pile) ~= 0 then
+        io.stdout:write("Oops, there are " .. Len(Stock.Pile) .. " cards still in the Stock\n")
     end
 end
 

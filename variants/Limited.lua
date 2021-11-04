@@ -11,23 +11,19 @@ STOCK_RECYCLES = 32767
 
 function BuildPiles()
 
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
+    AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
 
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     local pile
 
-    FOUNDATIONS = {}
     for x = 5, 12 do
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    TABLEAUX = {}
     for x = 1, 12 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n = 1, 3 do
             MoveCard(STOCK, pile)
         end
@@ -53,7 +49,7 @@ end
 -- TailAppendError constraints
 
 function Waste.TailAppendError(pile, tail)
-    if CardOwner(First(tail)) ~= STOCK then
+    if CardOwner(First(tail)) ~= Stock.Pile then
         return "The Waste can only accept cards from the Stock"
     end
     return nil
@@ -113,6 +109,6 @@ end
 
 function Stock.Tapped(tail)
     if tail then
-        MoveCard(STOCK, WASTE)
+        MoveCard(Stock.Pile, Waste.Pile)
     end
 end

@@ -13,7 +13,6 @@ struct Baize {
 
     char variantName[64];
 
-    size_t numberOfCardsInSuit;
     size_t numberOfCardsInLibrary;
     struct Card *cardLibrary;
 
