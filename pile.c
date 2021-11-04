@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <raylib.h>
-#include <baize.h>
+
+#include "baize.h"
 #include "pile.h"
 #include "array.h"
 
@@ -115,7 +116,7 @@ struct Card* PileFindLastCardUnderPoint(struct Pile *const self, Vector2 pt)
 
 _Bool PileIsStock(struct Pile *const self)
 {
-    struct Baize* baize = self->owner;
+    struct Baize* baize = PileOwner(self);
     if ( !BaizeValid(baize) )
     {
         fprintf(stderr, "ERROR: %s: Pile Baize pointer is not valid\n", __func__);
@@ -435,12 +436,12 @@ void PileRepushAllCards(struct Pile *const self)
 
 void PileGenericTapped(struct Pile *const self, struct Array *const tail)
 {
-    struct Baize* baize = self->owner;
+    struct Baize* baize = PileOwner(self);
     size_t index;
     for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
         if ( fp->vtable->CanAcceptTail(baize, fp, tail) ) {
             struct Card *c = ArrayGet(tail, 0);
-            PileMoveCard(fp, c->owner);
+            PileMoveCard(fp, CardOwner(c));
             break;
         }
     }
@@ -454,7 +455,7 @@ int PileGenericCollect(struct Pile *const self)
     // NB Spider piles are not collected because moving them to the 'foundations' is optional according to Morehead and Mott-Smith
     // so Spider games have Discard piles, not Foundation piles
     // Spider could be complete when a Tableau is either empty or contains 13 conformant cards (TODO not currently implemented)
-    struct Baize* baize = self->owner;
+    struct Baize* baize = PileOwner(self);
     int cardsMoved = 0;
     size_t index;
     for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {

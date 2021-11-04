@@ -139,7 +139,7 @@ int main(int argc, char* argv[], char* envp[])
 {
     (void)envp;
 
-#if _DEBUG
+#ifdef _DEBUG
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
     fprintf(stderr, "sizeof(int) == %lu\n", sizeof(int));
     fprintf(stderr, "sizeof(float) == %lu\n", sizeof(float));
@@ -214,7 +214,7 @@ int main(int argc, char* argv[], char* envp[])
     ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", originalCardWidth, originalCardHeight, kenneyBackInfo);
 #endif
 
-#if _DEBUG
+#ifdef _DEBUG
     {
         fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
         fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());

@@ -1,0 +1,10 @@
+# csol.settings.lil
+
+set CardScale 1.0
+set WindowWidth [expr 1920 * $CardScale]
+set WindowHeight [expr 1080 * $CardScale]
+
+print "csol.settings.lil processed:"
+print "\t CardScale $CardScale"
+print "\t WindowWidth $WindowWidth"
+print "\t WindowHeight $WindowHeight"

@@ -31,32 +31,6 @@ static struct PileVtable stockVtable = {
     &PileFree,
 };
 
-#if 0
-static void ParseCardFilter(lua_State *L, _Bool cardFilter[14])
-{
-    if ( lua_getglobal(L, "STRIP_CARDS") != LUA_TTABLE ) {
-        fprintf(stdout, "STRIP_CARDS is not set\n");
-    } else {
-        fprintf(stdout, "STRIP_CARDS is set\n");
-        for ( int i=1; i<14; i++ ) {
-            lua_pushinteger(L, i);    // pushes +1 onto stack
-            lua_gettable(L, -2);      // pops integer/index, pushes STRIP_CARDS[i]
-            if ( lua_isnumber(L, -1) ) {
-                int result;
-                result = lua_tointeger(L, -1);    // doesn't alter stack
-                if ( result > 0 && result < 14 ) {
-                    cardFilter[result] = 0;
-                } else {
-                    fprintf(stderr, "ERROR: STRIP_CARDS: invalid value %d\n", result);
-                }
-            }
-            lua_pop(L, 1);    // remove result of lua_gettable
-        }
-    }
-    lua_pop(L, 1);    // remove result of lua_getglobal
-}
-#endif
-
 static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t suits, _Bool cardFilter[14])
 {
     baize->numberOfCardsInSuit = 0;
@@ -89,7 +63,9 @@ static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t su
     }
     baize->numberOfCardsInLibrary = i;   // incase any were taken out by cardFilter
 
+#ifdef _DEBUG
     fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, baize->numberOfCardsInLibrary);
+#endif
 }
 
 static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const stock)
@@ -102,7 +78,7 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
 static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
 {
     unsigned seed = LuaUtilGetGlobalInt(baize->L, "SEED", time(NULL) & 0xFFFF);
-#if _DEBUG
+#ifdef _DEBUG
     fprintf(stdout, "SEED %u\n", seed);
 #endif
     srand(seed);

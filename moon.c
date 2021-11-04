@@ -30,9 +30,9 @@ static const struct FunctionToRegister {
     // {"PileMoveTo", MoonPileMoveTo},
     {"PileAccept", MoonPileAccept},
     {"PileType", MoonPileType},
-    {"PileGet", MoonPileGet},
-    {"PileLen", MoonPileLen},
-    {"PilePeek", MoonPilePeek},
+    {"PileGet", MoonPileGet},   // deprecated
+    {"PileLen", MoonPileLen},   // deprecated
+    {"PilePeek", MoonPilePeek},   // deprecated
     {"PileDemoteCards", MoonPileDemoteCards},
     {"PilePromoteCards", MoonPilePromoteCards},
 
@@ -47,12 +47,14 @@ static const struct FunctionToRegister {
     {"CardSuit", MoonCardSuit},
     // {"CardToTable", MoonCardToTable},
 
-    {"TailGet", MoonTailGet},
-    {"TailLen", MoonTailLen},
+    {"TailGet", MoonTailGet},   // deprecated
+    {"TailLen", MoonTailLen},   // deprecated
 
-    {"Get", MoonGet},
-    {"Len", MoonLen},
-    {"Peek", MoonPeek},
+    {"Get",     MoonGet},
+    {"Len",     MoonLen},
+    {"First",   MoonFirst},
+    {"Last",    MoonLast},
+    {"Empty",   MoonEmpty},
 
     {"Toast", MoonToast},
 };
@@ -61,15 +63,28 @@ static struct Baize* getBaize(lua_State* L)
 {
     int typ = lua_getglobal(L, "BAIZE");    // push light userdata on the stack
     if ( typ != LUA_TLIGHTUSERDATA ) {
-        fprintf(stderr, "global BAIZE is not light userdata\n");
+        fprintf(stderr, "ERROR: %s: global BAIZE is not light userdata\n", __func__);
         lua_pop(L, 1);  // remove "BAIZE" from stack
         return NULL;
     }
     struct Baize* baize = lua_touserdata(L, -1); // doesn't alter stack
     lua_pop(L, 1);  // pop light userdata
     if ( !BaizeValid(baize) ) {
-        fprintf(stderr, "global BAIZE is not valid\n");
+        fprintf(stderr, "ERROR: %s: global BAIZE is not valid\n", __func__);
+        baize = NULL;
     }
+
+#if 0
+    {
+        char buffer[64];
+        sprintf(buffer, "%p", (void*)baize);
+
+        struct Baize *b2 = NULL;
+        sscanf(buffer, "%p", (void**)&b2);
+
+        fprintf(stdout, "Baize is %p := %s := %p\n", (void*)baize, buffer, (void*)b2);
+    }
+#endif
     return baize;
 }
 
@@ -235,16 +250,46 @@ int MoonAddPile(lua_State* L)
         p = (struct Pile*)TableauNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Waste") == 0 ) {
         p = (struct Pile*)WasteNew(baize, (Vector2){x, y}, fan);
-    } else {
-        fprintf(stderr, "Unknown pile category %s\n", category);
     }
-    if ( PileValid(p) ) {
-        baize->piles = ArrayPush(baize->piles, p);
-        lua_pushlightuserdata(L, p);
-        return 1;
-    } else {
+
+    if (!PileValid(p)) {
+        fprintf(stderr, "ERROR: %s: invalid '%s' pile\n", __func__, category);
         return 0;
     }
+
+    if (LUA_TTABLE != lua_getglobal(L, p->category)) {
+        fprintf(stderr, "ERROR: %s: %s is not a table\n", __func__, p->category);
+        lua_pop(L, 1);  // remove whatever that was
+    } else {
+        int npiles = BaizeCountPiles(baize, p->category);
+        if (npiles == 0) {
+            /*
+                If this is the first pile of this type/category,
+                then it could turn out to be the only one.
+                So add it to the <category> table as <category>.Pile = <pile>
+            */
+            lua_pushlightuserdata(L, p);
+            lua_setfield(L, -2, "Pile");    // table["Pile"] = p, pops key value
+
+            lua_createtable(L, 0, 0);       // create and push empty table
+            lua_setfield(L, -2, "Piles");   // table[Piles] = {}, pops key value
+        }
+        // the global <category> table should still be on the top of the stack
+        if (LUA_TTABLE != lua_getfield(L, -1, "Piles")) {
+            fprintf(stderr, "ERROR: %s: expected %s.Piles table\n", __func__, p->category);
+            lua_pop(L, 2);  // pop category table and whatever that was
+        } else {
+            lua_pushlightuserdata(L, p);
+            lua_seti(L, -2, npiles + 1);
+        }
+        // the global <category> table should still be on the top of the stack
+        lua_pop(L, 1);
+    }
+
+    baize->piles = ArrayPush(baize->piles, p);
+
+    lua_pushlightuserdata(L, p);
+    return 1;
 }
 
 // don't need to find a pile if Lua is keeping track of piles itself in CELLS, TABLEAUX &c.
@@ -695,6 +740,30 @@ int MoonTailLen(lua_State* L)
     return 1;
 }
 
+int MoonLen(lua_State *L)
+{
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
+    void *thing = lua_touserdata(L, 1);
+    if (!thing) {
+        fprintf(stderr, "WARNING: %s: invalid thing\n", __func__);
+        return 0;
+    }
+    size_t len = 0;
+    if (PileValid(thing)) {
+        len = PileLen(thing);
+    } else if (ArrayValid(thing)) {
+        len = ArrayLen(thing);
+    } else if (CardValid(thing)) {
+        fprintf(stderr, "WARNING: %s: Len(Card) is a bit odd\n", __func__);
+        len = 1;
+    }
+    lua_pushinteger(L, len);
+    return 1;
+}
+
 int MoonGet(lua_State* L)
 {
     if (!lua_islightuserdata(L, 1)) {
@@ -730,7 +799,35 @@ int MoonGet(lua_State* L)
     return 1;
 }
 
-int MoonPeek(lua_State* L)
+int MoonFirst(lua_State* L)
+{
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
+    void* thing = lua_touserdata(L, 1);
+    if (!thing) {
+        fprintf(stderr, "WARNING: %s: invalid thing\n", __func__);
+        return 0;
+    }
+
+    struct Card *c = NULL;
+    if (PileValid(thing)) {
+        c = ArrayGet(((struct Pile*)thing)->cards, 0);
+    } else if (ArrayValid(thing)) {
+        c = ArrayGet(thing, 0);
+    } else {
+        fprintf(stderr, "WARNING: %s: unknown thing\n", __func__);
+    }
+    if (!CardValid(c)) {
+        fprintf(stderr, "WARNING: %s: invalid card\n", __func__);
+        return 0;
+    }
+    lua_pushlightuserdata(L, c);
+    return 1;
+}
+
+int MoonLast(lua_State* L)
 {
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
@@ -758,7 +855,7 @@ int MoonPeek(lua_State* L)
     return 1;
 }
 
-int MoonLen(lua_State *L)
+int MoonEmpty(lua_State *L)
 {
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
@@ -769,16 +866,16 @@ int MoonLen(lua_State *L)
         fprintf(stderr, "WARNING: %s: invalid thing\n", __func__);
         return 0;
     }
-    size_t len = 0;
+    _Bool empty = 1;
     if (PileValid(thing)) {
-        len = PileLen(thing);
+        empty = PileEmpty(thing);
     } else if (ArrayValid(thing)) {
-        len = ArrayLen(thing);
+        empty = ArrayLen(thing) == 0;
     } else if (CardValid(thing)) {
-        fprintf(stderr, "WARNING: %s: Len(Card) is a bit odd\n", __func__);
-        len = 1;
+        fprintf(stderr, "WARNING: %s: Empty(Card) is a bit odd\n", __func__);
+        empty = 1;
     }
-    lua_pushinteger(L, len);
+    lua_pushboolean(L, empty);
     return 1;
 }
 

@@ -9,6 +9,7 @@ dofile("variants/~Library.lua")
 POWER_MOVES = false
 -- SEED=32808
 -- SEED=59517
+-- SEED=321
 
 function BuildPiles()
 
@@ -68,10 +69,10 @@ function Discard.TailAppendError(pile, tail)
 
     local c1 = Get(tail, 1)
     if CardOrdinal(c1) ~= 13 then
-        return "Can only discard from a King, not a " .. V[CardOrdinal(c1)]
+        return "Can only discard starting from a King, not a " .. V[CardOrdinal(c1)]
     end
-    for i = 2, TaiLen(tail) do
-        local c2 = TaiGet(tail, i)
+    for i = 2, Len(tail) do
+        local c2 = Get(tail, i)
         local err = DownSuit(c1, c2) if err then return err end
         c1 = c2
     end

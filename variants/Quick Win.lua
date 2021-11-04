@@ -14,9 +14,11 @@ POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
 
--- C sets variables 'BAIZE', 'STOCK', FAN_*, and tables to hold pile functions
+-- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
 function BuildPiles()
+
+    io.stderr:write("BuildPiles\n")
 
     if type(AddPile) ~= "function" then
         io.stderr:write("Build cannot find function AddPile\n")
@@ -24,35 +26,51 @@ function BuildPiles()
     end
 
     -- a stock pile is always created first, and filled with PACKS of shuffled cards
-    STOCK = AddPile("Stock", 1, 1, FAN_NONE, 1, 4, {12,13})
-    WASTE = AddPile("Waste", 2, 1, FAN_RIGHT3)
+    AddPile("Stock", 1, 1, FAN_NONE, 1, 4, {12,13})
+    if Stock.Pile then
+        io.stderr:write("Stock.Pile autocreated\n")
+    else
+        io.stderr:write("Stock.Pile not autocreated\n")
+    end
+    if Stock.Piles[1] then
+        io.stderr:write("Stock.Piles[1] autocreated\n")
+    else
+        io.stderr:write("Stock.Piles[1] not autocreated\n")
+    end
+
+    AddPile("Waste", 2, 1, FAN_RIGHT3)
+    if Waste.Pile then
+        io.stderr:write("Waste.Pile autocreated\n")
+    else
+        io.stderr:write("Waste.Pile not autocreated\n")
+    end
+    if Waste.Piles[1] then
+        io.stderr:write("Waste.Piles[1] autocreated\n")
+    else
+        io.stderr:write("Waste.Piles[1] not autocreated\n")
+    end
 
     local pile
 
-    FOUNDATIONS = {}
     for x = 4, 9, 1.5 do    -- slots don't have to be integers
         pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileAccept(pile, 1)
-        table.insert(FOUNDATIONS, pile)
     end
 
-    MoveCard(STOCK, FOUNDATIONS[1], 1, 0)
+    MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
 
-    TABLEAUX = {}
     for x = 1, 10 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n = 1, 3 do
-          MoveCard(STOCK, pile)
+          MoveCard(Stock.Pile, pile)
         end
         PileDemoteCards(pile, 13)
         PilePromoteCards(pile, 1)
     end
     for x = 1, 10 do
         pile = AddPile("Tableau", x, 4, FAN_DOWN)
-        table.insert(TABLEAUX, pile)
         for n = 1, 1 do
-          MoveCard(STOCK, pile)
+          MoveCard(Stock.Pile, pile)
         end
         PileDemoteCards(pile, 13)
         PilePromoteCards(pile, 1)
@@ -63,7 +81,7 @@ function StartGame()
     io.stderr:write("StartGame\n")
     STOCK_RECYCLES = 3
 
-    local cp = CardPairs(TABLEAUX[1])
+    local cp = CardPairs(Tableau.Piles[1])
     io.stderr:write("#CardPairs ", #cp .. "\n");
     for _, v in pairs(cp) do
         assert(v[1])
@@ -74,7 +92,7 @@ function StartGame()
         io.stderr:write("{" .. CardOrdinal(v[1]) .. "," .. CardOrdinal(v[2]) .. "}\n")
     end
 
-    cp = CardPairs(WASTE)
+    cp = CardPairs(Waste.Pile)
     io.stderr:write("#CardPairs ", #cp .. "\n");
     for _, v in pairs(cp) do
         io.stderr:write("{" .. CardOrdinal(v[1]) .. "," .. CardOrdinal(v[2]) .. "}\n")
@@ -119,7 +137,7 @@ end
 
 function Waste.TailAppendError(pile, tail)
     io.stderr:write("Waste.TailAppendError\n")
-    if CardOwner(First(tail)) ~= STOCK then
+    if CardOwner(First(tail)) ~= Stock.Pile then
         return "The Waste can only accept cards from the Stock"
     end
     return nil
@@ -184,15 +202,15 @@ function Stock.Tapped(tail)
         elseif 2 == STOCK_RECYCLES then
             Toast("One Stock recycle remaining")
         end
-        if Len(WASTE) > 0 then
-            while Len(WASTE) > 0 do
-                MoveCard(WASTE, STOCK)
+        if Len(Waste.Pile) > 0 then
+            while Len(Waste.Pile) > 0 do
+                MoveCard(Waste.Pile, Stock.Pile)
             end
             STOCK_RECYCLES = STOCK_RECYCLES - 1
           end
     else
         for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(STOCK, WASTE)
+            MoveCard(Stock.Pile, Waste.Pile)
         end
     end
 end
@@ -201,8 +219,8 @@ function Waste.Tapped(tail)
     if not tail or Len(tail) > 1 then
         return
     end
-    for _, pile in ipairs(FOUNDATIONS) do
-        if Foundation.TailAppendError(pile, tail) then
+    for _, pile in ipairs(Foundation.Piles) do
+        if not Foundation.TailAppendError(pile, tail) then
             MoveCard(CardOwner(First(tail)), pile)
             break
         end
@@ -213,8 +231,8 @@ function Tableau.Tapped(tail)
     if not tail or Len(tail) > 1 then
         return
     end
-    for _, pile in ipairs(FOUNDATIONS) do
-        if Foundation.TailAppendError(pile, tail) then
+    for _, pile in ipairs(Foundation.Piles) do
+        if not Foundation.TailAppendError(pile, tail) then
             MoveCard(CardOwner(First(tail)), pile)
             break
         end
@@ -223,16 +241,16 @@ end
 
 function AfterMove()
   -- io.stdout:write("AfterMove\n")
-    for _, pile in ipairs(TABLEAUX) do
+    for _, pile in ipairs(Tableau.Piles) do
         if Len(pile) == 0 then
-            if Len(WASTE) > 0 then
-                MoveCard(WASTE, pile)
-            elseif Len(STOCK) > 0 then
-                MoveCard(STOCK, pile)
+            if Len(Waste.Pile) > 0 then
+                MoveCard(Waste.Pile, pile)
+            elseif Len(Stock.Pile) > 0 then
+                MoveCard(Stock.Pile, pile)
             end
         end
     end
-    if Len(WASTE) == 0 then
-        MoveCard(STOCK, WASTE)
+    if Len(Waste.Pile) == 0 then
+        MoveCard(Stock.Pile, Waste.Pile)
     end
 end

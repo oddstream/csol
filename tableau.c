@@ -153,7 +153,7 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
     (void)sorted;
     (void)unsorted;
 #else
-    struct Baize *const baize = self->owner;
+    struct Baize *const baize = PileOwner(self);
     lua_State *L = baize->L;
 
     if (LuaUtilSetupTableMethod(L, "Tableau", "SortedAndUnsorted")) {

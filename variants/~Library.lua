@@ -10,18 +10,6 @@
 
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 
-function First(thing)
-    return Get(thing, 1)
-end
-
-function Last(thing)
-    return Peek(thing)
-end
-
-function Empty(thing)
-    return Len(thing) == 0
-end
-
 function DownAltColor(c1, c2)
     if CardColor(c1) == CardColor(c2) then
         return "Cards must be in alternating colors"

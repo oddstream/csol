@@ -233,23 +233,35 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     BaizeUndoPush(self);
 }
 
-#if 0
 struct Pile* BaizeFindPile(struct Baize* self, const char* category, int n)
 {
     size_t index;
-    struct Pile* p = (struct Pile*)ArrayFirst(self->piles, &index);
-    while ( p ) {
+    struct Pile* p = ArrayFirst(self->piles, &index);
+    while (p) {
         if ( strcmp(p->category, category) == 0 ) {
             n--;
             if ( n == 0 ) {
                 return p;
             }
         }
-        p = (struct Pile*)ArrayNext(self->piles, &index);
+        p = ArrayNext(self->piles, &index);
     }
     return NULL;
 }
-#endif
+
+int BaizeCountPiles(struct Baize* self, const char* category)
+{
+    int count = 0;
+    size_t index;
+    struct Pile* p = ArrayFirst(self->piles, &index);
+    while (p) {
+        if ( strcmp(p->category, category) == 0 ) {
+            count++;
+        }
+        p = ArrayNext(self->piles, &index);
+    }
+    return count;
+}
 
 static struct Card* findCardAt(struct Baize *const self, Vector2 pos)
 {
