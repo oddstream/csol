@@ -11,6 +11,8 @@
 #include "array.h"
 #include "card.h"
 
+#define MAX_PILE_LABEL (31)
+
 enum FanType {
     FAN_NONE = 0,
     FAN_DOWN,
@@ -31,7 +33,7 @@ struct Pile {
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
-    char label[8];
+    char label[MAX_PILE_LABEL + 1];
     struct Array *cards;
 };
 

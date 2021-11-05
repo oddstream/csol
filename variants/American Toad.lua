@@ -83,7 +83,7 @@ function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)
         if U[CardOrdinal(c1)] ~= PileLabel(pile) then
-            return "An empty Foundation can only accept a " .. PileLabel(pile) .. " not a " .. U[CardOrdinal(c1)]
+            return "An empty Foundation can only accept " .. PileLabel(pile) .. " not " .. U[CardOrdinal(c1)]
         end
     else
         local c1 = Last(pile)

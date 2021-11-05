@@ -33,6 +33,40 @@
     restoring the baize from the last-popped state, and then pushing a new state onto the stack.
 */
 
+#define EMPTY_LABEL ("*")
+
+static void encodeLabel(char *dst, char *src)
+{
+    if (*src == '\0') {
+        strcpy(dst, EMPTY_LABEL);
+        return;
+    }
+    while (*src) {
+        if (*src == ' ' || *src == '\t')
+            *dst++ = '_';
+        else
+            *dst++ = *src;
+        src++;
+    }
+    *dst = '\0';
+}
+
+static void decodeLabel(char *dst, char *src)
+{
+    if (strcmp(src, EMPTY_LABEL) == 0) {
+        *dst = '\0';
+        return;
+    }
+    while (*src) {
+        if (*src == '_')
+            *dst++ = ' ';
+        else
+            *dst++ = *src;
+        src++;
+    }
+    *dst = '\0';
+}
+
 // We need to save the Card's prone flag as well as a reference (index) to the card in the card library
 struct SavedCard {
     unsigned int index:15;
@@ -42,7 +76,7 @@ struct SavedCard {
 // Array functions store arrays of void* pointers, but we need to store arrays of indexes into the card library,
 // so we have to make a new struct to avoid upsetting the compiler
 struct SavedCardArray {
-    char label[8];
+    char label[MAX_PILE_LABEL+1];
     size_t len;
     struct SavedCard sav[];
 };
@@ -51,7 +85,7 @@ static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct
 {
     struct SavedCardArray* self = calloc(1, sizeof(struct SavedCardArray) + ArrayLen(pile->cards) * sizeof(struct SavedCard));
     if (self) {
-        strcpy(self->label, pile->label);   // pile->label may be empty
+        encodeLabel(self->label, pile->label);
         self->len = 0;
         size_t index;
         for ( struct Card *c = ArrayFirst(pile->cards, &index); c; c = ArrayNext(pile->cards, &index) ) {
@@ -77,7 +111,10 @@ static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Ca
 
 static void SavedCardArrayWriteToFile(FILE* f, struct SavedCardArray *const sca)
 {
-    fprintf(f, "%s %lu:", sca->label[0] == '\0' ? "-" : sca->label, sca->len);
+    // sca->label will not be empty
+    if (sca->label[0]=='\0') fprintf(stderr, "ERROR: %s: label is empty\n", __func__);
+
+    fprintf(f, "%s %lu:", sca->label, sca->len);
     for ( size_t i=0; i<sca->len; i++ ) {
         unsigned int number = sca->sav[i].index;
         number <<= 1;
@@ -150,12 +187,28 @@ void UndoStackFree(struct Array *stack)
 
 static int CalcPercentComplete(struct Baize *const self)
 {
-    int sorted = 0, unsorted = 0;
-    size_t index;
-    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+    int percent = 0;
+
+    // let Lua have first dibs at this by calling function PercentComplete()
+    if (lua_getglobal(self->L, "PercentComplete") == LUA_TFUNCTION) {  // push Lua function name onto the stack
+        if ( lua_pcall(self->L, 0, 1, 0) != LUA_OK ) {  // no args, one return
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);    // remove error
+        } else {
+            percent = lua_tointeger(self->L, -1);
+        }
+    } else {
+        lua_pop(self->L, 1);    // remove "PercentComplete"
+
+        int sorted = 0, unsorted = 0;
+        size_t index;
+        for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+            p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+        }
+        percent = (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->numberOfCardsInLibrary, (float)self->numberOfCardsInLibrary, 0.0f, 100.0f));
     }
-    return (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->numberOfCardsInLibrary, (float)self->numberOfCardsInLibrary, 0.0f, 100.0f));
+
+    return percent;
 }
 
 void BaizeUndoPush(struct Baize *const self)
@@ -196,7 +249,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
         struct SavedCardArray *sca = ArrayGet(snap->savedPiles, i);
         struct Pile* dstPile = ArrayGet(self->piles, i);
         ArrayReset(dstPile->cards);
-        strncpy(dstPile->label, sca->label, sizeof(dstPile->label) - 1);
+        decodeLabel(dstPile->label, sca->label);
         SavedCardArrayCopyToPile(sca, self->cardLibrary, dstPile);
 
         if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
@@ -274,7 +327,7 @@ void BaizeUndo0(struct Baize *const self)
 {
     struct Snapshot *snap = ArrayPop(self->undoStack);    // removes current state
     if (!snap) {
-        fprintf(stderr, "ERROR: %s: popping from undo stack\n", __func__);
+        fprintf(stderr, "ERROR: %s: popping from undo stack of length %lu\n", __func__, ArrayLen(self->undoStack));
         return;
     }
     BaizeUpdateFromSnapshot(self, snap);
@@ -406,7 +459,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
         return NULL;
     }
 
-    fprintf(stdout, "INFO: %s: HOME is %s\n", __func__, homeDir);
+    // fprintf(stdout, "INFO: %s: HOME is %s\n", __func__, homeDir);
 
     char fname[256];
     strcpy(fname, homeDir);
@@ -464,18 +517,22 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                 goto fclose_label;
             }
             for ( size_t m=0; m<pileCount; m++ ) {
-                char label[8];
+                /*
+                    <label> <count>: <cards>
+                */
+                char label[MAX_PILE_LABEL+1];
                 size_t cards;
-                // prepend a space to consume \n
+
                 if (fscanf(f, "%s %lu:", label, &cards) != 2) {
-                    fprintf(stderr, "ERROR: %s: expecting label and number of cards\n", __func__);
+                    fprintf(stderr, "ERROR: %s: expecting <label> <cards>:\n", __func__);
                     goto fclose_label;
                 }
+
                 struct SavedCardArray *sca = calloc(1, sizeof(struct SavedCardArray) + cards * sizeof(struct SavedCard));
                 if (!sca) {
                     goto fclose_label;
                 }
-                strcpy(sca->label, label[0] == '-' ? "" : label);
+                strncpy(sca->label, label, MAX_PILE_LABEL);
                 for (size_t card=0; card<cards; card++) {
                     int index, prone;
                     unsigned int number;
@@ -493,6 +550,15 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
         }
         fclose_label: fclose(f);
     }
+
+#if _DEBUG
+    fprintf(stdout, "INFO: %s: state loaded from %s for '%s'\n", __func__, fname, variantName);
+    if (undoStack)
+        fprintf(stdout, "INFO: %s: returning undo stack of length %lu\n", __func__, ArrayLen(undoStack));
+    else
+        fprintf(stdout, "INFO: %s: returning null undo stack\n", __func__);
+
+#endif
 
     return undoStack;
 }

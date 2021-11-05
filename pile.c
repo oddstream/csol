@@ -505,7 +505,7 @@ void PileDraw(struct Pile *const self)
     DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
 
     if ( self->label[0] ) {
-        float fontSize = strlen(self->label) > 2 ? cardWidth / 4.0f : cardWidth / 2.0f;
+        float fontSize = cardWidth / 2.0f;
         Vector2 pos = PileScreenPos(self);
         pos.x += cardWidth / 8.0f;
         pos.y += cardWidth / 16.0f;

@@ -25,7 +25,7 @@ function BuildPiles()
     for x = 1, 12 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN)
         for n = 1, 3 do
-            MoveCard(STOCK, pile)
+            MoveCard(Stock.Pile, pile)
         end
     end
 

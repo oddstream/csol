@@ -90,6 +90,7 @@ void BaizeOpenLua(struct Baize *const self)
     lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Cell");
     lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Discard");
     lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Foundation");
+    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Label");
     lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Reserve");
     lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Stock");
     lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Tableau");

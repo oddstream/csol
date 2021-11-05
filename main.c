@@ -224,7 +224,6 @@ int main(int argc, char* argv[], char* envp[])
     char variantName[32];
     struct Array *loadedUndoStack = LoadUndoFromFile(variantName);
     if (loadedUndoStack) {
-        fprintf(stdout, "INFO: %s: state loaded from file for '%s'\n", __func__, variantName);
         if (variantName[0] == '\0') {
             fprintf(stderr, "ERROR: %s: variantName not set\n", __func__);
         }

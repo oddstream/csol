@@ -15,6 +15,7 @@
 #include "cell.h"
 #include "discard.h"
 #include "foundation.h"
+#include "label.h"
 #include "reserve.h"
 #include "tableau.h"
 #include "waste.h"
@@ -22,7 +23,7 @@
 #include "ui.h"
 
 static const struct FunctionToRegister {
-    char luaFunction[32];
+    char luaFunction[24];
     lua_CFunction cFunction;
 } FunctionsToRegister[] = {
     {"AddPile", MoonAddPile},
@@ -244,6 +245,8 @@ int MoonAddPile(lua_State* L)
         p = (struct Pile*)DiscardNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Foundation") == 0 ) {
         p = (struct Pile*)FoundationNew(baize, (Vector2){x, y}, fan);
+    } else if ( strcmp(category, "Label") == 0 ) {
+        p = (struct Pile*)LabelNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Reserve") == 0 ) {
         p = (struct Pile*)ReserveNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Tableau") == 0 ) {
@@ -349,7 +352,7 @@ int MoonPileLabel(lua_State *L)
         return 0;
     }
     if (lua_gettop(L) == 2 && lua_isstring(L, 2)) {
-        strncpy(p->label, lua_tostring(L, 2), sizeof(p->label) - 1);
+        strncpy(p->label, lua_tostring(L, 2), MAX_PILE_LABEL);
     }
     lua_pushstring(L, p->label);
     return 1;
@@ -381,6 +384,8 @@ int MoonPileType(lua_State *L)
 
 int MoonPileGet(lua_State* L)
 {
+    fprintf(stderr, "DEPRECATED: %s\n", __func__);
+
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
         return 0;
@@ -406,6 +411,8 @@ int MoonPileGet(lua_State* L)
 
 int MoonPileLen(lua_State *L)
 {
+    fprintf(stderr, "DEPRECATED: %s\n", __func__);
+
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
         return 0;
@@ -422,6 +429,8 @@ int MoonPileLen(lua_State *L)
 
 int MoonPilePeek(lua_State *L)
 {
+    fprintf(stderr, "DEPRECATED: %s\n", __func__);
+
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
         return 0;
@@ -702,6 +711,8 @@ int MoonCardToTable(lua_State *L)
 
 int MoonTailGet(lua_State* L)
 {
+    fprintf(stderr, "DEPRECATED: %s\n", __func__);
+
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
         return 0;
@@ -730,6 +741,8 @@ int MoonTailGet(lua_State* L)
 
 int MoonTailLen(lua_State* L)
 {
+    fprintf(stderr, "DEPRECATED: %s\n", __func__);
+
     struct Array *const a = lua_touserdata(L, 1);
     if (!a) {
         fprintf(stderr, "WARNING: %s: invalid tail\n", __func__);
