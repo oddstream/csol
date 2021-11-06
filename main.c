@@ -17,6 +17,65 @@
 #define RETROCARDS 0
 
 #if RETROCARDS
+struct Vector2 retroFaceInfo[52] = {
+    // Club
+    {.x=72.0f*0.0f, .y=0},
+    {.x=72.0f*1.0f, .y=0},
+    {.x=72.0f*2.0f, .y=0},
+    {.x=72.0f*3.0f, .y=0},
+    {.x=72.0f*4.0f, .y=0},
+    {.x=72.0f*5.0f, .y=0},
+    {.x=72.0f*6.0f, .y=0},
+    {.x=72.0f*7.0f, .y=0},
+    {.x=72.0f*8.0f, .y=0},
+    {.x=72.0f*9.0f, .y=0},
+    {.x=72.0f*10.0f, .y=0},
+    {.x=72.0f*11.0f, .y=0},
+    {.x=72.0f*12.0f, .y=0},
+    // Diamond
+    {.x=72.0f*0.0f, .y=96.0f*3.0f},
+    {.x=72.0f*1.0f, .y=96.0f*3.0f},
+    {.x=72.0f*2.0f, .y=96.0f*3.0f},
+    {.x=72.0f*3.0f, .y=96.0f*3.0f},
+    {.x=72.0f*4.0f, .y=96.0f*3.0f},
+    {.x=72.0f*5.0f, .y=96.0f*3.0f},
+    {.x=72.0f*6.0f, .y=96.0f*3.0f},
+    {.x=72.0f*7.0f, .y=96.0f*3.0f},
+    {.x=72.0f*8.0f, .y=96.0f*3.0f},
+    {.x=72.0f*9.0f, .y=96.0f*3.0f},
+    {.x=72.0f*10.0f, .y=96.0f*3.0f},
+    {.x=72.0f*11.0f, .y=96.0f*3.0f},
+    {.x=72.0f*12.0f, .y=96.0f*3.0f},
+    // Heart
+    {.x=72.0f*0.0f, .y=96.0f*2.0f},
+    {.x=72.0f*1.0f, .y=96.0f*2.0f},
+    {.x=72.0f*2.0f, .y=96.0f*2.0f},
+    {.x=72.0f*3.0f, .y=96.0f*2.0f},
+    {.x=72.0f*4.0f, .y=96.0f*2.0f},
+    {.x=72.0f*5.0f, .y=96.0f*2.0f},
+    {.x=72.0f*6.0f, .y=96.0f*2.0f},
+    {.x=72.0f*7.0f, .y=96.0f*2.0f},
+    {.x=72.0f*8.0f, .y=96.0f*2.0f},
+    {.x=72.0f*9.0f, .y=96.0f*2.0f},
+    {.x=72.0f*10.0f, .y=96.0f*2.0f},
+    {.x=72.0f*11.0f, .y=96.0f*2.0f},
+    {.x=72.0f*12.0f, .y=96.0f*2.0f},
+    // Spade
+    {.x=72.0f*0.0f, .y=96.0f},
+    {.x=72.0f*1.0f, .y=96.0f},
+    {.x=72.0f*2.0f, .y=96.0f},
+    {.x=72.0f*3.0f, .y=96.0f},
+    {.x=72.0f*4.0f, .y=96.0f},
+    {.x=72.0f*5.0f, .y=96.0f},
+    {.x=72.0f*6.0f, .y=96.0f},
+    {.x=72.0f*7.0f, .y=96.0f},
+    {.x=72.0f*8.0f, .y=96.0f},
+    {.x=72.0f*9.0f, .y=96.0f},
+    {.x=72.0f*10.0f, .y=96.0f},
+    {.x=72.0f*11.0f, .y=96.0f},
+    {.x=72.0f*12.0f, .y=96.0f},
+};
+
 struct Vector2 retroBackInfo[13] = {
     {.x = 5, .y = 4},       // Aquarium
     {.x = 85, .y = 4},      // CardHand
@@ -207,14 +266,15 @@ int main(int argc, char* argv[], char* envp[])
     ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
 
 #if RETROCARDS
-    ssFace = SpritesheetNew("assets/cards71x96.png", originalCardWidth, originalCardHeight, 13);
+    // ssFace = SpritesheetNew("assets/cards71x96.png", originalCardWidth, originalCardHeight, 13);
+    ssFace = SpritesheetNewInfo("assets/lessblockycards71x96.png", originalCardWidth, originalCardHeight, retroFaceInfo);
     ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", originalCardWidth, originalCardHeight, retroBackInfo);
 #else
     ssFace = SpritesheetNewInfo("assets/playingCards.png", originalCardWidth, originalCardHeight, kenneyFaceInfo);
     ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", originalCardWidth, originalCardHeight, kenneyBackInfo);
 #endif
 
-#ifdef _DEBUG
+#if 0
     {
         fprintf(stdout, "Monitor %d,%d\n", GetMonitorWidth(0), GetMonitorHeight(0));
         fprintf(stdout, "Screen %d,%d\n", GetScreenWidth(), GetScreenHeight());

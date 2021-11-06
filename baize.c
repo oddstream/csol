@@ -463,13 +463,26 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
                     UiToast(self->ui, "(CSOL) Cannot move a face down card");
                     ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                 } else {
-                    if ( CardOwner(c)->vtable->CanMoveTail(self->tail) && p->vtable->CanAcceptTail(self, p, self->tail) ) {
-                        ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
-                        // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), may trigger two more cards to follow
-                        if ( PileMoveCards(p, c) ) {
-                            BaizeAfterUserMove(self);
+                    if ( CardOwner(c)->vtable->CanMoveTail(self->tail) ) {
+                        struct Pile *pdst = p->vtable->MatchTail(self, p, self->tail);
+                        if (pdst) {
+                            // TODO move both cards to pdst?
+                            fprintf(stdout, "NOT IMPLEMENTED: %s: move matched cards\n", __func__);
+                        } else if (p->vtable->CanAcceptTail(self, p, self->tail)) {
+                            ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
+                            // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), may trigger two more cards to follow
+                            if ( PileMoveCards(p, c) ) {
+                                BaizeAfterUserMove(self);
+                            }
+                        } else {
+                            // fallout from not being able to match or accept
+                            if (self->errorString) {
+                                UiToast(self->ui, self->errorString);
+                            }
+                            ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                         }
                     } else {
+                        // fallout from not being able to move tail
                         if (self->errorString) {
                             UiToast(self->ui, self->errorString);
                         }

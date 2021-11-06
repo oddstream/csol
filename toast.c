@@ -74,9 +74,7 @@ static void DrawCenteredText(Rectangle r, const char* text, Vector2 mte)
     extern Font fontRobotoRegular14;
     extern Color uiTextColor;
 
-    Vector2 pos;
-    pos.x = r.x + (r.width / 2.0f) - (mte.x / 2.0f);
-    pos.y = r.y + (r.height / 2.0f) - (mte.y / 2.0f);
+    Vector2 pos = UtilCenterTextInRectangle(r, mte.x, mte.y);
     DrawTextEx(fontRobotoRegular14, text, pos, 14.0f, 1.2f, uiTextColor);
 }
 

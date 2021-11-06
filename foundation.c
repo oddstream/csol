@@ -15,13 +15,14 @@
 
 static struct PileVtable foundationVtable = {
     &FoundationCanMoveTail,
+    &PileInertCanMatchTail,
     &FoundationCanAcceptCard,
     &FoundationCanAcceptTail,
-    &FoundationTapped,
-    &FoundationCollect,
+    &PileInertTapped,
+    &PileInertCollect,
     &FoundationComplete,
     &FoundationConformant,
-    &FoundationSetRecycles,
+    &PileInertSetRecycles,
     &FoundationCountSortedAndUnsorted,
 
     &PileUpdate,
@@ -78,19 +79,6 @@ _Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self
     return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
 }
 
-void FoundationTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
-int FoundationCollect(struct Pile *const self)
-{
-    // collecting is done by pulling cards to Foundations, so we do nothing here
-    (void)self;
-    return 0;
-}
-
 _Bool FoundationComplete(struct Pile *const self)
 {
     struct Baize *baize = self->owner;
@@ -102,13 +90,6 @@ _Bool FoundationConformant(struct Pile *const self)
     // a Foundation is always assumed to be conformant, how else did it get built!?
     (void)self;
     return 1;
-}
-
-void FoundationSetRecycles(struct Pile *const self, int r)
-{
-    // only the Stock can be recycled
-    (void)self;
-    (void)r;
 }
 
 void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)

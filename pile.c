@@ -13,7 +13,7 @@
 
 #define CARD_FACE_FAN_FACTOR_V (3.0f)
 #define CARD_FACE_FAN_FACTOR_H (4.0f)
-#define CARD_BACK_FAN_FACTOR (5.0f)
+#define CARD_BACK_FAN_FACTOR (8.0f)
 
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
 //     struct Pile* self = calloc(1, sizeof(struct Pile));
@@ -445,7 +445,43 @@ void PileRepushAllCards(struct Pile *const self)
     ArrayFree(tmp);
 }
 
-void PileGenericTapped(struct Pile *const self, struct Array *const tail)
+_Bool PileInertCanMoveTail(struct Array *const tail)
+{
+    (void)tail;
+    return 0;
+}
+
+struct Pile* PileInertCanMatchTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+{
+    (void)baize;
+    (void)self;
+    (void)tail;
+    return NULL;
+}
+
+_Bool PileInertCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
+{
+    (void)baize;
+    (void)self;
+    (void)c;
+    return 0;
+}
+
+_Bool PileInertCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
+{
+    (void)baize;
+    (void)self;
+    (void)tail;
+    return 0;
+}
+
+void PileInertTapped(struct Pile *const self, struct Array *const tail)
+{
+    (void)self;
+    (void)tail;
+}
+
+void PileGenericTailTapped(struct Pile *const self, struct Array *const tail)
 {
     struct Baize* baize = PileOwner(self);
     size_t index;
@@ -456,6 +492,12 @@ void PileGenericTapped(struct Pile *const self, struct Array *const tail)
             break;
         }
     }
+}
+
+int PileInertCollect(struct Pile *const self)
+{
+    (void)self;
+    return 0;
 }
 
 int PileGenericCollect(struct Pile *const self)
@@ -486,6 +528,31 @@ int PileGenericCollect(struct Pile *const self)
         }
     }
     return cardsMoved;
+}
+
+_Bool PileInertComplete(struct Pile *const self)
+{
+    (void)self;
+    return 1;
+}
+
+_Bool PileInertConformant(struct Pile *const self)
+{
+    (void)self;
+    return 1;
+}
+
+void PileInertSetRecycles(struct Pile *const self, int r)
+{
+    (void)self;
+    (void)r;
+}
+
+void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+{
+    (void)self;
+    (void)sorted;
+    (void)unsorted;
 }
 
 void PileUpdate(struct Pile *const self)

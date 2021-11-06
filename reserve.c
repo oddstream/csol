@@ -13,13 +13,14 @@
 
 static struct PileVtable reserveVtable = {
     &ReserveCanMoveTail,
+    &PileInertCanMatchTail,
     &ReserveCanAcceptCard,
     &ReserveCanAcceptTail,
-    &PileGenericTapped,
+    &PileGenericTailTapped,
     &ReserveCollect,
     &ReserveComplete,
     &ReserveConformant,
-    &ReserveSetRecycles,
+    &PileInertSetRecycles,
     &ReserveCountSortedAndUnsorted,
 
     &PileUpdate,
@@ -59,12 +60,6 @@ _Bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
     return 0;
 }
 
-void ReserveTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
 int ReserveCollect(struct Pile *const self)
 {
     return PileGenericCollect(self);
@@ -78,13 +73,6 @@ _Bool ReserveComplete(struct Pile *const self)
 _Bool ReserveConformant(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-void ReserveSetRecycles(struct Pile *const self, int r)
-{
-    // we don't do that here
-    (void)self;
-    (void)r;
 }
 
 void ReserveCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)

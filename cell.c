@@ -13,13 +13,14 @@
 
 static struct PileVtable cellVtable = {
     &CellCanMoveTail,
+    &PileInertCanMatchTail,
     &CellCanAcceptCard,
     &CellCanAcceptTail,
-    &PileGenericTapped,
+    &PileGenericTailTapped,
     &CellCollect,
     &CellComplete,
     &CellConformant,
-    &CellSetRecycles,
+    &PileInertSetRecycles,
     &CellCountSortedAndUnsorted,
 
     &PileUpdate,
@@ -66,12 +67,6 @@ _Bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, stru
     return 1;
 }
 
-void CellTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
 int CellCollect(struct Pile *const self)
 {
     return PileGenericCollect(self);
@@ -86,13 +81,6 @@ _Bool CellConformant(struct Pile *const self)
 {
     (void)self;
     return 1;
-}
-
-void CellSetRecycles(struct Pile *const self, int r)
-{
-    // we don't do that here
-    (void)self;
-    (void)r;
 }
 
 void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)

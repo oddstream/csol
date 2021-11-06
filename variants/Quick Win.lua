@@ -194,6 +194,8 @@ end
 -- Actions
 
 function Stock.Tapped(tail)
+    io.stderr:write("Stock.Tapped\n")
+
     if tail == nil then
         if STOCK_RECYCLES == 0 then
             return "No more Stock recycles"
@@ -216,6 +218,7 @@ function Stock.Tapped(tail)
 end
 
 function Waste.Tapped(tail)
+    io.stderr:write("Waste.Tapped\n")
     if not tail or Len(tail) > 1 then
         return
     end
@@ -228,6 +231,7 @@ function Waste.Tapped(tail)
 end
 
 function Tableau.Tapped(tail)
+    io.stderr:write("Tableau.Tapped\n")
     if not tail or Len(tail) > 1 then
         return
     end
@@ -240,7 +244,7 @@ function Tableau.Tapped(tail)
 end
 
 function AfterMove()
-  -- io.stdout:write("AfterMove\n")
+  io.stdout:write("AfterMove\n")
     for _, pile in ipairs(Tableau.Piles) do
         if Len(pile) == 0 then
             if Len(Waste.Pile) > 0 then

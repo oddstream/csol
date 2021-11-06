@@ -26,5 +26,6 @@ char* UtilSuitToLongString(int suit);
 uint32_t UtilHash(char *str);
 
 _Bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer);
+Vector2 UtilCenterTextInRectangle(Rectangle r, float width, float height);
 
 #endif

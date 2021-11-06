@@ -39,9 +39,10 @@ struct Pile {
 
 struct PileVtable {
     _Bool (*CanMoveTail)(struct Array *const tail);
+    struct Pile* (*MatchTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
     _Bool (*CanAcceptCard)(struct Baize *const baize, struct Pile *const self, struct Card *const c);
     _Bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
-    void (*Tapped)(struct Pile *const self, struct Array *const tail);
+    void (*TailTapped)(struct Pile *const self, struct Array *const tail);
     int (*Collect)(struct Pile *p);
     _Bool (*Complete)(struct Pile *p);
     _Bool (*Conformant)(struct Pile *p);
@@ -77,8 +78,20 @@ Vector2 PilePushedFannedPos(struct Pile *const self);
 _Bool PileMoveCard(struct Pile *const self, struct Pile *const src);
 _Bool PileMoveCards(struct Pile *const self, struct Card const* c);
 void PileRepushAllCards(struct Pile *const self);
-void PileGenericTapped(struct Pile *const self, struct Array *const tail);
+
+_Bool PileInertCanMoveTail(struct Array *const Tail);
+struct Pile* PileInertCanMatchTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+_Bool PileInertCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
+_Bool PileInertCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+void PileInertTapped(struct Pile *const self, struct Array *const tail);
+void PileGenericTailTapped(struct Pile *const self, struct Array *const tail);
+int PileInertCollect(struct Pile *const self);
 int PileGenericCollect(struct Pile *const self);
+_Bool PileInertComplete(struct Pile *const self);
+_Bool PileInertConformant(struct Pile *const self);
+void PileInertSetRecycles(struct Pile *const self, int r);
+void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
+
 void PileUpdate(struct Pile *const self);
 void PileDraw(struct Pile *const self);
 void PileFree(struct Pile *const self);

@@ -30,14 +30,14 @@ function BuildPiles()
     for y = 1, 5 do
         local pile = AddPile("Label", 8, y, FAN_NONE)
         table.insert(XSCORES, pile)
-        PileLabel(pile, "X" .. #XSCORES)
+        -- PileLabel(pile, "X" .. #XSCORES)
     end
 
     YSCORES = {}
     for x = 3, 7 do
         local pile = AddPile("Label", x, 6, FAN_NONE)
         table.insert(YSCORES, pile)
-        PileLabel(pile, "Y" .. #YSCORES)
+        -- PileLabel(pile, "Y" .. #YSCORES)
     end
 
     TOTAL = AddPile("Label", 8, 6, FAN_NONE)
@@ -249,7 +249,7 @@ function AfterMove()
     PileLabel(TOTAL, total)
 
     if Empty(Reserve.Pile) then
-        Toast("Completed, final score " .. total)
+        Toast("Score " .. total)
         COMPLETE = true
     end
 end

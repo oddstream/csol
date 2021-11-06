@@ -43,6 +43,7 @@ function StartGame()
     for _, pile in ipairs(Foundation.Piles) do
         PileLabel(pile, "")
     end
+    Toast("Choose a Reserve card and move it to a Foundation")
 end
 
 -- TailMoveError constraints (Tableau only)

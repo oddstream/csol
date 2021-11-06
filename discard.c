@@ -15,13 +15,14 @@
 
 static struct PileVtable discardVtable = {
     &DiscardCanMoveTail,
-    &DiscardCanAcceptCard,
+    &PileInertCanMatchTail,
+    &PileInertCanAcceptCard,
     &DiscardCanAcceptTail,
-    &DiscardTapped,
-    &DiscardCollect,
+    &PileInertTapped,
+    &PileInertCollect,
     &DiscardComplete,
     &DiscardConformant,
-    &DiscardSetRecycles,
+    &PileInertSetRecycles,
     &DiscardCountSortedAndUnsorted,
 
     &PileUpdate,
@@ -47,15 +48,6 @@ _Bool DiscardCanMoveTail(struct Array *const tail)
     return 0;
 }
 
-_Bool DiscardCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
-{
-    (void)baize;
-    (void)self;
-    (void)c;
-
-    return 0;
-}
-
 _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
 {
     if ( !PileEmpty(self) ) {
@@ -70,18 +62,6 @@ _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
         }
     }
     return CanTailBeAppended(self, tail);
-}
-
-void DiscardTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
-int DiscardCollect(struct Pile *const self)
-{
-    (void)self;
-    return 0;
 }
 
 _Bool DiscardComplete(struct Pile *const self)
@@ -102,12 +82,6 @@ _Bool DiscardConformant(struct Pile *const self)
         return PileEmpty(self) || PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
     }
     return 0;
-}
-
-void DiscardSetRecycles(struct Pile *const self, int r)
-{
-    (void)self;
-    (void)r;
 }
 
 void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)

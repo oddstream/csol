@@ -4,10 +4,12 @@ RED = {1,0,0,1}
 GREEN = {0,1,0,1}
 BLUE = {0,0,1,1}
 
-CardScale = 0.5
+-- CardScale = (100/71)
+-- CardScale = (100/140)
+CardScale = 1.0
 WindowWidth = 1920
 WindowHeight = 1080
-BaizeColor = {red=0.1, green=0.25, blue=0.1, alpha=1}
+BaizeColor = {red=0.1, green=0.2, blue=0.1, alpha=1}
 -- Variant = "Quick Win"
 
 io.stderr:write("csol.settings.lua processed\n")

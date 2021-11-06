@@ -15,10 +15,12 @@
 
 static struct PileVtable stockVtable = {
     &StockCanMoveTail,
+    &PileInertCanMatchTail,
     &StockCanAcceptCard,
     &StockCanAcceptTail,
-    &StockTapped,
-    &StockCollect,
+    &PileInertTapped,       // tapping the stock pile to recycle is now handled by Lua
+                            // this function is a fallback in case there is no function Stock.Tapped
+    &PileInertCollect,
     &StockComplete,
     &StockConformant,
     &StockSetRecycles,
@@ -31,19 +33,18 @@ static struct PileVtable stockVtable = {
 
 static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t suits, _Bool cardFilter[14])
 {
+    // first time this is called, baize->cardLibrary will be NULL because we used calloc()
+    if (baize->cardLibrary) {
+        free(baize->cardLibrary);
+    }
+
     size_t numberOfCardsInSuit = 0;
     for ( int i=1; i<14; i++ ) {
         if (cardFilter[i]) {
             numberOfCardsInSuit += 1;
         }
     }
-
     size_t cardsRequired = packs * suits * numberOfCardsInSuit;
-
-    // first time this is called, baize->cardLibrary will be NULL because we used calloc()
-    if (baize->cardLibrary) {
-        free(baize->cardLibrary);
-    }
     baize->cardLibrary = calloc(cardsRequired, sizeof(struct Card));
     baize->numberOfCardsInLibrary = cardsRequired;
 
@@ -59,7 +60,7 @@ static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t su
             }
         }
     }
-    baize->numberOfCardsInLibrary = i;   // incase any were taken out by cardFilter
+    baize->numberOfCardsInLibrary = i;   // in case any were taken out by cardFilter
 
 #ifdef _DEBUG
     fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, baize->numberOfCardsInLibrary);
@@ -127,18 +128,6 @@ _Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, str
     (void)baize;
     (void)self;
     (void)tail;
-    return 0;
-}
-
-void StockTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
-int StockCollect(struct Pile *const self)
-{
-    (void)self;
     return 0;
 }
 

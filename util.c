@@ -123,3 +123,11 @@ _Bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer)
     }
     return 1;
 }
+
+Vector2 UtilCenterTextInRectangle(Rectangle r, float width, float height)
+{
+    return (Vector2){
+        .x = r.x + (r.width / 2.0f) - (width / 2.0f),
+        .y = r.y + (r.height / 2.0f) - (height / 2.0f),
+    };
+}

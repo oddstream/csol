@@ -18,11 +18,9 @@ struct Cell* CellNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
 _Bool CellCanMoveTail(struct Array *const tail);
 _Bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 _Bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
-void CellTapped(struct Pile *const self, struct Array *const tail);
 int CellCollect(struct Pile *const self);
 _Bool CellComplete(struct Pile *const self);
 _Bool CellConformant(struct Pile *const self);
-void CellSetRecycles(struct Pile *const self, int r);
 void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
 #endif

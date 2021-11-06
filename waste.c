@@ -14,13 +14,14 @@
 
 static struct PileVtable wasteVtable = {
     &WasteCanMoveTail,
+    &PileInertCanMatchTail,
     &WasteCanAcceptCard,
     &WasteCanAcceptTail,
-    &PileGenericTapped,
+    &PileGenericTailTapped,
     &WasteCollect,
     &WasteComplete,
     &WasteConformant,
-    &WasteSetRecycles,
+    &PileInertSetRecycles,
     &WasteCountSortedAndUnsorted,
 
     &PileUpdate,
@@ -66,12 +67,6 @@ _Bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, str
     return CanTailBeAppended(self, tail);
 }
 
-void WasteTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
 int WasteCollect(struct Pile *const self)
 {
     return PileGenericCollect(self);
@@ -85,13 +80,6 @@ _Bool WasteComplete(struct Pile *const self)
 _Bool WasteConformant(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-void WasteSetRecycles(struct Pile *const self, int r)
-{
-    // we don't do that here
-    (void)self;
-    (void)r;
 }
 
 void WasteCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)

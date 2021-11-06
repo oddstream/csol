@@ -15,13 +15,14 @@
 
 static struct PileVtable tableauVtable = {
     &TableauCanMoveTail,
+    &PileInertCanMatchTail,
     &TableauCanAcceptCard,
     &TableauCanAcceptTail,
-    &PileGenericTapped,
+    &PileGenericTailTapped,
     &TableauCollect,
     &TableauComplete,
     &TableauConformant,
-    &TableauSetRecycles,
+    &PileInertSetRecycles,
     &TableauCountSortedAndUnsorted,
 
     &PileUpdate,
@@ -96,12 +97,6 @@ _Bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
     return CanTailBeAppended(self, tail);
 }
 
-void TableauTapped(struct Pile *const self, struct Array *const tail)
-{
-    (void)self;
-    (void)tail;
-}
-
 int TableauCollect(struct Pile *const self)
 {
     return PileGenericCollect(self);
@@ -115,13 +110,6 @@ _Bool TableauComplete(struct Pile *const self)
 _Bool TableauConformant(struct Pile *const self)
 {
     return IsPileConformant(self);
-}
-
-void TableauSetRecycles(struct Pile *const self, int r)
-{
-    // only the Stock can be recycled
-    (void)self;
-    (void)r;
 }
 
 void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)

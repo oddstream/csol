@@ -55,7 +55,7 @@ void BaizeTailTapped(struct Baize *const self)
 
     if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
         fprintf(stderr, "INFO: %s: %s.Tapped is not a function, reverting to internal default (tail len %lu)\n", __func__, pile->category, ArrayLen(self->tail));
-        pile->vtable->Tapped(pile, self->tail);
+        pile->vtable->TailTapped(pile, self->tail);
     } else {
         // push one arg, the tail
         lua_pushlightuserdata(L, self->tail);
@@ -73,7 +73,7 @@ void BaizePileTapped(struct Baize *const self, struct Pile *const pile)
 
     if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
         fprintf(stderr, "INFO: %s: %s.Tapped is not a function, reverting to internal default (nil tail)\n", __func__, pile->category);
-        pile->vtable->Tapped(pile, NULL);
+        pile->vtable->TailTapped(pile, NULL);
     } else {
         // push one arg, the (non existant) tail
         lua_pushnil(L);

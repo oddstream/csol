@@ -39,13 +39,15 @@ struct CardId {
 };
 
 struct Card /* tag */ {
+    /* static things */
     unsigned magic;
     struct CardId id;
+    int frame;  // spritesheet frame, index into Info Vector2D struct
+
+    /* dynamically-changing things */
     _Bool prone;
     Vector2 pos;
     struct Pile* owner;
-
-    int frame;  // spritesheet frame, index into Info Vector2D struct
 
     _Bool dragging;
     Vector2 dragStartPos;
