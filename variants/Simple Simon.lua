@@ -123,6 +123,6 @@ end
 
 -- Actions
 
-function Tableau.Tapped(tail)
+function Tableau.TailTapped(tail)
     -- do nothing
 end

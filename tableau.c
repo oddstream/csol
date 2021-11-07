@@ -15,9 +15,9 @@
 
 static struct PileVtable tableauVtable = {
     &TableauCanMoveTail,
-    &PileInertCanMatchTail,
     &TableauCanAcceptCard,
     &TableauCanAcceptTail,
+    &PileInertPileTapped,
     &PileGenericTailTapped,
     &TableauCollect,
     &TableauComplete,

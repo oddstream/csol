@@ -15,11 +15,11 @@
 
 static struct PileVtable stockVtable = {
     &StockCanMoveTail,
-    &PileInertCanMatchTail,
     &StockCanAcceptCard,
     &StockCanAcceptTail,
-    &PileInertTapped,       // tapping the stock pile to recycle is now handled by Lua
+    &PileInertPileTapped,   // tapping the stock pile to recycle is now handled by Lua
                             // this function is a fallback in case there is no function Stock.Tapped
+    &PileInertTailTapped,
     &PileInertCollect,
     &StockComplete,
     &StockConformant,

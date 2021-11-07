@@ -361,31 +361,11 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
         fprintf(stderr, "ERROR: %s: src and dst are the same\n", __func__);
         return 0;
     }
-    size_t oldSrcLen = PileLen(src);
-#if 0
-    // find the new length of the source pile
-    // TODO could use ArrayIndexOf for this; index == newSrcLen?, retire pc
-    size_t newSrcLen = 0, index;
-    struct Card* pc = ArrayFirst(src->cards, &index);
-    while (pc) {
-        if (pc == c) {
-            break;
-        }
-        newSrcLen++;
-        pc = ArrayNext(src->cards, &index);
-    }
-
-    if (!pc) {
-        fprintf(stderr, "ERROR: %s: could not find card in pile\n", __func__);
-        return 0;
-    }
-#else
-    size_t newSrcLen;
+    size_t oldSrcLen = PileLen(src), newSrcLen;
     if (!ArrayIndexOf(src->cards, c, &newSrcLen)) {
         fprintf(stderr, "ERROR: %s: could not find card in pile\n", __func__);
         return 0;
     }
-#endif
 
     // pop the tail off the source and push onto tmp stack
     struct Array* tmp = ArrayNew(PileLen(self) + PileLen(src));
@@ -451,14 +431,6 @@ _Bool PileInertCanMoveTail(struct Array *const tail)
     return 0;
 }
 
-struct Pile* PileInertCanMatchTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail)
-{
-    (void)baize;
-    (void)self;
-    (void)tail;
-    return NULL;
-}
-
 _Bool PileInertCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
     (void)baize;
@@ -475,7 +447,12 @@ _Bool PileInertCanAcceptTail(struct Baize *const baize, struct Pile *const self,
     return 0;
 }
 
-void PileInertTapped(struct Pile *const self, struct Array *const tail)
+void PileInertPileTapped(struct Pile *const self)
+{
+    (void)self;
+}
+
+void PileInertTailTapped(struct Pile *const self, struct Array *const tail)
 {
     (void)self;
     (void)tail;

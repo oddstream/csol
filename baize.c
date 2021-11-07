@@ -15,6 +15,7 @@
 #include "moon.h"
 #include "undo.h"
 #include "util.h"
+#include "luautil.h"
 #include "ui.h"
 
 #define BAIZE_MAGIC (0x19910920)
@@ -201,6 +202,39 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
 
     self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
     self->dragging = 0;
+}
+
+void BaizeGetLuaGlobals(struct Baize *const self)
+{
+    if (!self->stock) {
+        fprintf(stderr, "ERROR: %s: Baize not formed\n", __func__);
+        exit(666);
+        return;
+    }
+    self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
+    self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
+}
+
+void BaizeStartGame(struct Baize *const self)
+{
+    unsigned crc = BaizeCRC(self);
+
+    if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
+        fprintf(stderr, "INFO: %s: StartGame is not a function\n", __func__);
+        lua_pop(self->L, 1);  // remove function name
+    } else {
+        // no args, no returns
+        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
+            lua_pop(self->L, 1);    // remove error
+        } else {
+            // nothing
+        }
+    }
+
+    if (BaizeCRC(self) != crc) {
+        fprintf(stdout, "INFO: %s: StartGame has changed the baize\n", __func__);
+    }
 }
 
 void BaizePositionPiles(struct Baize *const self, const int windowWidth)
@@ -464,13 +498,11 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
                     ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
                 } else {
                     if ( CardOwner(c)->vtable->CanMoveTail(self->tail) ) {
-                        struct Pile *pdst = p->vtable->MatchTail(self, p, self->tail);
-                        if (pdst) {
-                            // TODO move both cards to pdst?
-                            fprintf(stdout, "NOT IMPLEMENTED: %s: move matched cards\n", __func__);
-                        } else if (p->vtable->CanAcceptTail(self, p, self->tail)) {
+                        if (p->vtable->CanAcceptTail(self, p, self->tail)) {
                             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
-                            // TODO special case: dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), may trigger two more cards to follow
+                            // TODO special case:
+                            // dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), 
+                            // may trigger two cards to follow
                             if ( PileMoveCards(p, c) ) {
                                 BaizeAfterUserMove(self);
                             }

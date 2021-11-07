@@ -40,6 +40,7 @@ static const struct FunctionToRegister {
     {"MoveCard", MoonMoveCard},
     {"MoveAllCards", MoonMoveAllCards},
     {"CardPairs", MoonCardPairs},
+    {"SwapCards", MoonSwapCards},
 
     {"CardColor", MoonCardColor},
     {"CardOrdinal", MoonCardOrdinal},
@@ -927,6 +928,36 @@ int MoonCardPairs(lua_State *L)
         }
     }
     return 1; // we created 1 array table (of card pair array tables)
+}
+
+int MoonSwapCards(lua_State *L)
+{
+    struct Card *c1, *c2;
+    struct Pile *p1, *p2;
+    size_t i1, i2;
+
+    if (!(lua_islightuserdata(L, 1) && lua_islightuserdata(L, 1))) {
+        fprintf(stderr, "ERROR: %s: expecting two lightuserdata\n", __func__);
+        return 0;
+    }
+    c1 = lua_touserdata(L, 1);
+    c2 = lua_touserdata(L, 2);
+    if (!(CardValid(c1) && CardValid(c2))) {
+        fprintf(stderr, "ERROR: %s: expecting two cards\n", __func__);
+        return 0;
+    }
+    p1 = CardOwner(c1);
+    p2 = CardOwner(c2);
+    ArrayIndexOf(p1->cards, c1, &i1);   // ignore _Bool return
+    ArrayIndexOf(p2->cards, c2, &i2);   // ignore _Bool return
+
+    ArrayPut(p1->cards, i1, c2);
+    ArrayPut(p2->cards, i2, c1);
+
+    c1->owner = p2;
+    c2->owner = p1;
+
+    return 0;
 }
 
 int MoonToast(lua_State *L)

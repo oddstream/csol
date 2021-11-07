@@ -107,8 +107,6 @@ end
 
 -- Actions
 
-function Stock.Tapped(tail)
-    if tail then
-        MoveCard(Stock.Pile, Waste.Pile)
-    end
+function Stock.TailTapped(tail)
+    MoveCard(Stock.Pile, Waste.Pile)
 end

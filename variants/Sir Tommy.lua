@@ -98,7 +98,7 @@ end
 
 -- Actions
 
-function Stock.Tapped(tail)
+function Stock.TailTapped(tail)
     -- only allow one card at a time in waste
     if Empty(Waste.Pile) then
         MoveCard(Stock.Pile, Waste.Pile)

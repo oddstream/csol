@@ -39,9 +39,9 @@ struct Pile {
 
 struct PileVtable {
     _Bool (*CanMoveTail)(struct Array *const tail);
-    struct Pile* (*MatchTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
     _Bool (*CanAcceptCard)(struct Baize *const baize, struct Pile *const self, struct Card *const c);
     _Bool (*CanAcceptTail)(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
+    void (*PileTapped)(struct Pile *const self);
     void (*TailTapped)(struct Pile *const self, struct Array *const tail);
     int (*Collect)(struct Pile *p);
     _Bool (*Complete)(struct Pile *p);
@@ -80,10 +80,10 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c);
 void PileRepushAllCards(struct Pile *const self);
 
 _Bool PileInertCanMoveTail(struct Array *const Tail);
-struct Pile* PileInertCanMatchTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 _Bool PileInertCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 _Bool PileInertCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
-void PileInertTapped(struct Pile *const self, struct Array *const tail);
+void PileInertPileTapped(struct Pile *const self);
+void PileInertTailTapped(struct Pile *const self, struct Array *const tail);
 void PileGenericTailTapped(struct Pile *const self, struct Array *const tail);
 int PileInertCollect(struct Pile *const self);
 int PileGenericCollect(struct Pile *const self);

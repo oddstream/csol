@@ -85,14 +85,14 @@ end
 
 -- Actions
 
-function Stock.Tapped(tail)
-    if not tail then
-        for _, res in ipairs(Reserve.Piles) do
-            MoveAllCards(res, Stock.Pile)
-        end
-    else
-        for _, res in ipairs(Reserve.Piles) do
-            MoveCard(Stock.Pile, res)
-        end
+function Stock.PileTapped(pile)
+    for _, res in ipairs(Reserve.Piles) do
+        MoveAllCards(res, Stock.Pile)
+    end
+end
+
+function Stock.TailTapped(tail)
+    for _, res in ipairs(Reserve.Piles) do
+        MoveCard(Stock.Pile, res)
     end
 end

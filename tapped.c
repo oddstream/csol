@@ -10,39 +10,6 @@
 #include "baize.h"
 #include "luautil.h"
 
-void BaizeGetLuaGlobals(struct Baize *const self)
-{
-    if (!self->stock) {
-        fprintf(stderr, "ERROR: %s: Baize not formed\n", __func__);
-        exit(666);
-        return;
-    }
-    self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
-    self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
-}
-
-void BaizeStartGame(struct Baize *const self)
-{
-    unsigned crc = BaizeCRC(self);
-
-    if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        fprintf(stderr, "INFO: %s: StartGame is not a function\n", __func__);
-        lua_pop(self->L, 1);  // remove function name
-    } else {
-        // no args, no returns
-        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);    // remove error
-        } else {
-            // nothing
-        }
-    }
-
-    if (BaizeCRC(self) != crc) {
-        fprintf(stdout, "INFO: %s: StartGame has changed the baize\n", __func__);
-    }
-}
-
 void BaizeTailTapped(struct Baize *const self)
 {
     if (!self->tail || ArrayLen(self->tail)==0) {
@@ -53,8 +20,8 @@ void BaizeTailTapped(struct Baize *const self)
     struct Card* c0 = ArrayGet(self->tail, 0);
     struct Pile* pile = CardOwner(c0);
 
-    if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
-        fprintf(stderr, "INFO: %s: %s.Tapped is not a function, reverting to internal default (tail len %lu)\n", __func__, pile->category, ArrayLen(self->tail));
+    if (!LuaUtilSetupTableMethod(L, pile->category, "TailTapped")) {
+        fprintf(stderr, "INFO: %s: %s.TailTapped is not a function, reverting to internal default (tail len %lu)\n", __func__, pile->category, ArrayLen(self->tail));
         pile->vtable->TailTapped(pile, self->tail);
     } else {
         // push one arg, the tail
@@ -71,9 +38,9 @@ void BaizePileTapped(struct Baize *const self, struct Pile *const pile)
 {
     lua_State *L = self->L;
 
-    if (!LuaUtilSetupTableMethod(L, pile->category, "Tapped")) {
-        fprintf(stderr, "INFO: %s: %s.Tapped is not a function, reverting to internal default (nil tail)\n", __func__, pile->category);
-        pile->vtable->TailTapped(pile, NULL);
+    if (!LuaUtilSetupTableMethod(L, pile->category, "PileTapped")) {
+        fprintf(stderr, "INFO: %s: %s.PileTapped is not a function, reverting to internal default\n", __func__, pile->category);
+        pile->vtable->PileTapped(pile);
     } else {
         // push one arg, the (non existant) tail
         lua_pushnil(L);
@@ -84,3 +51,34 @@ void BaizePileTapped(struct Baize *const self, struct Pile *const pile)
         }
     }
 }
+
+#if 0
+// ask a Lua function if these cards match in some way
+_Bool BaizeMatchCards(struct Baize *const self, struct Card *const c1, struct Card *const c2)
+{
+    lua_State *L = self->L;
+    _Bool result = 0;
+
+    if (lua_getglobal(L, "MatchCards") != LUA_TFUNCTION) {
+        fprintf(stderr, "WARNING: %s: MatchCards is not a function\n", __func__);
+        lua_pop(L, 1);  // pop whatever "MatchCards" is
+    } else {
+        lua_pushlightuserdata(L, c1);
+        lua_pushlightuserdata(L, c2);
+        // two args, one bool return
+        if ( lua_pcall(L, 2, 1, 0) != LUA_OK ) {
+            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(L, -1));
+            lua_pop(L, 1);  // pop error
+        } else {
+            if (lua_isboolean(L, -1)) {
+                result = lua_toboolean(L, -1);
+            } else {
+                fprintf(stderr, "ERROR: %s: expecting boolean return\n", __func__);
+                lua_pop(L, 1);  // pop whatever that is
+            }
+        }
+    }
+
+    return result;
+}
+#endif

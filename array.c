@@ -103,17 +103,28 @@ void ArraySwap(struct Array *const self, int i, int j)
     self->data[j] = tmp;
 }
 
-void* ArrayGet(struct Array *const self, int pos)
+void* ArrayGet(struct Array *const self, size_t pos)
 {
-    if ((size_t)pos < self->used) {
+    if (pos < self->used) {
         return self->data[pos];
     } else {
-        fprintf(stderr, "WARNING: %s: index %d exceeds used %lu\n", __func__, pos, self->used);
+        fprintf(stderr, "WARNING: %s: index %lu exceeds used %lu\n", __func__, pos, self->used);
         return NULL;
     }
 }
 
-_Bool ArrayIndexOf(struct Array *const self, const void * element, size_t *index)
+// replace the element at pos - does not expand array
+void ArrayPut(struct Array *const self, size_t pos, void* element)
+{
+    if (pos < self->used) {
+        self->data[pos] = element;
+    } else {
+        fprintf(stderr, "WARNING: %s: index %lu exceeds used %lu\n", __func__, pos, self->used);
+    }
+}
+
+// return the index of element in out parameter, and true/false if element was found
+_Bool ArrayIndexOf(struct Array *const self, const void *element, size_t *index)
 {
     for ( size_t i=0; i<self->used; i++ ) {
         if (self->data[i] == element) {

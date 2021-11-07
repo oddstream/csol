@@ -105,12 +105,11 @@ function Tableau.SortedAndUnsorted(pile)
     return sorted, unsorted
 end
 
-function Stock.Tapped(tail)
+function Stock.PileTapped(pile)
+    Toast("No more cards in Stock")
+end
 
-    if not tail then
-        Toast("No more cards in Stock")
-        return
-    end
+function Stock.TailTapped(tail)
 
     local errMsg = nil
     local tabCards = 0

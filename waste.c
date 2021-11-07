@@ -14,9 +14,9 @@
 
 static struct PileVtable wasteVtable = {
     &WasteCanMoveTail,
-    &PileInertCanMatchTail,
     &WasteCanAcceptCard,
     &WasteCanAcceptTail,
+    &PileInertPileTapped,
     &PileGenericTailTapped,
     &WasteCollect,
     &WasteComplete,

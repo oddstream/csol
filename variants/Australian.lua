@@ -106,21 +106,25 @@ end
 
 -- Actions
 
-function Stock.Tapped(tail)
-    if tail == nil then
-        if STOCK_RECYCLES == 0 then
-            Toast("No more Stock recycles")
-            return
+function Stock.PileTapped(pile)
+    if STOCK_RECYCLES == 0 then
+        return "No more Stock recycles"
+    elseif 1 == STOCK_RECYCLES then
+        Toast("Last Stock recycle")
+    elseif 2 == STOCK_RECYCLES then
+        Toast("One Stock recycle remaining")
+    end
+    if Len(Waste.Pile) > 0 then
+        while Len(Waste.Pile) > 0 do
+            MoveCard(Waste.Pile, Stock.Pile)
         end
-        if Len(Waste.Pile) > 0 then
-            while Len(Waste.Pile) > 0 do
-                MoveCard(Waste.Pile, Stock.Pile)
-            end
-            STOCK_RECYCLES = STOCK_RECYCLES - 1
-        end
-    else
-        for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(Stock.Pile, Waste.Pile)
-        end
+        STOCK_RECYCLES = STOCK_RECYCLES - 1
     end
 end
+
+function Stock.TailTapped(tail)
+    for i = 1, STOCK_DEAL_CARDS do
+        MoveCard(Stock.Pile, Waste.Pile)
+    end
+end
+

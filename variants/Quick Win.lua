@@ -193,60 +193,61 @@ end
 
 -- Actions
 
-function Stock.Tapped(tail)
-    io.stderr:write("Stock.Tapped\n")
+function Stock.PileTapped(pile)
+    io.stderr:write("Stock.PileTapped\n")
 
-    if tail == nil then
-        if STOCK_RECYCLES == 0 then
-            return "No more Stock recycles"
-        elseif 1 == STOCK_RECYCLES then
-            Toast("Last Stock recycle")
-        elseif 2 == STOCK_RECYCLES then
-            Toast("One Stock recycle remaining")
+    if STOCK_RECYCLES == 0 then
+        return "No more Stock recycles"
+    elseif 1 == STOCK_RECYCLES then
+        Toast("Last Stock recycle")
+    elseif 2 == STOCK_RECYCLES then
+        Toast("One Stock recycle remaining")
+    end
+    if Len(Waste.Pile) > 0 then
+        while Len(Waste.Pile) > 0 do
+            MoveCard(Waste.Pile, Stock.Pile)
         end
-        if Len(Waste.Pile) > 0 then
-            while Len(Waste.Pile) > 0 do
-                MoveCard(Waste.Pile, Stock.Pile)
+        STOCK_RECYCLES = STOCK_RECYCLES - 1
+    end
+end
+
+function Stock.TailTapped(tail)
+    io.stderr:write("Stock.TailTapped\n")
+    for i = 1, STOCK_DEAL_CARDS do
+        MoveCard(Stock.Pile, Waste.Pile)
+    end
+end
+
+--[[
+function Waste.TailTapped(tail)
+    io.stderr:write("Waste.TailTapped\n")
+    if Len(tail) == 1 then
+        for _, pile in ipairs(Foundation.Piles) do
+            if not Foundation.TailAppendError(pile, tail) then
+                MoveCard(CardOwner(First(tail)), pile)
+                break
             end
-            STOCK_RECYCLES = STOCK_RECYCLES - 1
-          end
-    else
-        for i = 1, STOCK_DEAL_CARDS do
-            MoveCard(Stock.Pile, Waste.Pile)
         end
     end
 end
 
-function Waste.Tapped(tail)
-    io.stderr:write("Waste.Tapped\n")
-    if not tail or Len(tail) > 1 then
-        return
-    end
-    for _, pile in ipairs(Foundation.Piles) do
-        if not Foundation.TailAppendError(pile, tail) then
-            MoveCard(CardOwner(First(tail)), pile)
-            break
+function Tableau.TailTapped(tail)
+    io.stderr:write("Tableau.TailTapped\n")
+    if Len(tail) == 1 then
+        for _, pile in ipairs(Foundation.Piles) do
+            if not Foundation.TailAppendError(pile, tail) then
+                MoveCard(CardOwner(First(tail)), pile)
+                break
+            end
         end
     end
 end
-
-function Tableau.Tapped(tail)
-    io.stderr:write("Tableau.Tapped\n")
-    if not tail or Len(tail) > 1 then
-        return
-    end
-    for _, pile in ipairs(Foundation.Piles) do
-        if not Foundation.TailAppendError(pile, tail) then
-            MoveCard(CardOwner(First(tail)), pile)
-            break
-        end
-    end
-end
+]]
 
 function AfterMove()
   io.stdout:write("AfterMove\n")
     for _, pile in ipairs(Tableau.Piles) do
-        if Len(pile) == 0 then
+        if Empty(pile) then
             if Len(Waste.Pile) > 0 then
                 MoveCard(Waste.Pile, pile)
             elseif Len(Stock.Pile) > 0 then
@@ -254,7 +255,7 @@ function AfterMove()
             end
         end
     end
-    if Len(Waste.Pile) == 0 then
+    if Empty(Waste.Pile) then
         MoveCard(Stock.Pile, Waste.Pile)
     end
 end
