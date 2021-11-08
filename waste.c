@@ -21,6 +21,7 @@ static struct PileVtable wasteVtable = {
     &WasteCollect,
     &WasteComplete,
     &WasteConformant,
+    &PileGenericSetLabel,
     &PileInertSetRecycles,
     &WasteCountSortedAndUnsorted,
 

@@ -20,6 +20,7 @@ static struct PileVtable cellVtable = {
     &CellCollect,
     &CellComplete,
     &CellConformant,
+    &PileGenericSetLabel,
     &PileInertSetRecycles,
     &CellCountSortedAndUnsorted,
 

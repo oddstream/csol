@@ -14,13 +14,19 @@
 	Default background fill: #323232 100%
 */
 
+#define FONT_SIZE (14.0f)
+
 // Toast
 
 struct Toast* ToastNew(const char* message, int ticks)
 {
+    extern Font fontRobotoRegular14;
+    extern float fontSpacing;
+
     struct Toast *self = calloc(1, sizeof(struct Toast));
-    if ( self ) {
+    if (self) {
         self->message = strdup(message);
+        self->mte = MeasureTextEx(fontRobotoRegular14, message, FONT_SIZE, fontSpacing);
         self->ticksLeft = ticks;
     }
     return self;
@@ -28,8 +34,8 @@ struct Toast* ToastNew(const char* message, int ticks)
 
 void ToastFree(struct Toast *const self)
 {
-    if ( self ) {
-        if ( self->message ) {
+    if (self) {
+        if (self->message) {
             free(self->message);
         }
         free(self);
@@ -41,7 +47,7 @@ void ToastFree(struct Toast *const self)
 struct ToastManager* ToastManagerNew()
 {
     struct ToastManager *self = calloc(1, sizeof(struct ToastManager));
-    if ( self ) {
+    if (self) {
         self->toasts = ArrayNew(8);
     }
     return self;
@@ -69,20 +75,12 @@ void ToastManagerUpdate(struct ToastManager *const self)
     }
 }
 
-static void DrawCenteredText(Rectangle r, const char* text, Vector2 mte)
-{
-    extern Font fontRobotoRegular14;
-    extern Color uiTextColor;
-
-    Vector2 pos = UtilCenterTextInRectangle(r, mte.x, mte.y);
-    DrawTextEx(fontRobotoRegular14, text, pos, 14.0f, 1.2f, uiTextColor);
-}
-
 void ToastManagerDraw(struct ToastManager *const self)
 {
     // ToastManager draws all the Toasts, rather than handing it down to the Toast object, because we know position in queue
-    extern Color uiBackgroundColor;
+    extern Color uiBackgroundColor, uiTextColor;
     extern Font fontRobotoRegular14;
+    extern float fontSpacing;
 
     int baizeWidth = GetScreenWidth();
     int baizeHeight = GetScreenHeight();
@@ -90,13 +88,9 @@ void ToastManagerDraw(struct ToastManager *const self)
     float rY = (float)(baizeHeight - 14 - 14 - 14 - 24);  // 24 height of statusbar
     size_t index;
     for ( struct Toast *t = ArrayFirst(self->toasts, &index); t; t = ArrayNext(self->toasts, &index) ) {
-        Vector2 mte = MeasureTextEx(fontRobotoRegular14, t->message, 14.0f, 1.2f);
-        // mte.x += 24.0f;
-        // mte.y += 14.0f;
-
-        float tX = (baizeWidth / 2.0f) - (mte.x / 2.0f);
+        float tX = (baizeWidth / 2.0f) - (t->mte.x / 2.0f);
         float tY = rY + (14.0f / 2.0f);
-        Rectangle rText = {.x=tX, .y=tY, .width=mte.x, .height=mte.y};
+        Rectangle rText = {.x=tX, .y=tY, .width=t->mte.x, .height=t->mte.y};
 
         float rWidth = rText.width + 24;
         float rHeight = rText.height + 14;
@@ -105,7 +99,9 @@ void ToastManagerDraw(struct ToastManager *const self)
         Rectangle rRect = {.x=rX, .y=rY, .width=rWidth, .height=rHeight};
 
         DrawRectangleRounded(rRect, 0.05, 9, uiBackgroundColor);
-        DrawCenteredText(rText, t->message, mte);
+
+        Vector2 pos = UtilCenterTextInRectangle(rRect, t->mte.x, t->mte.y);
+        DrawTextEx(fontRobotoRegular14, t->message, pos, FONT_SIZE, fontSpacing, uiTextColor);
 
         rY = rY - rRect.height - 14.0f;
     }
@@ -113,7 +109,7 @@ void ToastManagerDraw(struct ToastManager *const self)
 
 void ToastManagerFree(struct ToastManager *const self)
 {
-    if ( self ) {
+    if (self) {
         ArrayForeach(self->toasts, (ArrayIterFunc)ToastFree);
         ArrayFree(self->toasts);
         free(self);

@@ -5,7 +5,8 @@ dofile("variants/~Library.lua")
 POWER_MOVES = true
 EASY_SEEDS = {39675,50060,50419,10982}
 
-local function DemoteKings(pile)
+local function DemoteCards(pile, ord)
+    -- yes, I know, a bubble sort
     local hasChanged
     local itemCount = Len(pile)
     repeat
@@ -14,7 +15,7 @@ local function DemoteKings(pile)
         for i = 1, itemCount do
             local c1 = Get(pile, i)
             local c2 = Get(pile, i + 1)
-            if CardOrdinal(c1) ~= 13 and CardOrdinal(c2) == 13 then
+            if CardOrdinal(c1) ~= ord and CardOrdinal(c2) == ord then
                 SwapCards(c1, c2)
                 hasChanged = true
             end
@@ -22,7 +23,7 @@ local function DemoteKings(pile)
     until not hasChanged 
 end
 
-local function PromoteAces(pile)
+local function PromoteCards(pile, ord)
     local hasChanged
     local itemCount = Len(pile)
     repeat
@@ -31,7 +32,7 @@ local function PromoteAces(pile)
         for i = 1, itemCount do
             local c1 = Get(pile, i)
             local c2 = Get(pile, i + 1)
-            if CardOrdinal(c1) == 1 and CardOrdinal(c2) ~= 1 then
+            if CardOrdinal(c1) == ord and CardOrdinal(c2) ~= ord then
                 SwapCards(c1, c2)
                 hasChanged = true
             end
@@ -65,8 +66,8 @@ function BuildPiles()
       MoveCard(Stock.Pile, pile)
     end
     if EASY then
-        DemoteKings(pile)
-        PromoteAces(pile)
+        DemoteCards(pile, 13)
+        PromoteCards(pile, 1)
     end
   end
   for x = 5, 8 do
@@ -75,8 +76,8 @@ function BuildPiles()
       MoveCard(Stock.Pile, pile)
     end
     if EASY then
-        DemoteKings(pile)
-        PromoteAces(pile)
+        DemoteCards(pile, 13)
+        PromoteCards(pile, 1)
     end
   end
 

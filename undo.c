@@ -97,6 +97,10 @@ static struct SavedCardArray* SavedCardArrayNew(struct Card* cardLibrary, struct
 
 static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Card *const cardLibrary, struct Pile *const pile)
 {
+    char label[MAX_PILE_LABEL+1];
+    decodeLabel(label, sca->label);
+    pile->vtable->SetLabel(pile, label);
+
     for ( size_t i=0; i<sca->len; i++ ) {
         struct SavedCard sc = sca->sav[i];
         struct Card* c = &cardLibrary[sc.index];
@@ -249,7 +253,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
         struct SavedCardArray *sca = ArrayGet(snap->savedPiles, i);
         struct Pile* dstPile = ArrayGet(self->piles, i);
         ArrayReset(dstPile->cards);
-        decodeLabel(dstPile->label, sca->label);
+
         SavedCardArrayCopyToPile(sca, self->cardLibrary, dstPile);
 
         if (snap->recycles != ((struct Stock*)self->stock)->recycles) {

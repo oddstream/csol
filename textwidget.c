@@ -16,38 +16,42 @@ static struct WidgetVtable textWidgetVtable = {
 struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, CommandFunction cf, void* param)
 {
     struct TextWidget* self = calloc(1, sizeof(struct TextWidget));
-    if ( self ) {
+    if (self) {
         WidgetCtor((struct Widget*)self, parent, align, cf, param);
         self->super.vtable = &textWidgetVtable;
         self->frame = frame;
         self->font = font;
         self->fontSize = fontSize;
         self->text = NULL;
+        self->mte = (Vector2){0};
     }
     return self;
 }
 
 void TextWidgetSetText(struct TextWidget *const self, const char* text)
 {
+    extern float fontSpacing;
+
     if ( self->text ) {
         free(self->text);
         self->text = NULL;
     }
     if ( text ) {
         self->text = strdup(text);
-        Vector2 mte = MeasureTextEx(*(self->font), text, self->fontSize, 1.2f);
+        self->mte = MeasureTextEx(*(self->font), text, self->fontSize, fontSpacing);
         if ( self->frame == NONE ) {
-            self->super.rect.width = mte.x;
-            self->super.rect.height = mte.y;
+            self->super.rect.width = self->mte.x;
+            self->super.rect.height = self->mte.y;
         } else {
-            self->super.rect.width = ICON_SIZE + mte.x;
-            self->super.rect.height = ICON_SIZE + mte.y;
+            self->super.rect.width = ICON_SIZE + self->mte.x;
+            self->super.rect.height = ICON_SIZE + self->mte.y;
         }
     }
 }
 
 void TextWidgetDraw(struct Widget *const self)
 {
+    extern float fontSpacing;
     extern Color uiTextColor;
 
     struct TextWidget *const tw = (struct TextWidget*)self;
@@ -88,7 +92,7 @@ void TextWidgetDraw(struct Widget *const self)
             pos.x += 2.0f;
             pos.y += 2.0f;
         }
-        DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, 1.2f, uiTextColor);
+        DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, fontSpacing, uiTextColor);
     }
 
 #if 0

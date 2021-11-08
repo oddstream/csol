@@ -50,7 +50,21 @@ end
 
 -- TailMoveError constraints (Tableau only)
 
+-- function Cell.TailMoveError(tail)
+--     if COMPLETE then
+--         return "Game Complete"
+--     end
+--     return nil
+-- end
+
 -- TailAppendError constraints
+
+-- function Cell.TailAppendError(pile, tail)
+--     if COMPLETE then
+--         return "Game Complete"
+--     end
+--     return nil
+-- end
 
 -- PileConformantError
 

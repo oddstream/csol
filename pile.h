@@ -34,6 +34,7 @@ struct Pile {
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
     char label[MAX_PILE_LABEL + 1];
+    Vector2 labelmte;    // cached result from MeasureTextEx()
     struct Array *cards;
 };
 
@@ -46,6 +47,7 @@ struct PileVtable {
     int (*Collect)(struct Pile *p);
     _Bool (*Complete)(struct Pile *p);
     _Bool (*Conformant)(struct Pile *p);
+    void (*SetLabel)(struct Pile *const self, const char* label);
     void (*SetRecycles)(struct Pile *const self, int r);
     void (*CountSortedAndUnsorted)(struct Pile *const self, int *sorted, int *unsorted);
     void (*Update)(struct Pile *const self);
@@ -72,9 +74,9 @@ Rectangle PileScreenRect(struct Pile *const self);
 Vector2 PileBaizePos(struct Pile *const self);
 Vector2 PileScreenPos(struct Pile *const self);
 Vector2 PileCalculatePosFromSlot(struct Pile *const self);
-void PileDrawUpperLeftGlyph(struct Pile *const self, int glyph);
+// void PileDrawUpperLeftGlyph(struct Pile *const self, int glyph);
 void PileDrawCenteredGlyph(struct Pile *const self, int glyph);
-void PileDrawUpperLeftText(struct Pile *const self, const char *text);
+// void PileDrawUpperLeftText(struct Pile *const self, const char *text);
 void PileDrawCenteredText(struct Pile *const self, const char *text);
 Rectangle PileFannedBaizeRect(struct Pile *const self);
 Rectangle PileFannedScreenRect(struct Pile *const self);
@@ -93,6 +95,8 @@ int PileInertCollect(struct Pile *const self);
 int PileGenericCollect(struct Pile *const self);
 _Bool PileInertComplete(struct Pile *const self);
 _Bool PileInertConformant(struct Pile *const self);
+void PileInertSetLabel(struct Pile *const self, const char* label);
+void PileGenericSetLabel(struct Pile *const self, const char* label);
 void PileInertSetRecycles(struct Pile *const self, int r);
 void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 

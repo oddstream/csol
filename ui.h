@@ -80,6 +80,7 @@ struct TextWidget {
     Font *font;
     float fontSize;
     char *text;
+    Vector2 mte;    // cached result from MeasureTextEx()
 };
 
 struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, CommandFunction cf, void* param);
@@ -178,6 +179,7 @@ void TitleBarFree(struct Container *const self);
 
 struct Toast {
     char *message;  // strdup'd
+    Vector2 mte;    // cached result from MeasureTextEx
     int ticksLeft;
 };
 

@@ -23,6 +23,7 @@ static struct PileVtable stockVtable = {
     &PileInertCollect,
     &StockComplete,
     &StockConformant,
+    &PileInertSetLabel,
     &StockSetRecycles,
     &StockCountSortedAndUnsorted,
 
@@ -165,39 +166,7 @@ void StockDraw(struct Pile *const self)
 
     struct Stock* s = (struct Stock*)self;
     if (s->recycles) {
-#if 0
-        float iconSize = 96.0f;
-        float iconScale = 1.0f;
-        // retro cards are 71 wide, kenney cards are 140 wide
-        if (iconSize >= cardWidth) {
-            iconScale = cardWidth / 96.0f;  // eg 71/96=0.7395
-            iconSize *= iconScale;
-        }
-        Vector2 pos = PileScreenPos(self);
-        pos.x += (cardWidth - iconSize) / 2.0f;
-        pos.y += (cardHeight - iconSize) / 2.0f;
-        if ( CheckCollisionPointRec(GetMousePosition(), (Rectangle){.x=pos.x, .y=pos.y, .width=iconSize, .height=iconSize}) ) {
-            pos.x += 2.0f;
-            pos.y += 2.0f;
-        }
-        DrawTextureEx(
-            recycleTexture,
-            pos,
-            0.0f,   // rotation
-            iconScale,   // scale
-            baizeHighlightColor
-        );
-        // if (s->recycles<10) {
-        //     char str[16]; sprintf(str, "%d", s->recycles);
-        //     Vector2 mte = MeasureTextEx(fontAcme, str, 24.0f, 0.0f);
-        //     pos = PileScreenPos(self);
-        //     pos.x += (cardWidth - mte.x) / 2.0f;
-        //     pos.y += (cardHeight - mte.y) / 2.0f;
-        //     DrawTextEx(fontAcme, str, pos, 24.0f, 0.0f, baizeHighlightColor);
-        // }
-#else
         PileDrawCenteredGlyph(self, 0x267b);
-#endif
     }
 
     PileDraw(self);

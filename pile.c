@@ -164,6 +164,7 @@ void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
     extern int pileFontSize;
     extern Color baizeHighlightColor;
 
+    // TODO consider caching this if too expensive
     GlyphInfo gi = GetGlyphInfo(fontSymbol, glyph);
     Rectangle gr = GetGlyphAtlasRec(fontSymbol, glyph);
     Rectangle rp = PileScreenRect(self);
@@ -171,10 +172,11 @@ void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
     rp.y -= gi.offsetY;
     Vector2 cpos = UtilCenterTextInRectangle(rp, gr.width, gr.height);
 
-    if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
-        cpos.x += 2.0f;
-        cpos.y += 2.0f;
-    }
+    // this may be too expensive to do at 60Hz
+    // if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
+    //     cpos.x += 2.0f;
+    //     cpos.y += 2.0f;
+    // }
 
     DrawTextCodepoint(fontSymbol, glyph, cpos, pileFontSize, baizeHighlightColor);
 }
@@ -211,8 +213,7 @@ void PileDrawUpperLeftText(struct Pile *const self, const char *text)
     Rectangle rp = PileScreenRect(self);
     rp.width /= 2.0f;
     rp.height /= 2.0f;
-    Vector2 mte = MeasureTextEx(fontAcme, text, (float)pileFontSize, 1.2f);
-    Vector2 pos = UtilCenterTextInRectangle(rp, mte.x, mte.y);
+    Vector2 pos = UtilCenterTextInRectangle(rp, self->labelmte.x, self->labelmte.y);
 
     DrawTextEx(fontAcme, text, pos, pileFontSize, 1.2f, baizeHighlightColor);
 }
@@ -222,21 +223,23 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
 {
     extern Font fontAcme;
     extern int pileFontSize;
+    extern float fontSpacing;
     extern Color baizeHighlightColor;
 
     if (text==NULL || *text=='\0') {
         return;
     }
+    // TODO consider caching this if too expensive
     Rectangle rp = PileScreenRect(self);
-    Vector2 mte = MeasureTextEx(fontAcme, text, (float)pileFontSize, 1.2f);
-    Vector2 cpos = UtilCenterTextInRectangle(rp, mte.x, mte.y);
+    Vector2 cpos = UtilCenterTextInRectangle(rp, self->labelmte.x, self->labelmte.y);
 
-    if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
-        cpos.x += 2.0f;
-        cpos.y += 2.0f;
-    }
+    // this may be too expensive to do at 60Hz
+    // if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
+    //     cpos.x += 2.0f;
+    //     cpos.y += 2.0f;
+    // }
 
-    DrawTextEx(fontAcme, text, cpos, pileFontSize, 1.2f, baizeHighlightColor);
+    DrawTextEx(fontAcme, text, cpos, pileFontSize, fontSpacing, baizeHighlightColor);
 }
 
 /*
@@ -598,6 +601,30 @@ _Bool PileInertConformant(struct Pile *const self)
 {
     (void)self;
     return 1;
+}
+
+void PileInertSetLabel(struct Pile *const self, const char *label)
+{
+    (void)self;
+    (void)label;
+}
+
+void PileGenericSetLabel(struct Pile *const self, const char *label)
+{
+    extern Font fontAcme;
+    extern int pileFontSize;
+    extern float fontSpacing;
+
+    // fprintf(stdout, "INFO: %s: set %s label to '%s'\n", __func__, self->category, label);
+
+    if (pileFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
+    memset(self->label, 0, MAX_PILE_LABEL + 1);
+    if (*label) {
+        strncpy(self->label, label, MAX_PILE_LABEL);
+        self->labelmte = MeasureTextEx(fontAcme, self->label, (float)pileFontSize, fontSpacing);
+    } else {
+        self->labelmte = (Vector2){0};
+    }
 }
 
 void PileInertSetRecycles(struct Pile *const self, int r)

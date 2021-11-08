@@ -193,6 +193,7 @@ Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
 Font fontSymbol = {0};
 int pileFontSize = 0;
+float fontSpacing = 1.0f;
 
 // Texture2D discardTexture = {0}, recycleTexture = {0};
 
@@ -251,7 +252,7 @@ int main(int argc, char* argv[], char* envp[])
     InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
 
     {
-        Image img = LoadImage("assets/outline_recycling_white_48dp.png");
+        Image img = LoadImage("assets/appicon.png");
         SetWindowIcon(img);
         UnloadImage(img);
     }
@@ -262,9 +263,14 @@ int main(int argc, char* argv[], char* envp[])
     fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
     // https://graphemica.com/search?q=home
-    int codepoints[6] = { 0x2663, 0x2666, 0x2665, 0x2660, 
+    int codepoints[6] = {
+        0x2663, /* black club */
+        0x2666, /* black diamond */
+        0x2665, /* black heart */
+        0x2660, /* black spade */
         0x267b, /* recycle */ 
-        0x2302, /* house */ };
+        0x2302, /* house */
+    };
     fontSymbol = LoadFontEx("assets/DejaVuSans-Bold.ttf", pileFontSize, codepoints, 6);
 
     // recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");

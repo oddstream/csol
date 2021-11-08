@@ -22,6 +22,7 @@ static struct PileVtable foundationVtable = {
     &PileInertCollect,
     &FoundationComplete,
     &FoundationConformant,
+    &PileGenericSetLabel,
     &PileInertSetRecycles,
     &FoundationCountSortedAndUnsorted,
 

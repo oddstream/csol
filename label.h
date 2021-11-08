@@ -15,6 +15,7 @@ struct Label {
 };
 
 struct Label* LabelNew(struct Baize *const baize, Vector2 pos, enum FanType fan);
+void LabelSetLabel(struct Pile *const self, const char* label);
 void LabelDraw(struct Pile *const self);
 
 #endif
