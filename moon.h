@@ -17,8 +17,8 @@ int MoonPileType(lua_State* L);
 /*deprecate*/int MoonPileGet(lua_State *L);
 /*deprecate*/int MoonPileLen(lua_State *L);
 /*deprecate*/int MoonPilePeek(lua_State* L);
-int MoonPileDemoteCards(lua_State *L);
-int MoonPilePromoteCards(lua_State *L);
+// int MoonPileDemoteCards(lua_State *L);
+// int MoonPilePromoteCards(lua_State *L);
 int MoonMoveCard(lua_State* L);
 int MoonMoveAllCards(lua_State* L);
 

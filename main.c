@@ -191,7 +191,10 @@ Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 Font fontAcme = {0};
 Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
-Texture2D recycleTexture = {0};
+Font fontSymbol = {0};
+int pileFontSize = 0;
+
+// Texture2D discardTexture = {0}, recycleTexture = {0};
 
 int main(int argc, char* argv[], char* envp[])
 // int main(void) 
@@ -253,11 +256,19 @@ int main(int argc, char* argv[], char* envp[])
         UnloadImage(img);
     }
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-    fontAcme = LoadFontEx("assets/Acme-Regular.ttf", (int)cardWidth / 2, 0, 0);
+    pileFontSize = (int)(cardHeight / 2.0f);
+    fontAcme = LoadFontEx("assets/Acme-Regular.ttf", pileFontSize, 0, 0);
     fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
     fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
-    recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");
+    // https://graphemica.com/search?q=home
+    int codepoints[6] = { 0x2663, 0x2666, 0x2665, 0x2660, 
+        0x267b, /* recycle */ 
+        0x2302, /* house */ };
+    fontSymbol = LoadFontEx("assets/DejaVuSans-Bold.ttf", pileFontSize, codepoints, 6);
+
+    // recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");
+    // discardTexture = LoadTexture("assets/outline_delete_white_48dp.png");
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
@@ -327,9 +338,11 @@ int main(int argc, char* argv[], char* envp[])
     SpritesheetFree(ssBack);
     SpritesheetFree(ssIcons);
 
-    UnloadTexture(recycleTexture);
+    // UnloadTexture(recycleTexture);
+    // UnloadTexture(discardTexture);
 
     UnloadFont(fontAcme);
+    UnloadFont(fontSymbol);
     UnloadFont(fontRobotoMedium24);
     UnloadFont(fontRobotoRegular14);
 

@@ -155,9 +155,9 @@ void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unso
 
 void StockDraw(struct Pile *const self)
 {
-    extern float cardWidth, cardHeight;
-    extern Texture2D recycleTexture;
-    extern Color baizeHighlightColor;
+    // extern float cardWidth, cardHeight;
+    // extern Texture2D recycleTexture;
+    // extern Color baizeHighlightColor;
     // extern Font fontAcme;
 
     // icon is 96x96
@@ -165,6 +165,7 @@ void StockDraw(struct Pile *const self)
 
     struct Stock* s = (struct Stock*)self;
     if (s->recycles) {
+#if 0
         float iconSize = 96.0f;
         float iconScale = 1.0f;
         // retro cards are 71 wide, kenney cards are 140 wide
@@ -194,6 +195,9 @@ void StockDraw(struct Pile *const self)
         //     pos.y += (cardHeight - mte.y) / 2.0f;
         //     DrawTextEx(fontAcme, str, pos, 24.0f, 0.0f, baizeHighlightColor);
         // }
+#else
+        PileDrawCenteredGlyph(self, 0x267b);
+#endif
     }
 
     PileDraw(self);

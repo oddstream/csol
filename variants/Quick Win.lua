@@ -16,6 +16,40 @@ STOCK_RECYCLES = 3
 
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
+local function DemoteCards(pile, ord)
+    local hasChanged
+    local itemCount = Len(pile)
+    repeat
+        hasChanged = false
+        itemCount = itemCount - 1
+        for i = 1, itemCount do
+            local c1 = Get(pile, i)
+            local c2 = Get(pile, i + 1)
+            if CardOrdinal(c1) ~= ord and CardOrdinal(c2) == ord then
+                SwapCards(c1, c2)
+                hasChanged = true
+            end
+        end
+    until not hasChanged 
+end
+
+local function PromoteCards(pile, ord)
+    local hasChanged
+    local itemCount = Len(pile)
+    repeat
+        hasChanged = false
+        itemCount = itemCount - 1
+        for i = 1, itemCount do
+            local c1 = Get(pile, i)
+            local c2 = Get(pile, i + 1)
+            if CardOrdinal(c1) == ord and CardOrdinal(c2) ~= ord then
+                SwapCards(c1, c2)
+                hasChanged = true
+            end
+        end
+    until not hasChanged 
+end
+
 function BuildPiles()
 
     io.stderr:write("BuildPiles\n")
@@ -64,17 +98,19 @@ function BuildPiles()
         for n = 1, 3 do
           MoveCard(Stock.Pile, pile)
         end
-        PileDemoteCards(pile, 11)
-        PilePromoteCards(pile, 1)
+        DemoteCards(pile, 11)
+        PromoteCards(pile, 1)
     end
     for x = 1, 10 do
         pile = AddPile("Tableau", x, 4, FAN_DOWN)
         for n = 1, 1 do
           MoveCard(Stock.Pile, pile)
         end
-        PileDemoteCards(pile, 11)
-        PilePromoteCards(pile, 1)
+        DemoteCards(pile, 11)
+        PromoteCards(pile, 1)
     end
+
+    PromoteCards(Stock.Pile, 1)
 end
 
 function StartGame()

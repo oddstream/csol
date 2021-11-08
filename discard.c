@@ -26,7 +26,7 @@ static struct PileVtable discardVtable = {
     &DiscardCountSortedAndUnsorted,
 
     &PileUpdate,
-    &PileDraw,
+    &DiscardDraw,
     &PileFree,
 };
 
@@ -88,4 +88,13 @@ void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 {
     (void)unsorted;
     *sorted += ArrayLen(self->cards);
+}
+
+void DiscardDraw(struct Pile *const self)
+{
+    if (PileEmpty(self)) {
+        PileDrawCenteredGlyph(self, 0x2302);
+    }
+
+    PileDraw(self);
 }

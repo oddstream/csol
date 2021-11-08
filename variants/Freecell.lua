@@ -5,6 +5,40 @@ dofile("variants/~Library.lua")
 POWER_MOVES = true
 EASY_SEEDS = {39675,50060,50419,10982}
 
+local function DemoteKings(pile)
+    local hasChanged
+    local itemCount = Len(pile)
+    repeat
+        hasChanged = false
+        itemCount = itemCount - 1
+        for i = 1, itemCount do
+            local c1 = Get(pile, i)
+            local c2 = Get(pile, i + 1)
+            if CardOrdinal(c1) ~= 13 and CardOrdinal(c2) == 13 then
+                SwapCards(c1, c2)
+                hasChanged = true
+            end
+        end
+    until not hasChanged 
+end
+
+local function PromoteAces(pile)
+    local hasChanged
+    local itemCount = Len(pile)
+    repeat
+        hasChanged = false
+        itemCount = itemCount - 1
+        for i = 1, itemCount do
+            local c1 = Get(pile, i)
+            local c2 = Get(pile, i + 1)
+            if CardOrdinal(c1) == 1 and CardOrdinal(c2) ~= 1 then
+                SwapCards(c1, c2)
+                hasChanged = true
+            end
+        end
+    until not hasChanged 
+end
+
 function BuildPiles()
 
   if type(AddPile) ~= "function" then
@@ -31,8 +65,8 @@ function BuildPiles()
       MoveCard(Stock.Pile, pile)
     end
     if EASY then
-      PileDemoteCards(pile, 13)
-      PilePromoteCards(pile, 1)
+        DemoteKings(pile)
+        PromoteAces(pile)
     end
   end
   for x = 5, 8 do
@@ -41,8 +75,8 @@ function BuildPiles()
       MoveCard(Stock.Pile, pile)
     end
     if EASY then
-      PileDemoteCards(pile, 13)
-      PilePromoteCards(pile, 1)
+        DemoteKings(pile)
+        PromoteAces(pile)
     end
   end
 

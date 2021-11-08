@@ -158,6 +158,87 @@ Vector2 PileCalculatePosFromSlot(struct Pile *const self)
             };
 }
 
+void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
+{
+    extern Font fontSymbol;
+    extern int pileFontSize;
+    extern Color baizeHighlightColor;
+
+    GlyphInfo gi = GetGlyphInfo(fontSymbol, glyph);
+    Rectangle gr = GetGlyphAtlasRec(fontSymbol, glyph);
+    Rectangle rp = PileScreenRect(self);
+    rp.x -= gi.offsetX;
+    rp.y -= gi.offsetY;
+    Vector2 cpos = UtilCenterTextInRectangle(rp, gr.width, gr.height);
+
+    if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
+        cpos.x += 2.0f;
+        cpos.y += 2.0f;
+    }
+
+    DrawTextCodepoint(fontSymbol, glyph, cpos, pileFontSize, baizeHighlightColor);
+}
+
+#if 0
+void PileDrawUpperLeftGlyph(struct Pile *const self, int glyph)
+{
+    extern Font fontSymbol;
+    extern int pileFontSize;
+    extern Color baizeHighlightColor;
+
+    GlyphInfo gi = GetGlyphInfo(fontSymbol, glyph);
+    Rectangle gr = GetGlyphAtlasRec(fontSymbol, glyph);
+    Rectangle rp = PileScreenRect(self);
+    rp.x -= gi.offsetX;
+    rp.y -= gi.offsetY;
+    rp.width /= 2.0f;
+    rp.height /= 2.0f;
+    Vector2 cpos = UtilCenterTextInRectangle(rp, gr.width, gr.height);
+    DrawTextCodepoint(fontSymbol, glyph, cpos, pileFontSize, baizeHighlightColor);
+}
+#endif
+
+#if 0
+void PileDrawUpperLeftText(struct Pile *const self, const char *text)
+{
+    extern Font fontAcme;
+    extern int pileFontSize;
+    extern Color baizeHighlightColor;
+
+    if (text==NULL || *text=='\0') {
+        return;
+    }
+    Rectangle rp = PileScreenRect(self);
+    rp.width /= 2.0f;
+    rp.height /= 2.0f;
+    Vector2 mte = MeasureTextEx(fontAcme, text, (float)pileFontSize, 1.2f);
+    Vector2 pos = UtilCenterTextInRectangle(rp, mte.x, mte.y);
+
+    DrawTextEx(fontAcme, text, pos, pileFontSize, 1.2f, baizeHighlightColor);
+}
+#endif
+
+void PileDrawCenteredText(struct Pile *const self, const char *text)
+{
+    extern Font fontAcme;
+    extern int pileFontSize;
+    extern Color baizeHighlightColor;
+
+    if (text==NULL || *text=='\0') {
+        return;
+    }
+    Rectangle rp = PileScreenRect(self);
+    Vector2 mte = MeasureTextEx(fontAcme, text, (float)pileFontSize, 1.2f);
+    Vector2 cpos = UtilCenterTextInRectangle(rp, mte.x, mte.y);
+
+    if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
+        cpos.x += 2.0f;
+        cpos.y += 2.0f;
+    }
+
+    DrawTextEx(fontAcme, text, cpos, pileFontSize, 1.2f, baizeHighlightColor);
+}
+
 /*
     Used to draw the Pile rounded rect, and to detect card drops on this pile
 */
@@ -539,22 +620,14 @@ void PileUpdate(struct Pile *const self)
 
 void PileDraw(struct Pile *const self)
 {
-    extern float cardWidth;
     extern Color baizeHighlightColor;
-    extern Font fontAcme;
 
     // BeginDrawing() has been called by BaizeDraw()
     // Rectangle r = PileFannedScreenRect(self);
     Rectangle r = PileScreenRect(self);
     DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
 
-    if ( self->label[0] ) {
-        float fontSize = cardWidth / 2.0f;
-        Vector2 pos = PileScreenPos(self);
-        pos.x += cardWidth / 8.0f;
-        pos.y += cardWidth / 16.0f;
-        DrawTextEx(fontAcme, self->label, pos, fontSize, 0, baizeHighlightColor);
-    }
+    PileDrawCenteredText(self, self->label);
 }
 
 void PileFree(struct Pile *const self)

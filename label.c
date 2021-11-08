@@ -45,10 +45,11 @@ void LabelDraw(struct Pile *const self)
     }
 
     extern Font fontAcme;
-    extern float cardWidth;
+    extern int pileFontSize;
     extern Color baizeHighlightColor;
 
-    float fontSize = cardWidth / 4.0f;
+    // TODO scale the font size to fit pile width?
+    float fontSize = (float)(pileFontSize / 4);
     Vector2 mte = MeasureTextEx(fontAcme, self->label, fontSize, 1.2f);
     // center the label in the Pile screen rect
     Rectangle r = PileScreenRect(self);

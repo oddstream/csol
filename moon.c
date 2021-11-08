@@ -34,8 +34,8 @@ static const struct FunctionToRegister {
     {"PileGet", MoonPileGet},   // deprecated
     {"PileLen", MoonPileLen},   // deprecated
     {"PilePeek", MoonPilePeek},   // deprecated
-    {"PileDemoteCards", MoonPileDemoteCards},
-    {"PilePromoteCards", MoonPilePromoteCards},
+    // {"PileDemoteCards", MoonPileDemoteCards},
+    // {"PilePromoteCards", MoonPilePromoteCards},
 
     {"MoveCard", MoonMoveCard},
     {"MoveAllCards", MoonMoveAllCards},
@@ -447,6 +447,7 @@ int MoonPilePeek(lua_State *L)
     return 1;
 }
 
+#if 0
 int MoonPileDemoteCards(lua_State *L)
 {
     if (!lua_islightuserdata(L, 1)) {
@@ -486,7 +487,9 @@ int MoonPileDemoteCards(lua_State *L)
     }
     return 0;
 }
+#endif
 
+#if 0
 int MoonPilePromoteCards(lua_State *L)
 {
     if (!lua_islightuserdata(L, 1)) {
@@ -526,6 +529,7 @@ int MoonPilePromoteCards(lua_State *L)
     }
     return 0;
 }
+#endif
 
 int MoonMoveCard(lua_State *L)
 {

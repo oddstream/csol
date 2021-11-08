@@ -20,5 +20,6 @@ _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
 _Bool DiscardComplete(struct Pile *const self);
 _Bool DiscardConformant(struct Pile *const self);
 void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
+void DiscardDraw(struct Pile *const self);
 
 #endif

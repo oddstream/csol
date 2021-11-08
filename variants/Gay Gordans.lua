@@ -14,8 +14,6 @@ function BuildPiles()
 
     AddPile("Stock", 6, -5, FAN_NONE, 1, 4)    -- hidden
     
-    AddPile("Foundation", 6, 10, FAN_NONE)      -- hidden for dramatic effect
-
     -- Partlett describes five piles of ten cards each,
     -- but that often gets stuck at the beginning,
     -- and is so unlikely to proceed that it's not really a game
@@ -27,7 +25,9 @@ function BuildPiles()
         end
     end
 
-    AddPile("Reserve", 11, 1, FAN_DOWN)
+    AddPile("Foundation", 12, 1, FAN_NONE)
+
+    AddPile("Reserve", 12, 2, FAN_DOWN)
     MoveCard(Stock.Pile, Reserve.Pile)
     MoveCard(Stock.Pile, Reserve.Pile)
 
@@ -66,6 +66,10 @@ function Tableau.TailMoveError(tail)
 end
 
 -- TailAppendError constraints
+
+function Foundation.TailAppendError(pile, tail)
+    return "You cannot move cards directly to the Foundation"
+end
 
 function Tableau.TailAppendError(pile, tail)
     if Empty(pile) then
@@ -115,6 +119,8 @@ function AfterMove()
         return
     end
     MoveCard(LAST_PILE_COUPLED, Foundation.Pile)
+    CardProne(Last(Foundation.Pile), true)
     MoveCard(LAST_PILE_COUPLED, Foundation.Pile)
+    CardProne(Last(Foundation.Pile), true)
     LAST_PILE_COUPLED = nil
 end
