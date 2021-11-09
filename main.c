@@ -1,8 +1,10 @@
 /* main.c */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include <raylib.h>
 #include <lua.h>
@@ -199,10 +201,92 @@ float fontSpacing = 1.0f;
 
 // Texture2D discardTexture = {0}, recycleTexture = {0};
 
+int flag_nolerp = 0;
+int flag_noflip = 0;
+int flag_noload = 0;
+int flag_nosave = 0;
+
 int main(int argc, char* argv[], char* envp[])
 // int main(void) 
 {
     (void)envp;
+
+#if _DEBUG
+    for ( int i=0; i<argc; i++ ) {
+        fprintf(stdout, "%d. %s\n", i, argv[i]);
+    }
+#endif
+
+    char variantName[32];
+    memset(variantName, 0, sizeof(variantName));
+
+    int windowWidth = 640, windowHeight = 480;
+
+    while (1) {
+        static struct option long_options[] = {
+            {"variant", required_argument, 0, 'v'},
+            {"width", required_argument, 0, 'w'},
+            {"height", required_argument, 0, 'h'},
+            {"noload", no_argument, &flag_noload, 1},
+            {"nosave", no_argument, &flag_nosave, 1},
+            {"nolerp", no_argument, &flag_nolerp, 1},
+            {"noflip", no_argument, &flag_noflip, 1},
+        };
+
+        int option_index = 0;
+        int c = getopt_long(argc, argv, "v:w:h:", long_options, &option_index);
+        if (c == -1) {
+            break;
+        }
+        switch (c) {
+            case 0: // TODO when is this used?
+                if (long_options[option_index].flag != 0)
+                    break;
+                fprintf(stdout, "INFO: %s: long option '%s' arg '%s'\n", __func__, long_options[option_index].name, optarg ? optarg : "null");
+                if (long_options[option_index].val == 'v' && strlen(optarg) < 32) {
+                    strcpy(variantName, optarg);
+                }
+                if (long_options[option_index].val == 'w' && atoi(optarg)) {
+                    windowWidth = atoi(optarg);
+                }
+                if (long_options[option_index].val == 'h' && atoi(optarg)) {
+                    windowHeight = atoi(optarg);
+                }
+                break;
+            case 'v':
+                fprintf(stdout, "INFO: %s: option v, value '%s'\n", __func__, optarg ? optarg : "null");
+                if (optarg && strlen(optarg) < sizeof(variantName)) {
+                    strcpy(variantName, optarg);
+                }
+                break;
+            case 'w':
+                fprintf(stdout, "INFO: %s: option w, value '%s'\n", __func__, optarg ? optarg : "null");
+                if (optarg && atoi(optarg)) {
+                    windowWidth = atoi(optarg);
+                }
+                break;
+            case 'h':
+                fprintf(stdout, "INFO: %s: option h, value '%s'\n", __func__, optarg ? optarg : "null");
+                if (optarg && atoi(optarg)) {
+                    windowHeight = atoi(optarg);
+                }
+                break;
+            case '?':
+                fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
+                break;
+            default:
+                fprintf(stdout, "INFO: %s: unhandled option %d\n", __func__, c);
+                exit(1);
+                break;
+        }
+     }
+
+     if (optind < argc) {
+         printf("Non option arguments: ");
+        while (optind < argc)
+            printf("%s ", argv[optind++]);
+        printf("\n");
+     }
 
 #ifdef _DEBUG
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
@@ -215,12 +299,10 @@ int main(int argc, char* argv[], char* envp[])
     fprintf(stderr, "sizeof(Pile) == %lu\n", sizeof(struct Pile));
     fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
 
-    for ( int i=0; i<argc; i++ ) {
-        fprintf(stdout, "%d. %s\n", i, argv[i]);
-    }
+    fprintf(stdout, "INFO: %s: nolerp=%d\n", __func__, flag_nolerp);
+    fprintf(stdout, "INFO: %s: noload=%d\n", __func__, flag_noload);
+    fprintf(stdout, "INFO: %s: nosave=%d\n", __func__, flag_nosave);
 #endif
-
-    int windowWidth = 640, windowHeight = 480;
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     baizeHighlightColor = (Color){255,255,255,31};
@@ -301,7 +383,6 @@ int main(int argc, char* argv[], char* envp[])
     }
 #endif
 
-    char variantName[32];
     struct Array *loadedUndoStack = LoadUndoFromFile(variantName);
     if (loadedUndoStack) {
         if (variantName[0] == '\0') {
@@ -309,7 +390,10 @@ int main(int argc, char* argv[], char* envp[])
         }
         // that's fine
     } else {
-        strcpy(variantName, argc == 2 ? argv[1] : "Klondike");
+        // strcpy(variantName, argc == 2 ? argv[1] : "Klondike");
+        if (variantName[0] == '\0') {
+            strcpy(variantName, "Klondike");
+        }
         fprintf(stdout, "INFO: %s: starting a fresh '%s'\n", __func__, variantName);
     }
 

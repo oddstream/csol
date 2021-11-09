@@ -136,6 +136,14 @@ void CardMovePositionBy(struct Card *const self, Vector2 delta)
 
 void CardTransitionTo(struct Card *const self, Vector2 pos)
 {
+    extern int flag_nolerp;
+    if (flag_nolerp) {
+        self->pos = pos;
+        self->lerpDst = pos;    // paranoia
+        self->lerpStep = 1.0f;  // stop any current lerp (again, paranoia)
+        return;
+    }
+
     extern float cardWidth;
 
     if ( pos.x == self->pos.x && pos.y == self->pos.y ) {
@@ -293,19 +301,27 @@ void CardDraw(struct Card *const self)
 
 void CardFlipUp(struct Card *const self)
 {
+    extern int flag_noflip;
+
     if ( self->prone ) {
         self->prone = 0;
-        self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
-        self->flipWidth = 1.0f;             // ... from it's full width
+        if (!flag_noflip) {
+            self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
+            self->flipWidth = 1.0f;             // ... from it's full width
+        }
     }
 }
 
 void CardFlipDown(struct Card *const self)
 {
+    extern int flag_noflip;
+
     if ( !self->prone ) {
         self->prone = 1;
-        self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
-        self->flipWidth = 1.0f;             // ... from it's full width
+        if (!flag_noflip) {
+            self->flipStep = -FLIPSTEPAMOUNT;   // start by making card narrower ...
+            self->flipWidth = 1.0f;             // ... from it's full width
+        }
     }
 }
 

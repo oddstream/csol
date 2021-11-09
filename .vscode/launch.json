@@ -4,12 +4,40 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
         "version": "0.2.0",
         "configurations": [
+
+          {
+            "name": "Heavy Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/csol",
+            "args": ["--nolerp","--noflip","--noload","Quick Win"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": false
+              }
+            ],
+            "linux": {
+              "name": "Launch",
+              "type": "cppdbg",
+              "request":"launch",
+              "program":"${workspaceRoot}/csol",
+              "miDebuggerPath": "/usr/bin/gdb",
+            },
+            "preLaunchTask": "build debug"
+          },
           {
             "name": "Debug",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/csol",
-            "args": ["Quick Win"],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

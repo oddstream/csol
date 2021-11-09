@@ -414,6 +414,8 @@ static _Bool createDirectories(char *src)
 
 void BaizeSaveUndoToFile(struct Baize *const self)
 {
+    extern int flag_nosave; if (flag_nosave) return;
+
     char *homeDir;
     if ((homeDir = getenv("HOME")) == NULL) {
         fprintf(stderr, "ERROR: %s: HOME not set\n", __func__);
@@ -457,6 +459,8 @@ void BaizeSaveUndoToFile(struct Baize *const self)
 
 struct Array* LoadUndoFromFile(char *variantName /* out */)
 {
+    extern int flag_noload; if (flag_noload) return NULL;
+
     char *homeDir;
     if ((homeDir = getenv("HOME")) == NULL) {
         fprintf(stderr, "ERROR: %s: HOME not set\n", __func__);
