@@ -21,6 +21,7 @@ int MoonPileType(lua_State* L);
 // int MoonPilePromoteCards(lua_State *L);
 int MoonMoveCard(lua_State* L);
 int MoonMoveAllCards(lua_State* L);
+int MoonRepushAllCards(lua_State* L);
 
 int MoonCardColor(lua_State* L);
 int MoonCardOrdinal(lua_State* L);

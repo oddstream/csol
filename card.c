@@ -25,12 +25,16 @@ struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
     struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .prone = 1, .dragging = 0};
     self.frame = (suit * 13) + (ord - 1); // index into Vector2D info struct, or retro spritesheet
-    self.pos = (Vector2){.x=0.0f,.y=0.0f};
+    self.pos = (Vector2){
+        .x=0.0f,
+        .y=0.0f
+    };
     self.flipWidth = 1.0f;
     self.flipStep = 0.0f;
     self.dragStartPos = self.pos;
     self.lerpSrc = self.pos;
     self.lerpDst = self.pos;
+    self.lerpStep = 1.0f;   // not currently lerping
     return self;    // return whole struct by value, gets saved into cardLibrary[]
 }
 
@@ -154,7 +158,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     float dist = UtilDistance(self->lerpSrc, self->lerpDst);
     self->lerpStepAmount = fminf(0.025f, speed*(1.0f/dist));
 #endif
-    self->lerpStep = 0.0f;       // trigger a lerp
+    self->lerpStep = 0.1f;       // trigger a lerp
 }
 
 _Bool CardTransitioning(struct Card *const self)

@@ -33,6 +33,7 @@ struct Pile {
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
+    float fanFactor;    // all non-waste fan types, both horz and vert
     char label[MAX_PILE_LABEL + 1];
     Vector2 labelmte;    // cached result from MeasureTextEx()
     struct Array *cards;
@@ -73,14 +74,14 @@ Rectangle PileBaizeRect(struct Pile *const self);
 Rectangle PileScreenRect(struct Pile *const self);
 Vector2 PileBaizePos(struct Pile *const self);
 Vector2 PileScreenPos(struct Pile *const self);
-Vector2 PileCalculatePosFromSlot(struct Pile *const self);
+// Vector2 PileCalculatePosFromSlot(struct Pile *const self);
 // void PileDrawUpperLeftGlyph(struct Pile *const self, int glyph);
 void PileDrawCenteredGlyph(struct Pile *const self, int glyph);
 // void PileDrawUpperLeftText(struct Pile *const self, const char *text);
 void PileDrawCenteredText(struct Pile *const self, const char *text);
 Rectangle PileFannedBaizeRect(struct Pile *const self);
 Rectangle PileFannedScreenRect(struct Pile *const self);
-Vector2 PilePushedFannedPos(struct Pile *const self);
+Vector2 PilePushedFannedPos2(struct Pile *const self);
 _Bool PileMoveCard(struct Pile *const self, struct Pile *const src);
 _Bool PileMoveCards(struct Pile *const self, struct Card const* c);
 void PileRepushAllCards(struct Pile *const self);

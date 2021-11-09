@@ -131,3 +131,8 @@ Vector2 UtilCenterTextInRectangle(Rectangle r, float width, float height)
         .y = r.y + (r.height / 2.0f) - (height / 2.0f),
     };
 }
+
+Vector2 UtilVector2Add(Vector2 a, Vector2 b)
+{
+    return (Vector2){.x = a.x + b.x, .y = a.y + b.y};
+}

@@ -39,6 +39,7 @@ static const struct FunctionToRegister {
 
     {"MoveCard", MoonMoveCard},
     {"MoveAllCards", MoonMoveAllCards},
+    {"RepushAllCards", MoonRepushAllCards},
     {"CardPairs", MoonCardPairs},
     {"SwapCards", MoonSwapCards},
 
@@ -608,6 +609,24 @@ int MoonMoveAllCards(lua_State *L)
     if ( c ) {
         PileMoveCards(dst, c);
     }
+
+    return 0;
+}
+
+int MoonRepushAllCards(lua_State *L)
+{
+    if (!lua_islightuserdata(L, 1)) {
+        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
+        return 0;
+    }
+    struct Pile *pile = lua_touserdata(L, 1);
+
+    if ( !PileValid(pile) ) {
+        fprintf(stderr, "ERROR: %s: invalid source pile\n", __func__);
+        return 0;
+    }
+
+    PileRepushAllCards(pile);
 
     return 0;
 }

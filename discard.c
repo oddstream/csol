@@ -93,9 +93,8 @@ void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 
 void DiscardDraw(struct Pile *const self)
 {
-    if (PileEmpty(self)) {
-        PileDrawCenteredGlyph(self, 0x2302);
-    }
+    extern Color baizeHighlightColor;
 
-    PileDraw(self);
+    Rectangle r = PileScreenRect(self);
+    DrawRectangleRounded(r, 0.05, 9, baizeHighlightColor);
 }

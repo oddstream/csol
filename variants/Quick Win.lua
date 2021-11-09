@@ -84,30 +84,16 @@ function BuildPiles()
         io.stderr:write("Waste.Piles[1] not autocreated\n")
     end
 
-    local pile
-
     for x = 4, 9, 1.5 do    -- slots don't have to be integers
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
-    MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
-
     for x = 1, 10 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
-        for n = 1, 3 do
-          MoveCard(Stock.Pile, pile)
-        end
-        DemoteCards(pile, 11)
-        PromoteCards(pile, 1)
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
     end
     for x = 1, 10 do
-        pile = AddPile("Tableau", x, 4, FAN_DOWN)
-        for n = 1, 1 do
-          MoveCard(Stock.Pile, pile)
-        end
-        DemoteCards(pile, 11)
-        PromoteCards(pile, 1)
+        local pile = AddPile("Tableau", x, 4, FAN_DOWN)
     end
 
     PromoteCards(Stock.Pile, 1)
@@ -117,6 +103,17 @@ function StartGame()
     io.stderr:write("StartGame\n")
     STOCK_RECYCLES = 3
 
+    MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
+
+    for _, pile in ipairs(Tableau.Piles) do 
+        for n = 1, 2 do
+            MoveCard(Stock.Pile, pile)
+        end
+        DemoteCards(pile, 11)
+        PromoteCards(pile, 1)
+        RepushAllCards(pile)
+    end
+--[[
     local cp = CardPairs(Tableau.Piles[1])
     io.stderr:write("#CardPairs ", #cp .. "\n");
     for _, v in pairs(cp) do
@@ -133,6 +130,7 @@ function StartGame()
     for _, v in pairs(cp) do
         io.stderr:write("{" .. CardOrdinal(v[1]) .. "," .. CardOrdinal(v[2]) .. "}\n")
     end
+]]
 end
 
 -- TailMoveError

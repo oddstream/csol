@@ -155,9 +155,7 @@ void BaizeCreatePiles(struct Baize *const self)
     // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
     // setup useful shortcuts for collect (to foundations) and statusbar
-    {   // scope for pindex
-        // size_t pindex;
-        // for ( struct Pile *p = ArrayFirst(self->piles, &pindex); p; p = ArrayNext(self->piles, &pindex) ) {
+    {
         struct Pile* p;
         struct ArrayIterator iter = ArrayIterator(self->piles);
         while ( (p = ArrayMoveNext(&iter)) ) {
@@ -217,6 +215,18 @@ void BaizeGetLuaGlobals(struct Baize *const self)
 
 void BaizeStartGame(struct Baize *const self)
 {
+#if _DEBUG
+    size_t index;
+    _Bool zeroPile = false;
+    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        if ( p->pos.x == 0.0f && p->pos.y == 0.0f ) {
+            zeroPile = true;
+            break;
+        }
+    }
+    if (zeroPile) fprintf(stderr, "WARNING: %s: zero pos pile\n", __func__);
+#endif
+
     unsigned crc = BaizeCRC(self);
 
     if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
@@ -253,13 +263,19 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth)
     pilePaddingY = cardHeight / 10.0f;
     float w = pilePaddingX + cardWidth * (maxX + 2);
     leftMargin = ((float)windowWidth - w) / 2.0f;
-    topMargin = 48.0f + (cardHeight / 10.0f);
+    topMargin = TITLEBAR_HEIGHT + pilePaddingY;
 
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        p->pos = PileCalculatePosFromSlot(p);
+        // p->pos = PileCalculatePosFromSlot(p);
+        p->pos = (Vector2){
+                .x = leftMargin + (p->slot.x * (cardWidth + pilePaddingX)),
+                .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
+            };
         // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
         PileRepushAllCards(p);
     }
+
+    fprintf(stdout, "INFO: %s:\n", __func__);
 }
 
 void BaizeNewDealCommand(struct Baize *const self, void* param)
@@ -719,7 +735,20 @@ void BaizeUpdate(struct Baize *const self)
     if ( IsKeyReleased(KEY_C) ) {
         BaizeCollectCommand(self, NULL);
     }
+#if _DEBUG
+    if ( IsKeyReleased(KEY_Z) ) {
 
+        size_t index;
+        for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+            // p->pos = (Vector2){
+            //         .x = leftMargin + (p->slot.x * (cardWidth + pilePaddingX)),
+            //         .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
+            //     };
+            // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
+            PileRepushAllCards(p);
+        }
+    }
+#endif
     UiUpdate(self->ui);
 }
 

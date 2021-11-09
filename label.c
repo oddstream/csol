@@ -41,17 +41,17 @@ struct Label* LabelNew(struct Baize *const baize, Vector2 slot, enum FanType fan
 
 void LabelSetLabel(struct Pile *const self, const char  *label)
 {
-    extern Font fontAcme;
-    extern int pileFontSize;
+    extern Font fontAcmeLabel;
+    extern int labelFontSize;
     extern float fontSpacing;
 
     // fprintf(stdout, "INFO: %s: set %s label to '%s'\n", __func__, self->category, label);
 
-    if (pileFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
+    if (labelFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
     memset(self->label, 0, MAX_PILE_LABEL + 1);
     if (*label) {
         strncpy(self->label, label, MAX_PILE_LABEL);
-        self->labelmte = MeasureTextEx(fontAcme, self->label, (float)pileFontSize / 3, fontSpacing);
+        self->labelmte = MeasureTextEx(fontAcmeLabel, self->label, (float)labelFontSize, fontSpacing);
     } else {
         self->labelmte = (Vector2){0};
     }
@@ -63,13 +63,13 @@ void LabelDraw(struct Pile *const self)
         return;
     }
 
-    extern Font fontAcme;
-    extern int pileFontSize;
+    extern Font fontAcmeLabel;
+    extern int labelFontSize;
     extern float fontSpacing;
     // extern Color baizeHighlightColor;
 
     // center the label in the Pile screen rect
     Rectangle r = PileScreenRect(self);
     Vector2 pos = UtilCenterTextInRectangle(r, self->labelmte.x, self->labelmte.y);
-    DrawTextEx(fontAcme, self->label, pos, pileFontSize / 3, fontSpacing, WHITE);
+    DrawTextEx(fontAcmeLabel, self->label, pos, labelFontSize, fontSpacing, WHITE);
 }

@@ -188,11 +188,13 @@ float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
-Font fontAcme = {0};
+Font fontAcmePile = {0};
+Font fontAcmeLabel = {0};
 Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
 Font fontSymbol = {0};
 int pileFontSize = 0;
+int labelFontSize = 0;
 float fontSpacing = 1.0f;
 
 // Texture2D discardTexture = {0}, recycleTexture = {0};
@@ -258,20 +260,21 @@ int main(int argc, char* argv[], char* envp[])
     }
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
     pileFontSize = (int)(cardHeight / 2.0f);
-    fontAcme = LoadFontEx("assets/Acme-Regular.ttf", pileFontSize, 0, 0);
+    fontAcmePile = LoadFontEx("assets/Acme-Regular.ttf", pileFontSize, 0, 0);
+    labelFontSize = (int)(cardHeight / 6.0f);
+    fontAcmeLabel = LoadFontEx("assets/Acme-Regular.ttf", labelFontSize, 0, 0);
     fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
     fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
 
     // https://graphemica.com/search?q=home
-    int codepoints[6] = {
+    int codepoints[5] = {
         0x2663, /* black club */
         0x2666, /* black diamond */
         0x2665, /* black heart */
         0x2660, /* black spade */
         0x267b, /* recycle */ 
-        0x2302, /* house */
     };
-    fontSymbol = LoadFontEx("assets/DejaVuSans-Bold.ttf", pileFontSize, codepoints, 6);
+    fontSymbol = LoadFontEx("assets/DejaVuSans-Bold.ttf", pileFontSize, codepoints, 5);
 
     // recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");
     // discardTexture = LoadTexture("assets/outline_delete_white_48dp.png");
@@ -347,7 +350,8 @@ int main(int argc, char* argv[], char* envp[])
     // UnloadTexture(recycleTexture);
     // UnloadTexture(discardTexture);
 
-    UnloadFont(fontAcme);
+    UnloadFont(fontAcmePile);
+    UnloadFont(fontAcmeLabel);
     UnloadFont(fontSymbol);
     UnloadFont(fontRobotoMedium24);
     UnloadFont(fontRobotoRegular14);

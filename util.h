@@ -28,4 +28,6 @@ uint32_t UtilHash(char *str);
 _Bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer);
 Vector2 UtilCenterTextInRectangle(Rectangle r, float width, float height);
 
+Vector2 UtilVector2Add(Vector2 a, Vector2 b);
+
 #endif
