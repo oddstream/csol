@@ -39,7 +39,7 @@ static const struct FunctionToRegister {
 
     {"MoveCard", MoonMoveCard},
     {"MoveAllCards", MoonMoveAllCards},
-    {"RepushAllCards", MoonRepushAllCards},
+    {"Refan", MoonRefan},
     {"CardPairs", MoonCardPairs},
     {"SwapCards", MoonSwapCards},
 
@@ -241,20 +241,30 @@ int MoonAddPile(lua_State* L)
             parseCardFilter(L, cardFilter);
         }
         p = (struct Pile*)StockNew(baize, (Vector2){x, y}, fan, packs, suits, cardFilter);
+        if (PileValid(baize->stock)) {
+            fprintf(stderr, "ERROR: %s: more than one Stock\n", __func__);
+        }
+        baize->stock = p;
     } else if ( strcmp(category, "Cell") == 0 ) {
         p = (struct Pile*)CellNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Discard") == 0 ) {
         p = (struct Pile*)DiscardNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Foundation") == 0 ) {
         p = (struct Pile*)FoundationNew(baize, (Vector2){x, y}, fan);
+        baize->foundations = ArrayPush(baize->foundations, p);
     } else if ( strcmp(category, "Label") == 0 ) {
         p = (struct Pile*)LabelNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Reserve") == 0 ) {
         p = (struct Pile*)ReserveNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Tableau") == 0 ) {
         p = (struct Pile*)TableauNew(baize, (Vector2){x, y}, fan);
+        baize->tableaux = ArrayPush(baize->tableaux, p);
     } else if ( strcmp(category, "Waste") == 0 ) {
         p = (struct Pile*)WasteNew(baize, (Vector2){x, y}, fan);
+        if (PileValid(baize->waste)) {
+            fprintf(stderr, "WARNING: %s: more than one Waste\n", __func__);
+        }
+        baize->waste = p;
     }
 
     if (!PileValid(p)) {
@@ -327,7 +337,7 @@ int MoonPileMoveTo(lua_State* L)
     if ( PileValid(p) ) {
         p->slot = (Vector2){.x=x, .y=y};
         p->pos = PileCalculatePosFromSlot(p);
-        PileRepushAllCards(p);
+        PileRefan(p);
         // float dx = newPos.x - oldPos.x;
         // float dy = newPos.y - oldPos.y;
         // size_t index;
@@ -563,7 +573,7 @@ int MoonMoveCard(lua_State *L)
         struct CardAndIndex ci = PileFindCard(src, ord, suit);
         if (ci.card) {
             ArrayDelete(src->cards, ci.index, NULL);
-            PileRepushAllCards(src);
+            PileRefan(src);
             c = ci.card;
             PilePushCard(dst, c);
             CardFlipUp(c);
@@ -613,7 +623,7 @@ int MoonMoveAllCards(lua_State *L)
     return 0;
 }
 
-int MoonRepushAllCards(lua_State *L)
+int MoonRefan(lua_State *L)
 {
     if (!lua_islightuserdata(L, 1)) {
         fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
@@ -626,7 +636,7 @@ int MoonRepushAllCards(lua_State *L)
         return 0;
     }
 
-    PileRepushAllCards(pile);
+    PileRefan(pile);
 
     return 0;
 }

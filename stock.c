@@ -71,7 +71,14 @@ static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t su
 static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const stock)
 {
     for ( size_t i = 0; i < baize->numberOfCardsInLibrary; i++ ) {
-        PilePushCard(stock, &baize->cardLibrary[i]);
+        // don't use PilePushCard because baize->stock is not set up,
+        // and we aren't fanning
+        // PilePushCard(stock, &baize->cardLibrary[i]);
+        struct Card *c = &baize->cardLibrary[i];
+        // cards are created face down
+        c->owner = stock;
+        c->pos = stock->pos;
+        stock->cards = ArrayPush(stock->cards, c);
     }
 }
 

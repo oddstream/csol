@@ -13,6 +13,13 @@
 
 #define MAX_PILE_LABEL (31)
 
+#define MIN_FAN_FACTOR (3.0f)
+#define MAX_FAN_FACTOR (8.0f)
+
+#define CARD_FACE_FAN_FACTOR_V (3.0f)
+#define CARD_FACE_FAN_FACTOR_H (4.0f)
+#define CARD_BACK_FAN_FACTOR (8.0f)
+
 enum FanType {
     FAN_NONE = 0,
     FAN_DOWN,
@@ -34,6 +41,8 @@ struct Pile {
     Vector2 pos;    // baize coords (screen coords are calculated)
     enum FanType fanType;
     float fanFactor;    // all non-waste fan types, both horz and vert
+    float defaultFanFactor;
+    float scrunchLimit; // all non-waste fan types, both horz and vert
     char label[MAX_PILE_LABEL + 1];
     Vector2 labelmte;    // cached result from MeasureTextEx()
     struct Array *cards;
@@ -64,6 +73,7 @@ struct Baize* PileOwner(struct Pile *const self);
 _Bool PileHidden(struct Pile *const self);
 _Bool PileEmpty(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
+void PileResetFanFactor(struct Pile *const self);
 void PilePushCard(struct Pile *const self, struct Card* c);
 struct Card* PilePopCard(struct Pile *const self);
 struct Card* PilePeekCard(struct Pile *const self);
@@ -81,10 +91,10 @@ void PileDrawCenteredGlyph(struct Pile *const self, int glyph);
 void PileDrawCenteredText(struct Pile *const self, const char *text);
 Rectangle PileFannedBaizeRect(struct Pile *const self);
 Rectangle PileFannedScreenRect(struct Pile *const self);
-Vector2 PilePushedFannedPos2(struct Pile *const self);
+Vector2 PilePosAfter(struct Pile *const self, struct Card *const c);
+void PileRefan(struct Pile *const self);
 _Bool PileMoveCard(struct Pile *const self, struct Pile *const src);
 _Bool PileMoveCards(struct Pile *const self, struct Card const* c);
-void PileRepushAllCards(struct Pile *const self);
 
 _Bool PileInertCanMoveTail(struct Array *const Tail);
 _Bool PileInertCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);

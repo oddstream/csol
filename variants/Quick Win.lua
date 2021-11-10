@@ -50,6 +50,23 @@ local function PromoteCards(pile, ord)
     until not hasChanged 
 end
 
+local function SortCards(pile)
+    local hasChanged
+    local itemCount = Len(pile)
+    repeat
+        hasChanged = false
+        itemCount = itemCount - 1
+        for i = 1, itemCount do
+            local c1 = Get(pile, i)
+            local c2 = Get(pile, i + 1)
+            if CardOrdinal(c1) < CardOrdinal(c2) then
+                SwapCards(c1, c2)
+                hasChanged = true
+            end
+        end
+    until not hasChanged 
+end
+
 function BuildPiles()
 
     io.stderr:write("BuildPiles\n")
@@ -60,7 +77,7 @@ function BuildPiles()
     end
 
     -- a stock pile is always created first, and filled with PACKS of shuffled cards
-    AddPile("Stock", 1, 1, FAN_NONE, 1, 4, {12,13})
+    AddPile("Stock", 1, 1, FAN_NONE, 2, 4, {12,13})
     if Stock.Pile then
         io.stderr:write("Stock.Pile autocreated\n")
     else
@@ -84,15 +101,15 @@ function BuildPiles()
         io.stderr:write("Waste.Piles[1] not autocreated\n")
     end
 
-    for x = 4, 9, 1.5 do    -- slots don't have to be integers
+    for x = 4, 11 do    -- slots don't have to be integers
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
-    for x = 1, 10 do
+    for x = 4, 11 do
         local pile = AddPile("Tableau", x, 2, FAN_DOWN)
     end
-    for x = 1, 10 do
+    for x = 4, 11 do
         local pile = AddPile("Tableau", x, 4, FAN_DOWN)
     end
 
@@ -103,16 +120,26 @@ function StartGame()
     io.stderr:write("StartGame\n")
     STOCK_RECYCLES = 3
 
-    MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
+    -- MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
 
     for _, pile in ipairs(Tableau.Piles) do 
-        for n = 1, 2 do
+        for n = 1, 5 do
             MoveCard(Stock.Pile, pile)
         end
-        DemoteCards(pile, 11)
-        PromoteCards(pile, 1)
-        RepushAllCards(pile)
+        -- DemoteCards(pile, 11)
+        -- PromoteCards(pile, 1)
+        SortCards(pile)
+        Refan(pile)
     end
+--[[
+    for _, pile in ipairs(Tableau.Piles) do 
+        for n = 1, 5 do
+            CardProne(Get(pile, n), true)
+        end
+        CardProne(Last(pile), false)
+    end
+]]
+
 --[[
     local cp = CardPairs(Tableau.Piles[1])
     io.stderr:write("#CardPairs ", #cp .. "\n");

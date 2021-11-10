@@ -1,6 +1,5 @@
 /* main.c */
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -190,6 +189,8 @@ float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
+int windowWidth = 0, windowHeight = 0;
+
 Font fontAcmePile = {0};
 Font fontAcmeLabel = {0};
 Font fontRobotoMedium24 = {0};
@@ -197,17 +198,15 @@ Font fontRobotoRegular14 = {0};
 Font fontSymbol = {0};
 int pileFontSize = 0;
 int labelFontSize = 0;
-float fontSpacing = 1.0f;
-
-// Texture2D discardTexture = {0}, recycleTexture = {0};
+float fontSpacing = 1.2f;
 
 int flag_nolerp = 0;
 int flag_noflip = 0;
 int flag_noload = 0;
 int flag_nosave = 0;
 
-int main(int argc, char* argv[], char* envp[])
 // int main(void) 
+int main(int argc, char* argv[], char* envp[])
 {
     (void)envp;
 
@@ -220,62 +219,87 @@ int main(int argc, char* argv[], char* envp[])
     char variantName[32];
     memset(variantName, 0, sizeof(variantName));
 
-    int windowWidth = 640, windowHeight = 480;
+    // https://azrael.digipen.edu/~mmead/www/Courses/CS180/getopt.html
 
     while (1) {
         static struct option long_options[] = {
-            {"variant", required_argument, 0, 'v'},
-            {"width", required_argument, 0, 'w'},
-            {"height", required_argument, 0, 'h'},
-            {"noload", no_argument, &flag_noload, 1},
-            {"nosave", no_argument, &flag_nosave, 1},
-            {"nolerp", no_argument, &flag_nolerp, 1},
-            {"noflip", no_argument, &flag_noflip, 1},
+            {"scale",   required_argument,  0,              's'},
+            {"variant", required_argument,  0,              'v'},
+            {"width",   required_argument,  0,              'w'},
+            {"height",  required_argument,  0,              'h'},
+            {"noload",  no_argument,        &flag_noload,   1},
+            {"nosave",  no_argument,        &flag_nosave,   1},
+            {"nolerp",  no_argument,        &flag_nolerp,   1},
+            {"noflip",  no_argument,        &flag_noflip,   1},
+            {NULL,      0,                  NULL,           0},
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "v:w:h:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "s:v:w:h:", long_options, &option_index);
         if (c == -1) {
             break;
         }
         switch (c) {
-            case 0: // TODO when is this used?
+
+            case 0:
                 if (long_options[option_index].flag != 0)
                     break;
                 fprintf(stdout, "INFO: %s: long option '%s' arg '%s'\n", __func__, long_options[option_index].name, optarg ? optarg : "null");
-                if (long_options[option_index].val == 'v' && strlen(optarg) < 32) {
-                    strcpy(variantName, optarg);
+#if 0
+                if (!optarg)
+                    break;
+                switch (long_options[option_index].val) {
+                    case 's':
+                        cardScale = atof(optarg);
+                        break;
+                    case 'v':
+                        if (strlen(optarg) < 32) {
+                            strcpy(variantName, optarg);
+                        }
+                        break;
+                    case 'w':
+                        if (atoi(optarg)) {
+                            windowWidth = atoi(optarg);
+                        }
+                        break;
+                    case 'h':
+                        if (atoi(optarg)) {
+                            windowHeight = atoi(optarg);
+                        }
+                        break;
+                    default:
+                        fprintf(stdout, "WARNING: %s: unhandled option %d\n", __func__, long_options[option_index].val);
+                        break;
                 }
-                if (long_options[option_index].val == 'w' && atoi(optarg)) {
-                    windowWidth = atoi(optarg);
-                }
-                if (long_options[option_index].val == 'h' && atoi(optarg)) {
-                    windowHeight = atoi(optarg);
-                }
+#endif
+                break;
+            case 's':
+                // fprintf(stdout, "INFO: %s: option s, value '%s'\n", __func__, optarg ? optarg : "null");
+                cardScale = optarg ? atof(optarg) : 1.0f;
                 break;
             case 'v':
-                fprintf(stdout, "INFO: %s: option v, value '%s'\n", __func__, optarg ? optarg : "null");
+                // fprintf(stdout, "INFO: %s: option v, value '%s'\n", __func__, optarg ? optarg : "null");
                 if (optarg && strlen(optarg) < sizeof(variantName)) {
                     strcpy(variantName, optarg);
                 }
                 break;
             case 'w':
-                fprintf(stdout, "INFO: %s: option w, value '%s'\n", __func__, optarg ? optarg : "null");
+                // fprintf(stdout, "INFO: %s: option w, value '%s'\n", __func__, optarg ? optarg : "null");
                 if (optarg && atoi(optarg)) {
                     windowWidth = atoi(optarg);
                 }
                 break;
             case 'h':
-                fprintf(stdout, "INFO: %s: option h, value '%s'\n", __func__, optarg ? optarg : "null");
+                // fprintf(stdout, "INFO: %s: option h, value '%s'\n", __func__, optarg ? optarg : "null");
                 if (optarg && atoi(optarg)) {
                     windowHeight = atoi(optarg);
                 }
                 break;
             case '?':
-                fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
+                // fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
                 break;
             default:
-                fprintf(stdout, "INFO: %s: unhandled option %d\n", __func__, c);
+                fprintf(stdout, "WARNING: %s: unhandled option %d\n", __func__, c);
                 exit(1);
                 break;
         }
@@ -288,7 +312,7 @@ int main(int argc, char* argv[], char* envp[])
         printf("\n");
      }
 
-#ifdef _DEBUG
+#if 0
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
     fprintf(stderr, "sizeof(int) == %lu\n", sizeof(int));
     fprintf(stderr, "sizeof(float) == %lu\n", sizeof(float));
@@ -306,26 +330,21 @@ int main(int argc, char* argv[], char* envp[])
 
     baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
     baizeHighlightColor = (Color){255,255,255,31};
-    uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xff};
+    uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xee};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
-    LoadSettings(&windowWidth, &windowHeight);
+    // LoadSettings(&windowWidth, &windowHeight);
     // fprintf(stderr, "cardScale %f\n", cardScale);
 
     cardWidth = originalCardWidth * cardScale;
     cardHeight = originalCardHeight * cardScale;
 
-    {
-        // int fontSizes[128-32];
-        // for ( int i=32; i<128; i++ ) {
-        //     fontSizes[i] = i;
-        // }
-        // fontAcme = LoadFontEx("assets/KAISG.ttf", 96, 0, 0);
-        // fontAcme = LoadFontEx("assets/Acme-Regular.ttf", 8, fontSizes, 128-32);
-        // fontAcme = LoadFontEx("assets/DejaVuSans-Bold.ttf", 8, 0, 255);
-        // fontAcme = LoadFontEx("assets/Roboto-Regular.ttf", 8, 0, 255);
+    if (windowWidth == 0) {
+        windowWidth = (int)cardWidth * 10;
     }
-
+    if (windowHeight == 0) {
+        windowHeight = (int)cardHeight * 6;
+    }
 
     // {
     //     int n = GetCurrentMonitor();
@@ -357,9 +376,6 @@ int main(int argc, char* argv[], char* envp[])
         0x267b, /* recycle */ 
     };
     fontSymbol = LoadFontEx("assets/DejaVuSans-Bold.ttf", pileFontSize, codepoints, 5);
-
-    // recycleTexture = LoadTexture("assets/outline_recycling_white_48dp.png");
-    // discardTexture = LoadTexture("assets/outline_delete_white_48dp.png");
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
@@ -430,9 +446,6 @@ int main(int argc, char* argv[], char* envp[])
     SpritesheetFree(ssFace);
     SpritesheetFree(ssBack);
     SpritesheetFree(ssIcons);
-
-    // UnloadTexture(recycleTexture);
-    // UnloadTexture(discardTexture);
 
     UnloadFont(fontAcmePile);
     UnloadFont(fontAcmeLabel);

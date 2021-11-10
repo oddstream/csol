@@ -13,6 +13,7 @@
 
 #include "baize.h"
 #include "moon.h"
+#include "scrunch.h"
 #include "undo.h"
 #include "util.h"
 #include "luautil.h"
@@ -156,29 +157,32 @@ void BaizeCreatePiles(struct Baize *const self)
 
     // setup useful shortcuts for collect (to foundations) and statusbar
     {
-        struct Pile* p;
-        struct ArrayIterator iter = ArrayIterator(self->piles);
-        while ( (p = ArrayMoveNext(&iter)) ) {
-            if ( strcmp("Foundation", p->category) == 0 ) {
-                self->foundations = ArrayPush(self->foundations, p);
-            } else if ( strcmp("Tableau", p->category) == 0 ) {
-                self->tableaux = ArrayPush(self->tableaux, p);
-            } else if ( strcmp(p->category, "Stock") == 0 ) {
-                self->stock = p;
-            } else if ( strcmp(p->category, "Waste") == 0 ) {
-                self->waste = p;
-            }
-        }
+        // we now do this in MoonAddPile, so shortcuts are immediately available
+        // (baize->stock needs to be set before MoveCard called)
+        // struct Pile* p;
+        // struct ArrayIterator iter = ArrayIterator(self->piles);
+        // while ( (p = ArrayMoveNext(&iter)) ) {
+        //     if ( strcmp("Foundation", p->category) == 0 ) {
+        //         self->foundations = ArrayPush(self->foundations, p);
+        //     } else if ( strcmp("Tableau", p->category) == 0 ) {
+        //         self->tableaux = ArrayPush(self->tableaux, p);
+        //     } else if ( strcmp(p->category, "Stock") == 0 ) {
+        //         self->stock = p;
+        //     } else if ( strcmp(p->category, "Waste") == 0 ) {
+        //         self->waste = p;
+        //     }
+        // }
         if (self->stock == NULL) {
-            fprintf(stderr, "ERROR: %s: no stock\n", __func__);
+            fprintf(stderr, "ERROR: %s: no Stock\n", __func__);
         }
         if (ArrayLen(self->foundations) == 0) {
-            fprintf(stderr, "ERROR: %s: no foundations - will divide by zero\n", __func__);
+            fprintf(stderr, "WARNING: %s: no Foundations - will divide by zero\n", __func__);
         }
     }
 
     // now the piles know their slots, calculate and set their positions
-    BaizePositionPiles(self, GetScreenWidth());
+    extern int windowWidth, windowHeight;
+    BaizePositionPiles(self, windowWidth, windowHeight);
 }
 
 void BaizeResetState(struct Baize *const self, struct Array *undoStack)
@@ -247,7 +251,15 @@ void BaizeStartGame(struct Baize *const self)
     }
 }
 
-void BaizePositionPiles(struct Baize *const self, const int windowWidth)
+void BaizeRefan(struct Baize *const self)
+{
+    size_t index;
+    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        PileRefan(p);
+    }
+}
+
+void BaizePositionPiles(struct Baize *const self, const int windowWidth, const int windowHeight)
 {
     extern float cardWidth, cardHeight, pilePaddingX, pilePaddingY, topMargin, leftMargin;
 
@@ -272,10 +284,13 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth)
                 .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
             };
         // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
-        PileRepushAllCards(p);
     }
 
-    fprintf(stdout, "INFO: %s:\n", __func__);
+    BaizeCalculateScrunchLimits(self, windowWidth, windowHeight);
+    // TODO compare fanFactor with default and Refan if changed
+    BaizeRefan(self);
+
+    // fprintf(stdout, "INFO: %s:\n", __func__);
 }
 
 void BaizeNewDealCommand(struct Baize *const self, void* param)
@@ -658,15 +673,15 @@ void BaizeAfterUserMove(struct Baize *const self)
     BaizeUndoPush(self);
 }
 
-void BaizeLayout(struct Baize *const self, const int windowWidth, const int windowHeight)
+void BaizeLayout(struct Baize *const self, const int newWindowWidth, const int newWindowHeight)
 {
-    static int oldWidth = 0, oldHeight = 0;
+    extern int windowWidth, windowHeight;
 
-    if ( oldWidth != windowWidth || oldHeight != windowHeight ) {
-        BaizePositionPiles(self, windowWidth);
+    if ( newWindowWidth != windowWidth || newWindowHeight != windowHeight ) {
+        windowWidth = newWindowWidth;
+        windowHeight = newWindowHeight;
+        BaizePositionPiles(self, windowWidth, windowHeight);
         UiLayout(self->ui, windowWidth, windowHeight);
-        oldWidth = windowWidth;
-        oldHeight = windowHeight;
     }
 }
 
@@ -736,6 +751,9 @@ void BaizeUpdate(struct Baize *const self)
         BaizeCollectCommand(self, NULL);
     }
 #if _DEBUG
+    if (IsKeyReleased(KEY_Q)) {
+        ScrunchPiles(self);
+    }
     if ( IsKeyReleased(KEY_Z) ) {
 
         size_t index;
@@ -745,7 +763,7 @@ void BaizeUpdate(struct Baize *const self)
             //         .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
             //     };
             // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
-            PileRepushAllCards(p);
+            PileRefan(p);
         }
     }
 #endif

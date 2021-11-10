@@ -5,17 +5,13 @@
 #include <string.h>
 #include <raylib.h>
 
-#include "baize.h"
-#include "pile.h"
 #include "array.h"
+#include "baize.h"
+#include "scrunch.h"
+#include "pile.h"
+
 
 #define PILE_MAGIC (0xdeadbeef)
-
-#define MAX_SCRUNCH_FACTOR (8.0f)
-
-#define CARD_FACE_FAN_FACTOR_V (3.0f)
-#define CARD_FACE_FAN_FACTOR_H (4.0f)
-#define CARD_BACK_FAN_FACTOR (8.0f)
 
 // struct Pile* PileNew(const char* category, Vector2 pos, enum FanType fan) {
 //     struct Pile* self = calloc(1, sizeof(struct Pile));
@@ -29,35 +25,6 @@
 //     return self;
 // }
 
-static void resetFanFactor(struct Pile *const self)
-{
-    switch (self->fanType) {
-        case FAN_NONE:
-            self->fanFactor = 1.0f;
-            break;
-        case FAN_DOWN:
-            self->fanFactor = CARD_FACE_FAN_FACTOR_V;
-            break;
-        case FAN_LEFT:
-            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
-            break;
-        case FAN_RIGHT:
-            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
-            break;
-        case FAN_DOWN3:
-            self->fanFactor = CARD_FACE_FAN_FACTOR_V;
-            break;
-        case FAN_LEFT3:
-            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
-            break;
-        case FAN_RIGHT3:
-            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
-            break;
-        default:
-            break;
-    }
-}
-
 void PileCtor(struct Baize *const baize, struct Pile *const self, const char* category, Vector2 slot, enum FanType fan)
 {
     self->magic = PILE_MAGIC;
@@ -65,7 +32,9 @@ void PileCtor(struct Baize *const baize, struct Pile *const self, const char* ca
     strncpy(self->category, category, sizeof self->category - 1);
     self->slot = slot;
     self->fanType = fan;
-    resetFanFactor(self);
+    self->scrunchLimit = -1.0f; // by default, do not scrunch
+    PileResetFanFactor(self);
+    self->defaultFanFactor = self->fanFactor;
     self->cards = ArrayNew(52);
 }
 
@@ -94,25 +63,69 @@ size_t PileLen(struct Pile *const self)
     return ArrayLen(self->cards);
 }
 
+void PileResetFanFactor(struct Pile *const self)
+{
+    switch (self->fanType) {
+        case FAN_NONE:
+            self->fanFactor = 1.0f;
+            break;
+        case FAN_DOWN:
+            self->fanFactor = CARD_FACE_FAN_FACTOR_V;
+            break;
+        case FAN_LEFT:
+            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
+            break;
+        case FAN_RIGHT:
+            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
+            break;
+        case FAN_DOWN3:
+            self->fanFactor = CARD_FACE_FAN_FACTOR_V;
+            break;
+        case FAN_LEFT3:
+            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
+            break;
+        case FAN_RIGHT3:
+            self->fanFactor = CARD_FACE_FAN_FACTOR_H;
+            break;
+        default:
+            break;
+    }
+}
+
 void PilePushCard(struct Pile *const self, struct Card* c)
 {
     if ( PileIsStock(self) ) {
         CardFlipDown(c);
     }
+    /*
+        Can't scrunch here,
+        because that would mean repushing the pile's cards,
+        which would recurse into here
+
+        TODO not anymore, since Refan
+    */
     CardSetOwner(c, self);
-    Vector2 fannedPos = PilePushedFannedPos2(self); // get this *before* pushing card to pile
-    // if ( strcmp(self->category, "Waste") == 0 ) {
-    //     fprintf(stdout, "Push from %.0f, %.0f to %.0f, %.0f\n", c->pos.x, c->pos.y, fannedPos.x, fannedPos.y);
-    // }
+    Vector2 fannedPos = PilePosAfter(self, ArrayPeek(self->cards)); // get this *before* pushing card to pile
     CardTransitionTo(c, fannedPos);
-    // c->pos = fannedPos;
     self->cards = ArrayPush(self->cards, c);
+
+    if (ScrunchOverflow(self, fannedPos)) {
+        self->fanFactor += 1.0f;
+        if (self->fanFactor > MAX_FAN_FACTOR) {
+            self->fanFactor = MAX_FAN_FACTOR;
+        }
+        PileRefan(self);
+    }
 }
 
 struct Card* PilePopCard(struct Pile *const self)
 {
     struct Card* c = ArrayPop(self->cards);
-    if ( CardValid(c) ) {
+    if (c) {
+        if (self->fanFactor != self->defaultFanFactor) {
+            self->fanFactor = self->defaultFanFactor;
+            PileRefan(self);
+        }
         CardSetOwner(c, NULL);
         CardFlipUp(c);
     }
@@ -153,6 +166,11 @@ _Bool PileIsStock(struct Pile *const self)
     if ( !BaizeValid(baize) )
     {
         fprintf(stderr, "ERROR: %s: Pile Baize pointer is not valid\n", __func__);
+        return 0;
+    }
+    if ( !PileValid(baize->stock) )
+    {
+        fprintf(stderr, "ERROR: %s: Pile Baize stock pointer is not valid\n", __func__);
         return 0;
     }
     return self == baize->stock;
@@ -321,7 +339,7 @@ Rectangle PileFannedScreenRect(struct Pile *const self) {
 }
 
 // get the Baize position of the next card to be pushed to this pile, also refans waste pile
-Vector2 PilePushedFannedPos2(struct Pile *const self)
+Vector2 PilePosAfter(struct Pile *const self, struct Card *const c)
 {
     extern float cardWidth, cardHeight;
 
@@ -330,7 +348,7 @@ Vector2 PilePushedFannedPos2(struct Pile *const self)
         return self->pos;
     }
 
-    struct Card *c;
+    // struct Card *c;
     Vector2 pos, slot0, slot1, slot2;
     size_t i;
 
@@ -339,17 +357,17 @@ Vector2 PilePushedFannedPos2(struct Pile *const self)
             pos = self->pos;
             break;
         case FAN_DOWN:
-            c = ArrayPeek(self->cards);
+            // c = ArrayPeek(self->cards);
             pos = CardTransitioning(c) ? c->lerpDst : c->pos;
             pos.y += (c->prone) ? cardHeight / CARD_BACK_FAN_FACTOR : cardHeight / self->fanFactor;
             break;
         case FAN_LEFT:
-            c = ArrayPeek(self->cards);
+            // c = ArrayPeek(self->cards);
             pos = CardTransitioning(c) ? c->lerpDst : c->pos;
             pos.x -= (c->prone) ? cardWidth / CARD_BACK_FAN_FACTOR : cardWidth / self->fanFactor;
             break;
         case FAN_RIGHT:
-            c = ArrayPeek(self->cards);
+            // c = ArrayPeek(self->cards);
             pos = CardTransitioning(c) ? c->lerpDst : c->pos;
             pos.x += (c->prone) ? cardWidth / CARD_BACK_FAN_FACTOR : cardWidth / self->fanFactor;
             break;
@@ -416,6 +434,18 @@ Vector2 PilePushedFannedPos2(struct Pile *const self)
     return pos;
 }
 
+void PileRefan(struct Pile *const self)
+{
+    size_t index;
+    struct Card *c = ArrayFirst(self->cards, &index);
+    if (c) {
+        CardTransitionTo(c, self->pos);
+        while ((c = ArrayNext(self->cards, &index))) {
+            CardTransitionTo(c, PilePosAfter(self, ArrayGet(self->cards, index-1)));
+        }
+    }
+}
+
 _Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
 {
     // an optimized, single card version of PileMoveCards
@@ -427,7 +457,7 @@ _Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
 
     PilePushCard(self, c);
 
-    // flip up an exposed source card, if src pile is not Stock*
+    // flip up an exposed source card, if src pile is not Stock
     if ( !PileIsStock(src) ) {
         struct Card* tc = PilePeekCard(src);
         if ( tc ) {
@@ -437,7 +467,7 @@ _Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
 
     // special case: waste may need refanning if we took a card from it
     if ( src->fanType == FAN_DOWN3 || src->fanType == FAN_LEFT3 || src->fanType == FAN_RIGHT3 ) {
-        PileRepushAllCards(src);
+        PileRefan(src);
     }
 
     return 1;
@@ -477,8 +507,7 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
     // }
     // fprintf(stderr, "old %lu, new %lu\n", oldSrcLen, newSrcLen);
 
-    // flip up an exposed source card, if src pile is not Stock*
-    // if ( strncmp(src->category, "Stock", 5) ) {
+    // flip up an exposed source card, if src pile is not Stock
     if (!PileIsStock(src)) {
         struct Card* tc = PilePeekCard(src);
         if (tc) {
@@ -488,7 +517,7 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
 
     // special case: waste may need refanning if we took a card from it
     if ( src->fanType == FAN_DOWN3 || src->fanType == FAN_LEFT3 || src->fanType == FAN_RIGHT3 ) {
-        PileRepushAllCards(src);
+        PileRefan(src);
     }
 
     // TODO scrunch
@@ -501,6 +530,7 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
     return newSrcLen != oldSrcLen;
 }
 
+#if 0
 void PileRepushAllCards(struct Pile *const self)
 {
     if (PileEmpty(self)) {
@@ -517,6 +547,7 @@ void PileRepushAllCards(struct Pile *const self)
         ArrayFree(tmp);
     }
 }
+#endif
 
 _Bool PileInertCanMoveTail(struct Array *const tail)
 {

@@ -246,9 +246,9 @@ void ArrayFree(struct Array *const self)
     }
 }
 
-struct ArrayIterator ArrayIterator(struct Array *const self)
+struct ArrayIterator ArrayIterator(struct Array *const a)
 {
-    return (struct ArrayIterator){.a = self, .i = 0};
+    return (struct ArrayIterator){.a = a, .i = 0};
 }
 
 void* ArrayMoveNext(struct ArrayIterator *self)

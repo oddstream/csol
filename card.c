@@ -23,6 +23,7 @@ extern struct Spritesheet *ssFace, *ssBack;
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
+    // create cards face down, because that's how they'll be in the Stock
     struct Card self = {.magic = CARD_MAGIC, .owner = NULL, .id.pack = pack, .id.ordinal = ord, .id.suit = suit, .prone = 1, .dragging = 0};
     self.frame = (suit * 13) + (ord - 1); // index into Vector2D info struct, or retro spritesheet
     self.pos = (Vector2){

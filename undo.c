@@ -557,6 +557,8 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
             undoStack = ArrayPush(undoStack, snap);
         }
         fclose_label: fclose(f);
+
+        remove(fname);
     }
 
 #if _DEBUG
