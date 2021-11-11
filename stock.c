@@ -53,8 +53,10 @@ static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t su
     for ( size_t pack = 0; pack < packs; pack++ ) {
         for ( enum CardOrdinal o = ACE; o <= KING; o++ ) {
             for ( enum CardSuit s = 0; s < suits; s++ ) {
-                if ( cardFilter[o] ) {
-                    baize->cardLibrary[i++] = CardNew(pack, o, s);
+                if (cardFilter[o]) {
+                    // run the suits loop backwards, so spades are used first
+                    // (folks expect Spider One Suit to use spades)
+                    baize->cardLibrary[i++] = CardNew(pack, o, SPADE - s);
                 } else {
                     // fprintf(stderr, "Skipping %u\n", o);
                 }

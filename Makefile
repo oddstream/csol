@@ -22,7 +22,8 @@ CFLAGS += -std=c99 -D_DEFAULT_SOURCE -DLIL_ENABLE_POOLS
 # https://airbus-seclab.github.io/c-compiler-security/
 CFLAGS += -Werror
 CFLAGS += -Wall -Wextra -Wpedantic 
-CFLAGS += -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-security 
+#  -Wformat-overflow=2
+CFLAGS += -Wformat=2 -Wformat-truncation=2 -Wformat-security 
 CFLAGS += -Wnull-dereference -Wtrampolines -Walloca -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2 
 CFLAGS += -Wcast-qual -Wstringop-overflow=4 -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=5 
 CFLAGS += -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wcast-align=strict

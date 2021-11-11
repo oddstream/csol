@@ -285,7 +285,7 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth, const i
         // fprintf(stdout, "%s: %.0f,%.0f := %.0f,%.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
     }
 
-    BaizeCalculateScrunchLimits(self, windowWidth, windowHeight);
+    BaizeCalculateScrunchDims(self, windowWidth, windowHeight);
     // TODO compare fanFactor with default and Refan if changed
     BaizeRefan(self);
 

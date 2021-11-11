@@ -341,7 +341,7 @@ int main(int argc, char* argv[], char* envp[])
     cardHeight = originalCardHeight * cardScale;
 
     if (windowWidth == 0) {
-        windowWidth = (int)cardWidth * 10;
+        windowWidth = (int)cardWidth * 11;
     }
     if (windowHeight == 0) {
         windowHeight = (int)cardHeight * 5;

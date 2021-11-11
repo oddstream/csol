@@ -44,7 +44,7 @@ struct Pile {
     enum FanType fanType;
     float fanFactor;    // all non-waste fan types, both horz and vert
     float defaultFanFactor;
-    float scrunchLimit; // all non-waste fan types, both horz and vert
+    Vector2 scrunchDims;
     char label[MAX_PILE_LABEL + 1];
     Vector2 labelmte;    // cached result from MeasureTextEx()
     struct Array *cards;
