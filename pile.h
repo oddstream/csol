@@ -14,7 +14,7 @@
 #define MAX_PILE_LABEL (31)
 
 #define MIN_FAN_FACTOR (3.0f)
-#define MAX_FAN_FACTOR (8.0f)
+#define MAX_FAN_FACTOR (7.0f)
 
 #define CARD_FACE_FAN_FACTOR_V (3.0f)
 #define CARD_FACE_FAN_FACTOR_H (4.0f)
@@ -39,6 +39,8 @@ struct Pile {
     char category[16];
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
+    Vector2 pos1;   // waste pos
+    Vector2 pos2;   // waste pos
     enum FanType fanType;
     float fanFactor;    // all non-waste fan types, both horz and vert
     float defaultFanFactor;
@@ -73,18 +75,22 @@ struct Baize* PileOwner(struct Pile *const self);
 _Bool PileHidden(struct Pile *const self);
 _Bool PileEmpty(struct Pile *const self);
 size_t PileLen(struct Pile *const self);
-void PileResetFanFactor(struct Pile *const self);
+
 void PilePushCard(struct Pile *const self, struct Card* c);
 struct Card* PilePopCard(struct Pile *const self);
 struct Card* PilePeekCard(struct Pile *const self);
+
 struct CardAndIndex PileFindCard(struct Pile *const self, enum CardOrdinal ord, enum CardSuit suit);
-struct Card* PileFindLastCardUnderPoint(struct Pile *const self, Vector2 pt);
+// struct Card* PileFindLastCardUnderPoint(struct Pile *const self, Vector2 pt);
 _Bool PileIsStock(struct Pile *const self);
-Rectangle PileBaizeRect(struct Pile *const self);
-Rectangle PileScreenRect(struct Pile *const self);
+
+void PileSetBaizePos(struct Pile *const self, Vector2 pos);
 Vector2 PileBaizePos(struct Pile *const self);
 Vector2 PileScreenPos(struct Pile *const self);
-// Vector2 PileCalculatePosFromSlot(struct Pile *const self);
+
+Rectangle PileBaizeRect(struct Pile *const self);
+Rectangle PileScreenRect(struct Pile *const self);
+
 // void PileDrawUpperLeftGlyph(struct Pile *const self, int glyph);
 void PileDrawCenteredGlyph(struct Pile *const self, int glyph);
 // void PileDrawUpperLeftText(struct Pile *const self, const char *text);

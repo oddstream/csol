@@ -28,7 +28,6 @@ static const struct FunctionToRegister {
 } FunctionsToRegister[] = {
     {"AddPile", MoonAddPile},
     // {"FindPile", MoonFindPile},
-    // {"PileMoveTo", MoonPileMoveTo},
     {"PileLabel", MoonPileLabel},
     {"PileType", MoonPileType},
     {"PileGet", MoonPileGet},   // deprecated
@@ -326,31 +325,6 @@ int MoonAddPile(lua_State* L)
 
 //     return 0;
 // }
-
-#if 0
-int MoonPileMoveTo(lua_State* L)
-{
-    struct Pile* p = lua_touserdata(L, 1);
-    float x = lua_tonumber(L, 2) - 1;
-    float y = lua_tonumber(L, 3) - 1;
-
-    if ( PileValid(p) ) {
-        p->slot = (Vector2){.x=x, .y=y};
-        p->pos = PileCalculatePosFromSlot(p);
-        PileRefan(p);
-        // float dx = newPos.x - oldPos.x;
-        // float dy = newPos.y - oldPos.y;
-        // size_t index;
-        // for ( struct Card* c = ArrayFirst(p->cards, &index); c; c = ArrayNext(p->cards, &index) ) {
-        //     Vector2 oldCardPos = CardGetBaizePos(c);
-        //     Vector2 newCardPos = (Vector2){.x = oldCardPos.x + dx, .y = oldCardPos.y + dy};
-        //     CardSetPos(c, newCardPos);
-        // }
-    }
-
-    return 0;
-}
-#endif
 
 int MoonPileLabel(lua_State *L)
 {

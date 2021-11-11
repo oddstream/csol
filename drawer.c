@@ -90,27 +90,28 @@ void DrawerUpdate(struct Container *const self)
 
     ContainerUpdate(self);  // does nothing?
 
-    switch ( dr->aniState ) {
-        case LEFT:
-            if ( dr->super.rect.x <= -DRAWER_WIDTH ) {
-                dr->super.rect.x = -(DRAWER_WIDTH);
-                dr->aniState = STOP;
-            } else {
-                dr->super.rect.x -= 16.0f;
-            }
-            break;
-        case STOP:
-            break;
-        case RIGHT:
-            if ( dr->super.rect.x >= 0.0f ) {
-                dr->super.rect.x = 0.0f;
-                dr->aniState = STOP;
-            } else {
-                dr->super.rect.x += 16.0f;
-            }
-            break;
-        default:
-            break;
+    /* K&R style switch formatting, see P59 if you don't believe me */
+    switch (dr->aniState) {
+    case LEFT:
+        if ( dr->super.rect.x <= -DRAWER_WIDTH ) {
+            dr->super.rect.x = -(DRAWER_WIDTH);
+            dr->aniState = STOP;
+        } else {
+            dr->super.rect.x -= 16.0f;
+        }
+        break;
+    case STOP:
+        break;
+    case RIGHT:
+        if ( dr->super.rect.x >= 0.0f ) {
+            dr->super.rect.x = 0.0f;
+            dr->aniState = STOP;
+        } else {
+            dr->super.rect.x += 16.0f;
+        }
+        break;
+    default:
+        break;
     }
 }
 

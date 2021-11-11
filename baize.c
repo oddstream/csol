@@ -278,12 +278,11 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth, const i
     topMargin = TITLEBAR_HEIGHT + pilePaddingY;
 
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        // p->pos = PileCalculatePosFromSlot(p);
-        p->pos = (Vector2){
-                .x = leftMargin + (p->slot.x * (cardWidth + pilePaddingX)),
-                .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
-            };
-        // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
+        PileSetBaizePos(p, (Vector2){
+            .x = leftMargin + (p->slot.x * (cardWidth + pilePaddingX)),
+            .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
+        });
+        // fprintf(stdout, "%s: %.0f,%.0f := %.0f,%.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
     }
 
     BaizeCalculateScrunchLimits(self, windowWidth, windowHeight);
@@ -690,22 +689,23 @@ void BaizeUpdate(struct Baize *const self)
     Vector2 touchPosition = GetTouchPosition(0);
     int gesture = GetGestureDetected();
 
-    switch ( gesture ) {
-        case GESTURE_TAP:
-            if ( !self->tail ) {
-                BaizeTouchStart(self, touchPosition);
-            }
-            break;
-        case GESTURE_DRAG:
-            BaizeTouchMove(self, touchPosition);
-            break;
-        case GESTURE_NONE:
-            if ( self->tail || self->touchedPile || self->touchedWidget || self->dragging ) {
-                BaizeTouchStop(self, touchPosition);
-            }
-            break;
-        default:
-            break;
+    /* K&R style switch formatting, see P59 if you don't believe me */
+    switch (gesture) {
+    case GESTURE_TAP:
+        if ( !self->tail ) {
+            BaizeTouchStart(self, touchPosition);
+        }
+        break;
+    case GESTURE_DRAG:
+        BaizeTouchMove(self, touchPosition);
+        break;
+    case GESTURE_NONE:
+        if ( self->tail || self->touchedPile || self->touchedWidget || self->dragging ) {
+            BaizeTouchStop(self, touchPosition);
+        }
+        break;
+    default:
+        break;
     }
 
     // static float dx, dy;
@@ -758,11 +758,6 @@ void BaizeUpdate(struct Baize *const self)
 
         size_t index;
         for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-            // p->pos = (Vector2){
-            //         .x = leftMargin + (p->slot.x * (cardWidth + pilePaddingX)),
-            //         .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
-            //     };
-            // fprintf(stdout, "%s: %.0f, %.0f := %.0f, %.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
             PileRefan(p);
         }
     }

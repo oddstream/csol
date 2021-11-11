@@ -15,6 +15,10 @@ void BaizeCalculateScrunchLimits(struct Baize *const baize, const int windowWidt
     size_t pi1, pi2;
     for ( struct Pile *p1 = ArrayFirst(baize->piles, &pi1); p1; p1 = ArrayNext(baize->piles, &pi1) ) {
 
+        /*
+            K&R style switch formatting, see P59 if you don't believe me
+            (ok, thay may have done it like this to fit in the book margins
+        */
         switch (p1->fanType) {
         case FAN_NONE:
         case FAN_DOWN3:
@@ -35,7 +39,7 @@ void BaizeCalculateScrunchLimits(struct Baize *const baize, const int windowWidt
             break;
         }
 
-        PileResetFanFactor(p1);
+        p1->fanFactor = p1->defaultFanFactor;
 
         for ( struct Pile *p2 = ArrayFirst(baize->piles, &pi2); p2; p2 = ArrayNext(baize->piles, &pi2) ) {
             if (p2 == p1) {
@@ -49,13 +53,13 @@ void BaizeCalculateScrunchLimits(struct Baize *const baize, const int windowWidt
                 break;
             case FAN_DOWN:
                 if (p1->slot.x == p2->slot.x && p2->slot.y > p1->slot.y) {
-                    fprintf(stdout,
-                        "INFO: %s: found %s pile at %.0f,%.0f "
-                        "that is above %s pile at %.0f,%.0f"
-                        "\n",
-                    __func__,
-                    p1->category, p1->slot.x, p1->slot.y,
-                    p2->category, p2->slot.x, p2->slot.y);
+                    // fprintf(stdout,
+                    //     "INFO: %s: found %s pile at %.0f,%.0f "
+                    //     "that is above %s pile at %.0f,%.0f"
+                    //     "\n",
+                    // __func__,
+                    // p1->category, p1->slot.x, p1->slot.y,
+                    // p2->category, p2->slot.x, p2->slot.y);
                     p1->scrunchLimit = p2->pos.y - cardHeight;
                 }
                 break;

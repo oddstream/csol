@@ -239,12 +239,13 @@ int main(int argc, char* argv[], char* envp[])
         if (c == -1) {
             break;
         }
+        /* K&R style switch formatting, see P59 if you don't believe me */
         switch (c) {
 
-            case 0:
-                if (long_options[option_index].flag != 0)
-                    break;
-                fprintf(stdout, "INFO: %s: long option '%s' arg '%s'\n", __func__, long_options[option_index].name, optarg ? optarg : "null");
+        case 0:
+            if (long_options[option_index].flag != 0)
+                break;
+            fprintf(stdout, "INFO: %s: long option '%s' arg '%s'\n", __func__, long_options[option_index].name, optarg ? optarg : "null");
 #if 0
                 if (!optarg)
                     break;
@@ -272,36 +273,36 @@ int main(int argc, char* argv[], char* envp[])
                         break;
                 }
 #endif
-                break;
-            case 's':
-                // fprintf(stdout, "INFO: %s: option s, value '%s'\n", __func__, optarg ? optarg : "null");
-                cardScale = optarg ? atof(optarg) : 1.0f;
-                break;
-            case 'v':
-                // fprintf(stdout, "INFO: %s: option v, value '%s'\n", __func__, optarg ? optarg : "null");
-                if (optarg && strlen(optarg) < sizeof(variantName)) {
-                    strcpy(variantName, optarg);
-                }
-                break;
-            case 'w':
-                // fprintf(stdout, "INFO: %s: option w, value '%s'\n", __func__, optarg ? optarg : "null");
-                if (optarg && atoi(optarg)) {
-                    windowWidth = atoi(optarg);
-                }
-                break;
-            case 'h':
-                // fprintf(stdout, "INFO: %s: option h, value '%s'\n", __func__, optarg ? optarg : "null");
-                if (optarg && atoi(optarg)) {
-                    windowHeight = atoi(optarg);
-                }
-                break;
-            case '?':
-                // fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
-                break;
-            default:
-                fprintf(stdout, "WARNING: %s: unhandled option %d\n", __func__, c);
-                exit(1);
-                break;
+            break;
+        case 's':
+            // fprintf(stdout, "INFO: %s: option s, value '%s'\n", __func__, optarg ? optarg : "null");
+            cardScale = optarg ? atof(optarg) : 1.0f;
+            break;
+        case 'v':
+            // fprintf(stdout, "INFO: %s: option v, value '%s'\n", __func__, optarg ? optarg : "null");
+            if (optarg && strlen(optarg) < sizeof(variantName)) {
+                strcpy(variantName, optarg);
+            }
+            break;
+        case 'w':
+            // fprintf(stdout, "INFO: %s: option w, value '%s'\n", __func__, optarg ? optarg : "null");
+            if (optarg && atoi(optarg)) {
+                windowWidth = atoi(optarg);
+            }
+            break;
+        case 'h':
+            // fprintf(stdout, "INFO: %s: option h, value '%s'\n", __func__, optarg ? optarg : "null");
+            if (optarg && atoi(optarg)) {
+                windowHeight = atoi(optarg);
+            }
+            break;
+        case '?':
+            // fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
+            break;
+        default:
+            fprintf(stdout, "WARNING: %s: unhandled option %d\n", __func__, c);
+            exit(1);
+            break;
         }
      }
 
@@ -343,7 +344,7 @@ int main(int argc, char* argv[], char* envp[])
         windowWidth = (int)cardWidth * 10;
     }
     if (windowHeight == 0) {
-        windowHeight = (int)cardHeight * 6;
+        windowHeight = (int)cardHeight * 5;
     }
 
     // {

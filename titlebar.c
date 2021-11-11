@@ -34,20 +34,20 @@ void TitleBarLayoutWidgets(struct Container *const self)
 
     size_t index;
     for ( struct Widget *w = ArrayFirst(self->widgets, &index); w; w = ArrayNext(self->widgets, &index) ) {
-        switch ( w->align ) {
-            case -1:
-                w->rect.x = nextLeft;
-                nextLeft += w->rect.width + padding;
-                break;
-            case 0:
-                w->rect.x = (self->rect.width / 2.0f) - (w->rect.width / 2.0f);
-                break;
-            case 1:
-                w->rect.x = nextRight - w->rect.width;
-                nextRight -= w->rect.width + padding;
-                break;
-            default:
-                break;
+        switch (w->align) {
+        case -1:
+            w->rect.x = nextLeft;
+            nextLeft += w->rect.width + padding;
+            break;
+        case 0:
+            w->rect.x = (self->rect.width / 2.0f) - (w->rect.width / 2.0f);
+            break;
+        case 1:
+            w->rect.x = nextRight - w->rect.width;
+            nextRight -= w->rect.width + padding;
+            break;
+        default:
+            break;
         }
         w->rect.y = (self->rect.height / 2.0f) - (w->rect.height / 2.0f);
     }
