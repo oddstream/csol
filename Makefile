@@ -18,10 +18,9 @@ LUA_PATH = /home/gilbert/lua-5.4.3/src
 SRC_DIR = src
 OBJ_DIR = obj
 
-CFLAGS += -std=c99 -D_DEFAULT_SOURCE -DLIL_ENABLE_POOLS
+CFLAGS += -std=c99 -D_DEFAULT_SOURCE
 # https://airbus-seclab.github.io/c-compiler-security/
-CFLAGS += -Werror
-CFLAGS += -Wall -Wextra -Wpedantic 
+CFLAGS += -Wall -Wextra -Wpedantic -Werror
 #  -Wformat-overflow=2
 CFLAGS += -Wformat=2 -Wformat-truncation=2 -Wformat-security 
 CFLAGS += -Wnull-dereference -Wtrampolines -Walloca -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2 
@@ -75,6 +74,7 @@ OBJECT_FILES = $(SOURCE_FILES:%=$(OBJ_DIR)/%.o)
 # use -v to see what's happening
 $(EXECUTABLE): $(SOURCE_FILES) $(HEADER_FILES) Makefile
 	$(CC) -o $@ $(SOURCE_FILES) $(CFLAGS) $(INCLUDE_PATHS) $(LDLIBS) $(LDFLAGS)
+	@echo $(PLAT)
 	@ls -al csol
 
 .PHONY: clean check

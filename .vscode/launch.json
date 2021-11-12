@@ -37,7 +37,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/csol",
-            "args": ["--variant","Quick Win"],
+            "args": ["--variant=Quick Win", "--cards=simple"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

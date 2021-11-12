@@ -147,12 +147,13 @@ void PileUpdate(struct Pile *const self)
 
 void PileDraw(struct Pile *const self)
 {
+    extern float cardRoundness;
     extern Color baizeHighlightColor;
 
     // BeginDrawing() has been called by BaizeDraw()
     // Rectangle r = PileFannedScreenRect(self);
     Rectangle r = PileScreenRect(self);
-    DrawRectangleRoundedLines(r, 0.05, 9, 2.0, baizeHighlightColor);
+    DrawRectangleRoundedLines(r, cardRoundness, 9, 2.0, baizeHighlightColor);
 
     PileDrawCenteredText(self, self->label);
 

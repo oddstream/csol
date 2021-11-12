@@ -3,3 +3,4 @@
 csol
 *.o
 obj/*
+*.svg

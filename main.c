@@ -15,9 +15,16 @@
 #include "settings.h"
 #include "undo.h"
 
-#define RETROCARDS 0
+enum CardSet {
+    CARDSET_RETRO = 0,
+    CARDSET_KENNEY,
+    CARDSET_SIMPLE_140x190,
+};
 
-#if RETROCARDS
+// enum CardSet cardSet = CARDSET_RETRO;
+enum CardSet cardSet = CARDSET_KENNEY;
+// enum CardSet cardSet = CARDSET_SIMPLE_140x190;
+
 struct Vector2 retroFaceInfo[52] = {
     // Club
     {.x=72.0f*0.0f, .y=0},
@@ -92,7 +99,7 @@ struct Vector2 retroBackInfo[13] = {
     {.x = 325, .y = 140},   // Roses
     {.x = 405, .y = 140},   // Shell
 };
-#else
+
 struct Vector2 kenneyFaceInfo[52] = {
     // Club
     {.x=560, .y=570},  // Ace
@@ -173,15 +180,68 @@ struct Vector2 kenneyBackInfo[15] = {
     {.x=140, .y=760},
     {.x=280, .y=760},
 };
-#endif
+
+struct Vector2 simple140x190FaceInfo[52] = {
+    // Club
+    {.x=1*140-140, .y=1*190-190},     // Ace
+    {.x=2*140-140, .y=1*190-190},     // 2
+    {.x=3*140-140, .y=1*190-190},     // 3
+    {.x=4*140-140, .y=1*190-190},     // 4
+    {.x=5*140-140, .y=1*190-190},     // 5
+    {.x=6*140-140, .y=1*190-190},     // 6
+    {.x=7*140-140, .y=1*190-190},     // 7
+    {.x=8*140-140, .y=1*190-190},     // 8
+    {.x=1*140-140, .y=2*190-190},     // 9
+    {.x=2*140-140, .y=2*190-190},     // 10
+    {.x=3*140-140, .y=2*190-190},     // J
+    {.x=4*140-140, .y=2*190-190},     // Q
+    {.x=5*140-140, .y=2*190-190},     // K
+    // Diamond
+    {.x=6*140-140, .y=2*190-190},     // Ace
+    {.x=7*140-140, .y=2*190-190},     // 2
+    {.x=8*140-140, .y=2*190-190},     // 3
+    {.x=1*140-140, .y=3*190-190},     // 4
+    {.x=2*140-140, .y=3*190-190},     // 5
+    {.x=3*140-140, .y=3*190-190},     // 6
+    {.x=4*140-140, .y=3*190-190},     // 7
+    {.x=5*140-140, .y=3*190-190},     // 8
+    {.x=6*140-140, .y=3*190-190},     // 9
+    {.x=7*140-140, .y=3*190-190},     // 10
+    {.x=8*140-140, .y=3*190-190},     // J
+    {.x=1*140-140, .y=4*190-190},     // Q
+    {.x=2*140-140, .y=4*190-190},     // K
+    // Heart
+    {.x=3*140-140, .y=4*190-190},     // Ace
+    {.x=4*140-140, .y=4*190-190},     // 2
+    {.x=5*140-140, .y=4*190-190},     // 3
+    {.x=6*140-140, .y=4*190-190},     // 4
+    {.x=7*140-140, .y=4*190-190},     // 5
+    {.x=8*140-140, .y=4*190-190},     // 6
+    {.x=1*140-140, .y=5*190-190},     // 7
+    {.x=2*140-140, .y=5*190-190},     // 8
+    {.x=3*140-140, .y=5*190-190},     // 9
+    {.x=4*140-140, .y=5*190-190},     // 10
+    {.x=5*140-140, .y=5*190-190},     // J
+    {.x=6*140-140, .y=5*190-190},     // Q
+    {.x=7*140-140, .y=5*190-190},     // K
+    // Spade
+    {.x=3*140-140, .y=6*190-190},     // Ace
+    {.x=4*140-140, .y=6*190-190},     // 2
+    {.x=5*140-140, .y=6*190-190},     // 3
+    {.x=6*140-140, .y=6*190-190},     // 4
+    {.x=7*140-140, .y=6*190-190},     // 5
+    {.x=8*140-140, .y=6*190-190},     // 6
+    {.x=9*140-140, .y=1*190-190},     // 7
+    {.x=9*140-140, .y=2*190-190},     // 8
+    {.x=9*140-140, .y=3*190-190},     // 9
+    {.x=9*140-140, .y=4*190-190},     // 10
+    {.x=9*140-140, .y=5*190-190},     // J
+    {.x=9*140-140, .y=6*190-190},     // Q
+    {.x=1*140-140, .y=7*190-190},     // K
+};
 
 struct Spritesheet *ssFace, *ssBack, *ssIcons;
-
-#if RETROCARDS
-float originalCardWidth = 71.0f, originalCardHeight = 96.0f;
-#else
-float originalCardWidth = 140.0f, originalCardHeight = 190.0f;
-#endif
+float cardRoundness, originalCardWidth, originalCardHeight;
 
 float cardScale = 1.0f;
 float cardWidth, cardHeight;
@@ -223,6 +283,7 @@ int main(int argc, char* argv[], char* envp[])
 
     while (1) {
         static struct option long_options[] = {
+            {"cards",   required_argument,  0,              'c'},
             {"scale",   required_argument,  0,              's'},
             {"variant", required_argument,  0,              'v'},
             {"width",   required_argument,  0,              'w'},
@@ -273,6 +334,20 @@ int main(int argc, char* argv[], char* envp[])
                         break;
                 }
 #endif
+            break;
+        case 'c':
+            // fprintf(stdout, "INFO: %s: option c, value '%s'\n", __func__, optarg ? optarg : "null");
+            if (optarg) {
+                if (strcmp(optarg, "retro")==0) {
+                    cardSet = CARDSET_RETRO;
+                } else if (strcmp(optarg, "kenney")==0) {
+                    cardSet = CARDSET_KENNEY;
+                } else if (strcmp(optarg, "simple")== 0) {
+                    cardSet = CARDSET_SIMPLE_140x190;
+                } else {
+                    fprintf(stderr, "ERROR: %s: unknown setting for --cards: %s\n", __func__, optarg);
+                }
+            }
             break;
         case 's':
             // fprintf(stdout, "INFO: %s: option s, value '%s'\n", __func__, optarg ? optarg : "null");
@@ -334,6 +409,25 @@ int main(int argc, char* argv[], char* envp[])
     uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xee};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
+    switch (cardSet) {
+    case CARDSET_RETRO:
+        originalCardWidth = 71.0f;
+        originalCardHeight = 96.0f;
+        cardRoundness = 0.05f;
+        break;
+    case CARDSET_KENNEY:
+        originalCardWidth = 140.0f;
+        originalCardHeight = 190.0f;
+        cardRoundness = 0.05f;
+        break;
+    case CARDSET_SIMPLE_140x190:
+        originalCardWidth = 140.0f;
+        originalCardHeight = 190.0f;
+        cardRoundness = 0.275f;
+        break;
+    default: break;
+    }
+
     // LoadSettings(&windowWidth, &windowHeight);
     // fprintf(stderr, "cardScale %f\n", cardScale);
 
@@ -384,14 +478,22 @@ int main(int argc, char* argv[], char* envp[])
     // https://draeton.github.io/stitches/
     ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
 
-#if RETROCARDS
-    // ssFace = SpritesheetNew("assets/cards71x96.png", originalCardWidth, originalCardHeight, 13);
-    ssFace = SpritesheetNewInfo("assets/lessblockycards71x96.png", originalCardWidth, originalCardHeight, retroFaceInfo);
-    ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", originalCardWidth, originalCardHeight, retroBackInfo);
-#else
-    ssFace = SpritesheetNewInfo("assets/playingCards.png", originalCardWidth, originalCardHeight, kenneyFaceInfo);
-    ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", originalCardWidth, originalCardHeight, kenneyBackInfo);
-#endif
+    switch (cardSet) {
+    case CARDSET_RETRO:
+        // ssFace = SpritesheetNew("assets/cards71x96.png", 71.0f, 96.0f, 13);
+        ssFace = SpritesheetNewInfo("assets/lessblockycards71x96.png", 71.0f, 96.0f, retroFaceInfo);
+        ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", 71.0f, 96.0f, retroBackInfo);
+        break;
+    case CARDSET_KENNEY:
+        ssFace = SpritesheetNewInfo("assets/playingCards.png", 140.0f, 190.0f, kenneyFaceInfo);
+        ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", 140.0f, 190.0f, kenneyBackInfo);
+        break;
+    case CARDSET_SIMPLE_140x190:
+        ssFace = SpritesheetNewInfo("assets/spritesheet simple 140x190.png", 140.0f, 190.0f, simple140x190FaceInfo);
+        ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", 140.0f, 190.0f, kenneyBackInfo);
+        break;
+    default: break;
+    }
 
 #if 0
     {

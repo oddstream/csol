@@ -80,7 +80,7 @@ void ToastManagerDraw(struct ToastManager *const self)
     // ToastManager draws all the Toasts, rather than handing it down to the Toast object, because we know position in queue
     extern Color uiBackgroundColor, uiTextColor;
     extern Font fontRobotoRegular14;
-    extern float fontSpacing;
+    extern float cardRoundness, fontSpacing;
 
     int baizeWidth = GetScreenWidth();
     int baizeHeight = GetScreenHeight();
@@ -98,7 +98,7 @@ void ToastManagerDraw(struct ToastManager *const self)
 
         Rectangle rRect = {.x=rX, .y=rY, .width=rWidth, .height=rHeight};
 
-        DrawRectangleRounded(rRect, 0.05, 9, uiBackgroundColor);
+        DrawRectangleRounded(rRect, cardRoundness, 9, uiBackgroundColor);
 
         Vector2 pos = UtilCenterTextInRectangle(rRect, t->mte.x, t->mte.y);
         DrawTextEx(fontRobotoRegular14, t->message, pos, FONT_SIZE, fontSpacing, uiTextColor);

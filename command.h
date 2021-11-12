@@ -5,8 +5,6 @@
 
 #include "baize.h"
 
-struct Array* CommandQueue;
-
 typedef void (*CommandFunction)(struct Baize *const, void* param);
 
 struct Command {

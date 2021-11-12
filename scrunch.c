@@ -190,6 +190,8 @@ void ScrunchPiles(struct Baize *const baize)
 
 void ScrunchDrawDebug(struct Pile *const pile)
 {
+    extern float cardRoundness;
+    
     Rectangle r = PileScreenRect(pile);
 
     char buff[64];
@@ -198,10 +200,10 @@ void ScrunchDrawDebug(struct Pile *const pile)
 
     r.width = pile->scrunchDims.x;
     r.height = pile->scrunchDims.y;
-    DrawRectangleRoundedLines(r, 0.05, 9, 1.0, RED);
+    DrawRectangleRoundedLines(r, cardRoundness, 9, 1.0, RED);
 
     Vector2 dims = calcPileDimensions(pile, pile->fanFactor);
     r.width = dims.x;
     r.height = dims.y;
-    DrawRectangleRoundedLines(r, 0.05, 9, 1.0, BLUE);
+    DrawRectangleRoundedLines(r, cardRoundness, 9, 1.0, BLUE);
 }

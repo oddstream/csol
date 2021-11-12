@@ -93,8 +93,9 @@ void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 
 void DiscardDraw(struct Pile *const self)
 {
+    extern float cardRoundness;
     extern Color baizeHighlightColor;
 
     Rectangle r = PileScreenRect(self);
-    DrawRectangleRounded(r, 0.05, 9, baizeHighlightColor);
+    DrawRectangleRounded(r, cardRoundness, 9, baizeHighlightColor);
 }

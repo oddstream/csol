@@ -243,6 +243,7 @@ void CardUpdate(struct Card *const self)
 void CardDraw(struct Card *const self)
 {
     // BeginDrawing() has been called by BaizeDraw()
+    extern float cardRoundness;
 
     _Bool showFace;
 
@@ -269,7 +270,7 @@ void CardDraw(struct Card *const self)
         // || CardTransitioning(self) 
         r.x += 2.0f;
         r.y += 2.0f;
-        DrawRectangleRounded(r, 0.05, 9, (Color){0,0,0,63});
+        DrawRectangleRounded(r, cardRoundness, 9, (Color){0,0,0,63});
         r.x -= 4.0f;
         r.y -= 4.0f;
     }
