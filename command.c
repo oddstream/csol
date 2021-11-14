@@ -1,8 +1,19 @@
 /* command.c */
 
+#include <stdio.h>
+
 #include "baize.h"
 #include "command.h"
 #include "ui.h"
+
+struct Command {
+    // ISO C forbids conversion of object pointer to function pointer type [-Werror=pedantic]
+    // so we hide our function pointer in a struct
+    CommandFunction cf;
+    void *param;    // NULL, or a pointer to a block of memory owned by widget
+                    // i.e. the Widget frees this memory, no-one else
+                    // currently used by TextWidget in variantDrawer: strdup(vname)
+};
 
 struct Array* CommandQueue = NULL;
 
@@ -18,13 +29,29 @@ void StopCommandQueue(void)
     }
 }
 
-void NewCommand(CommandFunction cf, void* param)
+void PostCommand(CommandFunction cf, void *param)
 {
     struct Command *c = calloc(1, sizeof(struct Command));
     if (c) {
         c->cf = cf;
         c->param = param;
         CommandQueue = ArrayPush(CommandQueue, c);
+    }
+}
+
+void PostUniqueCommand(CommandFunction cf, void *param)
+{
+    _Bool found = 0;
+    size_t index;
+    for ( struct Command *c = ArrayFirst(CommandQueue, &index); c; c = ArrayNext(CommandQueue, &index) ) {
+        if (c->cf == cf) {
+            fprintf(stdout, "INFO: %s: command already in queue\n", __func__);
+            found = 1;
+            break;
+        }
+    }
+    if (!found) {
+        PostCommand(cf, param);
     }
 }
 

@@ -17,18 +17,27 @@
 #include "undo.h"
 #include "util.h"
 #include "luautil.h"
+#include "trace.h"
 #include "ui.h"
 
 #define BAIZE_MAGIC (0x19910920)
 
-struct Baize* BaizeNew(const char *variant)
+struct Baize* BaizeNew(const char *variantName, const char *packName)
 {
     struct Baize* self = calloc(1, sizeof(struct Baize));
-    if ( !self ) {
+    if (!self) {
         return NULL;
     }
     self->magic = BAIZE_MAGIC;
-    strcpy(self->variantName, variant);
+    strcpy(self->variantName, variantName);
+    self->pack = PackCtor(packName);
+    if (!self->pack) {
+        self->pack = PackCtor("retro"); // try a fallback
+        if (!self->pack) {
+            free(self);
+            return NULL;
+        }
+    }
     self->ui = UiNew();
 
     return self;
@@ -133,7 +142,7 @@ void BaizeCreatePiles(struct Baize *const self)
     { // scope for fname
         char fname[128];    snprintf(fname, 127, "variants/%s.lua", self->variantName);
         if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
-            fprintf(stderr, "ERROR: %s: %s\n", __func__, lua_tostring(self->L, -1));
+            CSOL_ERROR("%s", lua_tostring(self->L, -1));
             lua_pop(self->L, 1);
             return;
         }
@@ -142,11 +151,11 @@ void BaizeCreatePiles(struct Baize *const self)
     }
 
     if (lua_getglobal(self->L, "BuildPiles") != LUA_TFUNCTION) { // push value of "BuildPiles" onto the stack, return type
-        fprintf(stderr, "ERROR: %s: BuildPiles is not a function\n", __func__);
+        CSOL_ERROR("%s", "BuildPiles is not a function");
         lua_pop(self->L, 1);    // remove "BuildPiles" from stack
     } else {
         if (lua_pcall(self->L, 0, 0, 0) != LUA_OK) {
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
+            CSOL_ERROR("running Lua function: %s", lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
             // fprintf(stderr, "BuildPiles called ok\n");
@@ -173,16 +182,15 @@ void BaizeCreatePiles(struct Baize *const self)
         //     }
         // }
         if (self->stock == NULL) {
-            fprintf(stderr, "ERROR: %s: no Stock\n", __func__);
+            CSOL_ERROR("%s", "no Stock");
         }
         if (ArrayLen(self->foundations) == 0) {
-            fprintf(stderr, "WARNING: %s: no Foundations - will divide by zero\n", __func__);
+            CSOL_WARNING("%s", "no Foundations - will divide by zero\n");
         }
     }
 
     // now the piles know their slots, calculate and set their positions
-    extern int windowWidth, windowHeight;
-    BaizePositionPiles(self, windowWidth, windowHeight);
+    BaizeLayoutCommand(self, NULL);
 }
 
 void BaizeResetState(struct Baize *const self, struct Array *undoStack)
@@ -209,7 +217,7 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
 void BaizeGetLuaGlobals(struct Baize *const self)
 {
     if (!self->stock) {
-        fprintf(stderr, "ERROR: %s: Baize not formed\n", __func__);
+        CSOL_ERROR("%s", "Baize not formed");
         exit(666);
         return;
     }
@@ -228,18 +236,18 @@ void BaizeStartGame(struct Baize *const self)
             break;
         }
     }
-    if (zeroPile) fprintf(stderr, "WARNING: %s: zero pos pile\n", __func__);
+    if (zeroPile) CSOL_WARNING("%s", "zero pos pile");
 #endif
 
     unsigned crc = BaizeCRC(self);
 
     if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        fprintf(stderr, "INFO: %s: StartGame is not a function\n", __func__);
+        CSOL_INFO("%s", "StartGame is not a function");
         lua_pop(self->L, 1);  // remove function name
     } else {
         // no args, no returns
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
+            CSOL_ERROR("running Lua function: %s", lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
             // nothing
@@ -247,7 +255,7 @@ void BaizeStartGame(struct Baize *const self)
     }
 
     if (BaizeCRC(self) != crc) {
-        fprintf(stdout, "INFO: %s: StartGame has changed the baize\n", __func__);
+        CSOL_INFO("%s", "StartGame has changed the baize");
     }
 }
 
@@ -261,7 +269,7 @@ void BaizeRefan(struct Baize *const self)
 
 void BaizePositionPiles(struct Baize *const self, const int windowWidth, const int windowHeight)
 {
-    extern float cardWidth, cardHeight, pilePaddingX, pilePaddingY, topMargin, leftMargin;
+    extern float pilePaddingX, pilePaddingY, topMargin, leftMargin;
 
     float maxX = 0.0f;
     size_t index;
@@ -271,25 +279,23 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth, const i
         }
     }
 
-    pilePaddingX = cardWidth / 10.0f;
-    pilePaddingY = cardHeight / 10.0f;
-    float w = pilePaddingX + cardWidth * (maxX + 2);
+    pilePaddingX = self->pack->width / 10.0f;
+    pilePaddingY = self->pack->height / 10.0f;
+    float w = pilePaddingX + self->pack->width * (maxX + 2);
     leftMargin = ((float)windowWidth - w) / 2.0f;
     topMargin = TITLEBAR_HEIGHT + pilePaddingY;
 
     for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         PileSetBaizePos(p, (Vector2){
-            .x = leftMargin + (p->slot.x * (cardWidth + pilePaddingX)),
-            .y = topMargin + (p->slot.y * (cardHeight + pilePaddingY)),
+            .x = leftMargin + (p->slot.x * (self->pack->width + pilePaddingX)),
+            .y = topMargin + (p->slot.y * (self->pack->height + pilePaddingY)),
         });
         // fprintf(stdout, "%s: %.0f,%.0f := %.0f,%.0f\n", p->category, p->slot.x, p->slot.y, p->pos.x, p->pos.y);
     }
 
     BaizeCalculateScrunchDims(self, windowWidth, windowHeight);
-    // TODO compare fanFactor with default and Refan if changed
-    BaizeRefan(self);
 
-    // fprintf(stdout, "INFO: %s:\n", __func__);
+    BaizeRefan(self);
 }
 
 void BaizeNewDealCommand(struct Baize *const self, void* param)
@@ -398,7 +404,7 @@ _Bool BaizeMakeTail(struct Baize *const self, struct Card *const cFirst)
     // find the index of the first tail card
     size_t iFirst;
     if (!ArrayIndexOf(p->cards, cFirst, &iFirst)) {
-        fprintf(stderr, "ERROR: %s: card not found in pile\n", __func__);
+        CSOL_ERROR("card %d %d not found in pile", cFirst->id.ordinal, cFirst->id.suit);
         return 0;
     }
     // free any old tail
@@ -440,12 +446,14 @@ void BaizeDragBy(struct Baize *const self, Vector2 delta) {
 void BaizeStopDrag(struct Baize *const self) {
     // fprintf(stdout, "BaizeStopDrag\n");
     self->dragging = 0;
+    BaizeCalculateScrunchDims(self, GetScreenWidth(), GetScreenHeight());
+    ScrunchPiles(self);
 }
 
 void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
 {
     if (self->tail) {
-        fprintf(stderr, "ERROR: %s: touch when there is a tail\n", __func__);
+        CSOL_ERROR("%s", "touch when there is a tail");
     }
 
     // the UI is on top of the baize, so gets first dibs
@@ -556,6 +564,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
                 ArrayForeach(self->tail, (ArrayIterFunc)CardCancelDrag);
             }
         } else {    // card was not dragged, ie it didn't move
+            // {    char z[64]; CardToString(ArrayGet(self->tail, 0), z);   fprintf(stdout, "Touched card %s\n", z);   }
             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
             unsigned crc = BaizeCRC(self);
             BaizeTailTapped(self);
@@ -580,7 +589,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
         if (!self->touchedWidget->parent->vtable->WasDragged(self->touchedWidget->parent, touchPosition)) {
             // fprintf(stderr, "Widget Command\n");
             if (self->touchedWidget->bcf) {
-                NewCommand(self->touchedWidget->bcf, self->touchedWidget->param);
+                PostCommand(self->touchedWidget->bcf, self->touchedWidget->param);
             }
         }
         self->touchedWidget = NULL;
@@ -648,12 +657,12 @@ void BaizeAfterUserMove(struct Baize *const self)
     // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
     if (lua_getglobal(self->L, "AfterMove") != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        // fprintf(stderr, "INFO: %s: AfterMove is not a function\n", __func__);
+        // CSOL_INFO("%s", "AfterMove is not a function");
         lua_pop(self->L, 1);  // remove func from stack
     } else {
         // no args, no returns
         if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
+            CSOL_ERROR("running Lua function: %s", lua_tostring(self->L, -1));
             lua_pop(self->L, 1);    // remove error
         } else {
             // nothing
@@ -672,15 +681,25 @@ void BaizeAfterUserMove(struct Baize *const self)
     BaizeUndoPush(self);
 }
 
-void BaizeLayout(struct Baize *const self, const int newWindowWidth, const int newWindowHeight)
+void BaizeLayoutCommand(struct Baize *const self, void *param)
 {
-    extern int windowWidth, windowHeight;
+    (void)param;
 
-    if ( newWindowWidth != windowWidth || newWindowHeight != windowHeight ) {
-        windowWidth = newWindowWidth;
-        windowHeight = newWindowHeight;
-        BaizePositionPiles(self, windowWidth, windowHeight);
-        UiLayout(self->ui, windowWidth, windowHeight);
+    int w = GetScreenWidth();
+    int h = GetScreenHeight();
+
+    CSOL_INFO("resizing to %d,%d", w, h);
+
+    BaizePositionPiles(self, w, h);
+    UiLayout(self->ui, w, h);
+}
+
+void BaizeLayout(struct Baize *const self)
+{
+    (void)self;
+
+    if (IsWindowResized()) {
+        PostUniqueCommand(BaizeLayoutCommand, NULL);
     }
 }
 
@@ -847,6 +866,7 @@ void BaizeFree(struct Baize *const self)
     ArrayFree(self->piles);
     free(self->cardLibrary);
     UiFree(self->ui);
+    PackDtor(self->pack);
     free(self);
 }
 

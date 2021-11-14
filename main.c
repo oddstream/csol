@@ -15,249 +15,17 @@
 #include "settings.h"
 #include "undo.h"
 
-enum CardSet {
-    CARDSET_RETRO = 0,
-    CARDSET_KENNEY,
-    CARDSET_SIMPLE_140x190,
-};
+struct Spritesheet *ssIcons;
 
-// enum CardSet cardSet = CARDSET_RETRO;
-enum CardSet cardSet = CARDSET_KENNEY;
-// enum CardSet cardSet = CARDSET_SIMPLE_140x190;
+float cardScale = 1.0f;     // deprecated?
 
-struct Vector2 retroFaceInfo[52] = {
-    // Club
-    {.x=72.0f*0.0f, .y=0},
-    {.x=72.0f*1.0f, .y=0},
-    {.x=72.0f*2.0f, .y=0},
-    {.x=72.0f*3.0f, .y=0},
-    {.x=72.0f*4.0f, .y=0},
-    {.x=72.0f*5.0f, .y=0},
-    {.x=72.0f*6.0f, .y=0},
-    {.x=72.0f*7.0f, .y=0},
-    {.x=72.0f*8.0f, .y=0},
-    {.x=72.0f*9.0f, .y=0},
-    {.x=72.0f*10.0f, .y=0},
-    {.x=72.0f*11.0f, .y=0},
-    {.x=72.0f*12.0f, .y=0},
-    // Diamond
-    {.x=72.0f*0.0f, .y=96.0f*3.0f},
-    {.x=72.0f*1.0f, .y=96.0f*3.0f},
-    {.x=72.0f*2.0f, .y=96.0f*3.0f},
-    {.x=72.0f*3.0f, .y=96.0f*3.0f},
-    {.x=72.0f*4.0f, .y=96.0f*3.0f},
-    {.x=72.0f*5.0f, .y=96.0f*3.0f},
-    {.x=72.0f*6.0f, .y=96.0f*3.0f},
-    {.x=72.0f*7.0f, .y=96.0f*3.0f},
-    {.x=72.0f*8.0f, .y=96.0f*3.0f},
-    {.x=72.0f*9.0f, .y=96.0f*3.0f},
-    {.x=72.0f*10.0f, .y=96.0f*3.0f},
-    {.x=72.0f*11.0f, .y=96.0f*3.0f},
-    {.x=72.0f*12.0f, .y=96.0f*3.0f},
-    // Heart
-    {.x=72.0f*0.0f, .y=96.0f*2.0f},
-    {.x=72.0f*1.0f, .y=96.0f*2.0f},
-    {.x=72.0f*2.0f, .y=96.0f*2.0f},
-    {.x=72.0f*3.0f, .y=96.0f*2.0f},
-    {.x=72.0f*4.0f, .y=96.0f*2.0f},
-    {.x=72.0f*5.0f, .y=96.0f*2.0f},
-    {.x=72.0f*6.0f, .y=96.0f*2.0f},
-    {.x=72.0f*7.0f, .y=96.0f*2.0f},
-    {.x=72.0f*8.0f, .y=96.0f*2.0f},
-    {.x=72.0f*9.0f, .y=96.0f*2.0f},
-    {.x=72.0f*10.0f, .y=96.0f*2.0f},
-    {.x=72.0f*11.0f, .y=96.0f*2.0f},
-    {.x=72.0f*12.0f, .y=96.0f*2.0f},
-    // Spade
-    {.x=72.0f*0.0f, .y=96.0f},
-    {.x=72.0f*1.0f, .y=96.0f},
-    {.x=72.0f*2.0f, .y=96.0f},
-    {.x=72.0f*3.0f, .y=96.0f},
-    {.x=72.0f*4.0f, .y=96.0f},
-    {.x=72.0f*5.0f, .y=96.0f},
-    {.x=72.0f*6.0f, .y=96.0f},
-    {.x=72.0f*7.0f, .y=96.0f},
-    {.x=72.0f*8.0f, .y=96.0f},
-    {.x=72.0f*9.0f, .y=96.0f},
-    {.x=72.0f*10.0f, .y=96.0f},
-    {.x=72.0f*11.0f, .y=96.0f},
-    {.x=72.0f*12.0f, .y=96.0f},
-};
-
-struct Vector2 retroBackInfo[13] = {
-    {.x = 5, .y = 4},       // Aquarium
-    {.x = 85, .y = 4},      // CardHand
-    {.x = 165, .y = 4},     // Castle
-    {.x = 245, .y = 4},     // Empty / JazzCup
-    {.x = 325, .y = 4},     // Fishes
-    {.x = 405, .y = 4},     // FlowerBlack
-    {.x = 485, .y = 4},     // FlowerBlue
-    {.x = 5, .y = 140},     // PalmBeach
-    {.x = 85, .y = 140},    // Pattern1
-    {.x = 165, .y = 140},   // Pattern2
-    {.x = 245, .y = 140},   // Robot
-    {.x = 325, .y = 140},   // Roses
-    {.x = 405, .y = 140},   // Shell
-};
-
-struct Vector2 kenneyFaceInfo[52] = {
-    // Club
-    {.x=560, .y=570},  // Ace
-    {.x=280, .y=1140}, // 2
-    {.x=700, .y=190},  // 3
-    {.x=700, .y=0},    // 4
-    {.x=560, .y=1710}, // 5
-    {.x=560, .y=1520}, // 6
-    {.x=560, .y=1330}, // 7
-    {.x=560, .y=1140}, // 8
-    {.x=560, .y=950},  // 9
-    {.x=560, .y=760},  // 10
-    {.x=560, .y=380},  // J
-    {.x=560, .y=0},    // Q
-    {.x=560, .y=190},  // K
-    // Diamond
-    {.x=420, .y=0},    // Ace
-    {.x=420, .y=1710}, // 2
-    {.x=420, .y=1520}, // 3
-    {.x=420, .y=1330}, // 4
-    {.x=420, .y=1140}, // 5
-    {.x=420, .y=950},  // 6
-    {.x=420, .y=760},  // 7
-    {.x=420, .y=570},  // 8
-    {.x=420, .y=380},  // 9
-    {.x=420, .y=190},  // 10
-    {.x=280, .y=1710}, // J
-    {.x=280, .y=1330}, // Q
-    {.x=280, .y=1520}, // K
-    // Heart
-    {.x=140, .y=1330}, // Ace
-    {.x=700, .y=380},  // 2
-    {.x=280, .y=950},  // 3
-    {.x=280, .y=760},  // 4
-    {.x=280, .y=570},  // 5
-    {.x=280, .y=380},  // 6
-    {.x=280, .y=190},  // 7
-    {.x=280, .y=0},    // 8
-    {.x=140, .y=1710}, // 9
-    {.x=140, .y=1520}, // 10
-    {.x=140, .y=1140}, // J
-    {.x=140, .y=760},  // Q
-    {.x=140, .y=950},  // K
-    // Spade
-    {.x=0, .y=570},    // Ace
-    {.x=140, .y=380},  // 2
-    {.x=140, .y=190},  // 3
-    {.x=140, .y=0},    // 4
-    {.x=0, .y=1710},   // 5
-    {.x=0, .y=1520},   // 6
-    {.x=0, .y=1330},   // 7
-    {.x=0, .y=1140},   // 8
-    {.x=0, .y=950},    // 9
-    {.x=0, .y=760},    // 10
-    {.x=0, .y=380},    // J
-    {.x=0, .y=00},     // Q
-    {.x=0, .y=190},    // K
-};
-
-struct Vector2 kenneyBackInfo[15] = {
-    {.x=0, .y=0},
-    {.x=140, .y=0},
-    {.x=280, .y=0},
-
-    {.x=0, .y=190},
-    {.x=140, .y=190},
-    {.x=280, .y=190},
-
-    {.x=0, .y=380},
-    {.x=140, .y=380},
-    {.x=280, .y=380},
-
-    {.x=0, .y=570},
-    {.x=140, .y=570},
-    {.x=280, .y=570},
-
-    {.x=0, .y=760},
-    {.x=140, .y=760},
-    {.x=280, .y=760},
-};
-
-struct Vector2 simple140x190FaceInfo[52] = {
-    // Club
-    {.x=1*140-140, .y=1*190-190},     // Ace
-    {.x=2*140-140, .y=1*190-190},     // 2
-    {.x=3*140-140, .y=1*190-190},     // 3
-    {.x=4*140-140, .y=1*190-190},     // 4
-    {.x=5*140-140, .y=1*190-190},     // 5
-    {.x=6*140-140, .y=1*190-190},     // 6
-    {.x=7*140-140, .y=1*190-190},     // 7
-    {.x=8*140-140, .y=1*190-190},     // 8
-    {.x=1*140-140, .y=2*190-190},     // 9
-    {.x=2*140-140, .y=2*190-190},     // 10
-    {.x=3*140-140, .y=2*190-190},     // J
-    {.x=4*140-140, .y=2*190-190},     // Q
-    {.x=5*140-140, .y=2*190-190},     // K
-    // Diamond
-    {.x=6*140-140, .y=2*190-190},     // Ace
-    {.x=7*140-140, .y=2*190-190},     // 2
-    {.x=8*140-140, .y=2*190-190},     // 3
-    {.x=1*140-140, .y=3*190-190},     // 4
-    {.x=2*140-140, .y=3*190-190},     // 5
-    {.x=3*140-140, .y=3*190-190},     // 6
-    {.x=4*140-140, .y=3*190-190},     // 7
-    {.x=5*140-140, .y=3*190-190},     // 8
-    {.x=6*140-140, .y=3*190-190},     // 9
-    {.x=7*140-140, .y=3*190-190},     // 10
-    {.x=8*140-140, .y=3*190-190},     // J
-    {.x=1*140-140, .y=4*190-190},     // Q
-    {.x=2*140-140, .y=4*190-190},     // K
-    // Heart
-    {.x=3*140-140, .y=4*190-190},     // Ace
-    {.x=4*140-140, .y=4*190-190},     // 2
-    {.x=5*140-140, .y=4*190-190},     // 3
-    {.x=6*140-140, .y=4*190-190},     // 4
-    {.x=7*140-140, .y=4*190-190},     // 5
-    {.x=8*140-140, .y=4*190-190},     // 6
-    {.x=1*140-140, .y=5*190-190},     // 7
-    {.x=2*140-140, .y=5*190-190},     // 8
-    {.x=3*140-140, .y=5*190-190},     // 9
-    {.x=4*140-140, .y=5*190-190},     // 10
-    {.x=5*140-140, .y=5*190-190},     // J
-    {.x=6*140-140, .y=5*190-190},     // Q
-    {.x=7*140-140, .y=5*190-190},     // K
-    // Spade
-    {.x=3*140-140, .y=6*190-190},     // Ace
-    {.x=4*140-140, .y=6*190-190},     // 2
-    {.x=5*140-140, .y=6*190-190},     // 3
-    {.x=6*140-140, .y=6*190-190},     // 4
-    {.x=7*140-140, .y=6*190-190},     // 5
-    {.x=8*140-140, .y=6*190-190},     // 6
-    {.x=9*140-140, .y=1*190-190},     // 7
-    {.x=9*140-140, .y=2*190-190},     // 8
-    {.x=9*140-140, .y=3*190-190},     // 9
-    {.x=9*140-140, .y=4*190-190},     // 10
-    {.x=9*140-140, .y=5*190-190},     // J
-    {.x=9*140-140, .y=6*190-190},     // Q
-    {.x=1*140-140, .y=7*190-190},     // K
-};
-
-struct Spritesheet *ssFace, *ssBack, *ssIcons;
-float cardRoundness, originalCardWidth, originalCardHeight;
-
-float cardScale = 1.0f;
-float cardWidth, cardHeight;
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
 
-int windowWidth = 0, windowHeight = 0;
-
-Font fontAcmePile = {0};
-Font fontAcmeLabel = {0};
 Font fontRobotoMedium24 = {0};
 Font fontRobotoRegular14 = {0};
-Font fontSymbol = {0};
-int pileFontSize = 0;
-int labelFontSize = 0;
+
 float fontSpacing = 1.2f;
 
 int flag_nolerp = 0;
@@ -276,23 +44,24 @@ int main(int argc, char* argv[], char* envp[])
     }
 #endif
 
-    char variantName[32];
-    memset(variantName, 0, sizeof(variantName));
+    char variantName[32];       memset(variantName, 0, sizeof(variantName));
+    char packName[32];          memset(packName, 0, sizeof(packName));
+    int windowWidth = 0, windowHeight = 0;
 
     // https://azrael.digipen.edu/~mmead/www/Courses/CS180/getopt.html
 
     while (1) {
         static struct option long_options[] = {
-            {"cards",   required_argument,  0,              'c'},
-            {"scale",   required_argument,  0,              's'},
-            {"variant", required_argument,  0,              'v'},
-            {"width",   required_argument,  0,              'w'},
-            {"height",  required_argument,  0,              'h'},
-            {"noload",  no_argument,        &flag_noload,   1},
-            {"nosave",  no_argument,        &flag_nosave,   1},
-            {"nolerp",  no_argument,        &flag_nolerp,   1},
-            {"noflip",  no_argument,        &flag_noflip,   1},
-            {NULL,      0,                  NULL,           0},
+            {"pack",    required_argument,  0,                  'p'},
+            {"scale",   required_argument,  0,                  's'},   // deprecated
+            {"variant", required_argument,  0,                  'v'},
+            {"width",   required_argument,  0,                  'w'},
+            {"height",  required_argument,  0,                  'h'},
+            {"noload",  no_argument,        &flag_noload,       1},
+            {"nosave",  no_argument,        &flag_nosave,       1},
+            {"nolerp",  no_argument,        &flag_nolerp,       1},
+            {"noflip",  no_argument,        &flag_noflip,       1},
+            {NULL,      0,                  NULL,               0},
         };
 
         int option_index = 0;
@@ -335,18 +104,10 @@ int main(int argc, char* argv[], char* envp[])
                 }
 #endif
             break;
-        case 'c':
+        case 'p':
             // fprintf(stdout, "INFO: %s: option c, value '%s'\n", __func__, optarg ? optarg : "null");
-            if (optarg) {
-                if (strcmp(optarg, "retro")==0) {
-                    cardSet = CARDSET_RETRO;
-                } else if (strcmp(optarg, "kenney")==0) {
-                    cardSet = CARDSET_KENNEY;
-                } else if (strcmp(optarg, "simple")== 0) {
-                    cardSet = CARDSET_SIMPLE_140x190;
-                } else {
-                    fprintf(stderr, "ERROR: %s: unknown setting for --cards: %s\n", __func__, optarg);
-                }
+            if (optarg && strlen(optarg) < sizeof(packName)) {
+                strcpy(packName, optarg);
             }
             break;
         case 's':
@@ -409,37 +170,10 @@ int main(int argc, char* argv[], char* envp[])
     uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xee};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
-    switch (cardSet) {
-    case CARDSET_RETRO:
-        originalCardWidth = 71.0f;
-        originalCardHeight = 96.0f;
-        cardRoundness = 0.05f;
-        break;
-    case CARDSET_KENNEY:
-        originalCardWidth = 140.0f;
-        originalCardHeight = 190.0f;
-        cardRoundness = 0.05f;
-        break;
-    case CARDSET_SIMPLE_140x190:
-        originalCardWidth = 140.0f;
-        originalCardHeight = 190.0f;
-        cardRoundness = 0.275f;
-        break;
-    default: break;
-    }
+    // pearl from the mudbank: can't use GetMonitorWidth() &c until InitWindow is called!
 
     // LoadSettings(&windowWidth, &windowHeight);
     // fprintf(stderr, "cardScale %f\n", cardScale);
-
-    cardWidth = originalCardWidth * cardScale;
-    cardHeight = originalCardHeight * cardScale;
-
-    if (windowWidth == 0) {
-        windowWidth = (int)cardWidth * 11;
-    }
-    if (windowHeight == 0) {
-        windowHeight = (int)cardHeight * 5;
-    }
 
     // {
     //     int n = GetCurrentMonitor();
@@ -447,53 +181,30 @@ int main(int argc, char* argv[], char* envp[])
     //     int h = GetMonitorHeight(0);
     //     fprintf(stderr, "%d:%d,%d\n", n, w, h);
     // }
-    InitWindow(windowWidth, windowHeight, "Oddstream Solitaire");
 
+    InitWindow(640*2, 480*2, "Oddstream Solitaire");
+
+    if (windowWidth == 0 || windowHeight == 0) {
+        windowWidth = GetMonitorWidth(GetCurrentMonitor()) / 2;
+        windowHeight = GetMonitorHeight(GetCurrentMonitor()) / 2;
+        SetWindowSize(windowWidth, windowHeight);
+    }
     {
         Image img = LoadImage("assets/appicon.png");
         SetWindowIcon(img);
         UnloadImage(img);
     }
-    // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-    pileFontSize = (int)(cardHeight / 2.0f);
-    fontAcmePile = LoadFontEx("assets/Acme-Regular.ttf", pileFontSize, 0, 0);
-    labelFontSize = (int)(cardHeight / 6.0f);
-    fontAcmeLabel = LoadFontEx("assets/Acme-Regular.ttf", labelFontSize, 0, 0);
-    fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
-    fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
-
-    // https://graphemica.com/search?q=home
-    int codepoints[5] = {
-        0x2663, /* black club */
-        0x2666, /* black diamond */
-        0x2665, /* black heart */
-        0x2660, /* black spade */
-        0x267b, /* recycle */ 
-    };
-    fontSymbol = LoadFontEx("assets/DejaVuSans-Bold.ttf", pileFontSize, codepoints, 5);
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
     SetTargetFPS(60);
 
+    // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
+
+    // TODO move these to UI
+    fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
+    fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
     // https://draeton.github.io/stitches/
     ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
-
-    switch (cardSet) {
-    case CARDSET_RETRO:
-        // ssFace = SpritesheetNew("assets/cards71x96.png", 71.0f, 96.0f, 13);
-        ssFace = SpritesheetNewInfo("assets/lessblockycards71x96.png", 71.0f, 96.0f, retroFaceInfo);
-        ssBack = SpritesheetNewInfo("assets/windows_16bit_cards.png", 71.0f, 96.0f, retroBackInfo);
-        break;
-    case CARDSET_KENNEY:
-        ssFace = SpritesheetNewInfo("assets/playingCards.png", 140.0f, 190.0f, kenneyFaceInfo);
-        ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", 140.0f, 190.0f, kenneyBackInfo);
-        break;
-    case CARDSET_SIMPLE_140x190:
-        ssFace = SpritesheetNewInfo("assets/spritesheet simple 140x190.png", 140.0f, 190.0f, simple140x190FaceInfo);
-        ssBack = SpritesheetNewInfo("assets/playingCardBacks.png", 140.0f, 190.0f, kenneyBackInfo);
-        break;
-    default: break;
-    }
 
 #if 0
     {
@@ -516,8 +227,10 @@ int main(int argc, char* argv[], char* envp[])
         fprintf(stdout, "INFO: %s: starting a fresh '%s'\n", __func__, variantName);
     }
 
-    struct Baize* baize = BaizeNew(variantName);
+    struct Baize* baize = BaizeNew(variantName, packName);
     if ( BaizeValid(baize) ) {
+        StartCommandQueue();
+
         BaizeOpenLua(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize, loadedUndoStack);  // Baize takes ownership of loadedUndoStack
@@ -532,9 +245,8 @@ int main(int argc, char* argv[], char* envp[])
         BaizeGetLuaGlobals(baize);
         BaizeUndoPush(baize);
 
-        StartCommandQueue();
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
-            BaizeLayout(baize, GetScreenWidth(), GetScreenHeight());
+            BaizeLayout(baize);
             BaizeUpdate(baize);
             BaizeDraw(baize);
             ServiceCommandQueue(baize);
@@ -546,13 +258,8 @@ int main(int argc, char* argv[], char* envp[])
         BaizeFree(baize);
     }
 
-    SpritesheetFree(ssFace);
-    SpritesheetFree(ssBack);
+    // TODO move these to UI free
     SpritesheetFree(ssIcons);
-
-    UnloadFont(fontAcmePile);
-    UnloadFont(fontAcmeLabel);
-    UnloadFont(fontSymbol);
     UnloadFont(fontRobotoMedium24);
     UnloadFont(fontRobotoRegular14);
 

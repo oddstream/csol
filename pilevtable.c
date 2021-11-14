@@ -111,17 +111,18 @@ void PileInertSetLabel(struct Pile *const self, const char *label)
 
 void PileGenericSetLabel(struct Pile *const self, const char *label)
 {
-    extern Font fontAcmePile;
-    extern int pileFontSize;
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
+
     extern float fontSpacing;
 
     // fprintf(stdout, "INFO: %s: set %s label to '%s'\n", __func__, self->category, label);
 
-    if (pileFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
+    if (pack->pileFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
     memset(self->label, 0, MAX_PILE_LABEL + 1);
     if (*label) {
         strncpy(self->label, label, MAX_PILE_LABEL);
-        self->labelmte = MeasureTextEx(fontAcmePile, self->label, (float)pileFontSize, fontSpacing);
+        self->labelmte = MeasureTextEx(pack->fontAcmePile, self->label, (float)pack->pileFontSize, fontSpacing);
     } else {
         self->labelmte = (Vector2){0};
     }
@@ -147,13 +148,15 @@ void PileUpdate(struct Pile *const self)
 
 void PileDraw(struct Pile *const self)
 {
-    extern float cardRoundness;
     extern Color baizeHighlightColor;
+
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
 
     // BeginDrawing() has been called by BaizeDraw()
     // Rectangle r = PileFannedScreenRect(self);
     Rectangle r = PileScreenRect(self);
-    DrawRectangleRoundedLines(r, cardRoundness, 9, 2.0, baizeHighlightColor);
+    DrawRectangleRoundedLines(r, pack->roundness, 9, 2.0f, baizeHighlightColor);
 
     PileDrawCenteredText(self, self->label);
 

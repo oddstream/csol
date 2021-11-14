@@ -12,6 +12,8 @@
 #include "array.h"
 #include "luautil.h"
 #include "stock.h"
+#include "trace.h"
+#include "ui.h"
 
 static struct PileVtable stockVtable = {
     &StockCanMoveTail,
@@ -65,9 +67,7 @@ static void CreateCardLibrary(struct Baize *const baize, size_t packs, size_t su
     }
     baize->numberOfCardsInLibrary = i;   // in case any were taken out by cardFilter
 
-#ifdef _DEBUG
-    fprintf(stdout, "%s: packs=%lu, suits=%lu, cards created=%lu\n", __func__, packs, suits, baize->numberOfCardsInLibrary);
-#endif
+    CSOL_INFO("%lu packs, %lu suits, %lu cards created", packs, suits, baize->numberOfCardsInLibrary);
 }
 
 static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const stock)
@@ -86,10 +86,14 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
 
 static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
 {
-    unsigned seed = LuaUtilGetGlobalInt(baize->L, "SEED", time(NULL) & 0xFFFF);
-#ifdef _DEBUG
-    fprintf(stdout, "SEED %u\n", seed);
-#endif
+    unsigned seed = LuaUtilGetGlobalInt(baize->L, "SEED", 0);
+    if (seed) {
+        char z[64]; sprintf(z, "Game number %u", seed);
+        UiToast(baize->ui, z);
+    } else {
+        seed = time(NULL) & 0xFFFF;
+    }
+    CSOL_INFO("SEED %u", seed);
     srand(seed);
     // Knuth-Fisher–Yates shuffle
     size_t n = ArrayLen(stock->cards);

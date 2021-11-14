@@ -77,7 +77,7 @@ _Bool DiscardComplete(struct Pile *const self)
 
 _Bool DiscardConformant(struct Pile *const self)
 {
-    struct Baize *baize = self->owner;
+    struct Baize *baize = PileOwner(self);
     int ndiscards = BaizeCountPiles(baize, self->category);
     if (ndiscards) {
         return PileEmpty(self) || PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
@@ -93,9 +93,11 @@ void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
 
 void DiscardDraw(struct Pile *const self)
 {
-    extern float cardRoundness;
     extern Color baizeHighlightColor;
 
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
+
     Rectangle r = PileScreenRect(self);
-    DrawRectangleRounded(r, cardRoundness, 9, baizeHighlightColor);
+    DrawRectangleRounded(r, pack->roundness, 9, baizeHighlightColor);
 }

@@ -152,7 +152,8 @@ _Bool PileIsStock(struct Pile *const self)
 // set the position of this pile in baize coords, also sets the auxillary waste pile fanned positions
 void PileSetBaizePos(struct Pile *const self, Vector2 pos)
 {
-    extern float cardWidth, cardHeight;
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
 
     self->pos = pos;
     switch (self->fanType) {
@@ -162,16 +163,16 @@ void PileSetBaizePos(struct Pile *const self, Vector2 pos)
     case FAN_RIGHT:
         break;
     case FAN_DOWN3:
-        self->pos1 = UtilVector2Add(self->pos, (Vector2){.x = 0.0f, .y = cardHeight / CARD_FACE_FAN_FACTOR_V});
-        self->pos2 = UtilVector2Add(self->pos1, (Vector2){.x = 0.0f, .y = cardHeight / CARD_FACE_FAN_FACTOR_V});
+        self->pos1 = UtilVector2Add(self->pos, (Vector2){.x = 0.0f, .y = pack->height / CARD_FACE_FAN_FACTOR_V});
+        self->pos2 = UtilVector2Add(self->pos1, (Vector2){.x = 0.0f, .y = pack->height / CARD_FACE_FAN_FACTOR_V});
         break;
     case FAN_LEFT3:
-        self->pos1 = UtilVector2Add(self->pos, (Vector2){.x = -(cardWidth / CARD_FACE_FAN_FACTOR_H), .y = 0.0f});
-        self->pos2 = UtilVector2Add(self->pos1, (Vector2){.x = -(cardWidth / CARD_FACE_FAN_FACTOR_H), .y = 0.0f});
+        self->pos1 = UtilVector2Add(self->pos, (Vector2){.x = -(pack->width / CARD_FACE_FAN_FACTOR_H), .y = 0.0f});
+        self->pos2 = UtilVector2Add(self->pos1, (Vector2){.x = -(pack->width / CARD_FACE_FAN_FACTOR_H), .y = 0.0f});
         break;
     case FAN_RIGHT3:
-        self->pos1 = UtilVector2Add(self->pos, (Vector2){.x = cardWidth / CARD_FACE_FAN_FACTOR_H, .y = 0.0f});
-        self->pos2 = UtilVector2Add(self->pos1, (Vector2){.x = cardWidth / CARD_FACE_FAN_FACTOR_H, .y = 0.0f});
+        self->pos1 = UtilVector2Add(self->pos, (Vector2){.x = pack->width / CARD_FACE_FAN_FACTOR_H, .y = 0.0f});
+        self->pos2 = UtilVector2Add(self->pos1, (Vector2){.x = pack->width / CARD_FACE_FAN_FACTOR_H, .y = 0.0f});
         break;
     default:
         break;
@@ -190,25 +191,28 @@ Vector2 PileScreenPos(struct Pile *const self)
 
 Rectangle PileBaizeRect(struct Pile *const self)
 {
-    extern float cardWidth, cardHeight;
-    return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
+    return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = pack->width, .height = pack->height};
 }
 
 Rectangle PileScreenRect(struct Pile *const self)
 {
-    extern float cardWidth, cardHeight;
-    return (Rectangle){.x = self->pos.x + self->owner->dragOffset.x, .y = self->pos.y + self->owner->dragOffset.y, .width = cardWidth, .height = cardHeight};
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
+    return (Rectangle){.x = self->pos.x + self->owner->dragOffset.x, .y = self->pos.y + self->owner->dragOffset.y, .width = pack->width, .height = pack->height};
 }
 
 void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
 {
-    extern Font fontSymbol;
-    extern int pileFontSize;
     extern Color baizeHighlightColor;
 
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
+
     // TODO consider caching this if too expensive
-    GlyphInfo gi = GetGlyphInfo(fontSymbol, glyph);
-    Rectangle gr = GetGlyphAtlasRec(fontSymbol, glyph);
+    GlyphInfo gi = GetGlyphInfo(pack->fontSymbol, glyph);
+    Rectangle gr = GetGlyphAtlasRec(pack->fontSymbol, glyph);
     Rectangle rp = PileScreenRect(self);
     rp.x -= gi.offsetX;
     rp.y -= gi.offsetY;
@@ -220,7 +224,7 @@ void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
     //     cpos.y += 2.0f;
     // }
 
-    DrawTextCodepoint(fontSymbol, glyph, cpos, pileFontSize, baizeHighlightColor);
+    DrawTextCodepoint(pack->fontSymbol, glyph, cpos, pack->pileFontSize, baizeHighlightColor);
 }
 
 #if 0
@@ -263,14 +267,14 @@ void PileDrawUpperLeftText(struct Pile *const self, const char *text)
 
 void PileDrawCenteredText(struct Pile *const self, const char *text)
 {
-    extern Font fontAcmePile;
-    extern int pileFontSize;
     extern float fontSpacing;
     extern Color baizeHighlightColor;
 
     if (text==NULL || *text=='\0') {
         return;
     }
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
     // TODO consider caching this if too expensive
     Rectangle rp = PileScreenRect(self);
     Vector2 cpos = UtilCenterTextInRectangle(rp, self->labelmte.x, self->labelmte.y);
@@ -281,7 +285,7 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
     //     cpos.y += 2.0f;
     // }
 
-    DrawTextEx(fontAcmePile, text, cpos, pileFontSize, fontSpacing, baizeHighlightColor);
+    DrawTextEx(pack->fontAcmePile, text, cpos, pack->pileFontSize, fontSpacing, baizeHighlightColor);
 }
 
 /*
@@ -290,8 +294,10 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
 */
 Rectangle PileFannedBaizeRect(struct Pile *const self)
 {
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
+
     // cannot use position of top card, in case it's being dragged
-    extern float cardWidth, cardHeight;
     Rectangle r = PileBaizeRect(self);
     if ( ArrayLen(self->cards) > 1 ) {
         struct Card* c = ArrayPeek(self->cards);
@@ -306,15 +312,15 @@ Rectangle PileFannedBaizeRect(struct Pile *const self)
             break;
         case FAN_RIGHT:
         case FAN_RIGHT3:
-            r.width = cPos.x + cardWidth - r.x;
+            r.width = cPos.x + pack->width - r.x;
             break;
         case FAN_LEFT:
         case FAN_LEFT3:
-            r.width = cPos.x - cardWidth - r.x;
+            r.width = cPos.x - pack->width - r.x;
             break;
         case FAN_DOWN:
         case FAN_DOWN3:
-            r.height = cPos.y + cardHeight - r.y;
+            r.height = cPos.y + pack->height - r.y;
             break;
         default:
             break;
@@ -333,13 +339,13 @@ Rectangle PileFannedScreenRect(struct Pile *const self) {
 // get the Baize position of the next card to be pushed to this pile, also refans waste pile
 Vector2 PilePosAfter(struct Pile *const self, struct Card *const c)
 {
-    extern float cardWidth, cardHeight;
-
     size_t len = ArrayLen(self->cards);
     if (len == 0) {
         return self->pos;
     }
 
+    struct Baize *baize = PileOwner(self);
+    struct Pack *pack = baize->pack;
     Vector2 pos;
     size_t i;
 
@@ -350,15 +356,15 @@ Vector2 PilePosAfter(struct Pile *const self, struct Card *const c)
         break;
     case FAN_DOWN:
         pos = CardTransitioning(c) ? c->lerpDst : c->pos;
-        pos.y += (c->prone) ? cardHeight / CARD_BACK_FAN_FACTOR : cardHeight / self->fanFactor;
+        pos.y += (c->prone) ? pack->height / CARD_BACK_FAN_FACTOR : pack->height / self->fanFactor;
         break;
     case FAN_LEFT:
         pos = CardTransitioning(c) ? c->lerpDst : c->pos;
-        pos.x -= (c->prone) ? cardWidth / CARD_BACK_FAN_FACTOR : cardWidth / self->fanFactor;
+        pos.x -= (c->prone) ? pack->width / CARD_BACK_FAN_FACTOR : pack->width / self->fanFactor;
         break;
     case FAN_RIGHT:
         pos = CardTransitioning(c) ? c->lerpDst : c->pos;
-        pos.x += (c->prone) ? cardWidth / CARD_BACK_FAN_FACTOR : cardWidth / self->fanFactor;
+        pos.x += (c->prone) ? pack->width / CARD_BACK_FAN_FACTOR : pack->width / self->fanFactor;
         break;
     case FAN_DOWN3:
     case FAN_LEFT3:

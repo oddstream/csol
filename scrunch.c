@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "array.h"
 #include "baize.h"
@@ -10,7 +11,7 @@
 
 void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth, const int windowHeight)
 {
-    extern float cardWidth, cardHeight;
+    struct Pack *pack = baize->pack;
 
     size_t pi1, pi2;
     for ( struct Pile *p1 = ArrayFirst(baize->piles, &pi1); p1; p1 = ArrayNext(baize->piles, &pi1) ) {
@@ -19,7 +20,7 @@ void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth,
             K&R style switch formatting, see P59 if you don't believe me
             (ok, thay may have done it like this to fit in the book margins
         */
-        p1->scrunchDims = (Vector2){.x=cardWidth, .y=cardHeight};
+        p1->scrunchDims = (Vector2){.x=pack->width, .y=pack->height};
         switch (p1->fanType) {
         case FAN_NONE:
         case FAN_DOWN3:
@@ -27,13 +28,15 @@ void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth,
         case FAN_RIGHT3:
             break;
         case FAN_DOWN:
-            p1->scrunchDims.y = windowHeight - p1->pos.y;
+            // baize->dragOffset is always -ve
+            p1->scrunchDims.y = windowHeight - p1->pos.y + fabsf(baize->dragOffset.y);
             break;
         case FAN_LEFT:
             p1->scrunchDims.x = p1->pos.x;
             break;
         case FAN_RIGHT:
-            p1->scrunchDims.x = windowWidth - p1->pos.x;
+            // baize->dragOffset is always -ve
+            p1->scrunchDims.x = windowWidth - p1->pos.x + fabsf(baize->dragOffset.x);
             break;
         default:
             break;
@@ -84,9 +87,10 @@ void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth,
 // calculate the width and heigh this pile would be if it had a specified fan factor
 static Vector2 calcPileDimensions(struct Pile *const pile, float fanFactor)
 {
-    extern float cardWidth, cardHeight;
+    struct Baize *baize = PileOwner(pile);
+    struct Pack *pack = baize->pack;
 
-    Vector2 dims = (Vector2){.x=cardWidth, .y=cardHeight};
+    Vector2 dims = (Vector2){.x=pack->width, .y=pack->height};
     size_t len = ArrayLen(pile->cards);
     if (len<2) {
         return dims;
@@ -102,10 +106,10 @@ static Vector2 calcPileDimensions(struct Pile *const pile, float fanFactor)
         case 1:
             break;
         case 2:
-            dims.y += (cardHeight / CARD_FACE_FAN_FACTOR_V);
+            dims.y += (pack->height / CARD_FACE_FAN_FACTOR_V);
             break;
         default:
-            dims.y += (cardHeight / CARD_FACE_FAN_FACTOR_V) * 2;
+            dims.y += (pack->height / CARD_FACE_FAN_FACTOR_V) * 2;
             break;
         }
         break;
@@ -116,10 +120,10 @@ static Vector2 calcPileDimensions(struct Pile *const pile, float fanFactor)
         case 1:
             break;
         case 2:
-            dims.x += (cardWidth / CARD_FACE_FAN_FACTOR_H);
+            dims.x += (pack->width / CARD_FACE_FAN_FACTOR_H);
             break;
         default:
-            dims.x += (cardWidth / CARD_FACE_FAN_FACTOR_H) * 2;
+            dims.x += (pack->width / CARD_FACE_FAN_FACTOR_H) * 2;
             break;
         }
         break;
@@ -127,18 +131,18 @@ static Vector2 calcPileDimensions(struct Pile *const pile, float fanFactor)
         // dims.y = 0.0f;
         for ( size_t i=0; i<len-1; i++ ) {
             struct Card *c = ArrayGet(pile->cards, i);
-            dims.y += (c->prone) ? cardHeight / CARD_BACK_FAN_FACTOR : cardHeight / fanFactor;
+            dims.y += (c->prone) ? pack->height / CARD_BACK_FAN_FACTOR : pack->height / fanFactor;
         }
-        // dims.y += cardHeight;
+        // dims.y += pack->height;
         break;
     case FAN_LEFT:
     case FAN_RIGHT:
         // dims.x = 0.0f;
         for ( size_t i=0; i<len-1; i++ ) {
             struct Card *c = ArrayGet(pile->cards, i);
-            dims.x += (c->prone) ? cardWidth / CARD_BACK_FAN_FACTOR : cardWidth / fanFactor;
+            dims.x += (c->prone) ? pack->width / CARD_BACK_FAN_FACTOR : pack->width / fanFactor;
         }
-        // dims.x += cardWidth;
+        // dims.x += pack->width;
         break;
     default:
         break;
@@ -150,9 +154,10 @@ static Vector2 calcPileDimensions(struct Pile *const pile, float fanFactor)
 // check the scrunch of this pile and adjust if necessary
 void ScrunchPile(struct Pile *const pile)
 {
-    extern float cardWidth, cardHeight;
+    struct Baize *baize = PileOwner(pile);
+    struct Pack *pack = baize->pack;
 
-    if (!(pile->scrunchDims.x>cardWidth || pile->scrunchDims.y>cardHeight)) {
+    if (!(pile->scrunchDims.x > pack->width || pile->scrunchDims.y > pack->height)) {
         return; // disregard waste-style piles and those that do not fan
     }
 
@@ -190,20 +195,21 @@ void ScrunchPiles(struct Baize *const baize)
 
 void ScrunchDrawDebug(struct Pile *const pile)
 {
-    extern float cardRoundness;
+    struct Baize *baize = PileOwner(pile);
+    struct Pack *pack = baize->pack;
     
     Rectangle r = PileScreenRect(pile);
 
     char buff[64];
     sprintf(buff, "dff=%.0f ff=%.0f", pile->defaultFanFactor, pile->fanFactor);
-    DrawText(buff, r.x + 10, r.y + 100, 18, BLUE);
+    DrawText(buff, r.x + 10, r.y + 100, pack->pileFontSize / 2.0f, GREEN);
 
     r.width = pile->scrunchDims.x;
     r.height = pile->scrunchDims.y;
-    DrawRectangleRoundedLines(r, cardRoundness, 9, 1.0, RED);
+    DrawRectangleRoundedLines(r, pack->roundness, 9, 1.0, RED);
 
     Vector2 dims = calcPileDimensions(pile, pile->fanFactor);
     r.width = dims.x;
     r.height = dims.y;
-    DrawRectangleRoundedLines(r, cardRoundness, 9, 1.0, BLUE);
+    DrawRectangleRoundedLines(r, pack->roundness, 9, 1.0, GREEN);
 }

@@ -6,6 +6,7 @@
 #include <lua.h>
 
 #include "array.h"
+#include "pack.h"
 #include "pile.h"
 
 struct Baize {
@@ -15,6 +16,7 @@ struct Baize {
 
     size_t numberOfCardsInLibrary;
     struct Card *cardLibrary;
+    struct Pack *pack;
 
     lua_State *L;
 
@@ -42,7 +44,7 @@ struct Baize {
     char* errorString;
 };
 
-struct Baize* BaizeNew(const char*);
+struct Baize* BaizeNew(const char *variantName, const char *packName);
 _Bool BaizeValid(struct Baize *const self);
 unsigned BaizeCRC(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);
@@ -68,7 +70,8 @@ void BaizeCollectCommand(struct Baize *const self, void* param);
 _Bool BaizeComplete(struct Baize *const self);
 _Bool BaizeConformant(struct Baize *const self);
 void BaizeAfterUserMove(struct Baize *const self);
-void BaizeLayout(struct Baize *const self, const int width, const int height);
+void BaizeLayoutCommand(struct Baize *const self, void *param);
+void BaizeLayout(struct Baize *const self);
 void BaizeUpdate(struct Baize *const self);
 void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);

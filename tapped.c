@@ -9,11 +9,12 @@
 
 #include "baize.h"
 #include "luautil.h"
+#include "trace.h"
 
 void BaizeTailTapped(struct Baize *const self)
 {
     if (!self->tail || ArrayLen(self->tail)==0) {
-        fprintf(stderr, "ERROR: %s: passed nil tail\n", __func__);
+        return;
     }
 
     lua_State *L = self->L;
@@ -21,14 +22,14 @@ void BaizeTailTapped(struct Baize *const self)
     struct Pile* pile = CardOwner(c0);
 
     if (!LuaUtilSetupTableMethod(L, pile->category, "TailTapped")) {
-        fprintf(stderr, "INFO: %s: %s.TailTapped is not a function, reverting to internal default (tail len %lu)\n", __func__, pile->category, ArrayLen(self->tail));
+        CSOL_INFO("%s.TailTapped is not a function, reverting to internal default (tail len %lu)", pile->category, ArrayLen(self->tail));
         pile->vtable->TailTapped(pile, self->tail);
     } else {
         // push one arg, the tail
         lua_pushlightuserdata(L, self->tail);
         // one arg (tail), no return (function can Toast itself for all I care)
         if ( lua_pcall(L, 1, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
+            CSOL_ERROR("running Lua function: %s\n", lua_tostring(self->L, -1));
             lua_pop(L, 1);
         }
     }
@@ -39,14 +40,14 @@ void BaizePileTapped(struct Baize *const self, struct Pile *const pile)
     lua_State *L = self->L;
 
     if (!LuaUtilSetupTableMethod(L, pile->category, "PileTapped")) {
-        fprintf(stderr, "INFO: %s: %s.PileTapped is not a function, reverting to internal default\n", __func__, pile->category);
+        CSOL_INFO("%s.PileTapped is not a function, reverting to internal default", pile->category);
         pile->vtable->PileTapped(pile);
     } else {
         // push one arg, the (non existant) tail
         lua_pushnil(L);
         // one arg (nil tail), no return (function can Toast itself for all care)
         if ( lua_pcall(L, 1, 0, 0) != LUA_OK ) {
-            fprintf(stderr, "ERROR: %s: error running Lua function: %s\n", __func__, lua_tostring(L, -1));
+            CSOL_ERROR("error running Lua function: %s", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     }

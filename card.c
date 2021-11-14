@@ -14,12 +14,32 @@
 
 #define CARD_MAGIC (0x29041962)
 #define FLIPSTEPAMOUNT (0.075f)
+// #define FLIPSTEPAMOUNT (0.0075f)
 #define DEBUG_SPEED  (0.005f)
 #define SLOW_SPEED (0.01f)
 #define NORMAL_SPEED (0.02f)
 #define FAST_SPEED (0.04f)
 
-extern struct Spritesheet *ssFace, *ssBack;
+// https://www.fileformat.info/info/unicode/block/playing_cards/fontsupport.htm
+// annoyingly, the unicode playing cards include 'Knights' (C) between Jacks and Queens
+// cards are in the same order as used for spritesheets, so we can use card->frame
+int cardCodePoints[52] = {
+    // Clubs
+    0x1F0D1, 0x1F0D2, 0x1F0D3, 0x1F0D4, 0x1F0D5, 0x1F0D6, 0x1F0D7, 0x1F0D8, 0x1F0D9, 0x1F0DA, 0x1F0DB, /* 0x1F0DC, */ 0x1F0DD, 0x1F0DE,
+    // Diamonds
+    0x1F0C1, 0x1F0C2, 0x1F0C3, 0x1F0C4, 0x1F0C5, 0x1F0C6, 0x1F0C7, 0x1F0C8, 0x1F0C9, 0x1F0CA, 0x1F0CB, /* 0x1F0CC, */ 0x1F0CD, 0x1F0CE,
+    // Hearts
+    0x1F0B1, 0x1F0B2, 0x1F0B3, 0x1F0B4, 0x1F0B5, 0x1F0B6, 0x1F0B7, 0x1F0B8, 0x1F0B9, 0x1F0BA, 0x1F0BB, /* 0x1F0BC, */ 0x1F0BD, 0x1F0BE,
+    // Spades
+    0x1F0A1, 0x1F0A2, 0x1F0A3, 0x1F0A4, 0x1F0A5, 0x1F0A6, 0x1F0A7, 0x1F0A8, 0x1F0A9, 0x1F0AA, 0x1F0AB, /* 0x1F0AC, */ 0x1F0AD, 0x1F0AE,
+};
+
+Color cardColors[4] = {
+    {0,0,0,0xff},
+    {0xB2,0x22,0x22,0xff},   // Firebrick
+    {0xB2,0x22,0x22,0xff},
+    {0,0,0,0xff},
+};
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
 {
@@ -117,15 +137,15 @@ Vector2 CardScreenPos(struct Card *const self)
 
 Rectangle CardBaizeRect(struct Card *const self)
 {
-    extern float cardWidth, cardHeight;
-    return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = cardWidth, .height = cardHeight};
+    struct Baize* baize = PileOwner(CardOwner(self));
+    return (Rectangle){.x = self->pos.x, .y = self->pos.y, .width = baize->pack->width, .height = baize->pack->height};
 }
 
 Rectangle CardScreenRect(struct Card *const self)
 {
-    extern float cardWidth, cardHeight;
+    struct Baize* baize = PileOwner(CardOwner(self));
     Vector2 csp = CardScreenPos(self);
-    return (Rectangle){.x=csp.x, .y=csp.y, .width=cardWidth, .height=cardHeight}; 
+    return (Rectangle){.x=csp.x, .y=csp.y, .width=baize->pack->width, .height=baize->pack->height}; 
 }
 
 void CardMovePositionBy(struct Card *const self, Vector2 delta)
@@ -145,7 +165,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
         return;
     }
 
-    extern float cardWidth;
+    struct Baize* baize = PileOwner(CardOwner(self));
 
     if ( pos.x == self->pos.x && pos.y == self->pos.y ) {
         self->lerpStep = 1.0f;    // stop any current lerp
@@ -154,7 +174,7 @@ void CardTransitionTo(struct Card *const self, Vector2 pos)
     self->lerpSrc = self->pos;
     self->lerpDst = pos;
 #if 1
-    if (UtilDistance(self->pos, pos) < cardWidth) {
+    if (UtilDistance(self->pos, pos) < baize->pack->width) {
         self->lerpStepAmount = FAST_SPEED;
         self->lerpFunc = &UtilLerp;
     } else {
@@ -220,15 +240,6 @@ void CardUpdate(struct Card *const self)
         }
     }
     if ( CardTransitioning(self) ) {
-        /*
-        extern float cardWidth;
-        if (UtilDistance(self->pos, self->lerpDst) < cardWidth / 4.0f) {
-            // self->pos = self->lerpDst;
-            // self->lerpStep = 1.0f;
-            // TODO make a nice snap sound
-            self->lerpStepAmount = FAST_SPEED;
-        }
-        */
         {
             self->pos.x = UtilSmoothstep(self->lerpSrc.x, self->lerpDst.x, self->lerpStep);
             self->pos.y = UtilSmoothstep(self->lerpSrc.y, self->lerpDst.y, self->lerpStep);
@@ -243,7 +254,8 @@ void CardUpdate(struct Card *const self)
 void CardDraw(struct Card *const self)
 {
     // BeginDrawing() has been called by BaizeDraw()
-    extern float cardRoundness;
+    struct Baize* baize = PileOwner(CardOwner(self));
+    struct Pack *pack = baize->pack;
 
     _Bool showFace;
 
@@ -270,7 +282,7 @@ void CardDraw(struct Card *const self)
         // || CardTransitioning(self) 
         r.x += 2.0f;
         r.y += 2.0f;
-        DrawRectangleRounded(r, cardRoundness, 9, (Color){0,0,0,63});
+        DrawRectangleRounded(r, pack->roundness, 9, (Color){0,0,0,63});
         r.x -= 4.0f;
         r.y -= 4.0f;
     }
@@ -294,10 +306,36 @@ void CardDraw(struct Card *const self)
         tried angling the card if it was dragging or transitioning,
         but it brought out the jaggies and looked a bit gimmicky
     */
-    if (showFace) {
-        SpritesheetDraw(ssFace, self->frame, self->flipWidth, 0.0f, r);
+    if (!pack->font.baseSize) {
+        if (showFace) {
+            SpritesheetDraw(pack->ssFace, self->frame, self->flipWidth, 0.0f, r);
+        } else {
+            SpritesheetDraw(pack->ssBack, pack->backFrame, self->flipWidth, 0.0f, r);
+        }
     } else {
-        SpritesheetDraw(ssBack, 2, self->flipWidth, 0.0f, r);
+        int glyph;
+        Color cardColor;
+        if (showFace) {
+            glyph = cardCodePoints[self->frame];
+            cardColor = cardColors[self->id.suit];
+        } else {
+            glyph = 0x1F0A0;
+            cardColor = (Color){70,130,180,0xff};   // SteelBlue
+        }
+        GlyphInfo gi = GetGlyphInfo(pack->font, glyph);
+        Rectangle gr = GetGlyphAtlasRec(pack->font, glyph);
+        Rectangle rc = CardScreenRect(self);
+        
+        // Rectangle rc2 = rc;
+        // rc2.width *= self->flipWidth;
+        // rc2.x += (rc.width - rc2.width) / 2.0f;
+        DrawRectangleRounded(rc, pack->roundness, 9, (Color){0xf5,0xf5,0xf5,0xff});   // Whitesmoke
+
+        rc.x -= gi.offsetX;
+        rc.y -= gi.offsetY;
+    
+        Vector2 cpos = UtilCenterTextInRectangle(rc, gr.width, gr.height);
+        DrawTextCodepoint(pack->font, glyph, cpos, pack->width * pack->fontExpansion, cardColor);
     }
 }
 

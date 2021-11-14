@@ -14,6 +14,8 @@ POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
 
+SEED = 42
+
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
 local function DemoteCards(pile, ord)

@@ -128,7 +128,7 @@ _Bool ArrayIndexOf(struct Array *const self, const void *element, size_t *index)
 {
     for ( size_t i=0; i<self->used; i++ ) {
         if (self->data[i] == element) {
-            *index = i;
+            if (index) *index = i;
             return 1;
         }
     }
