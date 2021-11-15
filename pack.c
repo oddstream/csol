@@ -399,6 +399,28 @@ static struct Pack Packs[] = {
         .ssBackFname = "assets/playingCardBacks.png",
     },
     {
+        .name = "guyenne-single",
+        .fixed = 1,
+        .width = 140.0f,
+        .height = 218.0f,
+        .roundness = 0.05f,
+        .ssFaceFname = "assets/guyenne-single.png",
+        .ssBackFname = "assets/guyenne-single.png",
+        .backMapEntries = 55,
+        .backFrame = 54,
+    },
+    {
+        .name = "guyenne-classic",
+        .fixed = 1,
+        .width = 140.0f,
+        .height = 218.0f,
+        .roundness = 0.05f,
+        .ssFaceFname = "assets/guyenne-classic.png",
+        .ssBackFname = "assets/guyenne-classic.png",
+        .backMapEntries = 55,
+        .backFrame = 54,
+    },
+    {
         .name = "large",
         .fixed = 1,
         .width = 140.0f,
@@ -462,11 +484,19 @@ struct Pack *PackCtor(const char *name)
         CSOL_ERROR("Cannot find pack '%s'", name);
         return (void*)0;
     }
-    if (self->ssFaceMap && self->ssFaceFname[0]) {
-        self->ssFace = SpritesheetNewInfo(self->ssFaceFname, self->width, self->height, self->ssFaceMap);
+    if (self->ssFaceFname) {
+        if (self->ssFaceMap) {
+            self->ssFace = SpritesheetNewInfo(self->ssFaceFname, self->width, self->height, self->ssFaceMap);
+        } else {
+            self->ssFace = SpritesheetNew(self->ssFaceFname, self->width, self->height, 13);
+        }
     }
-    if (self->ssBackMap && self->ssBackFname[0]) {
-        self->ssBack = SpritesheetNewInfo(self->ssBackFname, self->width, self->height, self->ssBackMap);
+    if (self->ssBackFname) {
+        if (self->ssBackMap) {
+            self->ssBack = SpritesheetNewInfo(self->ssBackFname, self->width, self->height, self->ssBackMap);
+        } else {
+            self->ssBack = SpritesheetNew(self->ssBackFname, self->width, self->height, 13);
+        }
     }
     if (self->fontFname) {
         int cardFontCodePoints[1+14*4]; // beware of Knights
@@ -505,9 +535,11 @@ void PackDtor(struct Pack *self)
 {
     if (self->ssFace) {
         SpritesheetFree(self->ssFace);
+        self->ssFace = (void*)0;
     }
     if (self->ssBack) {
         SpritesheetFree(self->ssBack);
+        self->ssBack = (void*)0;
     }
     if (self->font.baseSize) {
         UnloadFont(self->font);

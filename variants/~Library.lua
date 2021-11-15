@@ -11,6 +11,20 @@
 U = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
 V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 
+function Up(c1, c2)
+    if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
+        return "Cards must be in ascending rank"
+    end
+    return nil
+end
+
+function Down(c1, c2)
+    if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+        return "Cards must be in descending rank"
+    end
+    return nil
+end
+
 function DownAltColor(c1, c2)
     if CardColor(c1) == CardColor(c2) then
         return "Cards must be in alternating colors"
@@ -37,7 +51,7 @@ function UpAltColor(c1, c2)
     if CardColor(c1) == CardColor(c2) then
         return "Cards be in alternating colors"
     end
-    if CardOrdinal(c1) ~= CardOrdinal(c2) + 1 then
+    if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then
         return "Cards must be in ascending rank"
     end
     return nil
