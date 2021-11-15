@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/csol",
-            "args": ["--nolerp","--noflip","--noload","-w","1024","--height","1024","--scale","0.5","Quick Win"],
+            "args": ["--nolerp","--noflip","--noload","-w","1024","--height","1024","Quick Win"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

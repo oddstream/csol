@@ -21,6 +21,7 @@
 dofile("variants/~Library.lua")
 
 POWER_MOVES = false
+NUMBER_OF_COLORS = 4
 SEED=12620
 STOCK_DEAL_CARDS = 1
 

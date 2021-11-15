@@ -7,6 +7,7 @@ dofile("variants/~Library.lua")
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions and piles
 
 POWER_MOVES = false
+NUMBER_OF_COLORS = 4
 COMPLETE = false
 
 function BuildPiles()

@@ -3,9 +3,9 @@
 SRC_FILES = $(wildcard svg/Simple_*.svg)
 OBJ_FILES = $(patsubst %.svg,%.png,$(SRC_FILES))
 
-# DPI = 96 # 140x190
+#DPI = 96 # 140x190
 DPI = 64 # 93x127
-# DPI = 32 # 46x63
+#DPI = 32 # 46x63
 
 # target ... : prerequisites ...
 #	recipe

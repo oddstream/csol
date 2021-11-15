@@ -8,6 +8,7 @@
 dofile("variants/~Library.lua")
 
 POWER_MOVES = false
+NUMBER_OF_COLORS = 4
 STOCK_RECYCLES = 0
 
 if not table.contains then

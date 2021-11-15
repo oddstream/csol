@@ -220,6 +220,15 @@ static struct Vector2 simple140x190FaceMap[52] = {
     {.x=1*140-140, .y=7*190-190},     // K
 };
 
+static struct Vector2 simple140x190BackMap[6] = {
+    {.x=1*140-140, .y=1*190-190},
+    {.x=2*140-140, .y=1*190-190},
+    {.x=3*140-140, .y=1*190-190},
+    {.x=1*140-140, .y=2*190-190},
+    {.x=2*140-140, .y=2*190-190},
+    {.x=3*140-140, .y=2*190-190},
+};
+
 static struct Vector2 simple93x127FaceMap[52] = {
     // Club
     {.x=1*93-93, .y=1*127-127},     // Ace
@@ -279,10 +288,81 @@ static struct Vector2 simple93x127FaceMap[52] = {
     {.x=1*93-93, .y=7*127-127},     // K
 };
 
-static struct Vector2 simple93x127BackMap[3] = {
+static struct Vector2 simple93x127BackMap[6] = {
     {.x=1*93-93, .y=1*127-127},
     {.x=2*93-93, .y=1*127-127},
     {.x=3*93-93, .y=1*127-127},
+    {.x=1*93-93, .y=2*127-127},
+    {.x=2*93-93, .y=2*127-127},
+    {.x=3*93-93, .y=2*127-127},
+};
+
+static struct Vector2 simple47x63FaceMap[52] = {
+    // Club
+    {.x=1*47-47, .y=1*63-63},     // Ace
+    {.x=2*47-47, .y=1*63-63},     // 2
+    {.x=3*47-47, .y=1*63-63},     // 3
+    {.x=4*47-47, .y=1*63-63},     // 4
+    {.x=5*47-47, .y=1*63-63},     // 5
+    {.x=6*47-47, .y=1*63-63},     // 6
+    {.x=7*47-47, .y=1*63-63},     // 7
+    {.x=8*47-47, .y=1*63-63},     // 8
+    {.x=1*47-47, .y=2*63-63},     // 9
+    {.x=2*47-47, .y=2*63-63},     // 10
+    {.x=3*47-47, .y=2*63-63},     // J
+    {.x=4*47-47, .y=2*63-63},     // Q
+    {.x=5*47-47, .y=2*63-63},     // K
+    // Diamond
+    {.x=6*47-47, .y=2*63-63},     // Ace
+    {.x=7*47-47, .y=2*63-63},     // 2
+    {.x=8*47-47, .y=2*63-63},     // 3
+    {.x=1*47-47, .y=3*63-63},     // 4
+    {.x=2*47-47, .y=3*63-63},     // 5
+    {.x=3*47-47, .y=3*63-63},     // 6
+    {.x=4*47-47, .y=3*63-63},     // 7
+    {.x=5*47-47, .y=3*63-63},     // 8
+    {.x=6*47-47, .y=3*63-63},     // 9
+    {.x=7*47-47, .y=3*63-63},     // 10
+    {.x=8*47-47, .y=3*63-63},     // J
+    {.x=1*47-47, .y=4*63-63},     // Q
+    {.x=2*47-47, .y=4*63-63},     // K
+    // Heart
+    {.x=3*47-47, .y=4*63-63},     // Ace
+    {.x=4*47-47, .y=4*63-63},     // 2
+    {.x=5*47-47, .y=4*63-63},     // 3
+    {.x=6*47-47, .y=4*63-63},     // 4
+    {.x=7*47-47, .y=4*63-63},     // 5
+    {.x=8*47-47, .y=4*63-63},     // 6
+    {.x=1*47-47, .y=5*63-63},     // 7
+    {.x=2*47-47, .y=5*63-63},     // 8
+    {.x=3*47-47, .y=5*63-63},     // 9
+    {.x=4*47-47, .y=5*63-63},     // 10
+    {.x=5*47-47, .y=5*63-63},     // J
+    {.x=6*47-47, .y=5*63-63},     // Q
+    {.x=7*47-47, .y=5*63-63},     // K
+    // Spade
+    {.x=3*47-47, .y=6*63-63},     // Ace
+    {.x=4*47-47, .y=6*63-63},     // 2
+    {.x=5*47-47, .y=6*63-63},     // 3
+    {.x=6*47-47, .y=6*63-63},     // 4
+    {.x=7*47-47, .y=6*63-63},     // 5
+    {.x=8*47-47, .y=6*63-63},     // 6
+    {.x=9*47-47, .y=1*63-63},     // 7
+    {.x=9*47-47, .y=2*63-63},     // 8
+    {.x=9*47-47, .y=3*63-63},     // 9
+    {.x=9*47-47, .y=4*63-63},     // 10
+    {.x=9*47-47, .y=5*63-63},     // J
+    {.x=9*47-47, .y=6*63-63},     // Q
+    {.x=1*47-47, .y=7*63-63},     // K
+};
+
+static struct Vector2 simple47x63BackMap[6] = {
+    {.x=1*47-47, .y=1*63-63},
+    {.x=2*47-47, .y=1*63-63},
+    {.x=3*47-47, .y=1*63-63},
+    {.x=1*47-47, .y=2*63-63},
+    {.x=2*47-47, .y=2*63-63},
+    {.x=3*47-47, .y=2*63-63},
 };
 
 static struct Pack Packs[] = {
@@ -319,30 +399,43 @@ static struct Pack Packs[] = {
         .ssBackFname = "assets/playingCardBacks.png",
     },
     {
-        .name = "simple140x190",
+        .name = "large",
         .fixed = 1,
         .width = 140.0f,
         .height = 190.0f,
         .roundness = 0.275f, 
         .ssFaceMap = simple140x190FaceMap,
-        .ssBackMap = simple93x127BackMap,
-        .backMapEntries = 3,
-        .backFrame = 0,
+        .ssBackMap = simple140x190BackMap,
+        .backMapEntries = 6,
+        .backFrame = 1,
         .ssFaceFname = "assets/spritesheet simple 140x190.png",
-        .ssBackFname = "assets/spritesheet simple back 93x127.png",
+        .ssBackFname = "assets/spritesheet simple back 140x190.png",
     },
     {
-        .name = "simple93x127",
+        .name = "medium",
         .fixed = 1,
         .width = 93.0f,
         .height = 127.0f,
         .roundness = 0.275f, 
         .ssFaceMap = simple93x127FaceMap,
         .ssBackMap = simple93x127BackMap,
-        .backMapEntries = 3,
-        .backFrame = 0,
+        .backMapEntries = 6,
+        .backFrame = 1,
         .ssFaceFname = "assets/spritesheet simple 93x127.png",
         .ssBackFname = "assets/spritesheet simple back 93x127.png",
+    },
+    {
+        .name = "small",
+        .fixed = 1,
+        .width = 47.0f,
+        .height = 63.0f,
+        .roundness = 0.275f, 
+        .ssFaceMap = simple47x63FaceMap,
+        .ssBackMap = simple47x63BackMap,
+        .backMapEntries = 6,
+        .backFrame = 1,
+        .ssFaceFname = "assets/spritesheet simple 47x63.png",
+        .ssBackFname = "assets/spritesheet simple back 47x63.png",
     },
     {
         .name = "unicode",
@@ -391,10 +484,9 @@ struct Pack *PackCtor(const char *name)
         self->font = LoadFontEx(self->fontFname, self->width * self->fontExpansion, cardFontCodePoints, 1+14*4);
     }
 
+    self->fontAcme = LoadFontEx("assets/Acme-Regular.ttf", self->height / 2.0f, 0, 0);
     self->pileFontSize = self->height / 2.0f;
-    self->fontAcmePile = LoadFontEx("assets/Acme-Regular.ttf", self->pileFontSize, 0, 0);
     self->labelFontSize = self->height / 6.0f;
-    self->fontAcmeLabel = LoadFontEx("assets/Acme-Regular.ttf", self->labelFontSize, 0, 0);
 
     // https://graphemica.com/search?q=home
     int symbolFontCodePoints[5] = {
@@ -419,10 +511,12 @@ void PackDtor(struct Pack *self)
     }
     if (self->font.baseSize) {
         UnloadFont(self->font);
+        self->font = (Font){0};
     }
 
-    UnloadFont(self->fontAcmePile);
-    UnloadFont(self->fontAcmeLabel);
+    UnloadFont(self->fontAcme);
+    self->fontAcme = (Font){0};
     UnloadFont(self->fontSymbol);
-
+    self->fontSymbol = (Font){0};
 }
+

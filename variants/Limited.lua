@@ -3,6 +3,7 @@
 dofile("variants/~Library.lua")
 
 POWER_MOVES = true
+NUMBER_OF_COLORS = 4
 -- SEED = 4  -- winnable
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 32767

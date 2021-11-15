@@ -15,6 +15,7 @@ The foundations build up in suit, wrapping from King to Ace as necessary.
 dofile("variants/~Library.lua")
 
 POWER_MOVES = false
+NUMBER_OF_COLORS = 4
 STOCK_DEAL_CARDS = 1
 
 function BuildPiles()

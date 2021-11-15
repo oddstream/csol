@@ -29,10 +29,9 @@ struct Pack {
     float fontExpansion;
 
     // piggy-back some Pile things that depend on Card Pack
+    Font fontAcme;
     int pileFontSize;
-    Font fontAcmePile;
     int labelFontSize;
-    Font fontAcmeLabel;
     Font fontSymbol;
 };
 

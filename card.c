@@ -34,11 +34,18 @@ int cardCodePoints[52] = {
     0x1F0A1, 0x1F0A2, 0x1F0A3, 0x1F0A4, 0x1F0A5, 0x1F0A6, 0x1F0A7, 0x1F0A8, 0x1F0A9, 0x1F0AA, 0x1F0AB, /* 0x1F0AC, */ 0x1F0AD, 0x1F0AE,
 };
 
-Color cardColors[4] = {
-    {0,0,0,0xff},
-    {0xB2,0x22,0x22,0xff},   // Firebrick
-    {0xB2,0x22,0x22,0xff},
-    {0,0,0,0xff},
+Color fourColors[4] = {
+    {0,0,0,0xff},           // black
+    {0xB2,0x22,0x22,0xff},  // Firebrick
+    {153,50,204,0xff},      // darkorchid
+    {0,100,0,0xff},         // darkgreen
+};
+
+Color twoColors[4] = {
+    {0,0,0,0xff},           // black
+    {0xB2,0x22,0x22,0xff},  // Firebrick
+    {0xB2,0x22,0x22,0xff},  // Firebrick
+    {0,0,0,0xff},           // black
 };
 
 struct Card CardNew(unsigned pack, enum CardOrdinal ord, enum CardSuit suit)
@@ -317,7 +324,7 @@ void CardDraw(struct Card *const self)
         Color cardColor;
         if (showFace) {
             glyph = cardCodePoints[self->frame];
-            cardColor = cardColors[self->id.suit];
+            cardColor = baize->numberOfColors == 2 ? twoColors[self->id.suit] : fourColors[self->id.suit];
         } else {
             glyph = 0x1F0A0;
             cardColor = (Color){70,130,180,0xff};   // SteelBlue

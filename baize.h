@@ -38,6 +38,7 @@ struct Baize {
     Vector2 dragOffset;
 
     _Bool powerMoves;    // set from POWER_MOVES variable in variant.lua
+    int numberOfColors;
 
     struct UI* ui;
 
@@ -85,5 +86,6 @@ void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
 void BaizeFindGameCommand(struct Baize *const self, void* param);
 void BaizeReloadVariantCommand(struct Baize *const self, void* param);
 void BaizeChangeVariantCommand(struct Baize *const self, void* param);
+void BaizeChangePackCommand(struct Baize *const baize, void* param);
 
 #endif

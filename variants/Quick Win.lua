@@ -11,6 +11,7 @@
 dofile("variants/~Library.lua")
 
 POWER_MOVES = false
+NUMBER_OF_COLORS = 4
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
 

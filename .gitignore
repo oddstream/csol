@@ -1,6 +1,6 @@
-*.ttf
 .vscode/*
 csol
-*.o
 obj/*
-*.svg
+# assets/png/* are all autocreated from assets/svg/*
+assets/png/*
+assets/*.ttf

@@ -165,7 +165,7 @@ int main(int argc, char* argv[], char* envp[])
     fprintf(stdout, "INFO: %s: nosave=%d\n", __func__, flag_nosave);
 #endif
 
-    baizeColor = (Color){.r=0, .g=63, .b=0, .a=255};
+    baizeColor = (Color){.r=0, .g=80, .b=0, .a=255};   // darker than darkgreen
     baizeHighlightColor = (Color){255,255,255,31};
     uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xee};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};

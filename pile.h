@@ -46,7 +46,6 @@ struct Pile {
     float defaultFanFactor;
     Vector2 scrunchDims;
     char label[MAX_PILE_LABEL + 1];
-    Vector2 labelmte;    // cached result from MeasureTextEx()
     struct Array *cards;
 };
 

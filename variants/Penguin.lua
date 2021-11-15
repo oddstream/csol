@@ -5,6 +5,7 @@
 dofile("variants/~Library.lua")
 
 POWER_MOVES = false
+NUMBER_OF_COLORS = 4
 
 -- SEED = 4072
 

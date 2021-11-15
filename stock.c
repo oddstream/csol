@@ -169,14 +169,6 @@ void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unso
 
 void StockDraw(struct Pile *const self)
 {
-    // extern float cardWidth, cardHeight;
-    // extern Texture2D recycleTexture;
-    // extern Color baizeHighlightColor;
-    // extern Font fontAcme;
-
-    // icon is 96x96
-    // card is, say, 100x120
-
     struct Stock* s = (struct Stock*)self;
     if (s->recycles) {
         PileDrawCenteredGlyph(self, 0x267b);

@@ -41,7 +41,7 @@ struct Label* LabelNew(struct Baize *const baize, Vector2 slot, enum FanType fan
 
 void LabelSetLabel(struct Pile *const self, const char  *label)
 {
-    extern float fontSpacing;
+    // extern float fontSpacing;
 
     struct Baize *baize = PileOwner(self);
     struct Pack *pack = baize->pack;
@@ -52,9 +52,6 @@ void LabelSetLabel(struct Pile *const self, const char  *label)
     memset(self->label, 0, MAX_PILE_LABEL + 1);
     if (*label) {
         strncpy(self->label, label, MAX_PILE_LABEL);
-        self->labelmte = MeasureTextEx(pack->fontAcmeLabel, self->label, (float)pack->labelFontSize, fontSpacing);
-    } else {
-        self->labelmte = (Vector2){0};
     }
 }
 
@@ -71,7 +68,8 @@ void LabelDraw(struct Pile *const self)
     struct Pack *pack = baize->pack;
 
     // center the label in the Pile screen rect
+    Vector2 labelmte = MeasureTextEx(pack->fontAcme, self->label, (float)pack->labelFontSize, fontSpacing);
     Rectangle r = PileScreenRect(self);
-    Vector2 pos = UtilCenterTextInRectangle(r, self->labelmte.x, self->labelmte.y);
-    DrawTextEx(pack->fontAcmeLabel, self->label, pos, pack->labelFontSize, fontSpacing, WHITE);
+    Vector2 cpos = UtilCenterTextInRectangle(r, labelmte.x, labelmte.y);
+    DrawTextEx(pack->fontAcme, self->label, cpos, pack->labelFontSize, fontSpacing, WHITE);
 }

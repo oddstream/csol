@@ -222,6 +222,7 @@ void BaizeGetLuaGlobals(struct Baize *const self)
         return;
     }
     self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
+    self->numberOfColors = LuaUtilGetGlobalInt(self->L, "NUMBER_OF_COLORS", 2);
     self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
 }
 
@@ -781,6 +782,20 @@ void BaizeUpdate(struct Baize *const self)
         }
     }
 #endif
+    if (IsKeyReleased(KEY_ZERO)) {
+        BaizeChangePackCommand(self, "kenney");
+    } else if (IsKeyReleased(KEY_ONE)) {
+        BaizeChangePackCommand(self, "small");
+    } else if (IsKeyReleased(KEY_TWO)) {
+        BaizeChangePackCommand(self, "medium");
+    } else if (IsKeyReleased(KEY_THREE)) {
+        BaizeChangePackCommand(self, "large");
+    } else if (IsKeyReleased(KEY_FOUR)) {
+        BaizeChangePackCommand(self, "retro");
+    } else if (IsKeyReleased(KEY_FIVE)) {
+        BaizeChangePackCommand(self, "unicode");
+    }
+
     UiUpdate(self->ui);
 }
 
@@ -912,3 +927,14 @@ void BaizeChangeVariantCommand(struct Baize *const self, void* param)
     UiHideVariantDrawer(self->ui);
 }
 
+void BaizeChangePackCommand(struct Baize *const baize, void* param)
+{
+    if (param) {
+        struct Pack *pack = PackCtor(param);
+        if (pack) {
+            PackDtor(baize->pack);
+            baize->pack = pack;
+            BaizeLayoutCommand(baize, NULL);
+        }
+    }
+}

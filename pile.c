@@ -275,9 +275,10 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
     }
     struct Baize *baize = PileOwner(self);
     struct Pack *pack = baize->pack;
-    // TODO consider caching this if too expensive
+
+    Vector2 labelmte = MeasureTextEx(pack->fontAcme, self->label, (float)pack->pileFontSize, fontSpacing);
     Rectangle rp = PileScreenRect(self);
-    Vector2 cpos = UtilCenterTextInRectangle(rp, self->labelmte.x, self->labelmte.y);
+    Vector2 cpos = UtilCenterTextInRectangle(rp, labelmte.x, labelmte.y);
 
     // this may be too expensive to do at 60Hz
     // if ( CheckCollisionPointRec(GetMousePosition(), rp) ) {
@@ -285,7 +286,7 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
     //     cpos.y += 2.0f;
     // }
 
-    DrawTextEx(pack->fontAcmePile, text, cpos, pack->pileFontSize, fontSpacing, baizeHighlightColor);
+    DrawTextEx(pack->fontAcme, text, cpos, pack->pileFontSize, fontSpacing, baizeHighlightColor);
 }
 
 /*
