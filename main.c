@@ -17,8 +17,6 @@
 
 struct Spritesheet *ssIcons;
 
-float cardScale = 1.0f;     // deprecated?
-
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
@@ -80,9 +78,6 @@ int main(int argc, char* argv[], char* envp[])
                 if (!optarg)
                     break;
                 switch (long_options[option_index].val) {
-                    case 's':
-                        cardScale = atof(optarg);
-                        break;
                     case 'v':
                         if (strlen(optarg) < 32) {
                             strcpy(variantName, optarg);
@@ -109,10 +104,6 @@ int main(int argc, char* argv[], char* envp[])
             if (optarg && strlen(optarg) < sizeof(packName)) {
                 strcpy(packName, optarg);
             }
-            break;
-        case 's':
-            // fprintf(stdout, "INFO: %s: option s, value '%s'\n", __func__, optarg ? optarg : "null");
-            cardScale = optarg ? atof(optarg) : 1.0f;
             break;
         case 'v':
             // fprintf(stdout, "INFO: %s: option v, value '%s'\n", __func__, optarg ? optarg : "null");
@@ -165,15 +156,14 @@ int main(int argc, char* argv[], char* envp[])
     fprintf(stdout, "INFO: %s: nosave=%d\n", __func__, flag_nosave);
 #endif
 
-    baizeColor = (Color){.r=0, .g=80, .b=0, .a=255};   // darker than darkgreen
-    baizeHighlightColor = (Color){255,255,255,31};
+    baizeColor = (Color){.r=0, .g=70, .b=0, .a=255};   // darker than darkgreen
+    baizeHighlightColor = (Color){255,255,255,25};
     uiBackgroundColor = (Color){.r=0x32, .g=0x32, .b=0x32, .a=0xee};
     uiTextColor = (Color){.r=0xf0, .g=0xf0, .b=0xf0, .a=0xff};
 
     // pearl from the mudbank: can't use GetMonitorWidth() &c until InitWindow is called!
 
     // LoadSettings(&windowWidth, &windowHeight);
-    // fprintf(stderr, "cardScale %f\n", cardScale);
 
     // {
     //     int n = GetCurrentMonitor();

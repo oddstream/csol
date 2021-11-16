@@ -11,7 +11,6 @@
 
 #include "luautil.h"
 
-extern float cardScale;
 extern Color baizeColor;
 
 void LoadSettings(int *windowWidth, int *windowHeight)
@@ -29,7 +28,6 @@ void LoadSettings(int *windowWidth, int *windowHeight)
     } else {
         *windowWidth = LuaUtilGetGlobalInt(L, "WindowWidth", 640);
         *windowHeight = LuaUtilGetGlobalInt(L, "WindowHeight", 480);
-        cardScale = LuaUtilGetGlobalFloat(L, "CardScale", 1.0f);
         int typ = lua_getglobal(L, "BaizeColor");
         if ( typ == LUA_TTABLE ) {
             float r, g, b, a;

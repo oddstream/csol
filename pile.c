@@ -9,7 +9,7 @@
 #include "baize.h"
 #include "scrunch.h"
 #include "pile.h"
-
+#include "trace.h"
 
 #define PILE_MAGIC (0xdeadbeef)
 
@@ -211,8 +211,12 @@ void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
     struct Pack *pack = baize->pack;
 
     // TODO consider caching this if too expensive
-    GlyphInfo gi = GetGlyphInfo(pack->fontSymbol, glyph);
-    Rectangle gr = GetGlyphAtlasRec(pack->fontSymbol, glyph);
+    if (pack->symbolFont.baseSize==0) {
+        CSOL_ERROR("%s", "Symbol font not loaded");
+        return;
+    }
+    GlyphInfo gi = GetGlyphInfo(pack->symbolFont, glyph);
+    Rectangle gr = GetGlyphAtlasRec(pack->symbolFont, glyph);
     Rectangle rp = PileScreenRect(self);
     rp.x -= gi.offsetX;
     rp.y -= gi.offsetY;
@@ -224,7 +228,7 @@ void PileDrawCenteredGlyph(struct Pile *const self, int glyph)
     //     cpos.y += 2.0f;
     // }
 
-    DrawTextCodepoint(pack->fontSymbol, glyph, cpos, pack->pileFontSize, baizeHighlightColor);
+    DrawTextCodepoint(pack->symbolFont, glyph, cpos, pack->pileFontSize, baizeHighlightColor);
 }
 
 #if 0
@@ -276,7 +280,7 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
     struct Baize *baize = PileOwner(self);
     struct Pack *pack = baize->pack;
 
-    Vector2 labelmte = MeasureTextEx(pack->fontAcme, self->label, (float)pack->pileFontSize, fontSpacing);
+    Vector2 labelmte = MeasureTextEx(pack->pileFont, self->label, (float)pack->pileFontSize, fontSpacing);
     Rectangle rp = PileScreenRect(self);
     Vector2 cpos = UtilCenterTextInRectangle(rp, labelmte.x, labelmte.y);
 
@@ -286,7 +290,7 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
     //     cpos.y += 2.0f;
     // }
 
-    DrawTextEx(pack->fontAcme, text, cpos, pack->pileFontSize, fontSpacing, baizeHighlightColor);
+    DrawTextEx(pack->pileFont, text, cpos, pack->pileFontSize, fontSpacing, baizeHighlightColor);
 }
 
 /*

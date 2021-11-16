@@ -104,7 +104,18 @@ int TableauCollect(struct Pile *const self)
 }
 
 _Bool TableauComplete(struct Pile *const self)
-{
+{   /*
+        also complete when playing Spider-games (there will be discard piles)
+        (Simple Simon has 10 tableau piles and 4 discard piles)
+        (Spider has 10 tableau piles and 8 discard piles)
+        (number of discard piles is packs * suits)
+        and this pile contains 13 (ish) conformant cards K .. A
+    */
+    struct Baize *baize = PileOwner(self);
+    int ndiscards = BaizeCountPiles(baize, "Discard");
+    if (ndiscards) {
+        return PileLen(self) == baize->numberOfCardsInLibrary / ndiscards && IsPileConformant(self);
+    }
     return PileEmpty(self);
 }
 

@@ -1,11 +1,12 @@
 # make --recon
 
-SRC_FILES = $(wildcard svg/Simple_*.svg)
+SRC_FILES = $(wildcard svg/*.svg)
 OBJ_FILES = $(patsubst %.svg,%.png,$(SRC_FILES))
 
-#DPI = 96 # 140x190
-DPI = 64 # 93x127
-#DPI = 32 # 46x63
+DPI = 62.22 # 140x218
+#DPI = 53.33 # 120x187
+#DPI = 44.44 # 100x156
+#DPI = 35.56 # 80x124
 
 # target ... : prerequisites ...
 #	recipe

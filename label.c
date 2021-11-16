@@ -68,8 +68,8 @@ void LabelDraw(struct Pile *const self)
     struct Pack *pack = baize->pack;
 
     // center the label in the Pile screen rect
-    Vector2 labelmte = MeasureTextEx(pack->fontAcme, self->label, (float)pack->labelFontSize, fontSpacing);
+    Vector2 labelmte = MeasureTextEx(pack->pileFont, self->label, (float)pack->labelFontSize, fontSpacing);
     Rectangle r = PileScreenRect(self);
     Vector2 cpos = UtilCenterTextInRectangle(r, labelmte.x, labelmte.y);
-    DrawTextEx(pack->fontAcme, self->label, cpos, pack->labelFontSize, fontSpacing, WHITE);
+    DrawTextEx(pack->pileFont, self->label, cpos, pack->labelFontSize, fontSpacing, WHITE);
 }

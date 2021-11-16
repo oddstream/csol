@@ -689,7 +689,7 @@ void BaizeLayoutCommand(struct Baize *const self, void *param)
     int w = GetScreenWidth();
     int h = GetScreenHeight();
 
-    CSOL_INFO("resizing to %d,%d", w, h);
+    // CSOL_INFO("resizing to %d,%d", w, h);
 
     BaizePositionPiles(self, w, h);
     UiLayout(self->ui, w, h);
@@ -794,10 +794,6 @@ void BaizeUpdate(struct Baize *const self)
         BaizeChangePackCommand(self, "retro");
     } else if (IsKeyReleased(KEY_FIVE)) {
         BaizeChangePackCommand(self, "unicode");
-    } else if (IsKeyReleased(KEY_SIX)) {
-        BaizeChangePackCommand(self, "guyenne-single");
-    } else if (IsKeyReleased(KEY_SEVEN)) {
-        BaizeChangePackCommand(self, "guyenne-classic");
     }
 
     UiUpdate(self->ui);

@@ -29,10 +29,10 @@ struct Pack {
     float fontExpansion;
 
     // piggy-back some Pile things that depend on Card Pack
-    Font fontAcme;
+    Font pileFont;
     int pileFontSize;
     int labelFontSize;
-    Font fontSymbol;
+    Font symbolFont;
 };
 
 struct Pack *PackCtor(const char *name);

@@ -5,6 +5,10 @@ EXECUTABLE = $(PROJECT_NAME)
 
 BUILD_MODE ?= DEBUG
 
+# Define default options
+# One of PLATFORM_DESKTOP, PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+PLATFORM           ?= PLATFORM_DESKTOP
+
 # libraylib.a is installed in /usr/local/lib
 # raylib.h (and raylibmath.h &c) installed in /usr/local/include
 
