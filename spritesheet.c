@@ -46,7 +46,7 @@ struct Spritesheet* SpritesheetNew(const char * fname, float x, float y, int fra
 struct Spritesheet* SpritesheetNewInfo(const char* fname, float x, float y, Vector2 *coords)
 {
     struct Spritesheet* self = calloc(1, sizeof(struct Spritesheet));
-    if ( !self ) {
+    if (!self) {
         return NULL;
     }
     self->texture = LoadTexture(fname);
@@ -58,7 +58,7 @@ struct Spritesheet* SpritesheetNewInfo(const char* fname, float x, float y, Vect
 
 void SpritesheetFree(struct Spritesheet *const self)
 {
-    if ( !self ) {
+    if (!self) {
         return;
     }
     UnloadTexture(self->texture);
@@ -71,7 +71,12 @@ void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, fl
     const float yScale = 1.0f;
     const Color c = WHITE;
 
-    if ( self->coords ) {
+    if (!self) {
+        // can happen while changing pack
+        return;
+    }
+
+    if (self->coords) {
         rSrc = (Rectangle){.x=self->coords[frame].x, .y=self->coords[frame].y, .width=self->frameSize.x, .height=self->frameSize.y};
         // card dimensions are already scaled
     } else {

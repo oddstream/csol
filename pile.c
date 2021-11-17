@@ -277,8 +277,13 @@ void PileDrawCenteredText(struct Pile *const self, const char *text)
     if (text==NULL || *text=='\0') {
         return;
     }
+
     struct Baize *baize = PileOwner(self);
     struct Pack *pack = baize->pack;
+
+    if (pack->pileFont.baseSize == 0) {
+        return; // can happen while changing packs
+    }
 
     Vector2 labelmte = MeasureTextEx(pack->pileFont, self->label, (float)pack->pileFontSize, fontSpacing);
     Rectangle rp = PileScreenRect(self);

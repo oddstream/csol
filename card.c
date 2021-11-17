@@ -313,7 +313,7 @@ void CardDraw(struct Card *const self)
         tried angling the card if it was dragging or transitioning,
         but it brought out the jaggies and looked a bit gimmicky
     */
-    if (!pack->font.baseSize) {
+    if (!pack->unicodeFont.baseSize) {
         if (showFace) {
             SpritesheetDraw(pack->ssFace, self->frame, self->flipWidth, 0.0f, r);
         } else {
@@ -329,8 +329,8 @@ void CardDraw(struct Card *const self)
             glyph = 0x1F0A0;
             cardColor = (Color){70,130,180,0xff};   // SteelBlue
         }
-        GlyphInfo gi = GetGlyphInfo(pack->font, glyph);
-        Rectangle gr = GetGlyphAtlasRec(pack->font, glyph);
+        GlyphInfo gi = GetGlyphInfo(pack->unicodeFont, glyph);
+        Rectangle gr = GetGlyphAtlasRec(pack->unicodeFont, glyph);
         Rectangle rc = CardScreenRect(self);
         
         // Rectangle rc2 = rc;
@@ -342,7 +342,7 @@ void CardDraw(struct Card *const self)
         rc.y -= gi.offsetY;
     
         Vector2 cpos = UtilCenterTextInRectangle(rc, gr.width, gr.height);
-        DrawTextCodepoint(pack->font, glyph, cpos, pack->width * pack->fontExpansion, cardColor);
+        DrawTextCodepoint(pack->unicodeFont, glyph, cpos, pack->width * pack->unicodeFontExpansion, cardColor);
     }
 }
 

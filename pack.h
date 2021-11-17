@@ -24,9 +24,9 @@ struct Pack {
     struct Spritesheet *ssFace;    // built in Ctor
     struct Spritesheet *ssBack;    // built in Ctor
 
-    Font font;      // for unicode cards, built in Ctor
-    char *fontFname;
-    float fontExpansion;
+    Font unicodeFont;      // for unicode cards, built in Ctor
+    char *unicodeFontFname;
+    float unicodeFontExpansion;
 
     // piggy-back some Pile things that depend on Card Pack
     Font pileFont;

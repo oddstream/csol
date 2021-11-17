@@ -30,6 +30,7 @@ int flag_nolerp = 0;
 int flag_noflip = 0;
 int flag_noload = 0;
 int flag_nosave = 0;
+int flag_nodraw = 0;
 
 // int main(void) 
 int main(int argc, char* argv[], char* envp[])
@@ -236,6 +237,8 @@ int main(int argc, char* argv[], char* envp[])
         BaizeUndoPush(baize);
 
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
+            if (flag_nodraw)
+                continue;   // eg while changing packs
             BaizeLayout(baize);
             BaizeUpdate(baize);
             BaizeDraw(baize);

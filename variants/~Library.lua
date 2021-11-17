@@ -1,15 +1,15 @@
 -- ~Library.lua
 
+U = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
+V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
+
 --[[
     Think of the error string as an error object, which is a string
 
-    Up|Down|Same|UpDown
+    Up|Down|Same|PlusMinusOne
     Color|AltColor|Suit|AltSuit|Rank
     Wrap
 ]]
-
-U = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
-V = {"Ace","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Jack","Queen","King"}
 
 function Up(c1, c2)
     if CardOrdinal(c1) + 1 ~= CardOrdinal(c2) then

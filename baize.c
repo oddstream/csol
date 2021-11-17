@@ -782,9 +782,7 @@ void BaizeUpdate(struct Baize *const self)
         }
     }
 #endif
-    if (IsKeyReleased(KEY_ZERO)) {
-        BaizeChangePackCommand(self, "kenney");
-    } else if (IsKeyReleased(KEY_ONE)) {
+    if (IsKeyReleased(KEY_ONE)) {
         BaizeChangePackCommand(self, "small");
     } else if (IsKeyReleased(KEY_TWO)) {
         BaizeChangePackCommand(self, "medium");
@@ -792,7 +790,7 @@ void BaizeUpdate(struct Baize *const self)
         BaizeChangePackCommand(self, "large");
     } else if (IsKeyReleased(KEY_FOUR)) {
         BaizeChangePackCommand(self, "retro");
-    } else if (IsKeyReleased(KEY_FIVE)) {
+    } else if (IsKeyReleased(KEY_NINE)) {
         BaizeChangePackCommand(self, "unicode");
     }
 
