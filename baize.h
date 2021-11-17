@@ -6,6 +6,7 @@
 #include <lua.h>
 
 #include "array.h"
+#include "exiface.h"
 #include "pack.h"
 #include "pile.h"
 
@@ -19,6 +20,8 @@ struct Baize {
     struct Pack *pack;
 
     lua_State *L;
+
+    struct ExecutionInterface *exiface;          // interface to the rules and logic for variant
 
     struct Array *piles;
     struct Pile *stock;         // a struct Stock*

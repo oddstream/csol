@@ -1,6 +1,6 @@
 /* klondike.c */
 
-#include "game.h"
+#include "exiface.h"
 
 static void BuildPiles(struct Baize *const baize)
 {
@@ -59,7 +59,7 @@ static int PercentComplete(struct Baize *const baize)
     return 0;
 }
 
-static struct GameVtable klondikeVtable = {
+static struct ExecutionInterface klondikeVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -72,15 +72,7 @@ static struct GameVtable klondikeVtable = {
     &PercentComplete,
 };
 
-struct Game* KlondikeCtor(struct Baize *const baize)
+struct ExecutionInterface* GetKlondikeInterface(void)
 {
-    (void)baize;
-
-    struct Game *game = calloc(1, sizeof(struct Game));
-    if (!game) {
-        return (void*)0;
-    }
-    game->vtable = &klondikeVtable;
-
-    return game;
+    return &klondikeVtable;
 }

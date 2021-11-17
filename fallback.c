@@ -1,4 +1,4 @@
-/* freecell.c */
+/* fallback.c */
 
 #include "exiface.h"
 
@@ -59,7 +59,7 @@ static int PercentComplete(struct Baize *const baize)
     return 0;
 }
 
-static struct ExecutionInterface freecellVtable = {
+static struct ExecutionInterface fallbackVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -72,7 +72,7 @@ static struct ExecutionInterface freecellVtable = {
     &PercentComplete,
 };
 
-struct ExecutionInterface* GetFreecellInterface(void)
+struct ExecutionInterface* GetFallbackInterface(void)
 {
-    return &freecellVtable;
+    return &fallbackVtable;
 }

@@ -1,4 +1,7 @@
-/* game.h */
+/* exiface.h */
+
+#ifndef GAME_H
+#define GAME_H
 
 #include <stdlib.h>
 
@@ -6,7 +9,7 @@
 #include "baize.h"
 #include "pile.h"
 
-struct GameVtable {
+struct ExecutionInterface {
     void (*BuildPiles)(struct Baize *const baize);
     void (*StartGame)(struct Baize *const baize);
     void (*AfterMove)(struct Baize *const baize);
@@ -20,14 +23,14 @@ struct GameVtable {
     void (*PileTapped)(struct Pile *const pile);
 
     int (*PercentComplete)(struct Baize *const baize);
+    // TODO add something to get/set? globals to/from Lua
+    // if using a built-in, then we can get them directly
 };
 
-struct Game {
-    struct GameVtable *vtable;
-};
+struct ExecutionInterface* GetMoonInterface(void);
 
-struct Game* MoonGameCtor(struct Baize *const baize);
-struct Game* KlondikeCtor(struct Baize *const baize);
-struct Game* FreecellCtor(struct Baize *const baize);
+struct ExecutionInterface* GetFallbackInterface(void);
+struct ExecutionInterface* GetFreecellInterface(void);
+struct ExecutionInterface* GetKlondikeInterface(void);
 
-void GameDtor(struct Game *game);
+#endif

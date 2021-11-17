@@ -1,6 +1,6 @@
 /* moongame.c */
 
-#include "game.h"
+#include "exiface.h"
 #include "trace.h"
 #include "luautil.h"
 
@@ -226,7 +226,7 @@ static int PercentComplete(struct Baize *const baize)
     return percent;
 }
 
-static struct GameVtable moonGameVtable = {
+static struct ExecutionInterface moonGameVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -239,15 +239,7 @@ static struct GameVtable moonGameVtable = {
     &PercentComplete,
 };
 
-struct Game* MoonGameCtor(struct Baize *const baize)
+struct ExecutionInterface* GetMoonInterface(void)
 {
-    (void)baize;
-
-    struct Game *game = calloc(1, sizeof(struct Game));
-    if (!game) {
-        return (void*)0;
-    }
-    game->vtable = &moonGameVtable;
-
-    return game;
+    return &moonGameVtable;
 }

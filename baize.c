@@ -139,6 +139,8 @@ void BaizeCreatePiles(struct Baize *const self)
     self->stock = NULL;
     self->waste = NULL;
 
+    // TODO setup Baize->game here
+
     { // scope for fname
         char fname[128];    snprintf(fname, 127, "variants/%s.lua", self->variantName);
         if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
@@ -221,6 +223,8 @@ void BaizeGetLuaGlobals(struct Baize *const self)
         exit(666);
         return;
     }
+    // TODO if we are using an interface to a built-in game ...
+    // we never set a Lua global from csol?
     self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
     self->numberOfColors = LuaUtilGetGlobalInt(self->L, "NUMBER_OF_COLORS", 2);
     self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
