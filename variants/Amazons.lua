@@ -7,9 +7,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
-
 function BuildPiles()
 
     AddPile("Stock", 6, 1, FAN_NONE, 1, 4, {2,3,4,5,6,13})

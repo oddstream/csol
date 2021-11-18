@@ -483,6 +483,18 @@ static struct Pack Packs[] = {
 
         .unicodeFontFname = "assets/DejaVuSans.ttf",
         .unicodeFontExpansion = 1.3f,
+        .numberOfColors = 2,
+    },
+    {
+        .name = "fourcolor",
+        .fixed = 0,
+        .width = 93.0f,
+        .height = 127.0f,
+        .roundness = 0.25f,
+
+        .unicodeFontFname = "assets/DejaVuSans.ttf",
+        .unicodeFontExpansion = 1.3f,
+        .numberOfColors = 4,
     }
 };
 

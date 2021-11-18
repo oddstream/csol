@@ -9,10 +9,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
-
-
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
 local function DemoteCards(pile, ord)
@@ -37,11 +33,11 @@ function BuildPiles()
     AddPile("Stock", -5, -5, FAN_NONE, 1, 4)
 
     for x = 1, 7 do
-        local pile = AddPile("Tableau", x, 1, FAN_DOWN)
+        local pile = AddPile("Tableau", x, 1, FAN_DOWN, MOVE_ONE)
         PileLabel(pile, "X")
     end
     for x = 1, 6 do
-        local pile = AddPile("Tableau", x, 4, FAN_DOWN)
+        local pile = AddPile("Tableau", x, 4, FAN_DOWN, MOVE_ONE)
         PileLabel(pile, "X")
     end
     for y = 1, 4 do

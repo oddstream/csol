@@ -2,12 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = true
-NUMBER_OF_COLORS = 4
--- SEED = 4  -- winnable
-STOCK_DEAL_CARDS = 1
-STOCK_RECYCLES = 32767
-
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
 function BuildPiles()
@@ -16,15 +10,13 @@ function BuildPiles()
 
     AddPile("Waste", 2, 1, FAN_RIGHT3)
 
-    local pile
-
     for x = 5, 12 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
     for x = 1, 12 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
         for n = 1, 3 do
             MoveCard(Stock.Pile, pile)
         end
@@ -32,16 +24,16 @@ function BuildPiles()
 
 end
 
+function StartGame()
+    StockRecycles(0)
+end
+
 -- TailMoveError constraints (Tableau only)
 
 function Tableau.TailMoveError(tail)
-    if POWER_MOVES then
+    if Len(tail) > 1 then
         for _, c in ipairs(CardPairs(tail)) do
             local err = DownSuit(c[1], c[2]) if err then return err end
-        end
-    else
-        if Len(tail) > 1 then
-            return "Can only move a single card"
         end
     end
     return nil

@@ -23,42 +23,43 @@
 #include "ui.h"
 
 static const struct FunctionToRegister {
-    char luaFunction[24];
+    char luaFunction[16];
     lua_CFunction cFunction;
 } FunctionsToRegister[] = {
-    {"AddPile", MoonAddPile},
+    {"AddPile",         MoonAddPile},
     // {"FindPile", MoonFindPile},
-    {"PileLabel", MoonPileLabel},
-    {"PileType", MoonPileType},
-    {"PileGet", MoonPileGet},   // deprecated
-    {"PileLen", MoonPileLen},   // deprecated
-    {"PilePeek", MoonPilePeek},   // deprecated
+    {"PileLabel",       MoonPileLabel},
+    {"PileType",        MoonPileType},
+    {"PileGet",         MoonPileGet},   // deprecated
+    {"PileLen",         MoonPileLen},   // deprecated
+    {"PilePeek",        MoonPilePeek},   // deprecated
     // {"PileDemoteCards", MoonPileDemoteCards},
     // {"PilePromoteCards", MoonPilePromoteCards},
 
-    {"MoveCard", MoonMoveCard},
-    {"MoveAllCards", MoonMoveAllCards},
-    {"Refan", MoonRefan},
-    {"CardPairs", MoonCardPairs},
-    {"SwapCards", MoonSwapCards},
+    {"MoveCard",        MoonMoveCard},
+    {"MoveAllCards",    MoonMoveAllCards},
+    {"Refan",           MoonRefan},
+    {"CardPairs",       MoonCardPairs},
+    {"SwapCards",       MoonSwapCards},
 
-    {"CardColor", MoonCardColor},
-    {"CardOrdinal", MoonCardOrdinal},
-    {"CardOwner", MoonCardOwner},
-    {"CardProne", MoonCardProne},
-    {"CardSuit", MoonCardSuit},
+    {"CardColor",       MoonCardColor},
+    {"CardOrdinal",     MoonCardOrdinal},
+    {"CardOwner",       MoonCardOwner},
+    {"CardProne",       MoonCardProne},
+    {"CardSuit",        MoonCardSuit},
     // {"CardToTable", MoonCardToTable},
 
-    {"TailGet", MoonTailGet},   // deprecated
-    {"TailLen", MoonTailLen},   // deprecated
+    {"TailGet",         MoonTailGet},   // deprecated
+    {"TailLen",         MoonTailLen},   // deprecated
 
-    {"Get",     MoonGet},
-    {"Len",     MoonLen},
-    {"First",   MoonFirst},
-    {"Last",    MoonLast},
-    {"Empty",   MoonEmpty},
+    {"Get",             MoonGet},
+    {"Len",             MoonLen},
+    {"First",           MoonFirst},
+    {"Last",            MoonLast},
+    {"Empty",           MoonEmpty},
 
-    {"Toast", MoonToast},
+    {"StockRecycles",   MoonStockRecycles},
+    {"Toast",           MoonToast},
 };
 
 static struct Baize* getBaize(lua_State* L)
@@ -225,13 +226,13 @@ int MoonAddPile(lua_State* L)
     struct Pile* p = NULL;
     if ( strcmp(category, "Stock") == 0 ) {
         size_t packs, suits;
-        if (lua_isnumber(L, 5)) {
-            packs = lua_tonumber(L, 5);
+        if (lua_isinteger(L, 5)) {
+            packs = lua_tointeger(L, 5);
         } else {
             packs = 1;
         }
-        if (lua_isnumber(L, 6)) {
-            suits = lua_tonumber(L, 6);
+        if (lua_isinteger(L, 6)) {
+            suits = lua_tointeger(L, 6);
         } else {
             suits = 4;
         }
@@ -256,7 +257,11 @@ int MoonAddPile(lua_State* L)
     } else if ( strcmp(category, "Reserve") == 0 ) {
         p = (struct Pile*)ReserveNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Tableau") == 0 ) {
-        p = (struct Pile*)TableauNew(baize, (Vector2){x, y}, fan);
+        int moveType = 0;   // by default, MOVE_ANY
+        if (lua_isinteger(L, 5)) {
+            moveType = lua_tointeger(L, 5);
+        }
+        p = (struct Pile*)TableauNew(baize, (Vector2){x, y}, fan, moveType);
         baize->tableaux = ArrayPush(baize->tableaux, p);
     } else if ( strcmp(category, "Waste") == 0 ) {
         p = (struct Pile*)WasteNew(baize, (Vector2){x, y}, fan);
@@ -965,6 +970,17 @@ int MoonSwapCards(lua_State *L)
     c2->owner = p1;
 
     return 0;
+}
+
+int MoonStockRecycles(lua_State *L)
+{
+    struct Baize *baize = getBaize(L);
+
+    if (lua_isinteger(L, 1)) {
+        baize->stock->vtable->SetRecycles(baize->stock, lua_tointeger(L, 1));
+    }
+    lua_pushinteger(L, ((struct Stock*)baize->stock)->recycles);
+    return 1;
 }
 
 int MoonToast(lua_State *L)

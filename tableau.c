@@ -9,9 +9,8 @@
 #include "pile.h"
 #include "array.h"
 #include "tableau.h"
+#include "trace.h"
 #include "constraint.h"
-#include "luautil.h"
-#include "util.h"
 
 static struct PileVtable tableauVtable = {
     &TableauCanMoveTail,
@@ -31,18 +30,57 @@ static struct PileVtable tableauVtable = {
     &PileFree,
 };
 
-struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType fan)
+struct Tableau* TableauNew(struct Baize *const baize, Vector2 slot, enum FanType fan, enum MoveType move)
 {
     struct Tableau* self = calloc(1, sizeof(struct Tableau));
-    if ( self ) {
+    if (self) {
         PileCtor(baize, (struct Pile*)self, "Tableau", slot, fan);
         self->super.vtable = &tableauVtable;
+        self->moveType = move;
     }
     return self;
 }
 
 _Bool TableauCanMoveTail(struct Array *const tail)
 {
+    if (!tail) {
+        CSOL_ERROR("%s", "invalid tail");
+        return 0;
+    }
+
+    struct Card *c0 = ArrayGet(tail, 0);
+    if (!CardValid(c0)) {
+        CSOL_ERROR("%s", "invalid card");
+        return 0;
+    }
+
+    struct Pile *pile = CardOwner(c0);
+    struct Baize *baize = PileOwner(pile);
+    struct Tableau *tab = (struct Tableau*)pile;
+    switch (tab->moveType) {
+    case MOVE_ANY:
+        break;
+    case MOVE_ONE:
+        if (ArrayLen(tail) > 1) {
+            BaizeSetError(baize, "(CSOL) You can only move one card");
+            return 0;
+        }
+    case MOVE_ONE_PLUS:
+        // don't know destination, so we allow this as MOVE_ANY
+        break;
+    case MOVE_ONE_OR_ALL:
+        if (ArrayLen(tail)==1) {
+            // that's ok
+        } else if (ArrayLen(tail) == PileLen(pile)) {
+            // that's ok too
+        } else {
+            BaizeSetError(baize, "(CSOL) Only move one card, or the whole pile");
+            return 0;
+        }
+        break;
+    default:
+        break;
+    }
     return CanTailBeMoved(tail);
 }
 
@@ -81,18 +119,19 @@ _Bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
     if (ArrayLen(tail) == 1) {
         return TableauCanAcceptCard(baize, self, ArrayGet(tail, 0));
     }
-    if (ArrayLen(tail) > 1) {
-        if (baize->powerMoves) {
-            size_t moves = PowerMoves(baize, self);
-            if ( ArrayLen(tail) > moves ) {
-                char z[128];
-                if ( moves == 1 )
-                    sprintf(z, "(CSOL) Only enough space to move 1 card, not %lu", ArrayLen(tail));
-                else
-                    sprintf(z, "(CSOL) Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
-                BaizeSetError(baize, z);
-                return 0;
-            }
+    // we know the tail can be moved (else, how did we get here?)
+    // so just need to check power moves here
+    struct Tableau *tab = (struct Tableau*)self;
+    if (tab->moveType == MOVE_ONE_PLUS) {
+        size_t moves = PowerMoves(baize, self);
+        if ( ArrayLen(tail) > moves ) {
+            char z[128];
+            if ( moves == 1 )
+                sprintf(z, "(CSOL) Only enough space to move 1 card, not %lu", ArrayLen(tail));
+            else
+                sprintf(z, "(CSOL) Only enough space to move %lu cards, not %lu", moves, ArrayLen(tail));
+            BaizeSetError(baize, z);
+            return 0;
         }
     }
     return CanTailBeAppended(self, tail);
@@ -135,30 +174,9 @@ void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *un
         return;
     }
 #if 0
-    (void)self;
-    (void)sorted;
     (void)unsorted;
 #else
     struct Baize *const baize = PileOwner(self);
-    lua_State *L = baize->L;
-
-    if (LuaUtilSetupTableMethod(L, "Tableau", "SortedAndUnsorted")) {
-        lua_pushlightuserdata(L, self);
-        // one arg (pile), two returns (number, number)
-        if ( lua_pcall(L, 1, 2, 0) != LUA_OK ) {
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(L, -1));
-            lua_pop(L, 1);  // remove error
-        } else {
-            if ( lua_isnumber(L, -2) && lua_isnumber(L, -1) ) {
-                int extraSorted = lua_tonumber(L, -2);
-                int extraUnsorted = lua_tonumber(L, -1);
-                *sorted += extraSorted;
-                *unsorted += extraUnsorted;
-            } else {
-                fprintf(stderr, "ERROR: %s: expecting two numbers\n", __func__);
-            }
-            lua_pop(L, 2);
-        }
-    }
+    baize->exiface->PileSortedAndUnsorted(self, sorted, unsorted);
 #endif
 }

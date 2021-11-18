@@ -7,10 +7,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
-STOCK_RECYCLES = 0
-
 if not table.contains then
     function table.contains(tab, val)
         for index, value in ipairs(tab) do
@@ -71,13 +67,13 @@ Once on any foundation, cards may not be moved back off.
 
     -- Twenty-five tableau piles of four cards each, splayed downward. All cards are dealt face up.
     for x = 1, 13 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
         for i = 1, 4 do
             MoveCard(Stock.Pile, pile)
         end
     end
     for x = 1.5, 12.5 do
-        pile = AddPile("Tableau", x, 5, FAN_DOWN)
+        pile = AddPile("Tableau", x, 5, FAN_DOWN, MOVE_ONE)
         for i = 1, 4 do
             MoveCard(Stock.Pile, pile)
         end

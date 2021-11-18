@@ -4,11 +4,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
-
--- SEED = 4072
-
 function BuildPiles()
 
   if type(AddPile) ~= "function" then
@@ -30,7 +25,7 @@ function BuildPiles()
   end
 
   for x = 1, 7 do
-    pile = AddPile("Tableau", x, 2, FAN_DOWN)
+    pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
   end
 
   -- Shuffle a 52-card pack and deal the first card face up to the top left of the board.

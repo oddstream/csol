@@ -40,9 +40,6 @@ struct Baize {
     _Bool dragging;
     Vector2 dragOffset;
 
-    _Bool powerMoves;    // set from POWER_MOVES variable in variant.lua
-    int numberOfColors;
-
     struct UI* ui;
 
     char* errorString;
@@ -81,7 +78,6 @@ void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
 
 void BaizeGetLuaGlobals(struct Baize *const self);
-void BaizeStartGame(struct Baize *const self);
 void BaizeTailTapped(struct Baize *const self);
 void BaizePileTapped(struct Baize *const self, struct Pile *const c);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);

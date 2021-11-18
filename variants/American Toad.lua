@@ -4,7 +4,8 @@
 American Toad is a solitaire game using two decks of playing cards.
 This game is similar to Canfield except that the tableau builds down in suit, and a partial tableau stack cannot be moved (only the top card or entire stack can be moved).
 The object of the game is to move all cards to the foundations.
-American Toad has eight tableau stacks. Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
+American Toad has eight tableau stacks.
+Each tableau stack contains one card and builds down in suit wrapping from Ace to King, e.g. 3♠, 2♠, A♠, K♠...
 There are also eight foundations that build up in suit, e.g. 7♦, 8♦, 9♦...
 The game includes one reserve pile with twenty cards that can be played onto the tableau or foundations.
 There is a deck usually at the bottom right that turns up one card at a time.
@@ -14,8 +15,6 @@ The foundations build up in suit, wrapping from King to Ace as necessary.
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
 STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
@@ -37,7 +36,7 @@ function BuildPiles()
     end
 
     for x = 1, 8 do
-        pile = AddPile("Tableau", x, 3, FAN_DOWN)
+        pile = AddPile("Tableau", x, 3, FAN_DOWN, MOVE_ONE_OR_ALL)
         MoveCard(Stock.Pile, pile)
     end
 
@@ -45,6 +44,8 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
+    StockRecycles(STOCK_RECYCLES)
+
     MoveCard(Stock.Pile, Foundation.Piles[1])
     local c = First(Foundation.Piles[1])
     for _, pile in ipairs(Foundation.Piles) do
@@ -151,6 +152,7 @@ function Stock.PileTapped(pile)
             MoveCard(Waste.Pile, Stock.Pile)
         end
         STOCK_RECYCLES = STOCK_RECYCLES - 1
+        StockRecycles(STOCK_RECYCLES)
     end
 end
 

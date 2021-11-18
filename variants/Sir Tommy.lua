@@ -32,13 +32,14 @@ function BuildPiles()
     end
 
     for x = 4, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
     end
 
 end
 
--- function StartGame()
--- end
+function StartGame()
+    StockRecycles(STOCK_RECYCLES)
+end
 
 -- TailMoveError constraints (Tableau only)
 

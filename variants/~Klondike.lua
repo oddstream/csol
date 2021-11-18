@@ -4,10 +4,6 @@ dofile("variants/~Library.lua")
 
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions and piles
 
-POWER_MOVES = false
--- SEED = 3 -- 2 winnable draw three
--- SEED = 39880
--- SEED=35495
 STOCK_RECYCLES = 32767
 
 function BuildPiles()
@@ -24,7 +20,7 @@ function BuildPiles()
 
     local deal = 1
     for x = 1, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         PileLabel(pile, U[13])
 
         for n = 1, deal do
@@ -39,6 +35,7 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 32767
+    StockRecycles(STOCK_RECYCLES)
 end
 
 -- TailMoveError constraints (Tableau only)
@@ -139,6 +136,7 @@ function Stock.PileTapped(pile)
             MoveCard(Waste.Pile, Stock.Pile)
         end
         STOCK_RECYCLES = STOCK_RECYCLES - 1
+        StockRecycles(STOCK_RECYCLES)
     end
 end
 

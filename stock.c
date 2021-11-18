@@ -10,7 +10,6 @@
 #include "baize.h"
 #include "pile.h"
 #include "array.h"
-#include "luautil.h"
 #include "stock.h"
 #include "trace.h"
 #include "ui.h"
@@ -84,17 +83,9 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
     }
 }
 
-static void ShuffleStock(struct Baize *const baize, struct Pile *const stock)
+static void ShuffleStock(struct Pile *const stock)
 {
-    unsigned seed = LuaUtilGetGlobalInt(baize->L, "SEED", 0);
-    if (seed) {
-        char z[64]; sprintf(z, "Game number %u", seed);
-        UiToast(baize->ui, z);
-    } else {
-        seed = time(NULL) & 0xFFFF;
-    }
-    CSOL_INFO("SEED %u", seed);
-    srand(seed);
+    srand(time(NULL) & 0xFFFF);
     // Knuth-Fisher–Yates shuffle
     size_t n = ArrayLen(stock->cards);
     for ( int i = n-1; i > 0; i-- ) {
@@ -112,7 +103,7 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan
 
         CreateCardLibrary(baize, packs, suits, cardFilter);
         FillStockFromLibrary(baize, (struct Pile *const)self);
-        ShuffleStock(baize, (struct Pile *const)self);
+        ShuffleStock((struct Pile *const)self);
 
         self->recycles = 32767;  // infinite by default
     }

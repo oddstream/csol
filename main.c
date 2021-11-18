@@ -228,12 +228,11 @@ int main(int argc, char* argv[], char* envp[])
         if (loadedUndoStack) {
             BaizeUndo0(baize);
             if (ArrayLen(baize->undoStack) == 1) {
-                BaizeStartGame(baize);
+                baize->exiface->StartGame(baize);
             }
         } else {
-            BaizeStartGame(baize);
+            baize->exiface->StartGame(baize);
         }
-        BaizeGetLuaGlobals(baize);
         BaizeUndoPush(baize);
 
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key

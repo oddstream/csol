@@ -6,7 +6,6 @@
 #include "array.h"
 #include "baize.h"
 #include "stock.h"
-#include "luautil.h"
 #include "undo.h"
 #include "util.h"
 
@@ -189,6 +188,7 @@ void UndoStackFree(struct Array *stack)
     ArrayFree(stack);
 }
 
+#if 0
 static int CalcPercentComplete(struct Baize *const self)
 {
     int percent = 0;
@@ -214,6 +214,7 @@ static int CalcPercentComplete(struct Baize *const self)
 
     return percent;
 }
+#endif
 
 void BaizeUndoPush(struct Baize *const self)
 {
@@ -226,7 +227,7 @@ void BaizeUndoPush(struct Baize *const self)
 
     sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
 
-    sprintf(zRight, "COMPLETE: %d%%", CalcPercentComplete(self));
+    sprintf(zRight, "COMPLETE: %d%%", self->exiface->PercentComplete(self));
 
     if (self->stock) {
         // Baize->stock may not be set yet if variant.lua/Build has not been run

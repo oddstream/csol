@@ -53,6 +53,7 @@ static void AfterMove(struct Baize *const baize)
             // nothing
         }
     }
+    baize->stock->vtable->SetRecycles(baize->stock, LuaUtilGetGlobalInt(baize->L, "STOCK_RECYCLES", 32767));
 }
 
 static const char* TailMoveError(struct Array *const tail)

@@ -40,6 +40,7 @@ int MoonEmpty(lua_State* L);
 
 int MoonCardPairs(lua_State *L);
 int MoonSwapCards(lua_State *L);
+int MoonStockRecycles(lua_State *L);
 
 int MoonToast(lua_State *L);
 

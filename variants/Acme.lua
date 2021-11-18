@@ -20,9 +20,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
-SEED=12620
 STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
@@ -45,7 +42,7 @@ function BuildPiles()
     CardProne(Last(pile), false)
 
     for x = 4, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
         MoveCard(Stock.Pile, pile)
     end
 
@@ -53,21 +50,18 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
+    StockRecycles(STOCK_RECYCLES)
 end
 
 -- TailMoveError constraints (Tableau only)
 
 function Tableau.TailMoveError(tail)
-    local c1 = Get(tail, 1)
-    if POWER_MOVES then
+    if Len(tail) > 1 then
+        local c1 = Get(tail, 1)
         for i = 2, Len(tail) do
             local c2 = Get(tail, i)
             local err = DownSuit(c1, c2) if err then return err end
             c1 = c2
-        end
-    else
-        if Len(tail) > 1 then
-            return "Can only move a single card"
         end
     end
     return nil
@@ -153,6 +147,7 @@ function Stock.PileTapped(pile)
             MoveCard(Waste.Pile, Stock.Pile)
         end
         STOCK_RECYCLES = STOCK_RECYCLES - 1
+        StockRecycles(STOCK_RECYCLES)
     end
 end
 

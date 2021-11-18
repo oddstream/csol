@@ -2,9 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = true
-EASY_SEEDS = {39675,50060,50419,10982}
-
 local function DemoteCards(pile, ord)
     -- yes, I know, a bubble sort
     local hasChanged
@@ -61,7 +58,7 @@ function BuildPiles()
   end
 
   for x = 1, 4 do
-    pile = AddPile("Tableau", x, 2, FAN_DOWN)
+    pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
     for n = 1, 7 do
       MoveCard(Stock.Pile, pile)
     end
@@ -71,7 +68,7 @@ function BuildPiles()
     end
   end
   for x = 5, 8 do
-    pile = AddPile("Tableau", x, 2, FAN_DOWN)
+    pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
     for n = 1, 6 do
       MoveCard(Stock.Pile, pile)
     end
@@ -92,16 +89,12 @@ end
 -- TailMoveError constraints
 
 function Tableau.TailMoveError(tail)
-    if POWER_MOVES then
+    if Len(tail) > 1 then
         local c1 = Get(tail, 1)
         for i = 2, Len(tail) do
             local c2 = Get(tail, i)
             local err = DownAltColor(c1, c2) if err then return err end
             c1 = c2
-        end
-    else
-        if Len(tail) > 1 then
-            return "Can only move a single card"
         end
     end
     return nil

@@ -6,13 +6,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
-
--- SEED=32808
--- SEED=59517
--- SEED=321
-
 function BuildPiles()
 
     AddPile("Stock", -5, -5, FAN_NONE, 1, 4)    -- hidden off screen
@@ -24,14 +17,14 @@ function BuildPiles()
     end
 
     for x = 1, 3 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         for n = 1, 8 do
             MoveCard(Stock.Pile, pile)
         end
     end
     local deal = 7
     for x = 4, 10 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         for n = 1, deal do
           local c = MoveCard(Stock.Pile, pile)
         end

@@ -12,8 +12,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
 function BuildPiles()

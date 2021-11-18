@@ -16,7 +16,7 @@
 #include "scrunch.h"
 #include "undo.h"
 #include "util.h"
-#include "luautil.h"
+#include "tableau.h"
 #include "trace.h"
 #include "ui.h"
 
@@ -88,24 +88,29 @@ void BaizeOpenLua(struct Baize *const self)
     MoonRegisterFunctions(self->L);
 
     // create a handle to this Baize inside Lua TODO maybe not needed
-    lua_pushlightuserdata(self->L, self);   lua_setglobal(self->L, "BAIZE");
+    lua_pushlightuserdata(self->L, self);       lua_setglobal(self->L, "BAIZE");
 
-    lua_pushinteger(self->L, FAN_NONE);     lua_setglobal(self->L, "FAN_NONE");
-    lua_pushinteger(self->L, FAN_DOWN);     lua_setglobal(self->L, "FAN_DOWN");
-    lua_pushinteger(self->L, FAN_LEFT);     lua_setglobal(self->L, "FAN_LEFT");
-    lua_pushinteger(self->L, FAN_RIGHT);    lua_setglobal(self->L, "FAN_RIGHT");
-    lua_pushinteger(self->L, FAN_DOWN3);    lua_setglobal(self->L, "FAN_DOWN3");
-    lua_pushinteger(self->L, FAN_LEFT3);    lua_setglobal(self->L, "FAN_LEFT3");
-    lua_pushinteger(self->L, FAN_RIGHT3);   lua_setglobal(self->L, "FAN_RIGHT3");
+    lua_pushinteger(self->L, FAN_NONE);         lua_setglobal(self->L, "FAN_NONE");
+    lua_pushinteger(self->L, FAN_DOWN);         lua_setglobal(self->L, "FAN_DOWN");
+    lua_pushinteger(self->L, FAN_LEFT);         lua_setglobal(self->L, "FAN_LEFT");
+    lua_pushinteger(self->L, FAN_RIGHT);        lua_setglobal(self->L, "FAN_RIGHT");
+    lua_pushinteger(self->L, FAN_DOWN3);        lua_setglobal(self->L, "FAN_DOWN3");
+    lua_pushinteger(self->L, FAN_LEFT3);        lua_setglobal(self->L, "FAN_LEFT3");
+    lua_pushinteger(self->L, FAN_RIGHT3);       lua_setglobal(self->L, "FAN_RIGHT3");
 
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Cell");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Discard");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Foundation");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Label");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Reserve");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Stock");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Tableau");
-    lua_createtable(self->L, 0, 0);         lua_setglobal(self->L, "Waste");
+    lua_pushinteger(self->L, MOVE_ANY);         lua_setglobal(self->L, "MOVE_ANY");
+    lua_pushinteger(self->L, MOVE_ONE);         lua_setglobal(self->L, "MOVE_ONE");
+    lua_pushinteger(self->L, MOVE_ONE_PLUS);    lua_setglobal(self->L, "MOVE_ONE_PLUS");
+    lua_pushinteger(self->L, MOVE_ONE_OR_ALL);  lua_setglobal(self->L, "MOVE_ONE_OR_ALL");
+
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Cell");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Discard");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Foundation");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Label");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Reserve");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Stock");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Tableau");
+    lua_createtable(self->L, 0, 0);             lua_setglobal(self->L, "Waste");
 }
 
 void BaizeCloseLua(struct Baize *const self)
@@ -139,60 +144,22 @@ void BaizeCreatePiles(struct Baize *const self)
     self->stock = NULL;
     self->waste = NULL;
 
-    // TODO setup Baize->game here
+    self->exiface = GetInterface(self);
 
-    { // scope for fname
-        char fname[128];    snprintf(fname, 127, "variants/%s.lua", self->variantName);
-        if ( luaL_loadfile(self->L, fname) || lua_pcall(self->L, 0, 0, 0) ) {
-            CSOL_ERROR("%s", lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);
-            return;
-        }
-
-        UiUpdateTitleBar(self->ui, self->variantName);
-    }
-
-    if (lua_getglobal(self->L, "BuildPiles") != LUA_TFUNCTION) { // push value of "BuildPiles" onto the stack, return type
-        CSOL_ERROR("%s", "BuildPiles is not a function");
-        lua_pop(self->L, 1);    // remove "BuildPiles" from stack
-    } else {
-        if (lua_pcall(self->L, 0, 0, 0) != LUA_OK) {
-            CSOL_ERROR("running Lua function: %s", lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);    // remove error
-        } else {
-            // fprintf(stderr, "BuildPiles called ok\n");
-        }
-    }
+    self->exiface->BuildPiles(self);
 
     // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
-    // setup useful shortcuts for collect (to foundations) and statusbar
-    {
-        // we now do this in MoonAddPile, so shortcuts are immediately available
-        // (baize->stock needs to be set before MoveCard called)
-        // struct Pile* p;
-        // struct ArrayIterator iter = ArrayIterator(self->piles);
-        // while ( (p = ArrayMoveNext(&iter)) ) {
-        //     if ( strcmp("Foundation", p->category) == 0 ) {
-        //         self->foundations = ArrayPush(self->foundations, p);
-        //     } else if ( strcmp("Tableau", p->category) == 0 ) {
-        //         self->tableaux = ArrayPush(self->tableaux, p);
-        //     } else if ( strcmp(p->category, "Stock") == 0 ) {
-        //         self->stock = p;
-        //     } else if ( strcmp(p->category, "Waste") == 0 ) {
-        //         self->waste = p;
-        //     }
-        // }
-        if (self->stock == NULL) {
-            CSOL_ERROR("%s", "no Stock");
-        }
-        if (ArrayLen(self->foundations) == 0) {
-            CSOL_WARNING("%s", "no Foundations - will divide by zero\n");
-        }
+    if (self->stock == NULL) {
+        CSOL_ERROR("%s", "no Stock");
+    }
+    if (ArrayLen(self->foundations) == 0) {
+        CSOL_WARNING("%s", "no Foundations - will divide by zero\n");
     }
 
     // now the piles know their slots, calculate and set their positions
     BaizeLayoutCommand(self, NULL);
+    UiUpdateTitleBar(self->ui, self->variantName);
 }
 
 void BaizeResetState(struct Baize *const self, struct Array *undoStack)
@@ -214,54 +181,6 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
 
     self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
     self->dragging = 0;
-}
-
-void BaizeGetLuaGlobals(struct Baize *const self)
-{
-    if (!self->stock) {
-        CSOL_ERROR("%s", "Baize not formed");
-        exit(666);
-        return;
-    }
-    // TODO if we are using an interface to a built-in game ...
-    // we never set a Lua global from csol?
-    self->powerMoves = LuaUtilGetGlobalBool(self->L, "POWER_MOVES", false);
-    self->numberOfColors = LuaUtilGetGlobalInt(self->L, "NUMBER_OF_COLORS", 2);
-    self->stock->vtable->SetRecycles(self->stock, LuaUtilGetGlobalInt(self->L, "STOCK_RECYCLES", 32767));
-}
-
-void BaizeStartGame(struct Baize *const self)
-{
-#if _DEBUG
-    size_t index;
-    _Bool zeroPile = false;
-    for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        if ( p->pos.x == 0.0f && p->pos.y == 0.0f ) {
-            zeroPile = true;
-            break;
-        }
-    }
-    if (zeroPile) CSOL_WARNING("%s", "zero pos pile");
-#endif
-
-    unsigned crc = BaizeCRC(self);
-
-    if (lua_getglobal(self->L, "StartGame") != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        CSOL_INFO("%s", "StartGame is not a function");
-        lua_pop(self->L, 1);  // remove function name
-    } else {
-        // no args, no returns
-        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            CSOL_ERROR("running Lua function: %s", lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);    // remove error
-        } else {
-            // nothing
-        }
-    }
-
-    if (BaizeCRC(self) != crc) {
-        CSOL_INFO("%s", "StartGame has changed the baize");
-    }
 }
 
 void BaizeRefan(struct Baize *const self)
@@ -310,8 +229,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
 
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
-    BaizeStartGame(self);
-    BaizeGetLuaGlobals(self);
+    self->exiface->StartGame(self);
     BaizeUndoPush(self);
 }
 
@@ -572,7 +490,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             // {    char z[64]; CardToString(ArrayGet(self->tail, 0), z);   fprintf(stdout, "Touched card %s\n", z);   }
             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
             unsigned crc = BaizeCRC(self);
-            BaizeTailTapped(self);
+            self->exiface->TailTapped(self->tail);
             BaizeResetError(self);// wipe any error messages otherwise they look a bit odd
             if (BaizeCRC(self) != crc) {
                 BaizeAfterUserMove(self);
@@ -600,7 +518,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
         self->touchedWidget = NULL;
     } else if ( self->touchedPile ) {
         unsigned crc = BaizeCRC(self);
-        BaizePileTapped(self, self->touchedPile);
+        self->exiface->PileTapped(self->touchedPile);
         if (BaizeCRC(self) != crc) {
             BaizeAfterUserMove(self);
         }
@@ -661,18 +579,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
     // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
-    if (lua_getglobal(self->L, "AfterMove") != LUA_TFUNCTION) {  // push Lua function name onto the stack
-        // CSOL_INFO("%s", "AfterMove is not a function");
-        lua_pop(self->L, 1);  // remove func from stack
-    } else {
-        // no args, no returns
-        if ( lua_pcall(self->L, 0, 0, 0) != LUA_OK ) {
-            CSOL_ERROR("running Lua function: %s", lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);    // remove error
-        } else {
-            // nothing
-        }
-    }
+    self->exiface->AfterMove(self);
 
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
 
@@ -680,8 +587,6 @@ void BaizeAfterUserMove(struct Baize *const self)
         UiToast(self->ui, "Game complete");
     }
     // TODO test started/complete/conformant
-
-    BaizeGetLuaGlobals(self);
 
     BaizeUndoPush(self);
 }
@@ -779,7 +684,6 @@ void BaizeUpdate(struct Baize *const self)
         ScrunchPiles(self);
     }
     if ( IsKeyReleased(KEY_Z) ) {
-
         size_t index;
         for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
             PileRefan(p);
@@ -794,6 +698,8 @@ void BaizeUpdate(struct Baize *const self)
         BaizeChangePackCommand(self, "large");
     } else if (IsKeyReleased(KEY_FOUR)) {
         BaizeChangePackCommand(self, "retro");
+    } else if (IsKeyReleased(KEY_EIGHT)) {
+        BaizeChangePackCommand(self, "fourcolor");
     } else if (IsKeyReleased(KEY_NINE)) {
         BaizeChangePackCommand(self, "unicode");
     }
@@ -915,8 +821,7 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
     BaizeOpenLua(self);
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
-    BaizeStartGame(self);
-    BaizeGetLuaGlobals(self);
+    self->exiface->StartGame(self);
     BaizeUndoPush(self);
 }
 

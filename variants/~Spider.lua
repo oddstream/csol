@@ -2,7 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
 STOCK_RECYCLES = 0
 
 function BuildPiles()
@@ -16,7 +15,7 @@ function BuildPiles()
     end
 
     for x = 1, 4 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         for n=1,4 do
           local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
@@ -24,13 +23,17 @@ function BuildPiles()
         MoveCard(Stock.Pile, pile)
     end
     for x = 5, 10 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         for n=1,3 do
           local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
         end
         MoveCard(Stock.Pile, pile)
     end
+end
+
+function StartGame()
+    StockRecycles(STOCK_RECYCLES)
 end
 
 function Tableau.TailMoveError(tail)

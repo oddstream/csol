@@ -10,12 +10,8 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
-NUMBER_OF_COLORS = 4
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 3
-
-SEED = 42
 
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
@@ -110,10 +106,10 @@ function BuildPiles()
     end
 
     for x = 4, 11 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
     end
     for x = 4, 11 do
-        local pile = AddPile("Tableau", x, 4, FAN_DOWN)
+        local pile = AddPile("Tableau", x, 4, FAN_DOWN, MOVE_ANY)
     end
 
     PromoteCards(Stock.Pile, 1)
@@ -122,6 +118,7 @@ end
 function StartGame()
     io.stderr:write("StartGame\n")
     STOCK_RECYCLES = 3
+    StockRecycles(STOCK_RECYCLES)
 
     -- MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
 
@@ -272,6 +269,7 @@ function Stock.PileTapped(pile)
             MoveCard(Waste.Pile, Stock.Pile)
         end
         STOCK_RECYCLES = STOCK_RECYCLES - 1
+        StockRecycles(STOCK_RECYCLES)
     end
 end
 

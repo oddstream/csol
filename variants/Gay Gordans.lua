@@ -7,9 +7,6 @@ dofile("variants/~Library.lua")
 -- https://www.parlettgames.uk/patience/gaygordons.html
 -- https://en.wikipedia.org/wiki/Gay_Gordons_(solitaire)
 
-POWER_MOVES = false
--- SEED = 42086 -- three jacks in center pile
-
 function BuildPiles()
 
     AddPile("Stock", 6, -5, FAN_NONE, 1, 4)    -- hidden

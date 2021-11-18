@@ -2,7 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-NUMBER_OF_COLORS = 4
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
@@ -22,13 +21,17 @@ function BuildPiles()
 
     local deal = 1
     for x = 1, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN)
+        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         PileLabel(pile, U[13])
         for n = 1, 4 do
           local c = MoveCard(Stock.Pile, pile)
         end
     end
 
+end
+
+function StartGame()
+    StockRecycles(STOCK_RECYCLES)
 end
 
 -- TailMoveError constraints (Tableau only)
@@ -120,6 +123,7 @@ function Stock.PileTapped(pile)
             MoveCard(Waste.Pile, Stock.Pile)
         end
         STOCK_RECYCLES = STOCK_RECYCLES - 1
+        StockRecycles(STOCK_RECYCLES)
     end
 end
 

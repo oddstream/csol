@@ -9,7 +9,6 @@
 
 dofile("variants/~Library.lua")
 
-POWER_MOVES = false
 STOCK_DEAL_CARDS = 1
 
 function BuildPiles()
@@ -28,11 +27,11 @@ function BuildPiles()
     AddPile("Waste", 2, 3, FAN_DOWN3)
     
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 2, FAN_NONE)
+        pile = AddPile("Foundation", x, 2, FAN_NONE, MOVE_ANY)
     end
 
     for x = 4, 7 do
-        pile = AddPile("Tableau", x, 3, FAN_DOWN)
+        pile = AddPile("Tableau", x, 3, FAN_DOWN, MOVE_ANY)
         MoveCard(Stock.Pile, pile)
     end
 
@@ -40,6 +39,7 @@ end
 
 function StartGame()
     STOCK_RECYCLES = 1
+    StockRecycles(STOCK_RECYCLES)
     for _, pile in ipairs(Foundation.Piles) do
         PileLabel(pile, "")
     end
@@ -159,6 +159,7 @@ function Stock.PileTapped(pile)
             MoveCard(Waste.Pile, Stock.Pile)
         end
         STOCK_RECYCLES = STOCK_RECYCLES - 1
+        StockRecycles(STOCK_RECYCLES)
     end
 end
 

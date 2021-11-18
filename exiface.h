@@ -27,6 +27,8 @@ struct ExecutionInterface {
     // if using a built-in, then we can get them directly
 };
 
+struct ExecutionInterface* GetInterface(struct Baize *const baize);
+
 struct ExecutionInterface* GetMoonInterface(void);
 
 struct ExecutionInterface* GetFallbackInterface(void);

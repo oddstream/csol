@@ -27,6 +27,7 @@ struct Pack {
     Font unicodeFont;      // for unicode cards, built in Ctor
     char *unicodeFontFname;
     float unicodeFontExpansion;
+    int numberOfColors;
 
     // piggy-back some Pile things that depend on Card Pack
     Font pileFont;

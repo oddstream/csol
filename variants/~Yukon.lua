@@ -19,7 +19,7 @@ function BuildPiles()
         PileLabel(pile, U[1])
     end
 
-    pile = AddPile("Tableau", 1, 1, FAN_DOWN)
+    pile = AddPile("Tableau", 1, 1, FAN_DOWN, MOVE_ANY)
     if not RELAXED then
         PileLabel(pile, U[13])
     end
@@ -28,7 +28,7 @@ function BuildPiles()
     local dealDown = 1
     local dealUp = 5
     for x = 2, 7 do
-        pile = AddPile("Tableau", x, 1, FAN_DOWN)
+        pile = AddPile("Tableau", x, 1, FAN_DOWN, MOVE_ANY)
         if not RELAXED then
             PileLabel(pile, U[13])
         end

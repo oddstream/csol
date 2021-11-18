@@ -324,7 +324,7 @@ void CardDraw(struct Card *const self)
         Color cardColor;
         if (showFace) {
             glyph = cardCodePoints[self->frame];
-            cardColor = baize->numberOfColors == 2 ? twoColors[self->id.suit] : fourColors[self->id.suit];
+            cardColor = pack->numberOfColors == 4 ? fourColors[self->id.suit] : twoColors[self->id.suit];
         } else {
             glyph = 0x1F0A0;
             cardColor = (Color){70,130,180,0xff};   // SteelBlue
