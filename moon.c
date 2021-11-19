@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+
 #include <raylib.h>
 #include <lua.h>
 #include <lauxlib.h>
@@ -30,9 +31,6 @@ static const struct FunctionToRegister {
     // {"FindPile", MoonFindPile},
     {"PileLabel",       MoonPileLabel},
     {"PileType",        MoonPileType},
-    {"PileGet",         MoonPileGet},   // deprecated
-    {"PileLen",         MoonPileLen},   // deprecated
-    {"PilePeek",        MoonPilePeek},   // deprecated
     // {"PileDemoteCards", MoonPileDemoteCards},
     // {"PilePromoteCards", MoonPilePromoteCards},
 
@@ -48,9 +46,6 @@ static const struct FunctionToRegister {
     {"CardProne",       MoonCardProne},
     {"CardSuit",        MoonCardSuit},
     // {"CardToTable", MoonCardToTable},
-
-    {"TailGet",         MoonTailGet},   // deprecated
-    {"TailLen",         MoonTailLen},   // deprecated
 
     {"Get",             MoonGet},
     {"Len",             MoonLen},
@@ -373,70 +368,6 @@ int MoonPileType(lua_State *L)
     return 0;
 }
 
-int MoonPileGet(lua_State* L)
-{
-    fprintf(stderr, "DEPRECATED: %s\n", __func__);
-
-    if (!lua_islightuserdata(L, 1)) {
-        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
-        return 0;
-    }
-    struct Pile *const p = lua_touserdata(L, 1);
-    if (!PileValid(p)) {
-        fprintf(stderr, "WARNING: %s: invalid pile\n", __func__);
-        return 0;
-    }
-    int n = lua_tointeger(L, 2);
-    if (n==0) {
-        fprintf(stderr, "WARNING: %s: zero index\n", __func__);
-    }
-    // C is 0-indexed, Lua is 1-indexed
-    struct Card *const c = ArrayGet(p->cards, n-1);
-    if (!CardValid(c)) {
-        fprintf(stderr, "WARNING: %s: invalid card\n", __func__);
-        return 0;
-    }
-    lua_pushlightuserdata(L, c);
-    return 1;
-}
-
-int MoonPileLen(lua_State *L)
-{
-    fprintf(stderr, "DEPRECATED: %s\n", __func__);
-
-    if (!lua_islightuserdata(L, 1)) {
-        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
-        return 0;
-    }
-    struct Pile* p = lua_touserdata(L, 1);
-    if ( PileValid(p) ) {
-        lua_pushinteger(L, ArrayLen(p->cards));
-    } else {
-        fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
-        lua_pushinteger(L, 0);
-    }
-    return 1;
-}
-
-int MoonPilePeek(lua_State *L)
-{
-    fprintf(stderr, "DEPRECATED: %s\n", __func__);
-
-    if (!lua_islightuserdata(L, 1)) {
-        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
-        return 0;
-    }
-    struct Pile *p = lua_touserdata(L, 1);
-
-    if ( !PileValid(p) ) {
-        fprintf(stderr, "ERROR: %s: invalid pile\n", __func__);
-        return 0;
-    }
-
-    lua_pushlightuserdata(L, PilePeekCard(p));
-    return 1;
-}
-
 #if 0
 int MoonPileDemoteCards(lua_State *L)
 {
@@ -721,49 +652,6 @@ int MoonCardToTable(lua_State *L)
     return 1;
 }
 #endif
-
-int MoonTailGet(lua_State* L)
-{
-    fprintf(stderr, "DEPRECATED: %s\n", __func__);
-
-    if (!lua_islightuserdata(L, 1)) {
-        fprintf(stderr, "WARNING: %s: expecting lightuserdata\n", __func__);
-        return 0;
-    }
-    struct Array *const a = lua_touserdata(L, 1);
-    if (!ArrayValid(a)) {
-        fprintf(stderr, "WARNING: %s: invalid tail\n", __func__);
-        return 0;
-    }
-    if (!lua_isnumber(L, 2)) {
-        fprintf(stderr, "ERROR: %s: invalid index, have type %d\n", __func__, lua_type(L, 2));
-    }
-    int n = lua_tonumber(L, 2);
-    if (n==0) {
-        fprintf(stderr, "WARNING: %s: zero index\n", __func__);
-    }
-    // C is 0-indexed, Lua is 1-indexed
-    struct Card *const c = ArrayGet(a, n-1);
-    if (!CardValid(c)) {
-        fprintf(stderr, "WARNING: %s: invalid card\n", __func__);
-        return 0;
-    }
-    lua_pushlightuserdata(L, c);
-    return 1;
-}
-
-int MoonTailLen(lua_State* L)
-{
-    fprintf(stderr, "DEPRECATED: %s\n", __func__);
-
-    struct Array *const a = lua_touserdata(L, 1);
-    if (!a) {
-        fprintf(stderr, "WARNING: %s: invalid tail\n", __func__);
-        return 0;
-    }
-    lua_pushinteger(L, ArrayLen(a));
-    return 1;
-}
 
 int MoonLen(lua_State *L)
 {

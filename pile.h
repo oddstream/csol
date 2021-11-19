@@ -6,7 +6,6 @@
 #define PILE_H
 
 #include <raylib.h>
-#include <lua.h>
 
 #include "array.h"
 #include "card.h"

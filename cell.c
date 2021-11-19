@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <raylib.h>
-#include <lua.h>
 
 #include "baize.h"
 #include "pile.h"

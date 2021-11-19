@@ -13,9 +13,6 @@ int MoonAddPile(lua_State* L);
 int MoonFindPile(lua_State* L);
 int MoonPileLabel(lua_State* L);
 int MoonPileType(lua_State* L);
-/*deprecate*/int MoonPileGet(lua_State *L);
-/*deprecate*/int MoonPileLen(lua_State *L);
-/*deprecate*/int MoonPilePeek(lua_State* L);
 // int MoonPileDemoteCards(lua_State *L);
 // int MoonPilePromoteCards(lua_State *L);
 int MoonMoveCard(lua_State* L);
@@ -28,9 +25,6 @@ int MoonCardOwner(lua_State* L);
 int MoonCardProne(lua_State* L);
 int MoonCardSuit(lua_State* L);
 // int MoonCardToTable(lua_State *L);
-
-/*deprecate*/int MoonTailGet(lua_State* L);
-/*deprecate*/int MoonTailLen(lua_State* L);
 
 int MoonGet(lua_State* L);
 int MoonLen(lua_State* L);

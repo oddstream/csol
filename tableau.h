@@ -5,7 +5,7 @@
 
 #include <stdlib.h>
 #include <raylib.h>
-#include <lua.h>
+
 #include "array.h"
 #include "card.h"
 #include "pile.h"

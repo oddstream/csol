@@ -53,7 +53,6 @@ static void AfterMove(struct Baize *const baize)
             // nothing
         }
     }
-    baize->stock->vtable->SetRecycles(baize->stock, LuaUtilGetGlobalInt(baize->L, "STOCK_RECYCLES", 32767));
 }
 
 static const char* TailMoveError(struct Array *const tail)
@@ -208,7 +207,7 @@ static int PercentComplete(struct Baize *const baize)
     // let Lua have first dibs at this by calling function PercentComplete()
     if (lua_getglobal(baize->L, "PercentComplete") == LUA_TFUNCTION) {  // push Lua function name onto the stack
         if ( lua_pcall(baize->L, 0, 1, 0) != LUA_OK ) {  // no args, one return
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(baize->L, -1));
+            CSOL_ERROR("running Lua function: %s\n", lua_tostring(baize->L, -1));
             lua_pop(baize->L, 1);    // remove error
         } else {
             percent = lua_tointeger(baize->L, -1);
@@ -240,6 +239,7 @@ static struct ExecutionInterface moonGameVtable = {
     &PercentComplete,
 };
 
+// get the interface to run a variant through a Lua script
 struct ExecutionInterface* GetMoonInterface(void)
 {
     return &moonGameVtable;

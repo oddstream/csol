@@ -6,8 +6,6 @@
 #include <getopt.h>
 
 #include <raylib.h>
-#include <lua.h>
-#include <lauxlib.h>
 
 #include "baize.h"
 #include "command.h"
@@ -176,8 +174,8 @@ int main(int argc, char* argv[], char* envp[])
     InitWindow(640*2, 480*2, "Oddstream Solitaire");
 
     if (windowWidth == 0 || windowHeight == 0) {
-        windowWidth = GetMonitorWidth(GetCurrentMonitor()) / 2;
-        windowHeight = GetMonitorHeight(GetCurrentMonitor()) / 2;
+        windowWidth = GetMonitorWidth(GetCurrentMonitor()) * 2 / 3;
+        windowHeight = GetMonitorHeight(GetCurrentMonitor()) * 2 / 3;
         SetWindowSize(windowWidth, windowHeight);
     }
     {

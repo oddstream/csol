@@ -28,11 +28,21 @@ struct ExecutionInterface {
 };
 
 struct ExecutionInterface* GetInterface(struct Baize *const baize);
-
 struct ExecutionInterface* GetMoonInterface(void);
+
 
 struct ExecutionInterface* GetFallbackInterface(void);
 struct ExecutionInterface* GetFreecellInterface(void);
 struct ExecutionInterface* GetKlondikeInterface(void);
+
+const char* CardCompare_Up(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_Down(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_DownAltColor(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_DownAltColorWrap(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_UpAltColor(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_UpSuit(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_DownSuit(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_UpSuitWrap(struct Card *const c1, struct Card *const c2);
+const char* CardCompare_DownSuitWrap(struct Card *const c1, struct Card *const c2);
 
 #endif

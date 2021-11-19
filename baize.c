@@ -154,7 +154,7 @@ void BaizeCreatePiles(struct Baize *const self)
         CSOL_ERROR("%s", "no Stock");
     }
     if (ArrayLen(self->foundations) == 0) {
-        CSOL_WARNING("%s", "no Foundations - will divide by zero\n");
+        CSOL_WARNING("%s", "no Foundations - will divide by zero");
     }
 
     // now the piles know their slots, calculate and set their positions
@@ -650,7 +650,7 @@ void BaizeUpdate(struct Baize *const self)
     ArrayForeach(self->piles, (ArrayIterFunc)PileUpdate);
 
     // TODO these should go through CommandQueue rather than being called directly
-    if ( IsKeyReleased(KEY_U) ) {
+    if ( IsKeyReleased(KEY_BACKSPACE) ) {
         BaizeUndoCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_S) ) {
@@ -690,17 +690,17 @@ void BaizeUpdate(struct Baize *const self)
         }
     }
 #endif
-    if (IsKeyReleased(KEY_ONE)) {
+    if (IsKeyReleased(KEY_ZERO)) {
+        BaizeChangePackCommand(self, "retro");
+    } else if (IsKeyReleased(KEY_ONE)) {
         BaizeChangePackCommand(self, "small");
     } else if (IsKeyReleased(KEY_TWO)) {
         BaizeChangePackCommand(self, "medium");
     } else if (IsKeyReleased(KEY_THREE)) {
         BaizeChangePackCommand(self, "large");
     } else if (IsKeyReleased(KEY_FOUR)) {
-        BaizeChangePackCommand(self, "retro");
-    } else if (IsKeyReleased(KEY_EIGHT)) {
         BaizeChangePackCommand(self, "fourcolor");
-    } else if (IsKeyReleased(KEY_NINE)) {
+    } else if (IsKeyReleased(KEY_FIVE)) {
         BaizeChangePackCommand(self, "unicode");
     }
 

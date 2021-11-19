@@ -1,9 +1,9 @@
 # https://www.gnu.org/software/make/manual/make.html
+# make -recon
 
 PROJECT_NAME ?= csol
-EXECUTABLE = $(PROJECT_NAME)
-
 BUILD_MODE ?= DEBUG
+EXECUTABLE ?= csol
 
 # Define default options
 # One of PLATFORM_DESKTOP, PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
@@ -46,7 +46,7 @@ CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE
 INCLUDE_PATHS = -I$(RAYLIB_H_INSTALL_PATH) -I$(LUA_PATH)
 
 # Extra flags to give to compilers when they are supposed to invoke the linker, ‘ld’, such as -L
-LDFLAGS = -L$(LUA_PATH) 
+LDFLAGS = -L$(LUA_PATH) -fsanitize=undefined
 
 # Library flags or names given to compilers when they are supposed to invoke the linker, ‘ld’.
 LDLIBS = -lraylib -llua -lGL -lm -ldl -lpthread 
@@ -65,26 +65,35 @@ endif
 
 HEADER_FILES = $(wildcard *.h)
 SOURCE_FILES = $(wildcard *.c)
-OBJECT_FILES = $(SOURCE_FILES:%=$(OBJ_DIR)/%.o)
+OBJECT_FILES = $(patsubst %.c,%.o,$(SOURCE_FILES))
 
 # $@ filename of target of the rule
 # $< name of the first prerequisite
 
-#$(OBJ_DIR)/%.c.o: %.c
+$(EXECUTABLE): $(OBJECT_FILES) Makefile
+	$(CC) $(OBJECT_FILES) -o $@ $(LDLIBS) $(LDFLAGS)
 #	mkdir -p $(dir $@)
-#	$(CC) $(CFLAGS)  $(INCLUDE_PATHS) -c $< -o $@
+
+#$(EXECUTABLE): $(SOURCE_FILES) $(HEADER_FILES) Makefile
+#	$(CC) -o $@ $(SOURCE_FILES) $(CFLAGS) $(INCLUDE_PATHS) $(LDLIBS) $(LDFLAGS)
+#	@ls -al csol
+
+# -c compile and assemble, but do not link
+# -o <file> place the output into <file>
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDE_PATHS) -c $< -o $@
 
 # compile and link all the .c files
 # use -v to see what's happening
-$(EXECUTABLE): $(SOURCE_FILES) $(HEADER_FILES) Makefile
-	$(CC) -o $@ $(SOURCE_FILES) $(CFLAGS) $(INCLUDE_PATHS) $(LDLIBS) $(LDFLAGS)
-	@echo $(PLAT)
-	@ls -al csol
+#$(EXECUTABLE): $(SOURCE_FILES) $(HEADER_FILES) Makefile
+#	$(CC) -o $@ $(SOURCE_FILES) $(CFLAGS) $(INCLUDE_PATHS) $(LDLIBS) $(LDFLAGS)
+#	@echo $(PLAT)
+#	@ls -al csol
 
 .PHONY: clean check
 
 clean:
-	rm $(EXECUTABLE) $(OBJ_DIR)/*.o
+	rm $(EXECUTABLE) *.o
 
 check:
 	@echo $(BUILD_MODE)

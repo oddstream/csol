@@ -6,6 +6,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "card.h"
 #include "exiface.h"
 #include "trace.h"
 
@@ -38,7 +39,7 @@ struct ExecutionInterface* GetInterface(struct Baize *const baize)
             }
         }
     } else {
-        CSOL_INFO("loaded '%s'", fname);
+        CSOL_INFO("Loaded '%s'", fname);
         // we found a Lua script, and it loads, so use the csol-Lua bridge interface
         self = GetMoonInterface();
     }
@@ -51,4 +52,84 @@ struct ExecutionInterface* GetInterface(struct Baize *const baize)
     return self;
 }
 
-// TODO useful generic game library of functions
+// useful generic game library of functions
+
+static int CardColor(struct Card *const c)
+{
+    return (CardSuit(c) == DIAMOND || CardSuit(c) == HEART) ? 1 : 0;
+}
+
+const char* CardCompare_Up(struct Card *const c1, struct Card *const c2)
+{
+    if (CardOrdinal(c1) + 1 != CardOrdinal(c2))
+        return "Cards must be in ascending order";
+    return (void*)0;
+}
+
+const char* CardCompare_Down(struct Card *const c1, struct Card *const c2)
+{
+    if (CardOrdinal(c1) != CardOrdinal(c2) + 1)
+        return "Cards must be in descending order";
+    return (void*)0;
+}
+
+const char* CardCompare_DownAltColor(struct Card *const c1, struct Card *const c2)
+{
+    if (CardColor(c1) == CardColor(c2))
+        return "Cards must be in alternating colors";
+    return CardCompare_Down(c1, c2);
+}
+
+const char* CardCompare_DownAltColorWrap(struct Card *const c1, struct Card *const c2)
+{
+    if (CardColor(c1) == CardColor(c2))
+        return "Cards must be in alternating colors";
+    if (CardOrdinal(c1) == 1 && CardOrdinal(c2) == 13)
+        return (void*)0;   // King on Ace
+    return CardCompare_Down(c1, c2);
+}
+
+const char* CardCompare_UpAltColor(struct Card *const c1, struct Card *const c2)
+{
+    if (CardColor(c1) == CardColor(c2))
+        return "Cards must be in alternating colors";
+    return CardCompare_Up(c1, c2);
+}
+
+const char* CardCompare_UpSuit(struct Card *const c1, struct Card *const c2)
+{
+    if (CardSuit(c1) != CardSuit(c2))
+        return "Cards must be the same suit";
+    return CardCompare_Up(c1, c2);
+}
+
+const char* CardCompare_DownSuit(struct Card *const c1, struct Card *const c2)
+{
+    if (CardSuit(c1) != CardSuit(c2))
+        return "Cards must be the same suit";
+    return CardCompare_Down(c1, c2);
+}
+
+const char* CardCompare_UpSuitWrap(struct Card *const c1, struct Card *const c2)
+{
+    if (CardSuit(c1) != CardSuit(c2))
+        return "Cards must be the same suit";
+    if (CardOrdinal(c1) == 13 && CardOrdinal(c2) == 1)
+        return (void*)0;
+    else if (CardOrdinal(c1) == CardOrdinal(c2) - 1)
+        return (void*)0;
+    else
+        return "Cards must go up in rank (Kings on Aces allowed)";
+}
+
+const char* CardCompare_DownSuitWrap(struct Card *const c1, struct Card *const c2)
+{
+    if (CardSuit(c1) != CardSuit(c2))
+        return "Cards must be the same suit";
+    if (CardOrdinal(c1) == 1 && CardOrdinal(c2) == 13)
+        return (void*)0;
+    else if (CardOrdinal(c1) - 1 == CardOrdinal(c2))
+        return (void*)0;
+    else
+        return "Cards must go down in rank (Kings on Aces allowed)";
+}

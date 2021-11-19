@@ -188,34 +188,6 @@ void UndoStackFree(struct Array *stack)
     ArrayFree(stack);
 }
 
-#if 0
-static int CalcPercentComplete(struct Baize *const self)
-{
-    int percent = 0;
-
-    // let Lua have first dibs at this by calling function PercentComplete()
-    if (lua_getglobal(self->L, "PercentComplete") == LUA_TFUNCTION) {  // push Lua function name onto the stack
-        if ( lua_pcall(self->L, 0, 1, 0) != LUA_OK ) {  // no args, one return
-            fprintf(stderr, "ERROR: %s: running Lua function: %s\n", __func__, lua_tostring(self->L, -1));
-            lua_pop(self->L, 1);    // remove error
-        } else {
-            percent = lua_tointeger(self->L, -1);
-        }
-    } else {
-        lua_pop(self->L, 1);    // remove "PercentComplete"
-
-        int sorted = 0, unsorted = 0;
-        size_t index;
-        for ( struct Pile *p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-            p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
-        }
-        percent = (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)self->numberOfCardsInLibrary, (float)self->numberOfCardsInLibrary, 0.0f, 100.0f));
-    }
-
-    return percent;
-}
-#endif
-
 void BaizeUndoPush(struct Baize *const self)
 {
     struct Snapshot* s = SnapshotNew(self);
