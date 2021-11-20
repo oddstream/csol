@@ -24,6 +24,7 @@ static struct PileVtable labelVtable = {
     &PileInertSetRecycles,
     &PileInertCountSortedAndUnsorted,
 
+    &PileReset,
     &PileUpdate,
     &LabelDraw,
     &PileFree,

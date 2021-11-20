@@ -28,6 +28,7 @@ static struct PileVtable stockVtable = {
     &StockSetRecycles,
     &StockCountSortedAndUnsorted,
 
+    &StockReset,
     &PileUpdate,
     &StockDraw,
     &PileFree,
@@ -108,6 +109,14 @@ struct Stock* StockNew(struct Baize *const baize, Vector2 slot, enum FanType fan
         self->recycles = 32767;  // infinite by default
     }
     return self;
+}
+
+void StockReset(struct Pile *const self)
+{
+    struct Baize *baize = PileOwner(self);
+    ArrayReset(self->cards);
+    FillStockFromLibrary(baize, self);
+    ShuffleStock(self);
 }
 
 _Bool StockCanMoveTail(struct Array *const tail)

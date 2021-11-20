@@ -4,6 +4,10 @@
 
 dofile("variants/~Library.lua")
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Penguin_(solitaire)"
+end
+
 function BuildPiles()
 
   if type(AddPile) ~= "function" then
@@ -28,6 +32,9 @@ function BuildPiles()
     pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
   end
 
+end
+
+function StartGame()
   -- Shuffle a 52-card pack and deal the first card face up to the top left of the board.
   -- This card is called the Beak.
   local fnext = 1

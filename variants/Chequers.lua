@@ -20,6 +20,10 @@ end
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
+function Wikipedia()
+    return "https://politaire.com/help/chequers"
+end
+
 function BuildPiles()
 
     AddPile("Stock", -5, -5, FAN_NONE, 2, 4)
@@ -67,16 +71,14 @@ Once on any foundation, cards may not be moved back off.
 
     -- Twenty-five tableau piles of four cards each, splayed downward. All cards are dealt face up.
     for x = 1, 13 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
-        for i = 1, 4 do
-            MoveCard(Stock.Pile, pile)
-        end
+        AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
     end
     for x = 1.5, 12.5 do
-        pile = AddPile("Tableau", x, 5, FAN_DOWN, MOVE_ONE)
-        for i = 1, 4 do
-            MoveCard(Stock.Pile, pile)
-        end
+        AddPile("Tableau", x, 5, FAN_DOWN, MOVE_ONE)
+    end
+
+    if #Tableau.Piles ~= 25 then
+        io.stderr:write("Oops - there are " .. #Tableau.Piles .. " and there should be 25\n")
     end
 
     -- There is one reserve, initially containing four cards.
@@ -84,6 +86,17 @@ Once on any foundation, cards may not be moved back off.
     -- It is not possible to move any cards into the reserve.
     -- The top card of the reserve can be played to the tableau or the foundation.
     AddPile("Reserve", 7, 1, FAN_RIGHT)
+
+end
+
+function StartGame()
+
+    for _, pile in ipairs(Tableau.Piles) do
+        for i = 1, 4 do
+            MoveCard(Stock.Pile, pile)
+        end
+    end
+
     for i = 1, 4 do
         card = MoveCard(Stock.Pile, Reserve.Pile)
         CardProne(card, true)
@@ -93,6 +106,7 @@ Once on any foundation, cards may not be moved back off.
     if not Empty(Stock.Pile) then
         io.stderr:write("Oops - there are still " .. Len(Stock.Pile) .. " cards in the Stock\n")
     end
+
 end
 
 -- TailMoveError constraints (_Tableau only)

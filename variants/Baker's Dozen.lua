@@ -1,12 +1,5 @@
 -- Baker's Dozen
 
---[[
-    Style
-    
-    Lua globals are in UPPER_CASE, and use underscores between words
-    function names are in MixedCase
-]]
-
 dofile("variants/~Library.lua")
 
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
@@ -26,6 +19,10 @@ local function DemoteCards(pile, ord)
             end
         end
     until not hasChanged 
+end
+
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Baker%27s_Dozen_(solitaire)"
 end
 
 function BuildPiles()

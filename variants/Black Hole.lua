@@ -14,16 +14,15 @@ dofile("variants/~Library.lua")
 
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Black_Hole_(solitaire)"
+end
+
 function BuildPiles()
 
-    io.stderr:write("BuildPiles\n")
-
-    -- a stock pile is always created first, and filled with PACKS of shuffled cards
     AddPile("Stock", -5, -5, FAN_NONE, 1, 4)
 
-    pile = AddPile("Foundation", 5, 2.5, FAN_NONE)
-    -- "Put the Ace of spades in the middle of the board as the base or "black hole"."
-    MoveCard(Stock.Pile, Foundation.Pile, 1, 3)
+    AddPile("Foundation", 5, 2.5, FAN_NONE)
     
     local locations = {
         -- David Partlett's screenshot shows the cards in a sort of oval around the black hole
@@ -39,7 +38,16 @@ function BuildPiles()
     end
 
     for _, location in ipairs(locations) do
-        local pile = AddPile("Reserve", location.x, location.y, location.f)
+        AddPile("Reserve", location.x, location.y, location.f)
+    end
+end
+
+function StartGame()
+
+    -- "Put the Ace of spades in the middle of the board as the base or "black hole"."
+    MoveCard(Stock.Pile, Foundation.Pile, 1, 3)
+
+    for _, pile in ipairs(Reserve.Piles) do
         for n = 1, 3 do
             MoveCard(Stock.Pile, pile)
         end
@@ -48,10 +56,6 @@ function BuildPiles()
     if not Empty(Stock.Pile) then
         io.stderr:write("Oops, Stock still contains " .. Len(Stock.Pile) .. " cards \n")
     end
-end
-
-function StartGame()
-    io.stderr:write("StartGame\n")
 end
 
 function Foundation.TailAppendError(pile, tail)

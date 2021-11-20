@@ -60,6 +60,7 @@ struct PileVtable {
     void (*SetLabel)(struct Pile *const self, const char* label);
     void (*SetRecycles)(struct Pile *const self, int r);
     void (*CountSortedAndUnsorted)(struct Pile *const self, int *sorted, int *unsorted);
+    void (*Reset)(struct Pile *const self);
     void (*Update)(struct Pile *const self);
     void (*Draw)(struct Pile *const self);
     void (*Free)(struct Pile *const self);
@@ -115,6 +116,7 @@ void PileGenericSetLabel(struct Pile *const self, const char* label);
 void PileInertSetRecycles(struct Pile *const self, int r);
 void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
+void PileReset(struct Pile *const self);
 void PileUpdate(struct Pile *const self);
 void PileDraw(struct Pile *const self);
 void PileFree(struct Pile *const self);

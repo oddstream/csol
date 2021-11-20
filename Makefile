@@ -70,6 +70,8 @@ OBJECT_FILES = $(patsubst %.c,%.o,$(SOURCE_FILES))
 # $@ filename of target of the rule
 # $< name of the first prerequisite
 
+# prepend /usr/bin/time to $(CC)
+
 $(EXECUTABLE): $(OBJECT_FILES) Makefile
 	$(CC) $(OBJECT_FILES) -o $@ $(LDLIBS) $(LDFLAGS)
 #	mkdir -p $(dir $@)
@@ -80,6 +82,7 @@ $(EXECUTABLE): $(OBJECT_FILES) Makefile
 
 # -c compile and assemble, but do not link
 # -o <file> place the output into <file>
+# prepend /usr/bin/time to $(CC)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDE_PATHS) -c $< -o $@
 

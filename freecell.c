@@ -59,6 +59,12 @@ static int PercentComplete(struct Baize *const baize)
     return 0;
 }
 
+static const char* Wikipedia(struct Baize *const baize)
+{
+    (void)baize;
+    return "https://en.wikipedia.org/wiki/FreeCell";
+}
+
 static struct ExecutionInterface freecellVtable = {
     &BuildPiles,
     &StartGame,
@@ -70,6 +76,7 @@ static struct ExecutionInterface freecellVtable = {
     &TailTapped,
     &PileTapped,
     &PercentComplete,
+    &Wikipedia,
 };
 
 struct ExecutionInterface* GetFreecellInterface(void)

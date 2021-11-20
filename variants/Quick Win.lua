@@ -112,13 +112,14 @@ function BuildPiles()
         local pile = AddPile("Tableau", x, 4, FAN_DOWN, MOVE_ANY)
     end
 
-    PromoteCards(Stock.Pile, 1)
 end
 
 function StartGame()
     io.stderr:write("StartGame\n")
     STOCK_RECYCLES = 3
     StockRecycles(STOCK_RECYCLES)
+
+    PromoteCards(Stock.Pile, 1)
 
     -- MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
 

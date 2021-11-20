@@ -88,5 +88,6 @@ void BaizeFindGameCommand(struct Baize *const self, void* param);
 void BaizeReloadVariantCommand(struct Baize *const self, void* param);
 void BaizeChangeVariantCommand(struct Baize *const self, void* param);
 void BaizeChangePackCommand(struct Baize *const baize, void* param);
+void BaizeWikipediaCommand(struct Baize *const baize, void* param);
 
 #endif

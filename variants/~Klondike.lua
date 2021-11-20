@@ -2,27 +2,36 @@
 
 dofile("variants/~Library.lua")
 
--- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions and piles
+-- C sets variables 'BAIZE', FAN_*, MOVE_* and tables to hold pile functions and piles
 
 STOCK_RECYCLES = 32767
 
-function BuildPiles()
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Klondike_(solitaire)"
+end
 
+function BuildPiles()
     AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
     AddPile("Waste", 2, 1, FAN_RIGHT3)
     
-    local pile
-
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
-    local deal = 1
     for x = 1, 7 do
         pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         PileLabel(pile, U[13])
+    end
+end
 
+function StartGame()
+    STOCK_RECYCLES = 32767
+    StockRecycles(STOCK_RECYCLES)
+
+    local deal = 1
+    for x = 1, 7 do
+        local pile = Tableau.Piles[x]
         for n = 1, deal do
           local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
@@ -30,12 +39,6 @@ function BuildPiles()
         CardProne(Last(pile), false)
         deal = deal + 1
     end
-
-end
-
-function StartGame()
-    STOCK_RECYCLES = 32767
-    StockRecycles(STOCK_RECYCLES)
 end
 
 -- TailMoveError constraints (Tableau only)

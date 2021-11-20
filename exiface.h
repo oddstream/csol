@@ -23,13 +23,12 @@ struct ExecutionInterface {
     void (*PileTapped)(struct Pile *const pile);
 
     int (*PercentComplete)(struct Baize *const baize);
-    // TODO add something to get/set? globals to/from Lua
-    // if using a built-in, then we can get them directly
+
+    const char* (*Wikipedia)(struct Baize *const baize);
 };
 
 struct ExecutionInterface* GetInterface(struct Baize *const baize);
 struct ExecutionInterface* GetMoonInterface(void);
-
 
 struct ExecutionInterface* GetFallbackInterface(void);
 struct ExecutionInterface* GetFreecellInterface(void);

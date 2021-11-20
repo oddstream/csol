@@ -37,6 +37,10 @@ local function PromoteCards(pile, ord)
     until not hasChanged 
 end
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/FreeCell"
+end
+
 function BuildPiles()
 
   if type(AddPile) ~= "function" then
@@ -46,41 +50,45 @@ function BuildPiles()
 
   AddPile("Stock", 5, -5, FAN_NONE, 1, 4)  -- hide the stock off screen
 
-  local pile
-
   for x = 1, 4 do
-    pile = AddPile("Cell", x, 1, FAN_NONE)
+    AddPile("Cell", x, 1, FAN_NONE)
   end
 
   for x = 5, 8 do
-    pile = AddPile("Foundation", x, 1, FAN_NONE)
+    local pile = AddPile("Foundation", x, 1, FAN_NONE)
     PileLabel(pile, U[1])
   end
 
   for x = 1, 4 do
-    pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
-    for n = 1, 7 do
-      MoveCard(Stock.Pile, pile)
-    end
-    if EASY then
-        DemoteCards(pile, 13)
-        PromoteCards(pile, 1)
-    end
+    AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
   end
   for x = 5, 8 do
-    pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
-    for n = 1, 6 do
-      MoveCard(Stock.Pile, pile)
-    end
-    if EASY then
-        DemoteCards(pile, 13)
-        PromoteCards(pile, 1)
-    end
+    AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
   end
 
 end
 
 function StartGame()
+    for x = 1, 4 do
+        pile = Tableau.Piles[x]
+        for n = 1, 7 do
+          MoveCard(Stock.Pile, pile)
+        end
+        if EASY then
+            DemoteCards(pile, 13)
+            PromoteCards(pile, 1)
+        end
+      end
+      for x = 5, 8 do
+        pile = Tableau.Piles[x]
+        for n = 1, 6 do
+          MoveCard(Stock.Pile, pile)
+        end
+        if EASY then
+            DemoteCards(pile, 13)
+            PromoteCards(pile, 1)
+        end
+    end
     if EASY then
         Toast("Kings have been buried and Aces moved to the front")
     end

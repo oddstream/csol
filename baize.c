@@ -227,8 +227,11 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     (void)param;
     // TODO record lost game if this one started
 
-    BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
+    size_t index;
+    for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
+        p->vtable->Reset(p);
+    }
     self->exiface->StartGame(self);
     BaizeUndoPush(self);
 }
@@ -843,5 +846,19 @@ void BaizeChangePackCommand(struct Baize *const baize, void* param)
             baize->pack = pack;
             BaizeLayoutCommand(baize, NULL);
         }
+    }
+}
+
+void BaizeWikipediaCommand(struct Baize *const baize, void* param)
+{
+    (void)param;
+    const char *str = baize->exiface->Wikipedia(baize);
+    CSOL_INFO("Wikipedia '%s'", str ? str : "(null)");
+    if (str) {
+        char buff[512];
+        // sprintf(buff, "xdg-open \"%s\"", str);
+        // https://askubuntu.com/questions/8252/how-to-launch-default-web-browser-from-the-terminal
+        sprintf(buff, "URL=\"%s\"; xdg-open $URL || sensible-browser $URL || x-www-browser $URL || gnome-open $URL", str);
+        system(buff);
     }
 }

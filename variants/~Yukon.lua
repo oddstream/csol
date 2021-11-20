@@ -7,31 +7,39 @@ dofile("variants/~Library.lua")
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Yukon_(solitaire)"
+end
+
 function BuildPiles()
 
     AddPile("Stock", -5, -5, FAN_NONE, 1, 4)
     
     local pile
-    local card
 
     for y = 1, 4 do
         pile = AddPile("Foundation", 8.5, y, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
-    pile = AddPile("Tableau", 1, 1, FAN_DOWN, MOVE_ANY)
-    if not RELAXED then
-        PileLabel(pile, U[13])
-    end
-    card = MoveCard(Stock.Pile, pile)
-
-    local dealDown = 1
-    local dealUp = 5
-    for x = 2, 7 do
+    for x = 1, 7 do
         pile = AddPile("Tableau", x, 1, FAN_DOWN, MOVE_ANY)
         if not RELAXED then
             PileLabel(pile, U[13])
         end
+    end
+end
+
+function StartGame()
+
+    local card
+    local pile = Tableau.Piles[1]
+    MoveCard(Stock.Pile, pile)
+
+    local dealDown = 1
+    local dealUp = 5
+    for x = 2, 7 do
+        pile = Tableau.Piles[x]
         for c = 1, dealDown do
             card = MoveCard(Stock.Pile, pile)
             CardProne(card, true)
@@ -46,9 +54,6 @@ function BuildPiles()
     if not Empty(Stock.Pile) then
         io.stderr:write("Oops! There are still " .. Len(Stock.Pile) .. " cards in the Stock\n")
     end
-end
-
-function StartGame()
     if RELAXED then
         Toast("Relaxed version - any card may be placed in an empty pile")
     end

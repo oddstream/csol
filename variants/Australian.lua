@@ -5,33 +5,37 @@ dofile("variants/~Library.lua")
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
--- SEED=21960
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Australian_Patience"
+end
 
 function BuildPiles()
 
     AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
     AddPile("Waste", 2, 1, FAN_RIGHT3)
     
-    local pile
-
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
-    local deal = 1
     for x = 1, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
+        local pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
         PileLabel(pile, U[13])
-        for n = 1, 4 do
-          local c = MoveCard(Stock.Pile, pile)
-        end
     end
 
 end
 
 function StartGame()
+
     StockRecycles(STOCK_RECYCLES)
+
+    for _, pile in ipairs(Tableau.Piles) do
+        for n = 1, 4 do
+            local c = MoveCard(Stock.Pile, pile)
+          end
+      end
+
 end
 
 -- TailMoveError constraints (Tableau only)

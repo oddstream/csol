@@ -18,21 +18,23 @@ dofile("variants/~Library.lua")
 STOCK_DEAL_CARDS = 1
 STOCK_RECYCLES = 0
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Sir_Tommy"
+end
+
 function BuildPiles()
 
     AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
 
     AddPile("Waste", 2, 1, FAN_RIGHT3)
     
-    local pile
-
     for x = 4, 7 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
     for x = 4, 7 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
+        AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE)
     end
 
 end
@@ -83,7 +85,7 @@ function Foundation.TailAppendError(pile, tail)
 end
 
 function Tableau.TailAppendError(pile, tail)
-    if CardOwner(First(tail)) ~= WASTE then
+    if CardOwner(First(tail)) ~= Waste.Pile then
         return "Cards can only be moved here from the Waste"
     end
     return nil

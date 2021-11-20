@@ -4,10 +4,13 @@ dofile("variants/~Library.lua")
 
 -- C sets variables 'BAIZE', 'STOCK', FAN_*
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Forty_Thieves_(solitaire)"
+end
+
 function BuildPiles()
 
     AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
-
     AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     for x = 5, 12 do
@@ -16,16 +19,18 @@ function BuildPiles()
     end
 
     for x = 1, 12 do
-        local pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
-        for n = 1, 3 do
-            MoveCard(Stock.Pile, pile)
-        end
+        AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ONE_PLUS)
     end
 
 end
 
 function StartGame()
     StockRecycles(0)
+    for _, pile in ipairs(Tableau.Piles) do
+        for n = 1, 3 do
+            MoveCard(Stock.Pile, pile)
+        end
+    end
 end
 
 -- TailMoveError constraints (Tableau only)

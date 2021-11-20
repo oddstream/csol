@@ -158,6 +158,12 @@ static int PercentComplete(struct Baize *const baize)
     return percent;
 }
 
+static const char* Wikipedia(struct Baize *const baize)
+{
+    (void)baize;
+    return "https://en.wikipedia.org/wiki/Solitaire";
+}
+
 static struct ExecutionInterface fallbackVtable = {
     &BuildPiles,
     &StartGame,
@@ -169,6 +175,7 @@ static struct ExecutionInterface fallbackVtable = {
     &TailTapped,
     &PileTapped,
     &PercentComplete,
+    &Wikipedia,
 };
 
 struct ExecutionInterface* GetFallbackInterface(void)

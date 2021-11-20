@@ -7,6 +7,10 @@ dofile("variants/~Library.lua")
 -- https://www.parlettgames.uk/patience/gaygordons.html
 -- https://en.wikipedia.org/wiki/Gay_Gordons_(solitaire)
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Gay_Gordons_(solitaire)"
+end
+
 function BuildPiles()
 
     AddPile("Stock", 6, -5, FAN_NONE, 1, 4)    -- hidden
@@ -16,17 +20,25 @@ function BuildPiles()
     -- and is so unlikely to proceed that it's not really a game
     -- so we use the ten piles of five cards each described in the Wikipedia page
     for x = 1, 10 do
-        local pile = AddPile("Tableau", x, 1, FAN_DOWN)
-        for n = 1, 5 do
-            MoveCard(Stock.Pile, pile)
-        end
+        AddPile("Tableau", x, 1, FAN_DOWN)
     end
 
     AddPile("Foundation", 12, 1, FAN_NONE)
 
     AddPile("Reserve", 12, 2, FAN_DOWN)
+
+end
+
+function StartGame()
+
     MoveCard(Stock.Pile, Reserve.Pile)
     MoveCard(Stock.Pile, Reserve.Pile)
+
+    for _, pile in ipairs(Tableau.Piles) do
+        for n = 1, 5 do
+            MoveCard(Stock.Pile, pile)
+        end
+    end
 
     -- "If any of the resultant ten columns contains exactly three Jacks,
     -- exchange the middle one for the upper card of the reserve."
@@ -47,9 +59,6 @@ function BuildPiles()
         end
     end
 
-end
-
-function StartGame()
     LAST_PILE_COUPLED = nil
 end
 

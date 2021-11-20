@@ -25,6 +25,7 @@ static struct PileVtable foundationVtable = {
     &PileInertSetRecycles,
     &FoundationCountSortedAndUnsorted,
 
+    &PileReset,
     &PileUpdate,
     &PileDraw,
     &PileFree,

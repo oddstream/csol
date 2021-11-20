@@ -7,19 +7,28 @@
 
 dofile("variants/~Library.lua")
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Amazons_(solitaire)"
+end
+
 function BuildPiles()
 
     AddPile("Stock", 6, 1, FAN_NONE, 1, 4, {2,3,4,5,6,13})
 
-    local pile
-
     for x = 1, 4 do
-        pile = AddPile("Foundation", x, 1, FAN_NONE)
+        local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
     end
 
     for x = 1, 4 do
-        pile = AddPile("Reserve", x, 2, FAN_DOWN)
+        AddPile("Reserve", x, 2, FAN_DOWN)
+    end
+
+end
+
+function StartGame()
+
+    for _, pile in ipairs(Reserve.Piles) do
         MoveCard(Stock.Pile, pile)
     end
 

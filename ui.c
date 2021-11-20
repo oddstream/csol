@@ -141,6 +141,11 @@ struct UI* UiNew(void)
                 TextWidgetSetText(tw, "Goto bookmark");
                 self->navDrawer->super.super.widgets = ArrayPush(self->navDrawer->super.super.widgets, tw);
             }
+            tw = TextWidgetNew((struct Container*)self->navDrawer, INFO, &fontRobotoMedium24, 24.0f, -1, BaizeWikipediaCommand, NULL);
+            if ( tw ) {
+                TextWidgetSetText(tw, "Wikipedia...");
+                self->navDrawer->super.super.widgets = ArrayPush(self->navDrawer->super.super.widgets, tw);
+            }
 
             self->containers = ArrayPush(self->containers, self->navDrawer);
         }

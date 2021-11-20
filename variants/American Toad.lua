@@ -17,34 +17,42 @@ dofile("variants/~Library.lua")
 
 STOCK_DEAL_CARDS = 1
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/American_Toad_(solitaire)"
+end
+
 function BuildPiles()
 
     AddPile("Stock", 1, 1, FAN_NONE, 2, 4)
     AddPile("Waste", 2, 1, FAN_RIGHT3)
 
-    local pile
-
-    pile = AddPile("Reserve", 4, 1, FAN_RIGHT)
-    for n = 1, 20 do
-        local c = MoveCard(Stock.Pile, pile)
-        CardProne(c, true)
-    end
-    CardProne(Last(pile), false)
+    AddPile("Reserve", 4, 1, FAN_RIGHT)
     
     for x = 1, 8 do
-        pile = AddPile("Foundation", x, 2, FAN_NONE)
+        AddPile("Foundation", x, 2, FAN_NONE)
     end
 
     for x = 1, 8 do
-        pile = AddPile("Tableau", x, 3, FAN_DOWN, MOVE_ONE_OR_ALL)
-        MoveCard(Stock.Pile, pile)
+        AddPile("Tableau", x, 3, FAN_DOWN, MOVE_ONE_OR_ALL)
     end
 
 end
 
 function StartGame()
+
     STOCK_RECYCLES = 1
     StockRecycles(STOCK_RECYCLES)
+
+    local pile = Reserve.Pile
+    for n = 1, 20 do
+        local c = MoveCard(Stock.Pile, pile)
+        CardProne(c, true)
+    end
+    CardProne(Last(pile), false)
+
+    for _, pile in ipairs(Tableau.Piles) do
+        MoveCard(Stock.Pile, pile)
+    end
 
     MoveCard(Stock.Pile, Foundation.Piles[1])
     local c = First(Foundation.Piles[1])

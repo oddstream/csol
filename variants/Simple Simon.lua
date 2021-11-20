@@ -1,30 +1,36 @@
 -- Simple Simon
 
---[[
-    https://en.wikipedia.org/wiki/Simple_Simon_(solitaire)
-]]
-
 dofile("variants/~Library.lua")
+
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Simple_Simon_(solitaire)"
+end
 
 function BuildPiles()
 
     AddPile("Stock", -5, -5, FAN_NONE, 1, 4)    -- hidden off screen
     
-    local pile
-
     for x = 4, 7 do
-        pile = AddPile("Discard", x, 1, FAN_NONE)
+        AddPile("Discard", x, 1, FAN_NONE)
     end
 
+    for x = 1, 10 do
+        AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
+    end
+
+end
+
+function StartGame()
+
     for x = 1, 3 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
+        local pile = Tableau.Piles[x]
         for n = 1, 8 do
             MoveCard(Stock.Pile, pile)
         end
     end
     local deal = 7
     for x = 4, 10 do
-        pile = AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
+        local pile = Tableau.Piles[x]
         for n = 1, deal do
           local c = MoveCard(Stock.Pile, pile)
         end
@@ -35,9 +41,6 @@ function BuildPiles()
         io.stdout:write("Oops, there are " .. Len(Stock.Pile) .. " cards still in the Stock\n")
     end
 end
-
--- function StartGame()
--- end
 
 -- TailMoveError constraints (Tableau only)
 

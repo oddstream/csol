@@ -1,7 +1,6 @@
 -- Duchess
 
 --[[
-    https://en.wikipedia.org/wiki/Duchess_(solitaire)
     Duchess (also Dutchess) is a patience or solitaire card game which uses a deck of 52 playing cards.
     It has all four typical features of a traditional solitaire game: a tableau, a reserve, a stock and a waste pile, and is quite easy to win.
     It is closely related to Canfield.
@@ -11,6 +10,10 @@ dofile("variants/~Library.lua")
 
 STOCK_DEAL_CARDS = 1
 
+function Wikipedia()
+    return "https://en.wikipedia.org/wiki/Duchess_(solitaire)"
+end
+
 function BuildPiles()
 
     AddPile("Stock", 2, 2, FAN_NONE, 1, 4)
@@ -18,10 +21,7 @@ function BuildPiles()
     local pile
 
     for i = 1, 4 do
-        pile = AddPile("Reserve", (i*2), 1, FAN_RIGHT3)
-        for j = 1, 3 do
-            MoveCard(Stock.Pile, pile)
-        end
+        AddPile("Reserve", (i*2), 1, FAN_RIGHT3)
     end
 
     AddPile("Waste", 2, 3, FAN_DOWN3)
@@ -31,8 +31,7 @@ function BuildPiles()
     end
 
     for x = 4, 7 do
-        pile = AddPile("Tableau", x, 3, FAN_DOWN, MOVE_ANY)
-        MoveCard(Stock.Pile, pile)
+        AddPile("Tableau", x, 3, FAN_DOWN, MOVE_ANY)
     end
 
 end
@@ -42,6 +41,14 @@ function StartGame()
     StockRecycles(STOCK_RECYCLES)
     for _, pile in ipairs(Foundation.Piles) do
         PileLabel(pile, "")
+    end
+    for _, pile in ipairs(Reserve.Piles) do
+        MoveCard(Stock.Pile, pile)
+        MoveCard(Stock.Pile, pile)
+        MoveCard(Stock.Pile, pile)
+    end
+    for _, pile in ipairs(Tableau.Piles) do
+        MoveCard(Stock.Pile, pile)
     end
     Toast("Choose a Reserve card and move it to a Foundation")
 end

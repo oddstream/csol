@@ -226,6 +226,22 @@ static int PercentComplete(struct Baize *const baize)
     return percent;
 }
 
+static const char* Wikipedia(struct Baize *const baize)
+{
+    const char *str = (void*)0;
+
+    if (lua_getglobal(baize->L, "Wikipedia") == LUA_TFUNCTION) {  // push Lua function name onto the stack
+        if ( lua_pcall(baize->L, 0, 1, 0) != LUA_OK ) {  // no args, one return
+            CSOL_ERROR("running Lua function: %s\n", lua_tostring(baize->L, -1));
+            lua_pop(baize->L, 1);    // remove error
+        } else {
+            str = lua_tostring(baize->L, -1);
+        }
+    }
+
+    return str;
+}
+
 static struct ExecutionInterface moonGameVtable = {
     &BuildPiles,
     &StartGame,
@@ -237,6 +253,7 @@ static struct ExecutionInterface moonGameVtable = {
     &TailTapped,
     &PileTapped,
     &PercentComplete,
+    &Wikipedia,
 };
 
 // get the interface to run a variant through a Lua script

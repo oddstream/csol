@@ -23,6 +23,7 @@ static struct PileVtable cellVtable = {
     &PileInertSetRecycles,
     &CellCountSortedAndUnsorted,
 
+    &PileReset,
     &PileUpdate,
     &PileDraw,
     &PileFree,

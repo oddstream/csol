@@ -25,6 +25,7 @@ static struct PileVtable tableauVtable = {
     &PileInertSetRecycles,
     &TableauCountSortedAndUnsorted,
 
+    &PileReset,
     &PileUpdate,
     &PileDraw,
     &PileFree,

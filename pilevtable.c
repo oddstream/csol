@@ -136,6 +136,11 @@ void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *
     (void)unsorted;
 }
 
+void PileReset(struct Pile *const self)
+{
+    ArrayReset(self->cards);
+}
+
 void PileUpdate(struct Pile *const self)
 {
     ArrayForeach(self->cards, (ArrayIterFunc)CardUpdate);
