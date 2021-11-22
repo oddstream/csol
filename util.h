@@ -4,6 +4,9 @@
 #define UTIL_H
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
 
 #include <raylib.h>
 
@@ -29,5 +32,7 @@ _Bool UtilRectangleWithinRectangle(Rectangle inner, Rectangle outer);
 Vector2 UtilCenterTextInRectangle(Rectangle r, float width, float height);
 
 Vector2 UtilVector2Add(Vector2 a, Vector2 b);
+
+char* UtilStrDup(const char *s);
 
 #endif

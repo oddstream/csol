@@ -160,7 +160,7 @@ void PileDraw(struct Pile *const self)
 
     PileDrawCenteredText(self, self->label);
 
-#if _DEBUG
+#ifdef _DEBUG
     // ScrunchDrawDebug(self);
 #endif
 }

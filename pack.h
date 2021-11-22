@@ -10,7 +10,6 @@
 struct Pack {
     char *name;
     char *description;
-    _Bool fixed;    // fixed or scalable?
     float roundness;
     float width, height;
 

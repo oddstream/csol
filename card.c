@@ -255,6 +255,65 @@ void CardUpdate(struct Card *const self)
     }
 }
 
+static void DrawUnicodeCard(struct Card *const self, struct Pack *const pack, _Bool showFace)
+{
+    int glyph;
+    Color cardColor;
+    if (showFace) {
+        glyph = cardCodePoints[self->frame];
+        cardColor = pack->numberOfColors == 4 ? fourColors[self->id.suit] : twoColors[self->id.suit];
+    } else {
+        glyph = 0x1F0A0;
+        cardColor = (Color){70,130,180,0xff};   // SteelBlue
+    }
+    GlyphInfo gi = GetGlyphInfo(pack->unicodeFont, glyph);
+    Rectangle gr = GetGlyphAtlasRec(pack->unicodeFont, glyph);
+    Rectangle rc = CardScreenRect(self);
+    
+    // Rectangle rc2 = rc;
+    // rc2.width *= self->flipWidth;
+    // rc2.x += (rc.width - rc2.width) / 2.0f;
+    DrawRectangleRounded(rc, pack->roundness, 9, (Color){0xf5,0xf5,0xf5,0xff});   // Whitesmoke
+
+    rc.x -= gi.offsetX;
+    rc.y -= gi.offsetY;
+
+    Vector2 cpos = UtilCenterTextInRectangle(rc, gr.width, gr.height);
+    DrawTextCodepoint(pack->unicodeFont, glyph, cpos, pack->width * pack->unicodeFontExpansion, cardColor);
+}
+
+static void DrawScaledCard(struct Card *const self, struct Pack *const pack, _Bool showFace)
+{
+    static int suitSymbol[4] = {
+        0x2663, /* black club */
+        0x2666, /* black diamond */
+        0x2665, /* black heart */
+        0x2660, /* black spade */
+    };
+
+    Rectangle rc = CardScreenRect(self);
+    if (showFace) {
+        DrawRectangleRounded(rc, pack->roundness, 9, (Color){245,245,245,255});   // Whitesmoke
+        DrawRectangleRoundedLines(rc, pack->roundness, 9, 2.0f, (Color){192,192,192,255}); // Silver
+        DrawTextEx(pack->pileFont,
+            UtilOrdToShortString(CardOrdinal(self)),
+            (Vector2){10.0f + rc.x, rc.y},
+            rc.height / 2.0f,
+            1.0f,
+            twoColors[CardSuit(self)]
+        );
+        DrawTextCodepoint(pack->symbolFont,
+            suitSymbol[CardSuit(self)],
+            (Vector2){rc.x + rc.width / 2.0f, rc.y},
+            rc.height / 2.0f,
+            twoColors[CardSuit(self)]
+        );
+    } else {
+        DrawRectangleRounded(rc, pack->roundness, 9, (Color){100,149,237,255});   // CornflowerBlue
+        DrawRectangleRoundedLines(rc, pack->roundness, 9, 2.0f, (Color){192,192,192,255}); // Silver
+    }
+}
+
 void CardDraw(struct Card *const self)
 {
     // BeginDrawing() has been called by BaizeDraw()
@@ -310,36 +369,35 @@ void CardDraw(struct Card *const self)
         tried angling the card if it was dragging or transitioning,
         but it brought out the jaggies and looked a bit gimmicky
     */
-    if (!pack->unicodeFont.baseSize) {
+
+    /*
+        would like to draw scaled cards into a spritesheet Image,
+        and then load that spritesheet into a Texture with LoadTextureFromImage(),
+        which is all possible (and has been prototyped)
+        BUT
+        raylib has no way to draw rounded rectangles into an Image
+        (and I can't be arsed to write my own at the moment)
+        and raylib has no way to draw a codepoint glyph into an Image
+        (so there'll be no scalable suit symbols)
+        SO
+        drawed scaled cards dynamically, in a low huff.
+        can see the frame rate hit when running under valgrind
+        (as you can when drawing unicode cards)
+        AND
+        because they are drawn with text things and no spritesheet
+        they can't be flipped
+    */
+
+    if ((pack->ssFace != NULL) & (pack->ssBack != NULL)) {
         if (showFace) {
             SpritesheetDraw(pack->ssFace, self->frame, self->flipWidth, 0.0f, r);
         } else {
             SpritesheetDraw(pack->ssBack, pack->backFrame, self->flipWidth, 0.0f, r);
         }
+    } else if (pack->unicodeFont.baseSize) {
+        DrawUnicodeCard(self, pack, showFace);
     } else {
-        int glyph;
-        Color cardColor;
-        if (showFace) {
-            glyph = cardCodePoints[self->frame];
-            cardColor = pack->numberOfColors == 4 ? fourColors[self->id.suit] : twoColors[self->id.suit];
-        } else {
-            glyph = 0x1F0A0;
-            cardColor = (Color){70,130,180,0xff};   // SteelBlue
-        }
-        GlyphInfo gi = GetGlyphInfo(pack->unicodeFont, glyph);
-        Rectangle gr = GetGlyphAtlasRec(pack->unicodeFont, glyph);
-        Rectangle rc = CardScreenRect(self);
-        
-        // Rectangle rc2 = rc;
-        // rc2.width *= self->flipWidth;
-        // rc2.x += (rc.width - rc2.width) / 2.0f;
-        DrawRectangleRounded(rc, pack->roundness, 9, (Color){0xf5,0xf5,0xf5,0xff});   // Whitesmoke
-
-        rc.x -= gi.offsetX;
-        rc.y -= gi.offsetY;
-    
-        Vector2 cpos = UtilCenterTextInRectangle(rc, gr.width, gr.height);
-        DrawTextCodepoint(pack->unicodeFont, glyph, cpos, pack->width * pack->unicodeFontExpansion, cardColor);
+        DrawScaledCard(self, pack, showFace);
     }
 }
 

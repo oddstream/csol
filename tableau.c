@@ -151,12 +151,15 @@ _Bool TableauComplete(struct Pile *const self)
         (number of discard piles is packs * suits)
         and this pile contains 13 (ish) conformant cards K .. A
     */
+    if (PileEmpty(self)) {
+        return 1;
+    }
     struct Baize *baize = PileOwner(self);
     int ndiscards = BaizeCountPiles(baize, "Discard");
     if (ndiscards) {
-        return PileLen(self) == baize->numberOfCardsInLibrary / ndiscards && IsPileConformant(self);
+        return (PileLen(self) == baize->numberOfCardsInLibrary / ndiscards) && IsPileConformant(self);
     }
-    return PileEmpty(self);
+    return 0;
 }
 
 _Bool TableauConformant(struct Pile *const self)

@@ -48,9 +48,8 @@ _Bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail)
 
 _Bool IsPileConformant(struct Pile *const pile)
 {
-    if (!PileValid(pile)) {
-        CSOL_ERROR("%s", "invalid pile");
-        return 0;
+    if (PileEmpty(pile)) {
+        return 1;
     }
 
     struct Baize *const baize = PileOwner(pile);

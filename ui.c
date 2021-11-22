@@ -50,12 +50,22 @@ static void qsortfiles(char** files, int count) {
 }
 #endif
 
+struct Spritesheet *ssIcons;
+
+Font fontRobotoMedium24 = {0};
+Font fontRobotoRegular14 = {0};
+
 struct UI* UiNew(void)
 {
     extern Font fontRobotoRegular14, fontRobotoMedium24;
 
     struct UI *self = calloc(1, sizeof(struct UI));
     if ( self ) {
+        fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
+        fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
+        // https://draeton.github.io/stitches/
+        ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
+
         self->containers = ArrayNew(8);
 
         self->titleBar = TitleBarNew();
@@ -166,7 +176,7 @@ struct UI* UiNew(void)
                         if (vname[0] == '~') {
                             continue;
                         }
-                        struct TextWidget *tw = TextWidgetNew((struct Container*)self->variantDrawer, NONE, &fontRobotoMedium24, 24.0f, -1, BaizeChangeVariantCommand, strdup(vname));
+                        struct TextWidget *tw = TextWidgetNew((struct Container*)self->variantDrawer, NONE, &fontRobotoMedium24, 24.0f, -1, BaizeChangeVariantCommand, UtilStrDup(vname));
                         if ( tw ) {
                             TextWidgetSetText(tw, GetFileNameWithoutExt(files[i]));
                             self->variantDrawer->super.super.widgets = ArrayPush(self->variantDrawer->super.super.widgets, tw);
@@ -341,7 +351,7 @@ void UiDraw(struct UI *const self)
 
 void UiFree(struct UI *const self)
 {
-    if ( self ) {
+    if (self) {
         size_t index;
         for ( struct Container *con = ArrayFirst(self->containers, &index); con; con = ArrayNext(self->containers, &index) ) {
             con->vtable->Free(con);
@@ -350,4 +360,8 @@ void UiFree(struct UI *const self)
         ToastManagerFree(self->toastManager);
         free(self);
     }
+
+    SpritesheetFree(ssIcons);
+    if (fontRobotoMedium24.baseSize)    UnloadFont(fontRobotoMedium24);
+    if (fontRobotoRegular14.baseSize)   UnloadFont(fontRobotoRegular14);
 }

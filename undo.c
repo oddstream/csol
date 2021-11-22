@@ -501,7 +501,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                 /*
                     <label> <count>: <cards>
                 */
-                char label[MAX_PILE_LABEL+1];
+                char label[256];
                 size_t cards;
 
                 if (fscanf(f, "%s %lu:", label, &cards) != 2) {
@@ -513,7 +513,11 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                 if (!sca) {
                     goto fclose_label;
                 }
-                strncpy(sca->label, label, MAX_PILE_LABEL);
+                if (strlen(label)>MAX_PILE_LABEL) {
+                    sca->label[0] = '\0';
+                } else {
+                    strcpy(sca->label, label);
+                }
                 for (size_t card=0; card<cards; card++) {
                     int index, prone;
                     unsigned int number;
@@ -534,7 +538,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
         remove(fname);
     }
 
-#if _DEBUG
+#ifdef _DEBUG
     fprintf(stdout, "INFO: %s: state loaded from %s for '%s'\n", __func__, fname, variantName);
     if (undoStack)
         fprintf(stdout, "INFO: %s: returning undo stack of length %lu\n", __func__, ArrayLen(undoStack));

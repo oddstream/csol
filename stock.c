@@ -77,7 +77,8 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
         // and we aren't fanning
         // PilePushCard(stock, &baize->cardLibrary[i]);
         struct Card *c = &baize->cardLibrary[i];
-        // cards are created face down
+        // cards are created face down, but may be face up when recalled with StockReset
+        c->prone = 1;
         c->owner = stock;
         c->pos = stock->pos;
         stock->cards = ArrayPush(stock->cards, c);
@@ -86,6 +87,10 @@ static void FillStockFromLibrary(struct Baize *const baize, struct Pile *const s
 
 static void ShuffleStock(struct Pile *const stock)
 {
+    extern int flag_noshuf;
+
+    if (flag_noshuf) return;
+
     srand(time(NULL) & 0xFFFF);
     // Knuth-Fisher–Yates shuffle
     size_t n = ArrayLen(stock->cards);

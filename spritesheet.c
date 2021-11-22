@@ -43,6 +43,20 @@ struct Spritesheet* SpritesheetNew(const char * fname, float x, float y, int fra
     return self;
 }
 
+struct Spritesheet* SpritesheetNewImage(Image img, float x, float y, int framesWide)
+{
+    struct Spritesheet* self = calloc(1, sizeof(struct Spritesheet));
+    if ( !self ) {
+        return NULL;
+    }
+    self->texture = LoadTextureFromImage(img);
+    self->coords = NULL;
+    self->frameSize.x = x;
+    self->frameSize.y = y;
+    self->framesWide = framesWide;
+    return self;
+}
+
 struct Spritesheet* SpritesheetNewInfo(const char* fname, float x, float y, Vector2 *coords)
 {
     struct Spritesheet* self = calloc(1, sizeof(struct Spritesheet));

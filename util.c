@@ -1,8 +1,5 @@
 /* util.c */
 
-#include <math.h>
-#include <raylib.h>
-
 #include "util.h"
 
 // Formula is the square root of (x2 - x1)^2 + (y2 - y1)^2
@@ -135,4 +132,16 @@ Vector2 UtilCenterTextInRectangle(Rectangle r, float width, float height)
 Vector2 UtilVector2Add(Vector2 a, Vector2 b)
 {
     return (Vector2){.x = a.x + b.x, .y = a.y + b.y};
+}
+
+char* UtilStrDup(const char *s)
+{
+    if (!s) {
+        return (char*)0;
+    }
+    char *d = malloc(strlen(s)+1);
+    if (d) {
+        strcpy(d, s);
+    }
+    return d;
 }

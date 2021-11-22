@@ -4,6 +4,7 @@
 
 #include "pack.h"
 #include "trace.h"
+#include "util.h"
 
 static struct Vector2 retroFaceMap[52] = {
     // Club
@@ -80,7 +81,6 @@ static struct Vector2 retroBackMap[13] = {
     {.x = 405, .y = 140},   // Shell
 };
 
-#if 0
 static struct Vector2 kenneyFaceMap[52] = {
     // Club
     {.x=560, .y=570},  // Ace
@@ -161,7 +161,6 @@ static struct Vector2 kenneyBackMap[15] = {
     {.x=140, .y=760},
     {.x=280, .y=760},
 };
-#endif
 
 static struct Vector2 kenney96FaceMap[52] = {
     // Club
@@ -409,7 +408,6 @@ static struct Pack Packs[] = {
     */
     {
         .name = "retro",
-        .fixed = 1,
         .width = 71.0f,
         .height = 96.0f,
         .roundness = 0.05f,
@@ -422,7 +420,6 @@ static struct Pack Packs[] = {
     },
     {
         .name = "large",
-        .fixed = 1,
         .width = 140.0f,
         .height = 190.0f,
         .roundness = 0.05f,
@@ -435,7 +432,6 @@ static struct Pack Packs[] = {
     },
     {
         .name = "medium",
-        .fixed = 1,
         .width = 94.0f,
         .height = 127.0f,
         .roundness = 0.05f,
@@ -448,7 +444,6 @@ static struct Pack Packs[] = {
     },
     {
         .name = "small",
-        .fixed = 1,
         .width = 71.0f,
         .height = 95.0f,
         .roundness = 0.05f,
@@ -459,10 +454,8 @@ static struct Pack Packs[] = {
         .ssFaceFname = "assets/playingCards48.png",
         .ssBackFname = "assets/playingCardBacks48.png",
     },
-#if 0
     {
-        .name = "kenney",
-        .fixed = 1,
+        .name = "default",
         .width = 140.0f,
         .height = 190.0f,
         .roundness = 0.05f, 
@@ -473,10 +466,8 @@ static struct Pack Packs[] = {
         .ssFaceFname = "assets/playingCards.png",
         .ssBackFname = "assets/playingCardBacks.png",
     },
-#endif
     {
         .name = "unicode",
-        .fixed = 0,
         .width = 93.0f,
         .height = 127.0f,
         .roundness = 0.25f,
@@ -487,7 +478,6 @@ static struct Pack Packs[] = {
     },
     {
         .name = "fourcolor",
-        .fixed = 0,
         .width = 93.0f,
         .height = 127.0f,
         .roundness = 0.25f,
@@ -495,8 +485,53 @@ static struct Pack Packs[] = {
         .unicodeFontFname = "assets/DejaVuSans.ttf",
         .unicodeFontExpansion = 1.3f,
         .numberOfColors = 4,
+    },
+    {
+        .name = "scaled",
+        .width = 100.0f,
+        .height = 140.0f,
+        .roundness = 0.05f,
+        .backMapEntries = 1,
+        .backFrame = 0,
     }
 };
+
+#if 0
+static Image GenerateFaceSpritesheet(int cardWidth, int cardHeight, Font ordinalFont, Font suitFont)
+{
+    (void)suitFont;
+
+    Image img = GenImageColor(cardWidth * 13, cardHeight * 4, (Color){255,255,255,0});
+    for ( int x=0; x<13; x++ ) {
+        for ( int y=0; y<4; y++ ) {
+            Color col = (y==0 || y==3) ? BLACK : (Color){0xB2,0x22,0x22,0xff};
+            ImageDrawRectangle(&img, x * cardWidth, y * cardHeight, cardWidth, cardHeight, WHITE);
+            ImageDrawTextEx(&img,
+                ordinalFont,
+                UtilOrdToShortString(x+1),
+                (Vector2){x * cardWidth + 10, y * cardHeight + 2},
+                ((float)cardWidth)/5.0f,
+                1.2f,
+                col);
+            ImageDrawTextEx(&img,
+                ordinalFont,
+                UtilSuitToShortString(y),
+                (Vector2){x * cardWidth + (cardWidth/2), y * cardHeight + 2},
+                ((float)cardWidth)/5.0f,
+                1.2f,
+                col);
+        }
+    }
+    return img; // how is this freed?
+}
+
+static Image GenerateBackSpritesheet(int cardWidth, int cardHeight)
+{
+    Image img = GenImageColor(cardWidth * 13, cardHeight * 4, (Color){255,255,255,0});
+    ImageDrawRectangle(&img, 0, 0, cardWidth, cardHeight, (Color){100,149,237,255});
+    return img; // how is this freed?
+}
+#endif
 
 struct Pack *PackCtor(const char *name)
 {
@@ -515,6 +550,20 @@ struct Pack *PackCtor(const char *name)
     }
 
     flag_nodraw = 1;
+
+    self->pileFont = LoadFontEx("assets/RobotoSlab-Bold.ttf", self->height / 2.0f, 0, 0);
+    self->pileFontSize = self->height / 2.0f;
+    self->labelFontSize = self->height / 6.0f;
+
+    // https://graphemica.com/search?q=home
+    int symbolFontCodePoints[5] = {
+        0x2663, /* black club */
+        0x2666, /* black diamond */
+        0x2665, /* black heart */
+        0x2660, /* black spade */
+        0x267b, /* recycle */ 
+    };
+    self->symbolFont = LoadFontEx("assets/DejaVuSans.ttf", self->pileFontSize, symbolFontCodePoints, 5);
 
     if (self->ssFaceFname) {
         if (self->ssFaceMap) {
@@ -545,20 +594,6 @@ struct Pack *PackCtor(const char *name)
             *p++ = i;
         self->unicodeFont = LoadFontEx(self->unicodeFontFname, self->width * self->unicodeFontExpansion, cardFontCodePoints, 1+14*4);
     }
-
-    self->pileFont = LoadFontEx("assets/RobotoSlab-Bold.ttf", self->height / 2.0f, 0, 0);
-    self->pileFontSize = self->height / 2.0f;
-    self->labelFontSize = self->height / 6.0f;
-
-    // https://graphemica.com/search?q=home
-    int symbolFontCodePoints[5] = {
-        0x2663, /* black club */
-        0x2666, /* black diamond */
-        0x2665, /* black heart */
-        0x2660, /* black spade */
-        0x267b, /* recycle */ 
-    };
-    self->symbolFont = LoadFontEx("assets/DejaVuSans.ttf", self->pileFontSize, symbolFontCodePoints, 5);
 
     flag_nodraw = 0;
 

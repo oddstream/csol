@@ -10,17 +10,12 @@
 #include "baize.h"
 #include "command.h"
 #include "spritesheet.h"
-#include "settings.h"
+#include "trace.h"
 #include "undo.h"
-
-struct Spritesheet *ssIcons;
 
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
 Color baizeColor, baizeHighlightColor, uiBackgroundColor, uiTextColor;
-
-Font fontRobotoMedium24 = {0};
-Font fontRobotoRegular14 = {0};
 
 float fontSpacing = 1.2f;
 
@@ -28,6 +23,7 @@ int flag_nolerp = 0;
 int flag_noflip = 0;
 int flag_noload = 0;
 int flag_nosave = 0;
+int flag_noshuf = 0;
 int flag_nodraw = 0;
 
 // int main(void) 
@@ -35,9 +31,9 @@ int main(int argc, char* argv[], char* envp[])
 {
     (void)envp;
 
-#if _DEBUG
+#ifdef _DEBUG
     for ( int i=0; i<argc; i++ ) {
-        fprintf(stdout, "%d. %s\n", i, argv[i]);
+        CSOL_INFO("%d. %s\n", i, argv[i]);
     }
 #endif
 
@@ -58,6 +54,8 @@ int main(int argc, char* argv[], char* envp[])
             {"nosave",  no_argument,        &flag_nosave,       1},
             {"nolerp",  no_argument,        &flag_nolerp,       1},
             {"noflip",  no_argument,        &flag_noflip,       1},
+            {"noshuf",  no_argument,        &flag_noshuf,       1},
+            {"nodraw",  no_argument,        &flag_nodraw,       1},
             {NULL,      0,                  NULL,               0},
         };
 
@@ -72,7 +70,7 @@ int main(int argc, char* argv[], char* envp[])
         case 0:
             if (long_options[option_index].flag != 0)
                 break;
-            fprintf(stdout, "INFO: %s: long option '%s' arg '%s'\n", __func__, long_options[option_index].name, optarg ? optarg : "null");
+            CSOL_INFO("long option '%s' arg '%s'\n", long_options[option_index].name, optarg ? optarg : "null");
 #if 0
                 if (!optarg)
                     break;
@@ -126,18 +124,20 @@ int main(int argc, char* argv[], char* envp[])
             // fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
             break;
         default:
-            fprintf(stdout, "WARNING: %s: unhandled option %d\n", __func__, c);
+            CSOL_WARNING("unhandled option %d\n", c);
             exit(1);
             break;
         }
      }
 
+#ifdef _DEBUG
      if (optind < argc) {
          printf("Non option arguments: ");
         while (optind < argc)
             printf("%s ", argv[optind++]);
         printf("\n");
      }
+#endif
 
 #if 0
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
@@ -173,6 +173,7 @@ int main(int argc, char* argv[], char* envp[])
 
     InitWindow(640*2, 480*2, "Oddstream Solitaire");
 
+#ifdef PLATFORM_DESKTOP
     if (windowWidth == 0 || windowHeight == 0) {
         windowWidth = GetMonitorWidth(GetCurrentMonitor()) * 2 / 3;
         windowHeight = GetMonitorHeight(GetCurrentMonitor()) * 2 / 3;
@@ -183,17 +184,12 @@ int main(int argc, char* argv[], char* envp[])
         SetWindowIcon(img);
         UnloadImage(img);
     }
-
     SetWindowState(FLAG_WINDOW_RESIZABLE);
+#endif
+
     SetTargetFPS(60);
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
-
-    // TODO move these to UI
-    fontRobotoMedium24 = LoadFontEx("assets/Roboto-Medium.ttf", 24, 0, 0);
-    fontRobotoRegular14 = LoadFontEx("assets/Roboto-Regular.ttf", 14, 0, 0);
-    // https://draeton.github.io/stitches/
-    ssIcons = SpritesheetNew("assets/icons.png", 36, 36, 5);
 
 #if 0
     {
@@ -205,7 +201,7 @@ int main(int argc, char* argv[], char* envp[])
     struct Array *loadedUndoStack = LoadUndoFromFile(variantName);
     if (loadedUndoStack) {
         if (variantName[0] == '\0') {
-            fprintf(stderr, "ERROR: %s: variantName not set\n", __func__);
+            CSOL_ERROR("%s", "variantName not set");
         }
         // that's fine
     } else {
@@ -213,7 +209,7 @@ int main(int argc, char* argv[], char* envp[])
         if (variantName[0] == '\0') {
             strcpy(variantName, "Klondike");
         }
-        fprintf(stdout, "INFO: %s: starting a fresh '%s'\n", __func__, variantName);
+        CSOL_INFO("starting a fresh '%s'", variantName);
     }
 
     struct Baize* baize = BaizeNew(variantName, packName);
@@ -247,11 +243,6 @@ int main(int argc, char* argv[], char* envp[])
         BaizeCloseLua(baize);
         BaizeFree(baize);
     }
-
-    // TODO move these to UI free
-    SpritesheetFree(ssIcons);
-    UnloadFont(fontRobotoMedium24);
-    UnloadFont(fontRobotoRegular14);
 
     CloseWindow();
 

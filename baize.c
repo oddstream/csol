@@ -19,6 +19,7 @@
 #include "tableau.h"
 #include "trace.h"
 #include "ui.h"
+#include "util.h"
 
 #define BAIZE_MAGIC (0x19910920)
 
@@ -68,7 +69,7 @@ unsigned BaizeCRC(struct Baize *const self)
 void BaizeSetError(struct Baize *const self, const char *str)
 {
     BaizeResetError(self);
-    if (str) self->errorString = strdup(str);
+    if (str) self->errorString = UtilStrDup(str);
 }
 
 void BaizeResetError(struct Baize *const self)
@@ -682,7 +683,7 @@ void BaizeUpdate(struct Baize *const self)
     if ( IsKeyReleased(KEY_C) ) {
         BaizeCollectCommand(self, NULL);
     }
-#if _DEBUG
+#ifdef _DEBUG
     if (IsKeyReleased(KEY_Q)) {
         ScrunchPiles(self);
     }
@@ -773,7 +774,7 @@ void BaizeDraw(struct Baize *const self)
 
     UiDraw(self->ui);
 
-#if _DEBUG
+#ifdef _DEBUG
     DrawFPS(10, (int)TITLEBAR_HEIGHT);
 #endif
 
@@ -859,6 +860,7 @@ void BaizeWikipediaCommand(struct Baize *const baize, void* param)
         // sprintf(buff, "xdg-open \"%s\"", str);
         // https://askubuntu.com/questions/8252/how-to-launch-default-web-browser-from-the-terminal
         sprintf(buff, "URL=\"%s\"; xdg-open $URL || sensible-browser $URL || x-www-browser $URL || gnome-open $URL", str);
-        system(buff);
+        int result = system(buff);
+        CSOL_INFO("system returned %d", result);
     }
 }

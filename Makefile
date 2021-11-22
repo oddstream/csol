@@ -3,34 +3,42 @@
 
 PROJECT_NAME ?= csol
 BUILD_MODE ?= DEBUG
-EXECUTABLE ?= csol
+EXECUTABLE ?= $(PROJECT_NAME)
 
 # Define default options
 # One of PLATFORM_DESKTOP, PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
+# should have been defined as an arg to make in tasks.json
 PLATFORM           ?= PLATFORM_DESKTOP
+PLATFORM_OS        ?= LINUX
 
 # libraylib.a is installed in /usr/local/lib
 # raylib.h (and raylibmath.h &c) installed in /usr/local/include
 
 # RAYLIB_INSTALL_PATH should be the desired full path to libraylib. No relative paths.
-RAYLIB_INSTALL_PATH ?= /usr/local/lib
+RAYLIB_INSTALL_PATH ?= /home/gilbert/raylib
+
 # RAYLIB_H_INSTALL_PATH locates the installed raylib header and associated source files.
-RAYLIB_H_INSTALL_PATH ?= /usr/local/include
+RAYLIB_H_INSTALL_PATH ?= /home/gilbert/raylib/src
+
+# Library type used for raylib: STATIC (.a) or SHARED (.so/.dll)
+RAYLIB_LIBTYPE ?= STATIC
 
 LUA_PATH = /home/gilbert/lua-5.4.3/src
 
 SRC_DIR = src
 OBJ_DIR = obj
 
-CFLAGS += -std=c99 -D_DEFAULT_SOURCE
+# without CFLAGS += -D_DEFAULT_SOURCE, compiler complains about strdup
+
+CFLAGS += -D$(PLATFORM)
+CFLAGS += -std=c99
 # https://airbus-seclab.github.io/c-compiler-security/
 CFLAGS += -Wall -Wextra -Wpedantic -Werror
 #  -Wformat-overflow=2
 CFLAGS += -Wformat=2 -Wformat-truncation=2 -Wformat-security 
 CFLAGS += -Wnull-dereference -Wtrampolines -Walloca -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2 
 CFLAGS += -Wcast-qual -Wstringop-overflow=4 -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=5 
-CFLAGS += -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wcast-align=strict
-CFLAGS += -Wunused
+CFLAGS += -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wcast-align=strict -Wunused
 # if using alloca don't add these
 CFLAGS += -Wstack-protector -Wstack-usage=1000000
 CFLAGS += -fsanitize=undefined
@@ -46,7 +54,7 @@ CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE
 INCLUDE_PATHS = -I$(RAYLIB_H_INSTALL_PATH) -I$(LUA_PATH)
 
 # Extra flags to give to compilers when they are supposed to invoke the linker, ‘ld’, such as -L
-LDFLAGS = -L$(LUA_PATH) -fsanitize=undefined
+LDFLAGS = -L$(LUA_PATH) -L$(RAYLIB_INSTALL_PATH) -fsanitize=undefined
 
 # Library flags or names given to compilers when they are supposed to invoke the linker, ‘ld’.
 LDLIBS = -lraylib -llua -lGL -lm -ldl -lpthread 
@@ -93,15 +101,19 @@ $(EXECUTABLE): $(OBJECT_FILES) Makefile
 #	@echo $(PLAT)
 #	@ls -al csol
 
-.PHONY: clean check
+.PHONY: clean check valgrind
 
 clean:
 	rm $(EXECUTABLE) *.o
 
 check:
 	@echo $(BUILD_MODE)
+	@echo
 	@echo $(HEADER_FILES)
 	@echo
 	@echo $(SOURCE_FILES)
 	@echo
 	@echo $(OBJECT_FILES)
+
+valgrind:
+	valgrind --track-origins=yes --leak-check=full -s ./$(EXECUTABLE) --pack=scaled

@@ -4,7 +4,7 @@
             "type": "process",
             "label": "build debug",
             "command": "make",
-            "args": ["--trace"],
+            "args": ["--trace","PLATFORM=PLATFORM_DESKTOP"],
             "group": {
                 "kind": "build",
                 "isDefault": true

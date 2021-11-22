@@ -14,6 +14,7 @@
         "fstream": "c",
         "inttypes.h": "c",
         "raylib.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "string.h": "c"
     }
 }

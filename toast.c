@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "ui.h"
+#include "util.h"
 
 /*
  https://material.io/archive/guidelines/components/snackbars-toasts.html
@@ -25,7 +26,7 @@ struct Toast* ToastNew(const char* message, int ticks)
 
     struct Toast *self = calloc(1, sizeof(struct Toast));
     if (self) {
-        self->message = strdup(message);
+        self->message = UtilStrDup(message);
         self->mte = MeasureTextEx(fontRobotoRegular14, message, FONT_SIZE, fontSpacing);
         self->ticksLeft = ticks;
     }

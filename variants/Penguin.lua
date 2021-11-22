@@ -130,7 +130,7 @@ end
 function Tableau.PileConformantError(pile)
     local c1 = First(pile)
     for i = 2, Len(pile) do
-        local c2 = Get(pile, n)
+        local c2 = Get(pile, i)
         local err = DownSuitWrap(c1, c2) if err then return err end
         c1 = c2
     end

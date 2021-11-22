@@ -67,6 +67,9 @@ _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
 
 _Bool DiscardComplete(struct Pile *const self)
 {
+    if (PileEmpty(self)) {
+        return 1;
+    }
     struct Baize *baize = self->owner;
     int ndiscards = BaizeCountPiles(baize, self->category);
     if (ndiscards) {
@@ -77,10 +80,13 @@ _Bool DiscardComplete(struct Pile *const self)
 
 _Bool DiscardConformant(struct Pile *const self)
 {
+    if (PileEmpty(self)) {
+        return 1;
+    }
     struct Baize *baize = PileOwner(self);
     int ndiscards = BaizeCountPiles(baize, self->category);
     if (ndiscards) {
-        return PileEmpty(self) || PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
+        return PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
     }
     return 0;
 }

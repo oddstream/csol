@@ -37,7 +37,7 @@ void TextWidgetSetText(struct TextWidget *const self, const char* text)
         self->text = NULL;
     }
     if ( text ) {
-        self->text = strdup(text);
+        self->text = UtilStrDup(text);
         self->mte = MeasureTextEx(*(self->font), text, self->fontSize, fontSpacing);
         if ( self->frame == NONE ) {
             self->super.rect.width = self->mte.x;
