@@ -56,10 +56,9 @@ struct PileVtable {
     void (*TailTapped)(struct Pile *const self, struct Array *const tail);
     int (*Collect)(struct Pile *p);
     _Bool (*Complete)(struct Pile *p);
-    _Bool (*Conformant)(struct Pile *p);
     void (*SetLabel)(struct Pile *const self, const char* label);
     void (*SetRecycles)(struct Pile *const self, int r);
-    void (*CountSortedAndUnsorted)(struct Pile *const self, int *sorted, int *unsorted);
+    int (*UnsortedPairs)(struct Pile *const self);
     void (*Reset)(struct Pile *const self);
     void (*Update)(struct Pile *const self);
     void (*Draw)(struct Pile *const self);
@@ -110,11 +109,11 @@ void PileGenericTailTapped(struct Pile *const self, struct Array *const tail);
 int PileInertCollect(struct Pile *const self);
 int PileGenericCollect(struct Pile *const self);
 _Bool PileInertComplete(struct Pile *const self);
-_Bool PileInertConformant(struct Pile *const self);
 void PileInertSetLabel(struct Pile *const self, const char* label);
 void PileGenericSetLabel(struct Pile *const self, const char* label);
 void PileInertSetRecycles(struct Pile *const self, int r);
-void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
+int PileGenericUnsortedPairs(struct Pile *const self);
+int PileInertUnsortedPairs(struct Pile *const self);
 
 void PileReset(struct Pile *const self);
 void PileUpdate(struct Pile *const self);

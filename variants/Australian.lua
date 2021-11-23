@@ -81,22 +81,7 @@ function Tableau.TailAppendError(pile, tail)
     return nil
 end
 
--- PileConformantError
-
-function Tableau.PileConformantError(pile)
-    local c1 = First(pile)
-    for i = 2, Len(pile) do
-        local c2 = Get(pile, i)
-        local err = DownSuit(c1, c2) if err then return err end
-        c1 = c2
-    end
-    return nil
-end
-
--- SortedAndUnSorted (Tableau only)
-
-function Tableau.SortedAndUnsorted(pile)
-    local sorted = 0
+function Tableau.UnsortedPairs(pile)
     local unsorted = 0
     local c1 = Get(pile, 1)
     for i = 2, Len(pile) do
@@ -104,12 +89,10 @@ function Tableau.SortedAndUnsorted(pile)
         local err = DownSuit(c1, c2)
         if err then
             unsorted = unsorted + 1
-        else
-            sorted = sorted + 1
         end
         c1 = c2
     end
-    return sorted, unsorted
+    return unsorted
 end
 
 -- Actions

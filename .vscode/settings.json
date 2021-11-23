@@ -15,6 +15,7 @@
         "inttypes.h": "c",
         "raylib.h": "c",
         "typeinfo": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "util.h": "c"
     }
 }

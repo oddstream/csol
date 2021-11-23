@@ -63,8 +63,4 @@ function Foundation.TailAppendError(pile, tail)
     return nil
 end
 
--- PileConformantError (Tableau only)
-
--- SortedAndUnSorted (Tableau only)
-
 -- Actions

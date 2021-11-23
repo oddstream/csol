@@ -71,7 +71,7 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition);
 void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition);
 void BaizeCollectCommand(struct Baize *const self, void* param);
 _Bool BaizeComplete(struct Baize *const self);
-_Bool BaizeConformant(struct Baize *const self);
+
 void BaizeAfterUserMove(struct Baize *const self);
 void BaizeLayoutCommand(struct Baize *const self, void *param);
 void BaizeLayout(struct Baize *const self);

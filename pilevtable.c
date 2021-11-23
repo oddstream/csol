@@ -97,12 +97,6 @@ _Bool PileInertComplete(struct Pile *const self)
     return 1;
 }
 
-_Bool PileInertConformant(struct Pile *const self)
-{
-    (void)self;
-    return 1;
-}
-
 void PileInertSetLabel(struct Pile *const self, const char *label)
 {
     (void)self;
@@ -129,11 +123,18 @@ void PileInertSetRecycles(struct Pile *const self, int r)
     (void)r;
 }
 
-void PileInertCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
+int PileGenericUnsortedPairs(struct Pile *const self)
+{
+    if (PileEmpty(self)) {
+        return 0;
+    }
+    return PileLen(self) - 1;
+}
+
+int PileInertUnsortedPairs(struct Pile *const self)
 {
     (void)self;
-    (void)sorted;
-    (void)unsorted;
+    return 0;
 }
 
 void PileReset(struct Pile *const self)

@@ -102,14 +102,6 @@ function Tableau.TailAppendError(pile, tail)
     LAST_PILE_COUPLED = pile
 end
 
--- PileConformantError
-
--- SortedAndUnSorted (_Tableau only)
-
-function Tableau.SortedAndUnsorted(pile)
-    return 0, Len(pile)
-end
-
 -- Actions
 
 function Reserve.TailTapped(tail)

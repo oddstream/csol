@@ -18,7 +18,5 @@ _Bool FoundationCanMoveTail(struct Array *const tail);
 _Bool FoundationCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 _Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 _Bool FoundationComplete(struct Pile *const self);
-_Bool FoundationConformant(struct Pile *const self);
-void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
 #endif

@@ -30,17 +30,10 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
     return (void*)0;
 }
 
-static const char* PileConformantError(struct Pile *const pile)
+static int PileUnsortedPairs(struct Pile *const pile)
 {
     (void)pile;
-    return (void*)0;
-}
-
-static void PileSortedAndUnsorted(struct Pile *const pile, int* sorted, int* unsorted)
-{
-    (void)pile;
-    (void)sorted;
-    (void)unsorted;
+    return 0;
 }
 
 static void TailTapped(struct Array *const tail)
@@ -71,8 +64,7 @@ static struct ExecutionInterface klondikeVtable = {
     &AfterMove,
     &TailMoveError,
     &TailAppendError,
-    &PileConformantError,
-    &PileSortedAndUnsorted,
+    &PileUnsortedPairs,
     &TailTapped,
     &PileTapped,
     &PercentComplete,

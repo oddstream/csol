@@ -19,10 +19,9 @@ static struct PileVtable reserveVtable = {
     &PileGenericTailTapped,
     &ReserveCollect,
     &ReserveComplete,
-    &ReserveConformant,
     &PileGenericSetLabel,
     &PileInertSetRecycles,
-    &ReserveCountSortedAndUnsorted,
+    &PileGenericUnsortedPairs,
 
     &PileReset,
     &PileUpdate,
@@ -70,15 +69,4 @@ int ReserveCollect(struct Pile *const self)
 _Bool ReserveComplete(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-_Bool ReserveConformant(struct Pile *const self)
-{
-    return PileEmpty(self);
-}
-
-void ReserveCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    (void)sorted;
-    *unsorted += ArrayLen(self->cards);
 }

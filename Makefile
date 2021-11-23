@@ -116,4 +116,4 @@ check:
 	@echo $(OBJECT_FILES)
 
 valgrind:
-	valgrind --track-origins=yes --leak-check=full -s ./$(EXECUTABLE) --pack=scaled
+	valgrind --track-origins=yes --leak-check=full -s ./$(EXECUTABLE) --pack=default

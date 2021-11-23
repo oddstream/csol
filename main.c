@@ -55,7 +55,7 @@ int main(int argc, char* argv[], char* envp[])
             {"nolerp",  no_argument,        &flag_nolerp,       1},
             {"noflip",  no_argument,        &flag_noflip,       1},
             {"noshuf",  no_argument,        &flag_noshuf,       1},
-            {"nodraw",  no_argument,        &flag_nodraw,       1},
+            // flag_nodraw turns off drawing while a pack change is happening; no sense setting it here
             {NULL,      0,                  NULL,               0},
         };
 
@@ -124,7 +124,7 @@ int main(int argc, char* argv[], char* envp[])
             // fprintf(stdout, "INFO: %s: already printed an error message\n", __func__);
             break;
         default:
-            CSOL_WARNING("unhandled option %d\n", c);
+            CSOL_WARNING("unhandled option %d", c);
             exit(1);
             break;
         }

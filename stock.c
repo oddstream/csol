@@ -23,10 +23,9 @@ static struct PileVtable stockVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &StockComplete,
-    &StockConformant,
     &PileInertSetLabel,
     &StockSetRecycles,
-    &StockCountSortedAndUnsorted,
+    &PileGenericUnsortedPairs,
 
     &StockReset,
     &PileUpdate,
@@ -91,7 +90,7 @@ static void ShuffleStock(struct Pile *const stock)
 
     if (flag_noshuf) return;
 
-    srand(time(NULL) & 0xFFFF);
+    srand(time(NULL));
     // Knuth-Fisher–Yates shuffle
     size_t n = ArrayLen(stock->cards);
     for ( int i = n-1; i > 0; i-- ) {
@@ -155,21 +154,10 @@ _Bool StockComplete(struct Pile *const self)
     return PileEmpty(self);
 }
 
-_Bool StockConformant(struct Pile *const self)
-{
-    return PileEmpty(self);
-}
-
 void StockSetRecycles(struct Pile *const self, int r)
 {
     struct Stock *s = (struct Stock *)self;
     s->recycles = r;
-}
-
-void StockCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    (void)sorted;
-    *unsorted += ArrayLen(self->cards);
 }
 
 void StockDraw(struct Pile *const self)

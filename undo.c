@@ -261,10 +261,11 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
         UiToast(self->ui, "No bookmark");
         return;
     }
-    if ( BaizeComplete(self) ) {
-        UiToast(self->ui, "Cannot undo a completed game");
-        return;
-    }
+    // WHY can't you undo a completed game? Because undoing and then making a move counts as another win?
+    // if ( BaizeComplete(self) ) {
+    //     UiToast(self->ui, "Cannot undo a completed game");
+    //     return;
+    // }
     struct Snapshot *snapshot = NULL;
     while ( ArrayLen(self->undoStack) + 1 > self->savedPosition ) {
         if ( snapshot ) {
@@ -342,10 +343,11 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
         return;
     }
 
-    if ( BaizeComplete(self) ) {
-        UiToast(self->ui, "Cannot undo a completed game");
-        return;
-    }
+    // WHY can't you undo a completed game? Because undoing and then making a move counts as another win?
+    // if ( BaizeComplete(self) ) {
+    //     UiToast(self->ui, "Cannot undo a completed game");
+    //     return;
+    // }
 
     BaizeUndo(self);
 }

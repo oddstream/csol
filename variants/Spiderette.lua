@@ -1,8 +1,10 @@
--- Spider
+-- Spiderette
 
 dofile("variants/~Library.lua")
 
 STOCK_RECYCLES = 0
+PACKS = 1
+SUITS = 4
 
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Spider_(solitaire)"
@@ -12,11 +14,11 @@ function BuildPiles()
 
     AddPile("Stock", 1, 1, FAN_NONE, PACKS, SUITS)
 
-    for x = 3, 10 do
+    for x = 4, 7 do
         AddPile("Discard", x, 1, FAN_NONE)
     end
 
-    for x = 1, 10 do
+    for x = 1, 7 do
         AddPile("Tableau", x, 2, FAN_DOWN, MOVE_ANY)
     end
 end
@@ -25,22 +27,17 @@ function StartGame()
 
     StockRecycles(STOCK_RECYCLES)
 
-    for x = 1, 4 do
+    local deal = 1
+    for x = 1, 7 do
         local pile = Tableau.Piles[x]
-        for n= 1, 4 do
+        for n = 1, deal - 1 do
           local c = MoveCard(Stock.Pile, pile)
           CardProne(c, true)
         end
         MoveCard(Stock.Pile, pile)
+        deal = deal + 1
     end
-    for x = 5, 10 do
-        local pile = Tableau.Piles[x]
-        for n= 1, 3 do
-          local c = MoveCard(Stock.Pile, pile)
-          CardProne(c, true)
-        end
-        MoveCard(Stock.Pile, pile)
-    end
+
 end
 
 function Tableau.TailMoveError(tail)

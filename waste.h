@@ -20,7 +20,5 @@ _Bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, str
 _Bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int WasteCollect(struct Pile *const self);
 _Bool WasteComplete(struct Pile *const self);
-_Bool WasteConformant(struct Pile *const self);
-void WasteCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
 #endif

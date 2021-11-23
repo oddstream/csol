@@ -20,10 +20,9 @@ static struct PileVtable wasteVtable = {
     &PileGenericTailTapped,
     &WasteCollect,
     &WasteComplete,
-    &WasteConformant,
     &PileGenericSetLabel,
     &PileInertSetRecycles,
-    &WasteCountSortedAndUnsorted,
+    &PileGenericUnsortedPairs,
 
     &PileReset,
     &PileUpdate,
@@ -77,15 +76,4 @@ int WasteCollect(struct Pile *const self)
 _Bool WasteComplete(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-_Bool WasteConformant(struct Pile *const self)
-{
-    return PileEmpty(self);
-}
-
-void WasteCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    (void)sorted;
-    *unsorted += ArrayLen(self->cards);
 }

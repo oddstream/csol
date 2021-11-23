@@ -16,8 +16,7 @@ struct ExecutionInterface {
 
     const char* (*TailMoveError)(struct Array *const tail);
     const char* (*TailAppendError)(struct Pile *const pile, struct Array *const tail);
-    const char* (*PileConformantError)(struct Pile *const pile);
-    void (*PileSortedAndUnsorted)(struct Pile *const pile, int* sorted, int* unsorted);
+    int (*PileUnsortedPairs)(struct Pile *const pile);
 
     void (*TailTapped)(struct Array *const tail);
     void (*PileTapped)(struct Pile *const pile);

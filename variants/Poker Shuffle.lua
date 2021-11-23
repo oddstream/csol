@@ -65,10 +65,6 @@ end
 --     return nil
 -- end
 
--- PileConformantError
-
--- SortedAndUnSorted (_Tableau only)
-
 -- Actions
 
 local function isRoyal(map)

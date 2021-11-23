@@ -33,7 +33,7 @@ struct Baize* BaizeNew(const char *variantName, const char *packName)
     strcpy(self->variantName, variantName);
     self->pack = PackCtor(packName);
     if (!self->pack) {
-        self->pack = PackCtor("retro"); // try a fallback
+        self->pack = PackCtor("default"); // try a fallback
         if (!self->pack) {
             free(self);
             return NULL;
@@ -567,17 +567,6 @@ _Bool BaizeComplete(struct Baize *const self)
     return 1;
 }
 
-_Bool BaizeConformant(struct Baize *const self)
-{
-    size_t index;
-    for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
-        if ( !p->vtable->Conformant(p) ) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
 void BaizeAfterUserMove(struct Baize *const self)
 {
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
@@ -590,7 +579,7 @@ void BaizeAfterUserMove(struct Baize *const self)
     if ( BaizeComplete(self) ) {
         UiToast(self->ui, "Game complete");
     }
-    // TODO test started/complete/conformant
+    // TODO test started/complete
 
     BaizeUndoPush(self);
 }

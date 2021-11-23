@@ -18,10 +18,9 @@ static struct PileVtable cellVtable = {
     &PileGenericTailTapped,
     &CellCollect,
     &CellComplete,
-    &CellConformant,
     &PileGenericSetLabel,
     &PileInertSetRecycles,
-    &CellCountSortedAndUnsorted,
+    &PileInertUnsortedPairs,
 
     &PileReset,
     &PileUpdate,
@@ -76,18 +75,4 @@ int CellCollect(struct Pile *const self)
 _Bool CellComplete(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-_Bool CellConformant(struct Pile *const self)
-{
-    (void)self;
-    return 1;
-}
-
-void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    (void)unsorted;
-    if ( ArrayLen(self->cards) == 1 ) {
-        *sorted += 1;   // one sorted card
-    }
 }

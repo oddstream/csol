@@ -28,7 +28,6 @@ _Bool TableauCanAcceptCard(struct Baize *const baize, struct Pile *const self, s
 _Bool TableauCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int TableauCollect(struct Pile *const self);
 _Bool TableauComplete(struct Pile *const self);
-_Bool TableauConformant(struct Pile *const self);
-void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
+int TableauUnsortedPairs(struct Pile *const self);
 
 #endif

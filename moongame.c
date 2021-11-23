@@ -111,55 +111,27 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
     return result;
 }
 
-static const char* PileConformantError(struct Pile *const pile)
+static int PileUnsortedPairs(struct Pile *const pile)
 {
+    int unsorted = 0;
     struct Baize *const baize = PileOwner(pile);
 
-    const char *result = (void*)0;
-
-    if (LuaUtilSetupTableMethod(baize->L, pile->category, "PileConformantError")) {
+    if (LuaUtilSetupTableMethod(baize->L, pile->category, "UnsortedPairs")) {
         lua_pushlightuserdata(baize->L, pile);
-        // one arg (pile), one return (error string)
+        // one arg (pile), one return (integer)
         if ( lua_pcall(baize->L, 1, 1, 0) != LUA_OK ) {
             CSOL_ERROR("running Lua function: %s\n", lua_tostring(baize->L, -1));
             lua_pop(baize->L, 1);  // remove error
         } else {
-            if (lua_isstring(baize->L, -1)) {
-                result = lua_tostring(baize->L, -1);
-            } else if (lua_isnil(baize->L, -1)) {
-                ;
+            if (lua_isinteger(baize->L, -1)) {
+                unsorted = lua_tointeger(baize->L, -1);
             } else {
-                CSOL_ERROR("%s", "unexpected return");
+                CSOL_ERROR("%s", "expecting an integer");
             }
             lua_pop(baize->L, 1);
         }
     }
-
-    return result;
-}
-
-static void PileSortedAndUnsorted(struct Pile *const pile, int* sorted, int* unsorted)
-{
-    struct Baize *const baize = PileOwner(pile);
-
-    if (LuaUtilSetupTableMethod(baize->L, pile->category, "SortedAndUnsorted")) {
-        lua_pushlightuserdata(baize->L, pile);
-        // one arg (pile), two returns (integers)
-        if ( lua_pcall(baize->L, 1, 2, 0) != LUA_OK ) {
-            CSOL_ERROR("running Lua function: %s\n", lua_tostring(baize->L, -1));
-            lua_pop(baize->L, 1);  // remove error
-        } else {
-            if ( lua_isinteger(baize->L, -2) && lua_isinteger(baize->L, -1) ) {
-                int extraSorted = lua_tointeger(baize->L, -2);
-                int extraUnsorted = lua_tointeger(baize->L, -1);
-                *sorted += extraSorted;
-                *unsorted += extraUnsorted;
-            } else {
-                CSOL_ERROR("%s", "expecting two numbers");
-            }
-            lua_pop(baize->L, 2);
-        }
-    }
+    return unsorted;
 }
 
 static void TailTapped(struct Array *const tail)
@@ -210,17 +182,26 @@ static int PercentComplete(struct Baize *const baize)
             CSOL_ERROR("running Lua function: %s\n", lua_tostring(baize->L, -1));
             lua_pop(baize->L, 1);    // remove error
         } else {
-            percent = lua_tointeger(baize->L, -1);
+            if (lua_isinteger(baize->L, -1)) {
+                percent = lua_tointeger(baize->L, -1);
+            } else {
+                CSOL_ERROR("%s", "integer expected");
+                lua_pop(baize->L, 1);
+            }
         }
     } else {
         lua_pop(baize->L, 1);    // remove "PercentComplete"
 
-        int sorted = 0, unsorted = 0;
+        int pairs = 0, unsorted = 0;
         size_t index;
-        for ( struct Pile *p = ArrayFirst(baize->piles, &index); p; p = ArrayNext(baize->piles, &index) ) {
-            p->vtable->CountSortedAndUnsorted(p, &sorted, &unsorted);
+        for ( struct Pile *pile = ArrayFirst(baize->piles, &index); pile; pile = ArrayNext(baize->piles, &index) ) {
+            if (PileLen(pile) > 1) {
+                pairs += PileLen(pile) - 1;
+            }
+            unsorted += pile->vtable->UnsortedPairs(pile);
         }
-        percent = (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)baize->numberOfCardsInLibrary, (float)baize->numberOfCardsInLibrary, 0.0f, 100.0f));
+        // CSOL_INFO("pairs:%d unsorted:%d", pairs, unsorted);
+        percent = (int)(100.0f - UtilMapValue((float)unsorted, 0, (float)pairs, 0.0f, 100.0f));
     }
 
     return percent;
@@ -248,8 +229,7 @@ static struct ExecutionInterface moonGameVtable = {
     &AfterMove,
     &TailMoveError,
     &TailAppendError,
-    &PileConformantError,
-    &PileSortedAndUnsorted,
+    &PileUnsortedPairs,
     &TailTapped,
     &PileTapped,
     &PercentComplete,

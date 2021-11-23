@@ -169,7 +169,7 @@ void ScrunchPile(struct Pile *const pile)
     }
 
     float fanFactor;
-    for ( fanFactor = pile->defaultFanFactor; fanFactor < MAX_FAN_FACTOR; fanFactor += 0.5f ) {
+    for ( fanFactor = pile->defaultFanFactor; fanFactor < MAX_FAN_FACTOR; fanFactor += 0.33333333333f ) {
         Vector2 dims = calcPileDimensions(pile, fanFactor);
         if (pile->fanType == FAN_DOWN) {
             if (dims.y < pile->scrunchDims.y) {
@@ -182,10 +182,8 @@ void ScrunchPile(struct Pile *const pile)
         }
         // fprintf(stdout, "going round again\n");
     }
-    if (fanFactor != pile->fanFactor) {
-        pile->fanFactor = fanFactor;
-        PileRefan(pile);
-    }
+    pile->fanFactor = fanFactor;
+    PileRefan(pile);    // don't optimize this call
 }
 
 void ScrunchPiles(struct Baize *const baize)

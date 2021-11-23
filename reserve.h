@@ -20,7 +20,6 @@ _Bool ReserveCanAcceptCard(struct Baize *const baize, struct Pile *const self, s
 _Bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int ReserveCollect(struct Pile *const self);
 _Bool ReserveComplete(struct Pile *const self);
-_Bool ReserveConformant(struct Pile *const self);
-void ReserveCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
+int ReserveUnsortedPairs(struct Pile *const self);
 
 #endif

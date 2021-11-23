@@ -9,6 +9,5 @@
 
 _Bool CanTailBeMoved(struct Array *const tail);
 _Bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail);
-_Bool IsPileConformant(struct Pile *const pile);
 
 #endif

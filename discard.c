@@ -20,10 +20,9 @@ static struct PileVtable discardVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &DiscardComplete,
-    &DiscardConformant,
     &PileInertSetLabel,
     &PileInertSetRecycles,
-    &DiscardCountSortedAndUnsorted,
+    &PileInertUnsortedPairs,
 
     &PileReset,
     &PileUpdate,
@@ -76,25 +75,6 @@ _Bool DiscardComplete(struct Pile *const self)
         return PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
     }
     return 0;
-}
-
-_Bool DiscardConformant(struct Pile *const self)
-{
-    if (PileEmpty(self)) {
-        return 1;
-    }
-    struct Baize *baize = PileOwner(self);
-    int ndiscards = BaizeCountPiles(baize, self->category);
-    if (ndiscards) {
-        return PileLen(self) == baize->numberOfCardsInLibrary / ndiscards;
-    }
-    return 0;
-}
-
-void DiscardCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    (void)unsorted;
-    *sorted += ArrayLen(self->cards);
 }
 
 void DiscardDraw(struct Pile *const self)

@@ -228,29 +228,15 @@ function Tableau.TailAppendError(pile, tail)
     return nil
 end
 
--- PileConformantError (Tableau only)
-
-function Tableau.PileConformantError(pile)
-    for _, c in ipairs(CardPairs(pile)) do
-        local err = DownSuit(c[1], c[2]) if err then return err end
-    end
-    return nil
-end
-
--- SortedAndUnSorted (Tableau only)
-
-function Tableau.SortedAndUnsorted(pile)
-    local sorted = 0
+function Tableau.UnsortedPairs(pile)
     local unsorted = 0
     for _, c in ipairs(CardPairs(pile)) do
         local err = DownSuit(c[1], c[2])
         if err then
             unsorted = unsorted + 1
-        else
-            sorted = sorted + 1
         end
     end
-    return sorted, unsorted
+    return unsorted
 end
 
 -- Actions

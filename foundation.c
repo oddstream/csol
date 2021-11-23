@@ -20,10 +20,9 @@ static struct PileVtable foundationVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &FoundationComplete,
-    &FoundationConformant,
     &PileGenericSetLabel,
     &PileInertSetRecycles,
-    &FoundationCountSortedAndUnsorted,
+    &PileInertUnsortedPairs,
 
     &PileReset,
     &PileUpdate,
@@ -84,17 +83,4 @@ _Bool FoundationComplete(struct Pile *const self)
 {
     struct Baize *baize = self->owner;
     return PileLen(self) == baize->numberOfCardsInLibrary / ArrayLen(baize->foundations);
-}
-
-_Bool FoundationConformant(struct Pile *const self)
-{
-    // a Foundation is always assumed to be conformant, how else did it get built!?
-    (void)self;
-    return 1;
-}
-
-void FoundationCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    (void)unsorted;
-    *sorted += ArrayLen(self->cards);
 }

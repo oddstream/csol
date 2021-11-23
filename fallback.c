@@ -88,33 +88,20 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
     return (void*)0;
 }
 
-static const char* PileConformantError(struct Pile *const pile)
+static int PileUnsortedPairs(struct Pile *const pile)
 {
+    int unsorted = 0;
     const char *strerr = (void*)0;
     struct Card *c1 = ArrayGet(pile->cards, 0);
     struct Card *c2;
     for ( size_t i=1; i<ArrayLen(pile->cards); i++) {
         c2 = ArrayGet(pile->cards, i);
-        if ((strerr = CardCompare_DownSuit(c1, c2)))
-            break;
+        if ((strerr = CardCompare_DownSuit(c1, c2))) {
+            unsorted = unsorted + 1;
+        }
         c1 = c2;
     }
-    return strerr;
-}
-
-static void PileSortedAndUnsorted(struct Pile *const pile, int* sorted, int* unsorted)
-{
-    const char *strerr = (void*)0;
-    struct Card *c1 = ArrayGet(pile->cards, 0);
-    struct Card *c2;
-    for ( size_t i=1; i<ArrayLen(pile->cards); i++) {
-        c2 = ArrayGet(pile->cards, i);
-        if ((strerr = CardCompare_DownSuit(c1, c2)))
-            *unsorted = *unsorted + 1;
-        else
-            *sorted = *sorted + 1;
-        c1 = c2;
-    }
+    return unsorted;
 }
 
 static void TailTapped(struct Array *const tail)
@@ -149,12 +136,15 @@ static void PileTapped(struct Pile *const pile)
 
 static int PercentComplete(struct Baize *const baize)
 {
-    int percent = 0, sorted = 0, unsorted = 0;
+    int percent = 0, pairs = 0, unsorted = 0;
     size_t index;
     for ( struct Pile *pile = ArrayFirst(baize->piles, &index); pile; pile = ArrayNext(baize->piles, &index) ) {
-        pile->vtable->CountSortedAndUnsorted(pile, &sorted, &unsorted);
+        if (PileLen(pile) > 1) {
+            pairs += PileLen(pile) - 1;
+        }
+        unsorted += pile->vtable->UnsortedPairs(pile);
     }
-    percent = (int)(UtilMapValue((float)sorted-(float)unsorted, -(float)baize->numberOfCardsInLibrary, (float)baize->numberOfCardsInLibrary, 0.0f, 100.0f));
+    percent = (int)(100.0f - UtilMapValue((float)unsorted, 0, (float)pairs, 0.0f, 100.0f));
     return percent;
 }
 
@@ -170,8 +160,7 @@ static struct ExecutionInterface fallbackVtable = {
     &AfterMove,
     &TailMoveError,
     &TailAppendError,
-    &PileConformantError,
-    &PileSortedAndUnsorted,
+    &PileUnsortedPairs,
     &TailTapped,
     &PileTapped,
     &PercentComplete,

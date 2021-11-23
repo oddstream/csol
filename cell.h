@@ -20,7 +20,5 @@ _Bool CellCanAcceptCard(struct Baize *const baize, struct Pile *const self, stru
 _Bool CellCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 int CellCollect(struct Pile *const self);
 _Bool CellComplete(struct Pile *const self);
-_Bool CellConformant(struct Pile *const self);
-void CellCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted);
 
 #endif

@@ -102,6 +102,7 @@ void SpritesheetDraw(struct Spritesheet *const self, int frame, float xScale, fl
     float dstHeight = r.height * yScale;
     float xOffset = (r.width / 2.0f) - (dstWidth / 2.0f);
     rDst = (Rectangle){.x = r.x + xOffset, .y = r.y, .width = dstWidth, .height = dstHeight};
+
     DrawTexturePro(
         self->texture,
         rSrc,

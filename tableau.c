@@ -20,10 +20,9 @@ static struct PileVtable tableauVtable = {
     &PileGenericTailTapped,
     &TableauCollect,
     &TableauComplete,
-    &TableauConformant,
     &PileGenericSetLabel,
     &PileInertSetRecycles,
-    &TableauCountSortedAndUnsorted,
+    &TableauUnsortedPairs,
 
     &PileReset,
     &PileUpdate,
@@ -145,11 +144,14 @@ int TableauCollect(struct Pile *const self)
 
 _Bool TableauComplete(struct Pile *const self)
 {   /*
-        also complete when playing Spider-games (there will be discard piles)
-        (Simple Simon has 10 tableau piles and 4 discard piles)
-        (Spider has 10 tableau piles and 8 discard piles)
-        (number of discard piles is packs * suits)
-        and this pile contains 13 (ish) conformant cards K .. A
+        'complete' means
+            (a) empty
+            (b) if discard piles exist, then there are no unsorted card pairs
+                and pile len == baize->numberOfCardsInLibrary / ndiscards
+                there will always be one discard pile for each suit
+                (number of discard piles is packs * suits)
+                (Simple Simon has 10 tableau piles and 4 discard piles)
+                (Spider has 10 tableau piles and 8 discard piles)
     */
     if (PileEmpty(self)) {
         return 1;
@@ -157,30 +159,17 @@ _Bool TableauComplete(struct Pile *const self)
     struct Baize *baize = PileOwner(self);
     int ndiscards = BaizeCountPiles(baize, "Discard");
     if (ndiscards) {
-        return (PileLen(self) == baize->numberOfCardsInLibrary / ndiscards) && IsPileConformant(self);
+        return (PileLen(self) == baize->numberOfCardsInLibrary / ndiscards) && (TableauUnsortedPairs(self) == 0);
     }
     return 0;
 }
 
-_Bool TableauConformant(struct Pile *const self)
+int TableauUnsortedPairs(struct Pile *const self)
 {
-    return IsPileConformant(self);
-}
-
-void TableauCountSortedAndUnsorted(struct Pile *const self, int *sorted, int *unsorted)
-{
-    // some optimizations
-    if (PileEmpty(self)) {
-        return;
+    if (PileLen(self) > 1) {
+        struct Baize *const baize = PileOwner(self);
+        return baize->exiface->PileUnsortedPairs(self);
+    } else {
+        return 0;
     }
-    if ( ArrayLen(self->cards) == 1 ) {
-        *sorted += 1;
-        return;
-    }
-#if 0
-    (void)unsorted;
-#else
-    struct Baize *const baize = PileOwner(self);
-    baize->exiface->PileSortedAndUnsorted(self, sorted, unsorted);
-#endif
 }

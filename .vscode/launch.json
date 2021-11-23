@@ -37,7 +37,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/csol",
-            "args": ["--pack=default", "--noshuf"],
+            "args": ["--pack=default"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

@@ -91,14 +91,6 @@ function Tableau.TailAppendError(pile, tail)
     return nil
 end
 
--- PileConformantError (Tableau only)
-
--- SortedAndUnSorted (Tableau only)
-
-function Tableau.SortedAndUnsorted(pile)
-    return 0, Len(pile)
-end
-
 -- Actions
 
 function Stock.TailTapped(tail)

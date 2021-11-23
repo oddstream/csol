@@ -45,19 +45,3 @@ _Bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail)
 
     return 1;
 }
-
-_Bool IsPileConformant(struct Pile *const pile)
-{
-    if (PileEmpty(pile)) {
-        return 1;
-    }
-
-    struct Baize *const baize = PileOwner(pile);
-    const char *strerr = baize->exiface->PileConformantError(pile);
-    if (strerr) {
-        BaizeSetError(baize, strerr);
-        return 0;
-    }
-
-    return 1;
-}
