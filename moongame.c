@@ -1,6 +1,6 @@
 /* moongame.c */
 
-#include "exiface.h"
+#include "driface.h"
 #include "trace.h"
 #include "luautil.h"
 
@@ -223,7 +223,7 @@ static const char* Wikipedia(struct Baize *const baize)
     return str;
 }
 
-static struct ExecutionInterface moonGameVtable = {
+static struct DriverInterface moonGameVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -237,7 +237,7 @@ static struct ExecutionInterface moonGameVtable = {
 };
 
 // get the interface to run a variant through a Lua script
-struct ExecutionInterface* GetMoonInterface(void)
+struct DriverInterface* GetMoonInterface(void)
 {
     return &moonGameVtable;
 }

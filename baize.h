@@ -8,7 +8,7 @@
 #include <lualib.h>
 
 #include "array.h"
-#include "exiface.h"
+#include "driface.h"
 #include "pack.h"
 #include "pile.h"
 
@@ -23,7 +23,7 @@ struct Baize {
 
     lua_State *L;
 
-    struct ExecutionInterface *exiface;          // interface to the rules and logic for variant
+    struct DriverInterface *driface;          // interface to the rules and logic for variant
 
     struct Array *piles;
     struct Pile *stock;         // a struct Stock*

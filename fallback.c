@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "exiface.h"
+#include "driface.h"
 
 #include "pile.h"
 #include "foundation.h"
@@ -154,7 +154,7 @@ static const char* Wikipedia(struct Baize *const baize)
     return "https://en.wikipedia.org/wiki/Solitaire";
 }
 
-static struct ExecutionInterface fallbackVtable = {
+static struct DriverInterface fallbackVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -167,7 +167,7 @@ static struct ExecutionInterface fallbackVtable = {
     &Wikipedia,
 };
 
-struct ExecutionInterface* GetFallbackInterface(void)
+struct DriverInterface* GetFallbackInterface(void)
 {
     return &fallbackVtable;
 }

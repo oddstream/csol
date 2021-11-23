@@ -1,6 +1,6 @@
 /* klondike.c */
 
-#include "exiface.h"
+#include "driface.h"
 
 static void BuildPiles(struct Baize *const baize)
 {
@@ -58,7 +58,7 @@ static const char* Wikipedia(struct Baize *const baize)
     return "https://en.wikipedia.org/wiki/Klondike_(solitaire)";
 }
 
-static struct ExecutionInterface klondikeVtable = {
+static struct DriverInterface klondikeVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -71,7 +71,7 @@ static struct ExecutionInterface klondikeVtable = {
     &Wikipedia,
 };
 
-struct ExecutionInterface* GetKlondikeInterface(void)
+struct DriverInterface* GetKlondikeInterface(void)
 {
     return &klondikeVtable;
 }

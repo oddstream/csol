@@ -222,10 +222,10 @@ int main(int argc, char* argv[], char* envp[])
         if (loadedUndoStack) {
             BaizeUndo0(baize);
             if (ArrayLen(baize->undoStack) == 1) {
-                baize->exiface->StartGame(baize);
+                baize->driface->StartGame(baize);
             }
         } else {
-            baize->exiface->StartGame(baize);
+            baize->driface->StartGame(baize);
         }
         BaizeUndoPush(baize);
 

@@ -1,6 +1,6 @@
 /* freecell.c */
 
-#include "exiface.h"
+#include "driface.h"
 
 static void BuildPiles(struct Baize *const baize)
 {
@@ -58,7 +58,7 @@ static const char* Wikipedia(struct Baize *const baize)
     return "https://en.wikipedia.org/wiki/FreeCell";
 }
 
-static struct ExecutionInterface freecellVtable = {
+static struct DriverInterface freecellVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -71,7 +71,7 @@ static struct ExecutionInterface freecellVtable = {
     &Wikipedia,
 };
 
-struct ExecutionInterface* GetFreecellInterface(void)
+struct DriverInterface* GetFreecellInterface(void)
 {
     return &freecellVtable;
 }

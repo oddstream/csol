@@ -145,9 +145,9 @@ void BaizeCreatePiles(struct Baize *const self)
     self->stock = NULL;
     self->waste = NULL;
 
-    self->exiface = GetInterface(self);
+    self->driface = GetInterface(self);
 
-    self->exiface->BuildPiles(self);
+    self->driface->BuildPiles(self);
 
     // fprintf(stderr, "%lu piles created\n", ArrayLen(self->piles));
 
@@ -233,7 +233,7 @@ void BaizeNewDealCommand(struct Baize *const self, void* param)
     for ( struct Pile* p = ArrayFirst(self->piles, &index); p; p = ArrayNext(self->piles, &index) ) {
         p->vtable->Reset(p);
     }
-    self->exiface->StartGame(self);
+    self->driface->StartGame(self);
     BaizeUndoPush(self);
 }
 
@@ -494,7 +494,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
             // {    char z[64]; CardToString(ArrayGet(self->tail, 0), z);   fprintf(stdout, "Touched card %s\n", z);   }
             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
             unsigned crc = BaizeCRC(self);
-            self->exiface->TailTapped(self->tail);
+            self->driface->TailTapped(self->tail);
             BaizeResetError(self);// wipe any error messages otherwise they look a bit odd
             if (BaizeCRC(self) != crc) {
                 BaizeAfterUserMove(self);
@@ -522,7 +522,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
         self->touchedWidget = NULL;
     } else if ( self->touchedPile ) {
         unsigned crc = BaizeCRC(self);
-        self->exiface->PileTapped(self->touchedPile);
+        self->driface->PileTapped(self->touchedPile);
         if (BaizeCRC(self) != crc) {
             BaizeAfterUserMove(self);
         }
@@ -572,14 +572,13 @@ void BaizeAfterUserMove(struct Baize *const self)
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
     // fprintf(stdout, "Baize CRC %u\n", BaizeCRC(self));
 
-    self->exiface->AfterMove(self);
+    self->driface->AfterMove(self);
 
     // fprintf(stderr, "stack %d\n", lua_gettop(self->L));
 
     if ( BaizeComplete(self) ) {
         UiToast(self->ui, "Game complete");
     }
-    // TODO test started/complete
 
     BaizeUndoPush(self);
 }
@@ -814,7 +813,7 @@ void BaizeReloadVariantCommand(struct Baize *const self, void* param)
     BaizeOpenLua(self);
     BaizeCreatePiles(self);
     BaizeResetState(self, NULL);
-    self->exiface->StartGame(self);
+    self->driface->StartGame(self);
     BaizeUndoPush(self);
 }
 
@@ -842,7 +841,7 @@ void BaizeChangePackCommand(struct Baize *const baize, void* param)
 void BaizeWikipediaCommand(struct Baize *const baize, void* param)
 {
     (void)param;
-    const char *str = baize->exiface->Wikipedia(baize);
+    const char *str = baize->driface->Wikipedia(baize);
     CSOL_INFO("Wikipedia '%s'", str ? str : "(null)");
     if (str) {
         char buff[512];

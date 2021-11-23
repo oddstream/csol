@@ -37,7 +37,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/csol",
-            "args": ["--pack=default"],
+            "args": ["--pack=default","--variant=Fallback","--noload","--nosave"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

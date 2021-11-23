@@ -1,4 +1,4 @@
-/* exiface.h */
+/* driface.h */
 
 #ifndef GAME_H
 #define GAME_H
@@ -9,7 +9,7 @@
 #include "baize.h"
 #include "pile.h"
 
-struct ExecutionInterface {
+struct DriverInterface {
     void (*BuildPiles)(struct Baize *const baize);
     void (*StartGame)(struct Baize *const baize);
     void (*AfterMove)(struct Baize *const baize);
@@ -26,12 +26,12 @@ struct ExecutionInterface {
     const char* (*Wikipedia)(struct Baize *const baize);
 };
 
-struct ExecutionInterface* GetInterface(struct Baize *const baize);
-struct ExecutionInterface* GetMoonInterface(void);
+struct DriverInterface* GetInterface(struct Baize *const baize);
+struct DriverInterface* GetMoonInterface(void);
 
-struct ExecutionInterface* GetFallbackInterface(void);
-struct ExecutionInterface* GetFreecellInterface(void);
-struct ExecutionInterface* GetKlondikeInterface(void);
+struct DriverInterface* GetFallbackInterface(void);
+struct DriverInterface* GetFreecellInterface(void);
+struct DriverInterface* GetKlondikeInterface(void);
 
 const char* CardCompare_Up(struct Card *const c1, struct Card *const c2);
 const char* CardCompare_Down(struct Card *const c1, struct Card *const c2);

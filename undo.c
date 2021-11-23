@@ -177,6 +177,31 @@ static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
     }
 }
 
+static void BaizeUpdateStatusBar(struct Baize *const self)
+{
+    char zLeft[64], zCenter[64], zRight[64];
+
+    zLeft[0] = '\0';
+    // Baize->stock may not be set yet if variant.lua/Build has not been run
+    if (self->stock && !PileHidden(self->stock)) {
+        if (self->waste) {
+            sprintf(zLeft, "STOCK: %lu WASTE: %lu", PileLen(self->stock), PileLen(self->waste));
+        } else {
+            sprintf(zLeft, "STOCK: %lu", PileLen(self->stock));
+        }
+    }
+
+    sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
+
+    if (BaizeComplete(self)) {
+        strcpy(zRight, "COMPLETE");
+    } else {
+        sprintf(zRight, "PROGRESS: %d%%", self->driface->PercentComplete(self));
+    }
+
+    UiUpdateStatusBar(self->ui, zLeft, zCenter, zRight);
+}
+
 struct Array* UndoStackNew(void)
 {
     return ArrayNew(32);
@@ -193,27 +218,7 @@ void BaizeUndoPush(struct Baize *const self)
     struct Snapshot* s = SnapshotNew(self);
     self->undoStack = ArrayPush(self->undoStack, s);
 
-    // TODO mark movable?
-
-    char zLeft[64], zCenter[64], zRight[64];
-
-    sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
-
-    sprintf(zRight, "COMPLETE: %d%%", self->exiface->PercentComplete(self));
-
-    if (self->stock) {
-        // Baize->stock may not be set yet if variant.lua/Build has not been run
-        if ( PileHidden(self->stock) ) {
-            UiUpdateStatusBar(self->ui, NULL, zCenter, zRight);
-        } else {
-            if ( self->waste ) {
-                sprintf(zLeft, "STOCK: %lu WASTE: %lu", PileLen(self->stock), PileLen(self->waste));
-            } else {
-                sprintf(zLeft, "STOCK: %lu", PileLen(self->stock));
-            }
-            UiUpdateStatusBar(self->ui, zLeft, zCenter, zRight);
-        }
-    }
+    BaizeUpdateStatusBar(self);
 }
 
 void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
@@ -332,6 +337,8 @@ void BaizeUndo(struct Baize *const self)
         return;
     }
     BaizeUpdateFromSnapshot(self, snap);
+
+    BaizeUpdateStatusBar(self);
 }
 
 void BaizeUndoCommand(struct Baize *const self, void* param)

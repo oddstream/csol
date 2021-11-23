@@ -1,4 +1,4 @@
-/* exiface.c */
+/* driface.c */
 
 #include <string.h>
 
@@ -7,12 +7,12 @@
 #include <lualib.h>
 
 #include "card.h"
-#include "exiface.h"
+#include "driface.h"
 #include "trace.h"
 
 struct knownInterface {
     char name[32];
-    struct ExecutionInterface* (*Ctor)(void);
+    struct DriverInterface* (*Ctor)(void);
 };
 
 static struct knownInterface knownInterfaces[3] = {
@@ -21,10 +21,16 @@ static struct knownInterface knownInterfaces[3] = {
     { "Klondike", GetKlondikeInterface  },
 };
 
-// TODO baize->variantName is probably already set so retire name parameter
-struct ExecutionInterface* GetInterface(struct Baize *const baize)
+struct DriverInterface* GetInterface(struct Baize *const baize)
 {
-    struct ExecutionInterface *self = (void*)0;
+#ifdef _DEBUG
+    if (baize->variantName[0] == '\0') {
+        CSOL_ERROR("%s", "no variant name, using fallback");
+        strcpy(baize->variantName, "Fallback");
+    }
+#endif
+
+    struct DriverInterface *self = (void*)0;
 
     // try to find a Lua scripted game first, so inbuilt games can be overridden
     char fname[128];    snprintf(fname, 127, "variants/%s.lua", baize->variantName);
