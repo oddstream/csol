@@ -763,7 +763,9 @@ void BaizeDraw(struct Baize *const self)
     UiDraw(self->ui);
 
 #ifdef _DEBUG
-    DrawFPS(10, (int)TITLEBAR_HEIGHT);
+    if (GetFPS()<60) {
+        DrawFPS(10, (int)TITLEBAR_HEIGHT);
+    }
 #endif
 
     EndDrawing();

@@ -237,7 +237,7 @@ static struct DriverInterface moonGameVtable = {
 };
 
 // get the interface to run a variant through a Lua script
-struct DriverInterface* GetMoonInterface(void)
+struct DriverInterface* GetMoonGameInterface(void)
 {
     return &moonGameVtable;
 }

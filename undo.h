@@ -5,6 +5,7 @@
 
 struct Snapshot {
     int recycles;
+    size_t savedPosition;
     struct Array *savedPiles;
 };
 

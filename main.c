@@ -33,7 +33,7 @@ int main(int argc, char* argv[], char* envp[])
 
 #ifdef _DEBUG
     for ( int i=0; i<argc; i++ ) {
-        CSOL_INFO("%d. %s\n", i, argv[i]);
+        CSOL_INFO("%d. %s", i, argv[i]);
     }
 #endif
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[], char* envp[])
         case 0:
             if (long_options[option_index].flag != 0)
                 break;
-            CSOL_INFO("long option '%s' arg '%s'\n", long_options[option_index].name, optarg ? optarg : "null");
+            CSOL_INFO("long option '%s' arg '%s'", long_options[option_index].name, optarg ? optarg : "null");
 #if 0
                 if (!optarg)
                     break;

@@ -80,7 +80,7 @@ OBJECT_FILES = $(patsubst %.c,%.o,$(SOURCE_FILES))
 
 # prepend /usr/bin/time to $(CC)
 
-$(EXECUTABLE): $(OBJECT_FILES) Makefile
+$(EXECUTABLE): $(OBJECT_FILES) $(HEADER_FILES) Makefile
 	$(CC) $(OBJECT_FILES) -o $@ $(LDLIBS) $(LDFLAGS)
 #	mkdir -p $(dir $@)
 

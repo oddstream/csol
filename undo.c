@@ -144,6 +144,7 @@ static struct Snapshot* SnapshotNew(struct Baize *const self)
 {
     struct Snapshot *s = calloc(1, sizeof(struct Snapshot));
     if (s) {
+        s->savedPosition = self->savedPosition;
         s->recycles = ((struct Stock*)self->stock)->recycles;
         s->savedPiles = ArrayNew(ArrayLen(self->piles));
         if (s->savedPiles) {
@@ -169,7 +170,7 @@ static void SnapshotFree(struct Snapshot *s)
 
 static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
 {
-    fprintf(f, "#%lu %d\n", index, s->recycles);
+    fprintf(f, "#%lu %lu %d\n", index, s->savedPosition, s->recycles);
 
     size_t pindex;
     for ( struct SavedCardArray *sca = ArrayFirst(s->savedPiles, &pindex); sca; sca = ArrayNext(s->savedPiles, &pindex) ) {
@@ -239,6 +240,9 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
             lua_pushinteger(self->L, snap->recycles);
             lua_setglobal(self->L, "STOCK_RECYCLES");
         }
+
+        self->savedPosition = snap->savedPosition;
+
         // TODO scrunch this pile
     }
 }
@@ -486,10 +490,11 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
         undoStack = ArrayNew(stackDepth + 16);
         for ( size_t n=0; n<stackDepth; n++) {
             size_t ncheck = 0xdeadbeef;
+            size_t savedPosition;
             int recycles;
             // prepend a space to '#' to consume \n
-            if (fscanf(f, " #%lu %d", &ncheck, &recycles) != 2) {
-                fprintf(stderr, "ERROR: %s: incorrect read of saved pile, expecting #number recycles\n", __func__);
+            if (fscanf(f, " #%lu %lu %d", &ncheck, &savedPosition, &recycles) != 3) {
+                fprintf(stderr, "ERROR: %s: incorrect read of saved pile, expecting #number bookmark recycles\n", __func__);
                 goto fclose_label;
             }
             if (n != ncheck) {
@@ -500,6 +505,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
             if (!snap) {
                 goto fclose_label;
             }
+            snap->savedPosition = savedPosition;
             snap->recycles = recycles;
             snap->savedPiles = ArrayNew(pileCount);
             if (!snap->savedPiles) {

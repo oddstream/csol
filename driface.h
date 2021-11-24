@@ -27,8 +27,8 @@ struct DriverInterface {
 };
 
 struct DriverInterface* GetInterface(struct Baize *const baize);
-struct DriverInterface* GetMoonInterface(void);
 
+struct DriverInterface* GetMoonGameInterface(void);
 struct DriverInterface* GetFallbackInterface(void);
 struct DriverInterface* GetFreecellInterface(void);
 struct DriverInterface* GetKlondikeInterface(void);

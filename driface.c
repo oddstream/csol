@@ -12,11 +12,11 @@
 
 struct knownInterface {
     char name[32];
-    struct DriverInterface* (*Ctor)(void);
+    struct DriverInterface* (*Get)(void);
 };
 
 static struct knownInterface knownInterfaces[3] = {
-    { "Fallback", GetFallbackInterface  },  // fallback comes first
+    { "Fallback", GetFallbackInterface  },
     { "Freecell", GetFreecellInterface  },
     { "Klondike", GetKlondikeInterface  },
 };
@@ -38,21 +38,22 @@ struct DriverInterface* GetInterface(struct Baize *const baize)
         CSOL_ERROR("Cannot find script for game '%s', error: %s", baize->variantName, lua_tostring(baize->L, -1));
         lua_pop(baize->L, 1);
 
+        // try to find an inbuilt interface
         for ( size_t i=0; i<sizeof(knownInterfaces)/sizeof(struct knownInterface); i++ ) {
             if (strcmp(knownInterfaces[i].name, baize->variantName) == 0) {
-                self = knownInterfaces[i].Ctor();
+                self = knownInterfaces[i].Get();
                 break;
             }
         }
     } else {
         CSOL_INFO("Loaded '%s'", fname);
         // we found a Lua script, and it loads, so use the csol-Lua bridge interface
-        self = GetMoonInterface();
+        self = GetMoonGameInterface();
     }
 
     if (!self) {
         CSOL_INFO("Cannot find rules for game '%s', using fallback", baize->variantName);
-        self = knownInterfaces[0].Ctor();
+        self = GetFallbackInterface();
     }
 
     return self;
