@@ -8,8 +8,6 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_DEAL_CARDS = 1
-
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Duchess_(solitaire)"
 end
@@ -37,8 +35,7 @@ function BuildPiles()
 end
 
 function StartGame()
-    STOCK_RECYCLES = 1
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(1)
     for _, pile in ipairs(Foundation.Piles) do
         PileLabel(pile, "")
     end
@@ -137,26 +134,25 @@ end
 -- Actions
 
 function Stock.PileTapped(pile)
-    if STOCK_RECYCLES == 0 then
+    recycles = StockRecycles()
+    if recycles == 0 then
         return "No more Stock recycles"
-    elseif 1 == STOCK_RECYCLES then
+    elseif 1 == recycles then
         Toast("Last Stock recycle")
-    elseif 2 == STOCK_RECYCLES then
+    elseif 2 == recycles then
         Toast("One Stock recycle remaining")
     end
     if Len(Waste.Pile) > 0 then
         while Len(Waste.Pile) > 0 do
             MoveCard(Waste.Pile, Stock.Pile)
         end
-        STOCK_RECYCLES = STOCK_RECYCLES - 1
-        StockRecycles(STOCK_RECYCLES)
+        recycles = recycles - 1
+        StockRecycles(recycles)
     end
 end
 
 function Stock.TailTapped(tail)
-    for i = 1, STOCK_DEAL_CARDS do
-        MoveCard(Stock.Pile, Waste.Pile)
-    end
+    MoveCard(Stock.Pile, Waste.Pile)
 end
 
 function AfterMove()

@@ -4,8 +4,6 @@ dofile("variants/~Library.lua")
 
 -- C sets variables 'BAIZE', FAN_*, MOVE_* and tables to hold pile functions and piles
 
-STOCK_RECYCLES = 32767
-
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Klondike_(solitaire)"
 end
@@ -26,8 +24,7 @@ function BuildPiles()
 end
 
 function StartGame()
-    STOCK_RECYCLES = 32767
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(32767)
 
     local deal = 1
     for x = 1, 7 do
@@ -112,19 +109,20 @@ end
 -- Actions
 
 function Stock.PileTapped(pile)
-    if STOCK_RECYCLES == 0 then
+    recycles = StockRecycles()
+    if recycles == 0 then
         return "No more Stock recycles"
-    elseif 1 == STOCK_RECYCLES then
+    elseif 1 == recycles then
         Toast("Last Stock recycle")
-    elseif 2 == STOCK_RECYCLES then
+    elseif 2 == recycles then
         Toast("One Stock recycle remaining")
     end
     if Len(Waste.Pile) > 0 then
         while Len(Waste.Pile) > 0 do
             MoveCard(Waste.Pile, Stock.Pile)
         end
-        STOCK_RECYCLES = STOCK_RECYCLES - 1
-        StockRecycles(STOCK_RECYCLES)
+        recycles = recycles - 1
+        StockRecycles(recycles)
     end
 end
 

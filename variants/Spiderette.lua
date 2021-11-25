@@ -2,7 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_RECYCLES = 0
 PACKS = 1
 SUITS = 4
 
@@ -25,7 +24,7 @@ end
 
 function StartGame()
 
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(0)
 
     local deal = 1
     for x = 1, 7 do

@@ -4,9 +4,6 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_DEAL_CARDS = 1
-STOCK_RECYCLES = 0
-
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Yukon_(solitaire)"
 end

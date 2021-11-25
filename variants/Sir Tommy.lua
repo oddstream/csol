@@ -15,9 +15,6 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_DEAL_CARDS = 1
-STOCK_RECYCLES = 0
-
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Sir_Tommy"
 end
@@ -40,7 +37,7 @@ function BuildPiles()
 end
 
 function StartGame()
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(0)
 end
 
 -- TailMoveError constraints (Tableau only)

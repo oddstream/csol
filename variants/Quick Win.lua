@@ -10,10 +10,9 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_DEAL_CARDS = 1
-STOCK_RECYCLES = 3
-
 -- C sets variables 'BAIZE', FAN_*, and tables to hold pile functions
+
+STOCK_DEAL_CARDS = 3
 
 local function DemoteCards(pile, ord)
     local hasChanged
@@ -116,8 +115,7 @@ end
 
 function StartGame()
     io.stderr:write("StartGame\n")
-    STOCK_RECYCLES = 3
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(3)
 
     PromoteCards(Stock.Pile, 1)
 
@@ -243,23 +241,23 @@ end
 
 function Stock.PileTapped(pile)
     io.stderr:write("Stock.PileTapped\n")
-
-    if STOCK_RECYCLES == 0 then
+    recycles = StockRecycles()
+    if recycles == 0 then
         return "No more Stock recycles"
-    elseif 1 == STOCK_RECYCLES then
+    elseif 1 == recycles then
         Toast("Last Stock recycle")
-    elseif 2 == STOCK_RECYCLES then
+    elseif 2 == recycles then
         Toast("One Stock recycle remaining")
     end
     if Len(Waste.Pile) > 0 then
         while Len(Waste.Pile) > 0 do
             MoveCard(Waste.Pile, Stock.Pile)
         end
-        STOCK_RECYCLES = STOCK_RECYCLES - 1
-        StockRecycles(STOCK_RECYCLES)
+        recycles = recycles - 1
+        StockRecycles(recycles)
     end
 end
-
+    
 function Stock.TailTapped(tail)
     io.stderr:write("Stock.TailTapped\n")
     for i = 1, STOCK_DEAL_CARDS do

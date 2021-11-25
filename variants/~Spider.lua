@@ -2,8 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_RECYCLES = 0
-
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Spider_(solitaire)"
 end
@@ -23,7 +21,7 @@ end
 
 function StartGame()
 
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(0)
 
     for x = 1, 4 do
         local pile = Tableau.Piles[x]

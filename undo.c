@@ -7,6 +7,7 @@
 #include "baize.h"
 #include "stock.h"
 #include "undo.h"
+#include "trace.h"
 #include "util.h"
 
 #include "ui.h"
@@ -115,7 +116,7 @@ static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Ca
 static void SavedCardArrayWriteToFile(FILE* f, struct SavedCardArray *const sca)
 {
     // sca->label will not be empty
-    if (sca->label[0]=='\0') fprintf(stderr, "ERROR: %s: label is empty\n", __func__);
+    if (sca->label[0]=='\0') CSOL_ERROR("%s", "label is empty");
 
     fprintf(f, "%s %lu:", sca->label, sca->len);
     for ( size_t i=0; i<sca->len; i++ ) {
@@ -225,7 +226,7 @@ void BaizeUndoPush(struct Baize *const self)
 void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
 {
     if ( ArrayLen(self->piles) != ArrayLen(snap->savedPiles) ) {
-        fprintf(stderr, "ERROR: %s: Bad snapshot\n", __func__);
+        CSOL_ERROR("%s", "Bad snapshot");
         return;
     }
     for ( size_t i=0; i<ArrayLen(self->piles); i++ ) {
@@ -237,8 +238,6 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
 
         if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
             self->stock->vtable->SetRecycles(self->stock, snap->recycles);
-            lua_pushinteger(self->L, snap->recycles);
-            lua_setglobal(self->L, "STOCK_RECYCLES");
         }
 
         self->savedPosition = snap->savedPosition;
@@ -314,7 +313,7 @@ void BaizeUndo0(struct Baize *const self)
 {
     struct Snapshot *snap = ArrayPop(self->undoStack);    // removes current state
     if (!snap) {
-        fprintf(stderr, "ERROR: %s: popping from undo stack of length %lu\n", __func__, ArrayLen(self->undoStack));
+        CSOL_ERROR("popping from undo stack of length %lu", ArrayLen(self->undoStack));
         return;
     }
     BaizeUpdateFromSnapshot(self, snap);
@@ -324,20 +323,20 @@ void BaizeUndo0(struct Baize *const self)
 void BaizeUndo(struct Baize *const self)
 {
     if ( ArrayLen(self->undoStack) < 2 ) {
-        fprintf(stderr, "WARNING: %s: Nothing to undo\n", __func__);
+        CSOL_WARNING("%s", "Nothing to undo");
         return;
     }
 
     struct Snapshot* snap = ArrayPop(self->undoStack);    // removes current state
     if (!snap) {
-        fprintf(stderr, "ERROR: %s: popping from undo stack\n", __func__);
+        CSOL_ERROR("%s", "popping from undo stack");
         return;
     }
     SnapshotFree(snap);  // discard this one, it's the same as the current baize
 
     snap = ArrayPeek(self->undoStack);
     if (!snap) {
-        fprintf(stderr, "ERROR: %s: peeking from undo stack\n", __func__);
+        CSOL_ERROR("%s", "peeking from undo stack");
         return;
     }
     BaizeUpdateFromSnapshot(self, snap);
@@ -370,7 +369,7 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
 static _Bool createDirectories(char *src)
 {
     if (!src || *src != '/') {
-        fprintf(stderr, "ERROR: %s: bad input\n", __func__);
+        CSOL_ERROR("%s", "bad input");
         return 0;
     }
     struct stat st = {0};
@@ -384,12 +383,12 @@ static _Bool createDirectories(char *src)
         *dst = '\0';
 
         if (stat(dirName, &st) == -1) {
-            fprintf(stderr, "INFO: %s: %s does not exist\n", __func__, dirName);
+            CSOL_INFO("%s does not exist", dirName);
             if (mkdir(dirName, 0700) == -1) {
-                fprintf(stderr, "ERROR: %s: cannot create %s\n", __func__, dirName);
+                CSOL_ERROR("cannot create %s", dirName);
                 return 0;
             } else {
-                fprintf(stderr, "INFO: %s: %s created\n", __func__, dirName);
+                CSOL_INFO("%s created", dirName);
             }
         } else {
             // fprintf(stdout, "INFO: %s: %s exists\n", __func__, dirName);
@@ -404,7 +403,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
 
     char *homeDir;
     if ((homeDir = getenv("HOME")) == NULL) {
-        fprintf(stderr, "ERROR: %s: HOME not set\n", __func__);
+        CSOL_ERROR("%s", "HOME not set");
         return;
     }
 
@@ -414,7 +413,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
     }
 */
 
-    fprintf(stdout, "INFO: %s: HOME is %s\n", __func__, homeDir);
+    // fprintf(stdout, "INFO: %s: HOME is %s\n", __func__, homeDir);
 
     char fname[256];
     strcpy(fname, homeDir);
@@ -437,7 +436,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
         }
         fclose(f);
     } else {
-        fprintf(stderr, "WARNING: %s: could not create %s\n", __func__, fname);
+        CSOL_WARNING("could not create %s", fname);
     }
 
     // fprintf(stdout, "GetWorkingDirectory is %s\n", GetWorkingDirectory());
@@ -449,7 +448,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
 
     char *homeDir;
     if ((homeDir = getenv("HOME")) == NULL) {
-        fprintf(stderr, "ERROR: %s: HOME not set\n", __func__);
+        CSOL_ERROR("%s", "HOME not set");
         return NULL;
     }
 

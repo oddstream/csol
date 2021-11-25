@@ -2,9 +2,6 @@
 
 dofile("variants/~Library.lua")
 
-STOCK_DEAL_CARDS = 1
-STOCK_RECYCLES = 0
-
 function Wikipedia()
     return "https://en.wikipedia.org/wiki/Australian_Patience"
 end
@@ -28,7 +25,7 @@ end
 
 function StartGame()
 
-    StockRecycles(STOCK_RECYCLES)
+    StockRecycles(0)
 
     for _, pile in ipairs(Tableau.Piles) do
         for n = 1, 4 do
@@ -97,26 +94,7 @@ end
 
 -- Actions
 
-function Stock.PileTapped(pile)
-    if STOCK_RECYCLES == 0 then
-        return "No more Stock recycles"
-    elseif 1 == STOCK_RECYCLES then
-        Toast("Last Stock recycle")
-    elseif 2 == STOCK_RECYCLES then
-        Toast("One Stock recycle remaining")
-    end
-    if Len(Waste.Pile) > 0 then
-        while Len(Waste.Pile) > 0 do
-            MoveCard(Waste.Pile, Stock.Pile)
-        end
-        STOCK_RECYCLES = STOCK_RECYCLES - 1
-        StockRecycles(STOCK_RECYCLES)
-    end
-end
-
 function Stock.TailTapped(tail)
-    for i = 1, STOCK_DEAL_CARDS do
-        MoveCard(Stock.Pile, Waste.Pile)
-    end
+    MoveCard(Stock.Pile, Waste.Pile)
 end
 
