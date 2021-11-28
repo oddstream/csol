@@ -33,7 +33,7 @@ struct Baize {
 
     struct Array *tail;
     struct Array *undoStack;
-    size_t savedPosition;
+    size_t bookmark;
     Vector2 lastTouch;
     struct Pile *touchedPile;
 

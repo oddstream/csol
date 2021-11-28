@@ -1,7 +1,7 @@
 # https://www.gnu.org/software/make/manual/make.html
 # make -recon
 
-PROJECT_NAME ?= csol
+PROJECT_NAME ?= gomps4
 BUILD_MODE ?= DEBUG
 EXECUTABLE ?= $(PROJECT_NAME)
 

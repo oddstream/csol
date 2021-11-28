@@ -171,7 +171,7 @@ int main(int argc, char* argv[], char* envp[])
     //     fprintf(stderr, "%d:%d,%d\n", n, w, h);
     // }
 
-    InitWindow(640*2, 480*2, "Oddstream Solitaire");
+    InitWindow(640*2, 480*2, "Solitaire");
 
 #ifdef PLATFORM_DESKTOP
     if (windowWidth == 0 || windowHeight == 0) {

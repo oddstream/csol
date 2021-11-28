@@ -175,7 +175,7 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
     }
     self->undoStack = undoStack ? undoStack : UndoStackNew();
 
-    self->savedPosition = 0;
+    self->bookmark = 0;
 
     self->touchedPile = NULL;
     self->touchedWidget = NULL;

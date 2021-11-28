@@ -5,9 +5,10 @@
 
 #include "array.h"
 #include "baize.h"
+#include "scrunch.h"
 #include "stock.h"
-#include "undo.h"
 #include "trace.h"
+#include "undo.h"
 #include "util.h"
 
 #include "ui.h"
@@ -104,12 +105,13 @@ static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Ca
     for ( size_t i=0; i<sca->len; i++ ) {
         struct SavedCard sc = sca->sav[i];
         struct Card* c = &cardLibrary[sc.index];
-        PilePushCard(pile, c);
-        if ( sc.prone ) {
-            CardFlipDown(c);
-        } else {
-            CardFlipUp(c);
-        }
+
+        // PilePushCard does a Scrunch, so do a simplified copy of PilePushCard()
+        CardSetOwner(c, pile);
+        Vector2 fannedPos = PilePosAfter(pile, ArrayPeek(pile->cards)); // get this *before* pushing card to pile
+        CardTransitionTo(c, fannedPos);
+        pile->cards = ArrayPush(pile->cards, c);
+        sc.prone ? CardFlipDown(c) : CardFlipUp(c);
     }
 }
 
@@ -145,7 +147,7 @@ static struct Snapshot* SnapshotNew(struct Baize *const self)
 {
     struct Snapshot *s = calloc(1, sizeof(struct Snapshot));
     if (s) {
-        s->savedPosition = self->savedPosition;
+        s->bookmark = self->bookmark;
         s->recycles = ((struct Stock*)self->stock)->recycles;
         s->savedPiles = ArrayNew(ArrayLen(self->piles));
         if (s->savedPiles) {
@@ -171,7 +173,7 @@ static void SnapshotFree(struct Snapshot *s)
 
 static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
 {
-    fprintf(f, "#%lu %lu %d\n", index, s->savedPosition, s->recycles);
+    fprintf(f, "#%lu %lu %d\n", index, s->bookmark, s->recycles);
 
     size_t pindex;
     for ( struct SavedCardArray *sca = ArrayFirst(s->savedPiles, &pindex); sca; sca = ArrayNext(s->savedPiles, &pindex) ) {
@@ -240,9 +242,9 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
             self->stock->vtable->SetRecycles(self->stock, snap->recycles);
         }
 
-        self->savedPosition = snap->savedPosition;
+        self->bookmark = snap->bookmark;
 
-        // TODO scrunch this pile
+        ScrunchPile(dstPile);
     }
 }
 
@@ -254,9 +256,9 @@ void BaizeSavePositionCommand(struct Baize *const self, void* param)
         UiToast(self->ui, "Cannot bookmark a completed game");
         return;
     }
-    self->savedPosition = ArrayLen(self->undoStack);
+    self->bookmark = ArrayLen(self->undoStack);
     UiToast(self->ui, "Position bookmarked");
-    // fprintf(stdout, "undoStack %lu savedPosition %lu\n", ArrayLen(self->undoStack), self->savedPosition);
+    // fprintf(stdout, "undoStack %lu bookmark %lu\n", ArrayLen(self->undoStack), self->bookmark);
 }
 
 void BaizeLoadPositionCommand(struct Baize *const self, void* param)
@@ -265,7 +267,7 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
 
     // fprintf(stderr, "undoStack 1 %lu\n", ArrayLen(self->undoStack));
 
-    if ( self->savedPosition == 0 || self->savedPosition > ArrayLen(self->undoStack) ) {
+    if ( self->bookmark == 0 || self->bookmark > ArrayLen(self->undoStack) ) {
         UiToast(self->ui, "No bookmark");
         return;
     }
@@ -275,7 +277,7 @@ void BaizeLoadPositionCommand(struct Baize *const self, void* param)
     //     return;
     // }
     struct Snapshot *snapshot = NULL;
-    while ( ArrayLen(self->undoStack) + 1 > self->savedPosition ) {
+    while ( ArrayLen(self->undoStack) + 1 > self->bookmark ) {
         if ( snapshot ) {
             SnapshotFree(snapshot);
         }
@@ -304,7 +306,7 @@ void BaizeRestartDealCommand(struct Baize *const self, void* param)
         BaizeUpdateFromSnapshot(self, snapshot);
         SnapshotFree(snapshot);
     }
-    self->savedPosition = 0;
+    self->bookmark = 0;
     // do not run BaizeStartGame(self);!
     BaizeUndoPush(self);
 }
@@ -313,35 +315,11 @@ void BaizeUndo0(struct Baize *const self)
 {
     struct Snapshot *snap = ArrayPop(self->undoStack);    // removes current state
     if (!snap) {
-        CSOL_ERROR("popping from undo stack of length %lu", ArrayLen(self->undoStack));
+        CSOL_ERROR("no snap when popping from undo stack of length %lu", ArrayLen(self->undoStack));
         return;
     }
     BaizeUpdateFromSnapshot(self, snap);
     SnapshotFree(snap);
-}
-
-void BaizeUndo(struct Baize *const self)
-{
-    if ( ArrayLen(self->undoStack) < 2 ) {
-        CSOL_WARNING("%s", "Nothing to undo");
-        return;
-    }
-
-    struct Snapshot* snap = ArrayPop(self->undoStack);    // removes current state
-    if (!snap) {
-        CSOL_ERROR("%s", "popping from undo stack");
-        return;
-    }
-    SnapshotFree(snap);  // discard this one, it's the same as the current baize
-
-    snap = ArrayPeek(self->undoStack);
-    if (!snap) {
-        CSOL_ERROR("%s", "peeking from undo stack");
-        return;
-    }
-    BaizeUpdateFromSnapshot(self, snap);
-
-    BaizeUpdateStatusBar(self);
 }
 
 void BaizeUndoCommand(struct Baize *const self, void* param)
@@ -359,7 +337,21 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
     //     return;
     // }
 
-    BaizeUndo(self);
+    struct Snapshot* snap = ArrayPop(self->undoStack);    // removes current state
+    if (!snap) {
+        CSOL_ERROR("%s", "popping from undo stack");
+        return;
+    }
+    SnapshotFree(snap);  // discard this one, it's the same as the current baize
+
+    snap = ArrayPeek(self->undoStack);
+    if (!snap) {
+        CSOL_ERROR("%s", "peeking from undo stack");
+        return;
+    }
+    BaizeUpdateFromSnapshot(self, snap);    // this was Peeked, so don't you go trying to free it
+
+    BaizeUpdateStatusBar(self);
 }
 
 #include <sys/types.h>
@@ -469,42 +461,39 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
         */
 
         if (fscanf(f, "VARIANT=%[^\n]s", variantName) != 1) {
-            fprintf(stderr, "ERROR: %s: cannot read VARIANT=\n", __func__);
+            CSOL_ERROR("%s", "cannot read VARIANT=");
             return NULL;
         }
-// fprintf(stdout, "VARIANT='%s'\n", variantName);
         // prepend a space to 'PILES=' to consume \n
         if (fscanf(f, " PILES=%lu", &pileCount) != 1) {
-            fprintf(stderr, "ERROR: %s: cannot read PILES=\n", __func__);
+            CSOL_ERROR("%s", "cannot read PILES=");
             return NULL;
         }
-// fprintf(stdout, "PILES='%lu'\n", pileCount);
         // prepend a space to 'UNDOSTACK=' to consume \n
         if (fscanf(f, " UNDOSTACK=%lu", &stackDepth) != 1) {
-            fprintf(stderr, "ERROR: %s: cannot read UNDOSTACK=\n", __func__);
+            CSOL_ERROR("%s", "cannot read UNDOSTACK=");
             return NULL;
         }
-// fprintf(stdout, "UNDOSTACK='%lu'\n", stackDepth);
 
         undoStack = ArrayNew(stackDepth + 16);
         for ( size_t n=0; n<stackDepth; n++) {
             size_t ncheck = 0xdeadbeef;
-            size_t savedPosition;
+            size_t bookmark;
             int recycles;
             // prepend a space to '#' to consume \n
-            if (fscanf(f, " #%lu %lu %d", &ncheck, &savedPosition, &recycles) != 3) {
-                fprintf(stderr, "ERROR: %s: incorrect read of saved pile, expecting #number bookmark recycles\n", __func__);
+            if (fscanf(f, " #%lu %lu %d", &ncheck, &bookmark, &recycles) != 3) {
+                CSOL_ERROR("%s", "incorrect read of saved pile, expecting #number bookmark recycles");
                 goto fclose_label;
             }
             if (n != ncheck) {
-                fprintf(stderr, "ERROR: %s: saved pile miscount %lu != %lu\n", __func__, n, ncheck);
+                CSOL_ERROR("saved pile miscount %lu != %lu", n, ncheck);
                 goto fclose_label;
             }
             struct Snapshot *snap = calloc(1, sizeof(struct Snapshot));
             if (!snap) {
                 goto fclose_label;
             }
-            snap->savedPosition = savedPosition;
+            snap->bookmark = bookmark;
             snap->recycles = recycles;
             snap->savedPiles = ArrayNew(pileCount);
             if (!snap->savedPiles) {
@@ -519,7 +508,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                 size_t cards;
 
                 if (fscanf(f, "%s %lu:", label, &cards) != 2) {
-                    fprintf(stderr, "ERROR: %s: expecting <label> <cards>:\n", __func__);
+                    CSOL_ERROR("%s", "expecting <label> <cards>:");
                     goto fclose_label;
                 }
 
@@ -536,7 +525,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
                     int index, prone;
                     unsigned int number;
                     if (fscanf(f, " %u", &number) != 1) {
-                        fprintf(stderr, "ERROR: %s: expecting card index<<1|prone\n", __func__);
+                        CSOL_ERROR("%s", "expecting card index<<1|prone");
                         goto fclose_label;
                     }
                     index = number >> 1;
@@ -553,12 +542,11 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
     }
 
 #ifdef _DEBUG
-    fprintf(stdout, "INFO: %s: state loaded from %s for '%s'\n", __func__, fname, variantName);
+    CSOL_INFO("state loaded from %s for '%s'", fname, variantName);
     if (undoStack)
-        fprintf(stdout, "INFO: %s: returning undo stack of length %lu\n", __func__, ArrayLen(undoStack));
+        CSOL_INFO("returning undo stack of length %lu", ArrayLen(undoStack));
     else
-        fprintf(stdout, "INFO: %s: returning null undo stack\n", __func__);
-
+        CSOL_INFO("%s", "returning null undo stack");
 #endif
 
     return undoStack;

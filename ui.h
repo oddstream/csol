@@ -47,14 +47,12 @@ struct WidgetVtable {
     void (*Update)(struct Widget *const self);
     void (*Draw)(struct Widget *const self);
     void (*Free)(struct Widget *const self);
-    // NotifyCallback
 };
 
 struct Widget {
     struct WidgetVtable *vtable;
     struct Container *parent;
     int align;  // alignment in parent container: left=-1, center=0, right=+1
-    // _Bool disabled;
     CommandFunction bcf;
     void* param;        // NULL, or a pointer to a block of memory, owned by the widget
     Rectangle rect;    // x, y relative to parent
@@ -80,7 +78,6 @@ struct TextWidget {
     Font *font;
     float fontSize;
     char *text;
-    Vector2 mte;    // cached result from MeasureTextEx()
 };
 
 struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, Font *font, float fontSize, int align, CommandFunction cf, void* param);

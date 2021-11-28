@@ -282,6 +282,7 @@ static void DrawUnicodeCard(struct Card *const self, struct Pack *const pack, _B
     DrawTextCodepoint(pack->unicodeFont, glyph, cpos, pack->width * pack->unicodeFontExpansion, cardColor);
 }
 
+#if 0
 static void DrawScaledCard(struct Card *const self, struct Pack *const pack, _Bool showFace)
 {
     static int suitSymbol[4] = {
@@ -313,6 +314,7 @@ static void DrawScaledCard(struct Card *const self, struct Pack *const pack, _Bo
         DrawRectangleRoundedLines(rc, pack->roundness, 9, 2.0f, (Color){192,192,192,255}); // Silver
     }
 }
+#endif
 
 void CardDraw(struct Card *const self)
 {
@@ -397,7 +399,7 @@ void CardDraw(struct Card *const self)
     } else if (pack->unicodeFont.baseSize) {
         DrawUnicodeCard(self, pack, showFace);
     } else {
-        DrawScaledCard(self, pack, showFace);
+        // DrawScaledCard(self, pack, showFace);
     }
 }
 

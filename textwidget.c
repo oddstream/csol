@@ -23,7 +23,6 @@ struct TextWidget* TextWidgetNew(struct Container *parent, enum IconName frame, 
         self->font = font;
         self->fontSize = fontSize;
         self->text = NULL;
-        self->mte = (Vector2){0};
     }
     return self;
 }
@@ -32,21 +31,24 @@ void TextWidgetSetText(struct TextWidget *const self, const char* text)
 {
     extern float fontSpacing;
 
-    if ( self->text ) {
+    if (self->text) {
         free(self->text);
         self->text = NULL;
     }
-    if ( text ) {
+    if (text) {
         self->text = UtilStrDup(text);
-        self->mte = MeasureTextEx(*(self->font), text, self->fontSize, fontSpacing);
-        if ( self->frame == NONE ) {
-            self->super.rect.width = self->mte.x;
-            self->super.rect.height = self->mte.y;
+        Vector2 mte = MeasureTextEx(*(self->font), self->text, self->fontSize, fontSpacing);
+        if (self->frame == NONE) {
+            self->super.rect.width = mte.x;
+            self->super.rect.height = mte.y;
         } else {
-            self->super.rect.width = ICON_SIZE + self->mte.x;
-            self->super.rect.height = ICON_SIZE + self->mte.y;
+            self->super.rect.width = ICON_SIZE + WIDGET_PADDING + mte.x;
+            self->super.rect.height = ICON_SIZE;
         }
     }
+    // the size of this widget has changed, so it needs to be repositioned in it's parent container
+    struct Widget *w = (struct Widget*)self;
+    w->parent->vtable->Layout(w->parent, GetScreenWidth(), GetScreenHeight());
 }
 
 void TextWidgetDraw(struct Widget *const self)
@@ -62,13 +64,19 @@ void TextWidgetDraw(struct Widget *const self)
     Vector2 pos;
     pos.x = con->rect.x + self->rect.x;
     pos.y = con->rect.y + self->rect.y;
+
+    // draw the icon, if there is one
     if ( tw->frame != NONE ) {
         extern struct Spritesheet *ssIcons;
-        Rectangle rectIcon = WidgetScreenRect(&(tw->super));
+        Rectangle rectIcon = WidgetScreenRect((struct Widget*)tw);
         rectIcon.width = ICON_SIZE;
         rectIcon.height = ICON_SIZE;
 
         if (!UtilRectangleWithinRectangle(rectIcon, con->rect)) {
+#ifdef _DEBUG
+            Rectangle r = WidgetScreenRect((struct Widget*)tw);
+            DrawRectangleLines(r.x, r.y, r.width, r.height, RED);
+#endif
             return;
         }
         if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
@@ -76,22 +84,31 @@ void TextWidgetDraw(struct Widget *const self)
             rectIcon.y += 2.0f;
         }
         SpritesheetDraw(ssIcons, tw->frame, 1.0f, 0.0f, rectIcon);
-
-        pos.x += ICON_SIZE;
     }
+
+    // draw the text to the right of the icon
     if ( tw->text ) {
-        Rectangle rectText = WidgetScreenRect(&(tw->super));
-        if (!UtilRectangleWithinRectangle(rectText, con->rect)) {
-            return;
-        }
+        Rectangle rectText = WidgetScreenRect((struct Widget*)tw);
+
         if ( tw->frame != NONE ) {
+            pos.x += ICON_SIZE;
             pos.x += WIDGET_PADDING;
             pos.y += WIDGET_PADDING / 2.0f;//self->parent->rect.y + (ICON_SIZE / 2.0f) - (self->rect.height / 2.0f);
         }
+
+        if (!UtilRectangleWithinRectangle(rectText, con->rect)) {
+#ifdef _DEBUG
+            Rectangle r = WidgetScreenRect((struct Widget*)tw);
+            DrawRectangleLines(r.x, r.y, r.width, r.height, RED);
+#endif
+            return;
+        }
+
         if ( self->bcf && CheckCollisionPointRec(GetMousePosition(), WidgetScreenRect(self)) ) {
             pos.x += 2.0f;
             pos.y += 2.0f;
         }
+
         DrawTextEx(*(tw->font), tw->text, pos, tw->fontSize, fontSpacing, uiTextColor);
     }
 

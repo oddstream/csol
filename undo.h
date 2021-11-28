@@ -5,7 +5,7 @@
 
 struct Snapshot {
     int recycles;
-    size_t savedPosition;
+    size_t bookmark;
     struct Array *savedPiles;
 };
 
@@ -17,7 +17,6 @@ void BaizeSavePositionCommand(struct Baize *const self, void* param);
 void BaizeLoadPositionCommand(struct Baize *const self, void* param);
 void BaizeRestartDealCommand(struct Baize *const self, void* param);
 void BaizeUndo0(struct Baize *const self);
-void BaizeUndo(struct Baize *const self);
 void BaizeUndoCommand(struct Baize *const, void* param);
 
 void BaizeSaveUndoToFile(struct Baize *const self);

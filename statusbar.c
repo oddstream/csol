@@ -28,19 +28,17 @@ struct StatusBar* StatusBarNew(void)
 
 void StatusBarLayoutWidgets(struct Container *const self)
 {
-    const float padding = (14.0f);
-
     size_t index;
     for ( struct Widget *w = ArrayFirst(self->widgets, &index); w; w = ArrayNext(self->widgets, &index) ) {
         switch (w->align) {
         case -1:
-            w->rect.x = 0.0f + padding;
+            w->rect.x = 0.0f + WIDGET_PADDING;
             break;
         case 0:
-            w->rect.x = (self->rect.width / 2.0f) - (w->rect.width / 2.0f);
+            w->rect.x = (self->rect.width - w->rect.width) / 2.0f;
             break;
         case 1:
-            w->rect.x = self->rect.width - w->rect.width - padding;
+            w->rect.x = self->rect.width - w->rect.width - WIDGET_PADDING;
             break;
         default:
             break;
