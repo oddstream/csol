@@ -113,7 +113,7 @@ struct CardAndIndex PileFindCard(struct Pile *const self, enum CardOrdinal ord, 
     size_t index;
     for ( struct Card *c = ArrayFirst(self->cards, &index); c; c = ArrayNext(self->cards, &index) ) {
         if ( c->id.ordinal == ord && c->id.suit == suit ) {
-           return (struct CardAndIndex){.card=c, .index=index}; 
+           return (struct CardAndIndex){.card=c, .index=index};
         }
     }
     return (struct CardAndIndex){.card=NULL, .index=0};
@@ -356,24 +356,20 @@ Vector2 PilePosAfter(struct Pile *const self, struct Card *const c)
 
     struct Baize *baize = PileOwner(self);
     struct Pack *pack = baize->pack;
-    Vector2 pos;
+    Vector2 pos = CardTransitioning(c) ? c->lerpDst : c->pos;
     size_t i;
 
     /* K&R style switch formatting, see P59 if you don't believe me */
     switch (self->fanType) {
     case FAN_NONE:
-        pos = self->pos;
         break;
     case FAN_DOWN:
-        pos = CardTransitioning(c) ? c->lerpDst : c->pos;
         pos.y += (c->prone) ? pack->height / CARD_BACK_FAN_FACTOR : pack->height / self->fanFactor;
         break;
     case FAN_LEFT:
-        pos = CardTransitioning(c) ? c->lerpDst : c->pos;
         pos.x -= (c->prone) ? pack->width / CARD_BACK_FAN_FACTOR : pack->width / self->fanFactor;
         break;
     case FAN_RIGHT:
-        pos = CardTransitioning(c) ? c->lerpDst : c->pos;
         pos.x += (c->prone) ? pack->width / CARD_BACK_FAN_FACTOR : pack->width / self->fanFactor;
         break;
     case FAN_DOWN3:

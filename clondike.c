@@ -21,33 +21,34 @@ static void BuildPiles(struct Baize *const baize)
     baize->waste = (struct Pile*)WasteNew(baize, (Vector2){1, 0}, FAN_RIGHT3);
     baize->piles = ArrayPush(baize->piles, baize->waste);
 
-    for ( int x = 6; x < 10; x++ ) {
+    for ( int x = 3; x < 7; x++ ) {
         pile = (struct Pile*)FoundationNew(baize, (Vector2){x, 0}, FAN_NONE);
         baize->piles = ArrayPush(baize->piles, pile);
         baize->foundations = ArrayPush(baize->foundations, pile);
         pile->vtable->SetLabel(pile, "A");
     }
 
-    for ( int x = 0; x < 10; x++ ) {
+    for ( int x = 0; x < 7; x++ ) {
         pile = (struct Pile*)TableauNew(baize, (Vector2){x, 1}, FAN_DOWN, MOVE_ANY);
         baize->piles = ArrayPush(baize->piles, pile);
         baize->tableaux = ArrayPush(baize->tableaux, pile);
+        pile->vtable->SetLabel(pile, "K");
     }
 }
 
 static void StartGame(struct Baize *const baize)
 {
+    int deal = 1;
     size_t index;
     for ( struct Pile *pile = ArrayFirst(baize->tableaux, &index); pile; pile = ArrayNext(baize->tableaux, &index)) {
-        for ( int i=0; i<2; i++ ) {
+        for ( int i=0; i<deal-1; i++ ) {
             PileMoveCard(pile, baize->stock);
             CardFlipDown(PilePeekCard(pile));
         }
-    }
-    for ( struct Pile *pile = ArrayFirst(baize->tableaux, &index); pile; pile = ArrayNext(baize->tableaux, &index)) {
         PileMoveCard(pile, baize->stock);
+        deal++;
     }
-    baize->stock->vtable->SetRecycles(baize->stock, 1);
+    baize->stock->vtable->SetRecycles(baize->stock, 32767);
 }
 
 static void AfterMove(struct Baize *const baize)
@@ -57,7 +58,19 @@ static void AfterMove(struct Baize *const baize)
 
 static const char* TailMoveError(struct Array *const tail)
 {
-    (void)tail;
+    struct Card *c1 = ArrayGet(tail, 0);
+    struct Pile *pile = CardOwner(c1);
+    if (strcmp(pile->category, "Tableau")) {
+        const char *strerr = (void*)0;
+        struct Card *c2;
+        for ( size_t i=1; i<ArrayLen(pile->cards); i++) {
+            c2 = ArrayGet(pile->cards, i);
+            if ((strerr = CardCompare_DownSuit(c1, c2))) {
+                return strerr;
+            }
+            c1 = c2;
+        }
+    }
     return (void*)0;
 }
 
@@ -80,7 +93,7 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
         } else {
             struct Card *c1 = PilePeekCard(pile);
             struct Card *c2 = ArrayGet(tail, 0);
-            return CardCompare_DownSuit(c1, c2);
+            return CardCompare_DownAltColor(c1, c2);
         }
     } else if (strcmp(pile->category, "Waste")==0) {
         return "Waste can only accept cards from Stock";
@@ -96,7 +109,7 @@ static int PileUnsortedPairs(struct Pile *const pile)
     struct Card *c2;
     for ( size_t i=1; i<ArrayLen(pile->cards); i++) {
         c2 = ArrayGet(pile->cards, i);
-        if ((strerr = CardCompare_DownSuit(c1, c2))) {
+        if ((strerr = CardCompare_DownAltColor(c1, c2))) {
             unsorted = unsorted + 1;
         }
         c1 = c2;
@@ -154,7 +167,7 @@ static const char* Wikipedia(struct Baize *const baize)
     return "https://en.wikipedia.org/wiki/Solitaire";
 }
 
-static struct DriverInterface fallbackVtable = {
+static struct DriverInterface clondikeVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -167,7 +180,7 @@ static struct DriverInterface fallbackVtable = {
     &Wikipedia,
 };
 
-struct DriverInterface* GetFallbackInterface(void)
+struct DriverInterface* GetClondikeInterface(void)
 {
-    return &fallbackVtable;
+    return &clondikeVtable;
 }

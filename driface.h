@@ -29,9 +29,8 @@ struct DriverInterface {
 struct DriverInterface* GetInterface(struct Baize *const baize);
 
 struct DriverInterface* GetMoonGameInterface(void);
-struct DriverInterface* GetFallbackInterface(void);
+struct DriverInterface* GetClondikeInterface(void);
 struct DriverInterface* GetFreecellInterface(void);
-struct DriverInterface* GetKlondikeInterface(void);
 
 const char* CardCompare_Up(struct Card *const c1, struct Card *const c2);
 const char* CardCompare_Down(struct Card *const c1, struct Card *const c2);

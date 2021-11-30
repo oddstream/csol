@@ -23,14 +23,13 @@
 
 #define BAIZE_MAGIC (0x19910920)
 
-struct Baize* BaizeNew(const char *variantName, const char *packName)
+struct Baize* BaizeNew(const char *packName)
 {
     struct Baize* self = calloc(1, sizeof(struct Baize));
     if (!self) {
         return NULL;
     }
     self->magic = BAIZE_MAGIC;
-    strcpy(self->variantName, variantName);
     self->pack = PackCtor(packName);
     if (!self->pack) {
         self->pack = PackCtor("default"); // try a fallback
@@ -384,19 +383,14 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
     }
 
     // the UI is on top of the baize, so gets first dibs
-    // the Widget's container is at w->parent
     struct Widget *w = UiFindWidgetAt(self->ui, touchPosition);
     if (w) {
-        // ContainerStartDrag(w->parent, touchPosition);
+        // the Widget's container is w->parent
         w->parent->vtable->StartDrag(w->parent, touchPosition);
         self->touchedWidget = w;
     } else {
         struct Card* c = findCardAt(self, touchPosition);
         if (c) {
-            // record the distance from the card's origin to the tap point
-            // dx = touchPosition.x - c->pos.x;
-            // dy = touchPosition.y - c->pos.y;
-            // LOGCARD(c);
             if ( BaizeMakeTail(self, c) ) {
                 ArrayForeach(self->tail, (ArrayIterFunc)CardStartDrag);
             }
@@ -410,7 +404,7 @@ void BaizeTouchStart(struct Baize *const self, Vector2 touchPosition)
     if ( self->tail == NULL && self->touchedPile == NULL && self->touchedWidget == NULL ) {
         BaizeStartDrag(self);
     }
-    
+
     self->lastTouch = touchPosition;
 }
 
@@ -428,7 +422,6 @@ void BaizeTouchMove(struct Baize *const self, Vector2 touchPosition)
     } else if ( self->touchedPile ) {
         // do nothing, can't drag a pile
     } else if ( self->touchedWidget ) {
-        // ContainerDragBy(self->touchedWidget->parent, delta);
         self->touchedWidget->parent->vtable->DragBy(self->touchedWidget->parent, delta);
     } else if ( self->dragging ) {
         BaizeDragBy(self, delta);
@@ -466,7 +459,7 @@ void BaizeTouchStop(struct Baize *const self, Vector2 touchPosition)
                         if (p->vtable->CanAcceptTail(self, p, self->tail)) {
                             ArrayForeach(self->tail, (ArrayIterFunc)CardStopDrag);
                             // TODO special case:
-                            // dragging a card from Stock to Waste in Canfield, Klondike (Draw Three), 
+                            // dragging a card from Stock to Waste in Canfield, Klondike (Draw Three),
                             // may trigger two cards to follow
                             if ( PileMoveCards(p, c) ) {
                                 BaizeAfterUserMove(self);

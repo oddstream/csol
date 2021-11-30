@@ -26,7 +26,7 @@ int flag_nosave = 0;
 int flag_noshuf = 0;
 int flag_nodraw = 0;
 
-// int main(void) 
+// int main(void)
 int main(int argc, char* argv[], char* envp[])
 {
     (void)envp;
@@ -36,6 +36,12 @@ int main(int argc, char* argv[], char* envp[])
         CSOL_INFO("%d. %s", i, argv[i]);
     }
 #endif
+
+    /*
+        1. if there is a variant on the command line, start with a fresh game of that
+        2. if there is a saved.txt, start with that
+        3. start with a fresh game of Clondike
+    */
 
     char variantName[32];       memset(variantName, 0, sizeof(variantName));
     char packName[32];          memset(packName, 0, sizeof(packName));
@@ -198,24 +204,19 @@ int main(int argc, char* argv[], char* envp[])
     }
 #endif
 
-    struct Array *loadedUndoStack = LoadUndoFromFile(variantName);
-    if (loadedUndoStack) {
-        if (variantName[0] == '\0') {
-            CSOL_ERROR("%s", "variantName not set");
-        }
-        // that's fine
-    } else {
-        // strcpy(variantName, argc == 2 ? argv[1] : "Klondike");
-        if (variantName[0] == '\0') {
-            strcpy(variantName, "Klondike");
-        }
-        CSOL_INFO("starting a fresh '%s'", variantName);
-    }
-
-    struct Baize* baize = BaizeNew(variantName, packName);
+    struct Array *loadedUndoStack = variantName[0] == '\0' ? LoadUndoFromFile(variantName /* out */) : NULL;
+    struct Baize* baize = BaizeNew(packName[0] ? packName : "default");
     if ( BaizeValid(baize) ) {
-        StartCommandQueue();
 
+        if (variantName[0]) {
+            // variantName has been set from command line or saved.txt
+            strcpy(baize->variantName, variantName);
+        } else {
+            CSOL_INFO("%s", "variant name not set, using Clondike");
+            strcpy(baize->variantName, "Clondike");
+        }
+
+        StartCommandQueue();
         BaizeOpenLua(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize, loadedUndoStack);  // Baize takes ownership of loadedUndoStack

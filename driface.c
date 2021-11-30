@@ -16,17 +16,16 @@ struct knownInterface {
 };
 
 static struct knownInterface knownInterfaces[3] = {
-    { "Fallback", GetFallbackInterface  },
+    { "Clondike", GetClondikeInterface  },
     { "Freecell", GetFreecellInterface  },
-    { "Klondike", GetKlondikeInterface  },
 };
 
 struct DriverInterface* GetInterface(struct Baize *const baize)
 {
 #ifdef _DEBUG
     if (baize->variantName[0] == '\0') {
-        CSOL_ERROR("%s", "no variant name, using fallback");
-        strcpy(baize->variantName, "Fallback");
+        CSOL_ERROR("%s", "no variant name, using Clondike");
+        strcpy(baize->variantName, "Clondike");
     }
 #endif
 
@@ -52,8 +51,8 @@ struct DriverInterface* GetInterface(struct Baize *const baize)
     }
 
     if (!self) {
-        CSOL_INFO("Cannot find rules for game '%s', using fallback", baize->variantName);
-        self = GetFallbackInterface();
+        CSOL_INFO("Cannot find rules for game '%s', using Clondike", baize->variantName);
+        self = GetClondikeInterface();
     }
 
     return self;

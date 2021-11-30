@@ -47,7 +47,7 @@ struct Baize {
     char* errorString;
 };
 
-struct Baize* BaizeNew(const char *variantName, const char *packName);
+struct Baize* BaizeNew(const char *packName);
 _Bool BaizeValid(struct Baize *const self);
 unsigned BaizeCRC(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);

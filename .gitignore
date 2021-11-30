@@ -1,5 +1,5 @@
 .vscode/*
-csol
+gomps4
 *.o
 # assets/png/* are all autocreated from assets/svg/*
 assets/png/*
