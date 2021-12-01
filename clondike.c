@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "driface.h"
+#include "script.h"
 
 #include "pile.h"
 #include "foundation.h"
@@ -161,13 +161,12 @@ static int PercentComplete(struct Baize *const baize)
     return percent;
 }
 
-static const char* Wikipedia(struct Baize *const baize)
+static const char* Wikipedia(void)
 {
-    (void)baize;
     return "https://en.wikipedia.org/wiki/Solitaire";
 }
 
-static struct DriverInterface clondikeVtable = {
+static struct ScriptInterface clondikeVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -180,7 +179,7 @@ static struct DriverInterface clondikeVtable = {
     &Wikipedia,
 };
 
-struct DriverInterface* GetClondikeInterface(void)
+struct ScriptInterface* GetClondikeInterface(void)
 {
     return &clondikeVtable;
 }

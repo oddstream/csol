@@ -26,15 +26,15 @@ void LoadSettings(int *windowWidth, int *windowHeight)
         fprintf(stderr, "ERROR: %s: col.settings.lua: %s\n", __func__, lua_tostring(L, -1));
         lua_pop(L, 1);
     } else {
-        *windowWidth = LuaUtilGetGlobalInt(L, "WindowWidth", 640);
-        *windowHeight = LuaUtilGetGlobalInt(L, "WindowHeight", 480);
+        *windowWidth = LuaUtilGetGlobalInt("WindowWidth", 640);
+        *windowHeight = LuaUtilGetGlobalInt("WindowHeight", 480);
         int typ = lua_getglobal(L, "BaizeColor");
         if ( typ == LUA_TTABLE ) {
             float r, g, b, a;
-            r = LuaUtilGetFieldFloat(L, "red", 1);
-            g = LuaUtilGetFieldFloat(L, "green", 1);
-            b = LuaUtilGetFieldFloat(L, "blue", 1);
-            a = LuaUtilGetFieldFloat(L, "alpha", 1);
+            r = LuaUtilGetFieldFloat("red", 1);
+            g = LuaUtilGetFieldFloat("green", 1);
+            b = LuaUtilGetFieldFloat("blue", 1);
+            a = LuaUtilGetFieldFloat("alpha", 1);
             baizeColor = (Color){.r=r*255, .g=g*255, .b=b*255, .a=a*255};
         } else {
             baizeColor = DARKGREEN;

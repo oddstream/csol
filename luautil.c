@@ -7,9 +7,58 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "baize.h"
+#include "moon.h"
+#include "pile.h"
+#include "tableau.h"
+
 #include "luautil.h"
 
-_Bool LuaUtilGetGlobalBool(lua_State* L, const char* var, const _Bool def)
+extern lua_State *L;
+
+void OpenLua(struct Baize *const baize)
+{
+    // nb there isn't a luaL_resetstate() so any globals set in one variant end up in the next
+    L = luaL_newstate();
+    luaL_openlibs(L);
+
+    MoonRegisterFunctions(L);
+
+    // create a handle to this Baize inside Lua TODO maybe not needed
+    lua_pushlightuserdata(L, baize);      lua_setglobal(L, "BAIZE");
+
+    lua_pushinteger(L, FAN_NONE);         lua_setglobal(L, "FAN_NONE");
+    lua_pushinteger(L, FAN_DOWN);         lua_setglobal(L, "FAN_DOWN");
+    lua_pushinteger(L, FAN_LEFT);         lua_setglobal(L, "FAN_LEFT");
+    lua_pushinteger(L, FAN_RIGHT);        lua_setglobal(L, "FAN_RIGHT");
+    lua_pushinteger(L, FAN_DOWN3);        lua_setglobal(L, "FAN_DOWN3");
+    lua_pushinteger(L, FAN_LEFT3);        lua_setglobal(L, "FAN_LEFT3");
+    lua_pushinteger(L, FAN_RIGHT3);       lua_setglobal(L, "FAN_RIGHT3");
+
+    lua_pushinteger(L, MOVE_ANY);         lua_setglobal(L, "MOVE_ANY");
+    lua_pushinteger(L, MOVE_ONE);         lua_setglobal(L, "MOVE_ONE");
+    lua_pushinteger(L, MOVE_ONE_PLUS);    lua_setglobal(L, "MOVE_ONE_PLUS");
+    lua_pushinteger(L, MOVE_ONE_OR_ALL);  lua_setglobal(L, "MOVE_ONE_OR_ALL");
+
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Cell");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Discard");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Foundation");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Label");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Reserve");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Stock");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Tableau");
+    lua_createtable(L, 0, 0);             lua_setglobal(L, "Waste");
+}
+
+void CloseLua()
+{
+    if (L) {
+        lua_close(L);
+        L = NULL;
+    }
+}
+
+_Bool LuaUtilGetGlobalBool(const char* var, const _Bool def)
 {
     _Bool result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
@@ -29,7 +78,7 @@ _Bool LuaUtilGetGlobalBool(lua_State* L, const char* var, const _Bool def)
     return result;
 }
 
-int LuaUtilGetGlobalInt(lua_State* L, const char* var, const int def)
+int LuaUtilGetGlobalInt(const char* var, const int def)
 {
     int result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
@@ -54,7 +103,7 @@ int LuaUtilGetGlobalInt(lua_State* L, const char* var, const int def)
     return result;
 }
 
-float LuaUtilGetGlobalFloat(lua_State* L, const char* var, const float def)
+float LuaUtilGetGlobalFloat(const char* var, const float def)
 {
     float result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
@@ -79,7 +128,7 @@ float LuaUtilGetGlobalFloat(lua_State* L, const char* var, const float def)
     return result;
 }
 
-const char* LuaUtilGetGlobalString(lua_State* L, const char* var, const char* def)
+const char* LuaUtilGetGlobalString(const char* var, const char* def)
 {
     const char* result = def;
     // fprintf(stderr, "stack %d\n", lua_gettop(L));
@@ -100,7 +149,7 @@ const char* LuaUtilGetGlobalString(lua_State* L, const char* var, const char* de
     return result;
 }
 
-float LuaUtilGetFieldFloat(lua_State* L, const char* key, const float def)
+float LuaUtilGetFieldFloat(const char* key, const float def)
 {
     // assumes table is on top of stack
     float result = def;
@@ -123,7 +172,7 @@ float LuaUtilGetFieldFloat(lua_State* L, const char* key, const float def)
     return result;
 }
 
-_Bool LuaUtilSetupTableMethod(lua_State *L, const char *table, const char *method)
+_Bool LuaUtilSetupTableMethod(const char *table, const char *method)
 {
     int typ = lua_getglobal(L, table);
     if (typ != LUA_TTABLE) {

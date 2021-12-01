@@ -1,4 +1,4 @@
-/* driface.c */
+/* script.c */
 
 #include <string.h>
 
@@ -7,20 +7,22 @@
 #include <lualib.h>
 
 #include "card.h"
-#include "driface.h"
+#include "script.h"
 #include "trace.h"
 
-struct knownInterface {
+extern lua_State *L;
+
+struct builtinInterface {
     char name[32];
-    struct DriverInterface* (*Get)(void);
+    struct ScriptInterface* (*Get)(void);
 };
 
-static struct knownInterface knownInterfaces[3] = {
+static struct builtinInterface builtinInterfaces[2] = {
     { "Clondike", GetClondikeInterface  },
     { "Freecell", GetFreecellInterface  },
 };
 
-struct DriverInterface* GetInterface(struct Baize *const baize)
+struct ScriptInterface* GetInterface(struct Baize *const baize)
 {
 #ifdef _DEBUG
     if (baize->variantName[0] == '\0') {
@@ -29,18 +31,18 @@ struct DriverInterface* GetInterface(struct Baize *const baize)
     }
 #endif
 
-    struct DriverInterface *self = (void*)0;
+    struct ScriptInterface *self = (void*)0;
 
     // try to find a Lua scripted game first, so inbuilt games can be overridden
     char fname[128];    snprintf(fname, 127, "variants/%s.lua", baize->variantName);
-    if ( luaL_loadfile(baize->L, fname) || lua_pcall(baize->L, 0, 0, 0) ) {
-        CSOL_ERROR("Cannot find script for game '%s', error: %s", baize->variantName, lua_tostring(baize->L, -1));
-        lua_pop(baize->L, 1);
+    if ( luaL_loadfile(L, fname) || lua_pcall(L, 0, 0, 0) ) {
+        CSOL_ERROR("Cannot find script for game '%s', error: %s", baize->variantName, lua_tostring(L, -1));
+        lua_pop(L, 1);
 
         // try to find an inbuilt interface
-        for ( size_t i=0; i<sizeof(knownInterfaces)/sizeof(struct knownInterface); i++ ) {
-            if (strcmp(knownInterfaces[i].name, baize->variantName) == 0) {
-                self = knownInterfaces[i].Get();
+        for ( size_t i=0; i<sizeof(builtinInterfaces)/sizeof(struct builtinInterface); i++ ) {
+            if (strcmp(builtinInterfaces[i].name, baize->variantName) == 0) {
+                self = builtinInterfaces[i].Get();
                 break;
             }
         }

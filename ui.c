@@ -136,7 +136,7 @@ struct UI* UiNew(void)
                 TextWidgetSetText(tw, "Restart deal");
                 self->navDrawer->super.super.widgets = ArrayPush(self->navDrawer->super.super.widgets, tw);
             }
-            tw = TextWidgetNew((struct Container*)self->navDrawer, SEARCH, &fontRobotoMedium24, 24.0f, -1, BaizeFindGameCommand, NULL);
+            tw = TextWidgetNew((struct Container*)self->navDrawer, SEARCH, &fontRobotoMedium24, 24.0f, -1, BaizeFindVariantCommand, NULL);
             if ( tw ) {
                 TextWidgetSetText(tw, "Find game...");
                 self->navDrawer->super.super.widgets = ArrayPush(self->navDrawer->super.super.widgets, tw);

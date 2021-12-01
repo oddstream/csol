@@ -8,7 +8,7 @@
 #include <lualib.h>
 
 #include "array.h"
-#include "driface.h"
+#include "script.h"
 #include "pack.h"
 #include "pile.h"
 
@@ -21,9 +21,7 @@ struct Baize {
     struct Card *cardLibrary;
     struct Pack *pack;
 
-    lua_State *L;
-
-    struct DriverInterface *driface;          // interface to the rules and logic for variant
+    struct ScriptInterface *script;          // interface to the rules and logic for variant
 
     struct Array *piles;
     struct Pile *stock;         // a struct Stock*
@@ -52,8 +50,6 @@ _Bool BaizeValid(struct Baize *const self);
 unsigned BaizeCRC(struct Baize *const self);
 void BaizeResetError(struct Baize *const self);
 void BaizeSetError(struct Baize *const self, const char *str);
-void BaizeOpenLua(struct Baize *const self);
-void BaizeCloseLua(struct Baize *const self);
 void BaizeCreatePiles(struct Baize *const self);
 void BaizeResetState(struct Baize *const self, struct Array *undoStack);
 void BaizeRefan(struct Baize *const self);
@@ -84,7 +80,7 @@ void BaizeTailTapped(struct Baize *const self);
 void BaizePileTapped(struct Baize *const self, struct Pile *const c);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);
 void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
-void BaizeFindGameCommand(struct Baize *const self, void* param);
+void BaizeFindVariantCommand(struct Baize *const self, void* param);
 void BaizeReloadVariantCommand(struct Baize *const self, void* param);
 void BaizeChangeVariantCommand(struct Baize *const self, void* param);
 void BaizeChangePackCommand(struct Baize *const baize, void* param);

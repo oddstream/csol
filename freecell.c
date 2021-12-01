@@ -1,6 +1,6 @@
 /* freecell.c */
 
-#include "driface.h"
+#include "script.h"
 
 static void BuildPiles(struct Baize *const baize)
 {
@@ -52,13 +52,12 @@ static int PercentComplete(struct Baize *const baize)
     return 0;
 }
 
-static const char* Wikipedia(struct Baize *const baize)
+static const char* Wikipedia(void)
 {
-    (void)baize;
     return "https://en.wikipedia.org/wiki/FreeCell";
 }
 
-static struct DriverInterface freecellVtable = {
+static struct ScriptInterface freecellVtable = {
     &BuildPiles,
     &StartGame,
     &AfterMove,
@@ -71,7 +70,7 @@ static struct DriverInterface freecellVtable = {
     &Wikipedia,
 };
 
-struct DriverInterface* GetFreecellInterface(void)
+struct ScriptInterface* GetFreecellInterface(void)
 {
     return &freecellVtable;
 }

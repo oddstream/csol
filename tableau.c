@@ -167,7 +167,7 @@ int TableauUnsortedPairs(struct Pile *const self)
 {
     if (PileLen(self) > 1) {
         struct Baize *const baize = PileOwner(self);
-        return baize->driface->PileUnsortedPairs(self);
+        return baize->script->PileUnsortedPairs(self);
     } else {
         return 0;
     }

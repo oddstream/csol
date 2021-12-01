@@ -1,4 +1,4 @@
-/* driface.h */
+/* script.h */
 
 #ifndef GAME_H
 #define GAME_H
@@ -9,7 +9,7 @@
 #include "baize.h"
 #include "pile.h"
 
-struct DriverInterface {
+struct ScriptInterface {
     void (*BuildPiles)(struct Baize *const baize);
     void (*StartGame)(struct Baize *const baize);
     void (*AfterMove)(struct Baize *const baize);
@@ -23,14 +23,14 @@ struct DriverInterface {
 
     int (*PercentComplete)(struct Baize *const baize);
 
-    const char* (*Wikipedia)(struct Baize *const baize);
+    const char* (*Wikipedia)(void);
 };
 
-struct DriverInterface* GetInterface(struct Baize *const baize);
+struct ScriptInterface* GetInterface(struct Baize *const baize);
 
-struct DriverInterface* GetMoonGameInterface(void);
-struct DriverInterface* GetClondikeInterface(void);
-struct DriverInterface* GetFreecellInterface(void);
+struct ScriptInterface* GetMoonGameInterface(void);
+struct ScriptInterface* GetClondikeInterface(void);
+struct ScriptInterface* GetFreecellInterface(void);
 
 const char* CardCompare_Up(struct Card *const c1, struct Card *const c2);
 const char* CardCompare_Down(struct Card *const c1, struct Card *const c2);

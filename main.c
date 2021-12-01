@@ -5,13 +5,20 @@
 #include <string.h>
 #include <getopt.h>
 
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
 #include <raylib.h>
 
 #include "baize.h"
 #include "command.h"
+#include "luautil.h"
 #include "spritesheet.h"
 #include "trace.h"
 #include "undo.h"
+
+lua_State *L = (void*)0;
 
 float pilePaddingX, pilePaddingY, leftMargin, topMargin;
 
@@ -217,16 +224,16 @@ int main(int argc, char* argv[], char* envp[])
         }
 
         StartCommandQueue();
-        BaizeOpenLua(baize);
+        OpenLua(baize);
         BaizeCreatePiles(baize);
         BaizeResetState(baize, loadedUndoStack);  // Baize takes ownership of loadedUndoStack
         if (loadedUndoStack) {
             BaizeUndo0(baize);
             if (ArrayLen(baize->undoStack) == 1) {
-                baize->driface->StartGame(baize);
+                baize->script->StartGame(baize);
             }
         } else {
-            baize->driface->StartGame(baize);
+            baize->script->StartGame(baize);
         }
         BaizeUndoPush(baize);
 
@@ -241,8 +248,8 @@ int main(int argc, char* argv[], char* envp[])
         StopCommandQueue();
 
         BaizeSaveUndoToFile(baize);
-        BaizeCloseLua(baize);
         BaizeFree(baize);
+        CloseLua();
     }
 
     CloseWindow();

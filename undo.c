@@ -200,7 +200,7 @@ static void BaizeUpdateStatusBar(struct Baize *const self)
     if (BaizeComplete(self)) {
         strcpy(zRight, "COMPLETE");
     } else {
-        sprintf(zRight, "PROGRESS: %d%%", self->driface->PercentComplete(self));
+        sprintf(zRight, "PROGRESS: %d%%", self->script->PercentComplete(self));
     }
 
     UiUpdateStatusBar(self->ui, zLeft, zCenter, zRight);

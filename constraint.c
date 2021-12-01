@@ -16,7 +16,7 @@ _Bool CanTailBeMoved(struct Array *const tail)
     struct Pile *const pile = CardOwner(c0);
     struct Baize *const baize = PileOwner(pile);
 
-    const char *strerr = baize->driface->TailMoveError(tail);
+    const char *strerr = baize->script->TailMoveError(tail);
     if (strerr) {
         BaizeSetError(baize, strerr);
         return 0;
@@ -37,7 +37,7 @@ _Bool CanTailBeAppended(struct Pile *const pile, struct Array *const tail)
     }
 
     struct Baize *const baize = PileOwner(pile);
-    const char *strerr = baize->driface->TailAppendError(pile, tail);
+    const char *strerr = baize->script->TailAppendError(pile, tail);
     if (strerr) {
         BaizeSetError(baize, strerr);
         return 0;
