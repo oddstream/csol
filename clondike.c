@@ -25,28 +25,28 @@ static void BuildPiles(struct Baize *const baize)
         pile = (struct Pile*)FoundationNew(baize, (Vector2){x, 0}, FAN_NONE);
         baize->piles = ArrayPush(baize->piles, pile);
         baize->foundations = ArrayPush(baize->foundations, pile);
-        pile->vtable->SetLabel(pile, "A");
+        PileSetLabel(pile, "A");
     }
 
     for ( int x = 0; x < 7; x++ ) {
         pile = (struct Pile*)TableauNew(baize, (Vector2){x, 1}, FAN_DOWN, MOVE_ANY);
         baize->piles = ArrayPush(baize->piles, pile);
         baize->tableaux = ArrayPush(baize->tableaux, pile);
-        pile->vtable->SetLabel(pile, "K");
+        PileSetLabel(pile, "K");
     }
 }
 
 static void StartGame(struct Baize *const baize)
 {
-    int deal = 1;
+    int dealDown = 0;
     size_t index;
     for ( struct Pile *pile = ArrayFirst(baize->tableaux, &index); pile; pile = ArrayNext(baize->tableaux, &index)) {
-        for ( int i=0; i<deal-1; i++ ) {
+        for ( int i=0; i<dealDown; i++ ) {
             PileMoveCard(pile, baize->stock);
             CardFlipDown(PilePeekCard(pile));
         }
+        dealDown++;
         PileMoveCard(pile, baize->stock);
-        deal++;
     }
     baize->stock->vtable->SetRecycles(baize->stock, 32767);
 }
@@ -89,7 +89,7 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
         }
     } else if (strcmp(pile->category, "Tableau")==0) {
         if (PileEmpty(pile)) {
-            return (void*)0;
+            ;
         } else {
             struct Card *c1 = PilePeekCard(pile);
             struct Card *c2 = ArrayGet(tail, 0);

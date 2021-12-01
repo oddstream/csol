@@ -338,7 +338,7 @@ int MoonPileLabel(lua_State *L)
         return 0;
     }
     if (lua_gettop(L) == 2 && lua_isstring(L, 2)) {
-        p->vtable->SetLabel(p, lua_tostring(L, 2));
+        PileSetLabel(p, lua_tostring(L, 2));
     }
     lua_pushstring(L, p->label);
     return 1;

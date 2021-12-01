@@ -23,7 +23,6 @@ static struct PileVtable stockVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &StockComplete,
-    &PileInertSetLabel,
     &StockSetRecycles,
     &PileGenericUnsortedPairs,
 

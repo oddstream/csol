@@ -20,7 +20,6 @@ static struct PileVtable tableauVtable = {
     &PileGenericTailTapped,
     &TableauCollect,
     &TableauComplete,
-    &PileGenericSetLabel,
     &PileInertSetRecycles,
     &TableauUnsortedPairs,
 

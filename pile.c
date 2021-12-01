@@ -72,6 +72,14 @@ size_t PileLen(struct Pile *const self)
     return ArrayLen(self->cards);
 }
 
+void PileSetLabel(struct Pile *const self, const char  *label)
+{
+    memset(self->label, 0, MAX_PILE_LABEL + 1);
+    if (*label) {
+        strncpy(self->label, label, MAX_PILE_LABEL);
+    }
+}
+
 void PilePushCard(struct Pile *const self, struct Card* c)
 {
     if (PileIsStock(self)) {

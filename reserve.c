@@ -19,7 +19,6 @@ static struct PileVtable reserveVtable = {
     &PileGenericTailTapped,
     &ReserveCollect,
     &ReserveComplete,
-    &PileGenericSetLabel,
     &PileInertSetRecycles,
     &PileGenericUnsortedPairs,
 

@@ -20,7 +20,6 @@ static struct PileVtable foundationVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &FoundationComplete,
-    &PileGenericSetLabel,
     &PileInertSetRecycles,
     &PileInertUnsortedPairs,
 

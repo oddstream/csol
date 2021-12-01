@@ -19,7 +19,6 @@ static struct PileVtable labelVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &PileInertComplete,
-    &LabelSetLabel,
     &PileInertSetRecycles,
     &PileInertUnsortedPairs,
 
@@ -37,22 +36,6 @@ struct Label* LabelNew(struct Baize *const baize, Vector2 slot, enum FanType fan
         self->super.vtable = &labelVtable;
     }
     return self;
-}
-
-void LabelSetLabel(struct Pile *const self, const char  *label)
-{
-    // extern float fontSpacing;
-
-    struct Baize *baize = PileOwner(self);
-    struct Pack *pack = baize->pack;
-
-    // fprintf(stdout, "INFO: %s: set %s label to '%s'\n", __func__, self->category, label);
-
-    if (pack->labelFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
-    memset(self->label, 0, MAX_PILE_LABEL + 1);
-    if (*label) {
-        strncpy(self->label, label, MAX_PILE_LABEL);
-    }
 }
 
 void LabelDraw(struct Pile *const self)

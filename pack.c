@@ -402,7 +402,7 @@ static struct Vector2 kenney48BackMap[15] = {
 static struct Pack Packs[] = {
     /*
         designated initializers:
-        omitted members are initialized as zero: 
+        omitted members are initialized as zero:
         "Omitted field members are implicitly initialized the same as objects that have static storage duration."
         (https://gcc.gnu.org/onlinedocs/gcc/Designated-Inits.html)
     */
@@ -458,7 +458,7 @@ static struct Pack Packs[] = {
         .name = "default",
         .width = 140.0f,
         .height = 190.0f,
-        .roundness = 0.05f, 
+        .roundness = 0.05f,
         .ssFaceMap = kenneyFaceMap,
         .ssBackMap = kenneyBackMap,
         .backMapEntries = 15,
@@ -561,7 +561,7 @@ struct Pack *PackCtor(const char *name)
         0x2666, /* black diamond */
         0x2665, /* black heart */
         0x2660, /* black spade */
-        0x267b, /* recycle */ 
+        0x267b, /* recycle */
     };
     self->symbolFont = LoadFontEx("assets/DejaVuSans.ttf", self->pileFontSize, symbolFontCodePoints, 5);
 
@@ -582,7 +582,7 @@ struct Pack *PackCtor(const char *name)
     if (self->unicodeFontFname) {
         int cardFontCodePoints[1+14*4]; // beware of Knights
         int i, *p = cardFontCodePoints;
-            
+
         *p++ = 0x1F0A0;   // Playing Card Back
         for ( i=0x1f0a1; i<0x1f0af; i++ ) // Spades
             *p++ = i;

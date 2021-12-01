@@ -179,7 +179,7 @@ void BaizeResetState(struct Baize *const self, struct Array *undoStack)
     self->touchedPile = NULL;
     self->touchedWidget = NULL;
 
-    self->dragOffset = (Vector2){.x=0.0f, .y=0.0f};
+    self->dragOffset = (Vector2){0};
     self->dragging = 0;
 }
 

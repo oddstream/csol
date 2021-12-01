@@ -97,26 +97,6 @@ _Bool PileInertComplete(struct Pile *const self)
     return 1;
 }
 
-void PileInertSetLabel(struct Pile *const self, const char *label)
-{
-    (void)self;
-    (void)label;
-}
-
-void PileGenericSetLabel(struct Pile *const self, const char *label)
-{
-    struct Baize *baize = PileOwner(self);
-    struct Pack *pack = baize->pack;
-
-    // fprintf(stdout, "INFO: %s: set %s label to '%s'\n", __func__, self->category, label);
-
-    if (pack->pileFontSize==0) fprintf(stderr, "ERROR: %s: pileFontSize is zero\n", __func__);
-    memset(self->label, 0, MAX_PILE_LABEL + 1);
-    if (*label) {
-        strncpy(self->label, label, MAX_PILE_LABEL);
-    }
-}
-
 void PileInertSetRecycles(struct Pile *const self, int r)
 {
     (void)self;

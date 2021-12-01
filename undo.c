@@ -30,7 +30,7 @@
 
     Bookmarking a position means remembering the current length of the undo stack.
 
-    Going back to a bookmark makes means popping saved states off the undo stack until it's length == the saved length, 
+    Going back to a bookmark makes means popping saved states off the undo stack until it's length == the saved length,
     restoring the baize from the last-popped state, and then pushing a new state onto the stack.
 */
 
@@ -100,7 +100,7 @@ static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Ca
 {
     char label[MAX_PILE_LABEL+1];
     decodeLabel(label, sca->label);
-    pile->vtable->SetLabel(pile, label);
+    PileSetLabel(pile, label);
 
     for ( size_t i=0; i<sca->len; i++ ) {
         struct SavedCard sc = sca->sav[i];
