@@ -48,7 +48,7 @@ static void StartGame(struct Baize *const baize)
         dealDown++;
         PileMoveCard(pile, baize->stock);
     }
-    baize->stock->vtable->SetRecycles(baize->stock, 32767);
+    ((struct Stock*)baize->stock)->recycles = 32767;
 }
 
 static void AfterMove(struct Baize *const baize)
@@ -65,7 +65,7 @@ static const char* TailMoveError(struct Array *const tail)
         struct Card *c2;
         for ( size_t i=1; i<ArrayLen(pile->cards); i++) {
             c2 = ArrayGet(pile->cards, i);
-            if ((strerr = CardCompare_DownSuit(c1, c2))) {
+            if ((strerr = CardCompare_DownAltColor(c1, c2))) {
                 return strerr;
             }
             c1 = c2;

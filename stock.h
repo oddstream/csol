@@ -20,7 +20,6 @@ _Bool StockCanMoveTail(struct Array *const tail);
 _Bool StockCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c);
 _Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, struct Array *const tail);
 _Bool StockComplete(struct Pile *const self);
-void StockSetRecycles(struct Pile *const self, int r);
 void StockDraw(struct Pile *const self);
 
 #endif

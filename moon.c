@@ -863,11 +863,12 @@ int MoonSwapCards(lua_State *L)
 int MoonStockRecycles(lua_State *L)
 {
     struct Baize *baize = getBaize(L);
+    struct Stock *stock = (struct Stock*)baize->stock;
 
     if (lua_isinteger(L, 1)) {
-        baize->stock->vtable->SetRecycles(baize->stock, lua_tointeger(L, 1));
+        stock->recycles = lua_tointeger(L, 1);
     }
-    lua_pushinteger(L, ((struct Stock*)baize->stock)->recycles);
+    lua_pushinteger(L, stock->recycles);
     return 1;
 }
 

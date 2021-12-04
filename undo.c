@@ -239,7 +239,7 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
         SavedCardArrayCopyToPile(sca, self->cardLibrary, dstPile);
 
         if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
-            self->stock->vtable->SetRecycles(self->stock, snap->recycles);
+            ((struct Stock*)self->stock)->recycles = snap->recycles;
         }
 
         self->bookmark = snap->bookmark;

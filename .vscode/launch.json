@@ -37,7 +37,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/gomps4",
-            "args": ["--pack=default"],
+            "args": ["--pack=default","--variant=Clondike","--noload","--nosave"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

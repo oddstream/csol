@@ -20,7 +20,6 @@ static struct PileVtable wasteVtable = {
     &PileGenericTailTapped,
     &WasteCollect,
     &WasteComplete,
-    &PileInertSetRecycles,
     &PileGenericUnsortedPairs,
 
     &PileReset,

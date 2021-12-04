@@ -11,7 +11,7 @@
 
 struct Discard {
     struct Pile super;
-    enum CardOrdinal accept;
+    // enum CardOrdinal accept;
 };
 
 struct Discard* DiscardNew(struct Baize *const baize, Vector2 pos, enum FanType fan);

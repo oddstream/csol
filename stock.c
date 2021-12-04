@@ -23,7 +23,6 @@ static struct PileVtable stockVtable = {
     &PileInertTailTapped,
     &PileInertCollect,
     &StockComplete,
-    &StockSetRecycles,
     &PileGenericUnsortedPairs,
 
     &StockReset,
@@ -151,12 +150,6 @@ _Bool StockCanAcceptTail(struct Baize *const baize, struct Pile *const self, str
 _Bool StockComplete(struct Pile *const self)
 {
     return PileEmpty(self);
-}
-
-void StockSetRecycles(struct Pile *const self, int r)
-{
-    struct Stock *s = (struct Stock *)self;
-    s->recycles = r;
 }
 
 void StockDraw(struct Pile *const self)

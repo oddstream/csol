@@ -127,7 +127,7 @@ const char* CardCompare_UpSuitWrap(struct Card *const c1, struct Card *const c2)
     else if (CardOrdinal(c1) == CardOrdinal(c2) - 1)
         return (void*)0;
     else
-        return "Cards must go up in rank (Kings on Aces allowed)";
+        return "Cards must go up in rank (Aces on Kings allowed)";
 }
 
 const char* CardCompare_DownSuitWrap(struct Card *const c1, struct Card *const c2)

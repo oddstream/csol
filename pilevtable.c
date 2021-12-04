@@ -97,12 +97,6 @@ _Bool PileInertComplete(struct Pile *const self)
     return 1;
 }
 
-void PileInertSetRecycles(struct Pile *const self, int r)
-{
-    (void)self;
-    (void)r;
-}
-
 int PileGenericUnsortedPairs(struct Pile *const self)
 {
     if (PileEmpty(self)) {
