@@ -456,8 +456,7 @@ void PileRefan(struct Pile *const self)
             // nothing to do
             break;
         case 2:
-            index = ArrayLen(self->cards);
-            c = ArrayGet(self->cards, --index);
+            c = ArrayGet(self->cards, 1);
             CardTransitionTo(c, self->pos1);
             break;
         default:

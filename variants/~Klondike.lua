@@ -11,7 +11,7 @@ end
 function BuildPiles()
     AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
     AddPile("Waste", 2, 1, FAN_RIGHT3)
-    
+
     for x = 4, 7 do
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])

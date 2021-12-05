@@ -75,9 +75,6 @@ void BaizeUpdate(struct Baize *const self);
 void BaizeDraw(struct Baize *const self);
 void BaizeFree(struct Baize *const self);
 
-void BaizeGetLuaGlobals(struct Baize *const self);
-void BaizeTailTapped(struct Baize *const self);
-void BaizePileTapped(struct Baize *const self, struct Pile *const c);
 void BaizeToggleNavDrawerCommand(struct Baize *const self, void* param);
 void BaizeToggleVariantDrawerCommand(struct Baize *const self, void* param);
 void BaizeFindVariantCommand(struct Baize *const self, void* param);

@@ -144,8 +144,9 @@ static void TailTapped(struct Array *const tail)
     struct Pile* pile = CardOwner(c0);
 
     if (!LuaUtilSetupTableMethod(pile->category, "TailTapped")) {
-        CSOL_INFO("%s.TailTapped is not a function, reverting to internal default (tail len %lu)", pile->category, ArrayLen(tail));
-        pile->vtable->TailTapped(pile, tail);
+        if (ArrayLen(tail) == 1) {
+            pile->vtable->CardTapped(c0);
+        }
     } else {
         // push one arg, the tail
         lua_pushlightuserdata(L, tail);
@@ -159,10 +160,7 @@ static void TailTapped(struct Array *const tail)
 
 static void PileTapped(struct Pile *const pile)
 {
-    if (!LuaUtilSetupTableMethod(pile->category, "PileTapped")) {
-        CSOL_INFO("%s.PileTapped is not a function, reverting to internal default", pile->category);
-        pile->vtable->PileTapped(pile);
-    } else {
+    if (LuaUtilSetupTableMethod(pile->category, "PileTapped")) {
         // push one arg, the (non-existant) tail
         lua_pushnil(L);
         // one arg (nil tail), no return (function can Toast itself for all I care)

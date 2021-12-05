@@ -31,26 +31,21 @@ _Bool PileInertCanAcceptTail(struct Baize *const baize, struct Pile *const self,
     return 0;
 }
 
-void PileInertPileTapped(struct Pile *const self)
+void CardInertTapped(struct Card *const c)
 {
-    (void)self;
+    (void)c;
 }
 
-void PileInertTailTapped(struct Pile *const self, struct Array *const tail)
+void CardGenericTapped(struct Card *const c)
 {
-    (void)self;
-    (void)tail;
-}
-
-void PileGenericTailTapped(struct Pile *const self, struct Array *const tail)
-{
-    struct Baize* baize = PileOwner(self);
+    struct Pile *pile = CardOwner(c);
+    struct Baize *baize = PileOwner(pile);
     size_t index;
     for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
-        if ( fp->vtable->CanAcceptTail(baize, fp, tail) ) {
-            struct Card *c = ArrayGet(tail, 0);
-            PileMoveCard(fp, CardOwner(c));
-            break;
+        if ( fp->vtable->CanAcceptCard(baize, fp, c) ) {
+            if ( PileMoveCard(fp, pile) ) {
+                break;
+            }
         }
     }
 }

@@ -63,8 +63,8 @@ static const char* TailMoveError(struct Array *const tail)
     if (strcmp(pile->category, "Tableau")) {
         const char *strerr = (void*)0;
         struct Card *c2;
-        for ( size_t i=1; i<ArrayLen(pile->cards); i++) {
-            c2 = ArrayGet(pile->cards, i);
+        for ( size_t i=1; i<ArrayLen(tail); i++) {
+            c2 = ArrayGet(tail, i);
             if ((strerr = CardCompare_DownAltColor(c1, c2))) {
                 return strerr;
             }
@@ -122,12 +122,14 @@ static void TailTapped(struct Array *const tail)
     struct Card *c1 = ArrayGet(tail, 0);
     struct Pile *pile = CardOwner(c1);
     struct Baize *baize = PileOwner(pile);
-    if (pile == baize->stock) {
+    if (strcmp(pile->category, "Stock") == 0) {
         if (ArrayLen(baize->stock->cards) > 0) {
             PileMoveCard(baize->waste, baize->stock);
         }
     } else {
-        pile->vtable->TailTapped(pile, tail);
+        if (ArrayLen(tail) == 1) {
+            pile->vtable->CardTapped(c1);
+        }
     }
 }
 
@@ -142,8 +144,6 @@ static void PileTapped(struct Pile *const pile)
             }
             s->recycles -= 1;
         }
-    } else {
-        pile->vtable->PileTapped(pile);
     }
 }
 
