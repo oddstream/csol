@@ -244,6 +244,7 @@ int MoonAddPile(lua_State* L)
         p = (struct Pile*)CellNew(baize, (Vector2){x, y}, fan);
     } else if ( strcmp(category, "Discard") == 0 ) {
         p = (struct Pile*)DiscardNew(baize, (Vector2){x, y}, fan);
+        baize->discards = ArrayPush(baize->discards, p);
     } else if ( strcmp(category, "Foundation") == 0 ) {
         p = (struct Pile*)FoundationNew(baize, (Vector2){x, y}, fan);
         baize->foundations = ArrayPush(baize->foundations, p);

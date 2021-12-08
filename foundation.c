@@ -68,10 +68,6 @@ _Bool FoundationCanAcceptTail(struct Baize *const baize, struct Pile *const self
         BaizeSetError(baize, "(CSOL) The Foundation is full");
         return 0;
     }
-    if (ArrayLen(self->cards) + ArrayLen(tail) > baize->numberOfCardsInLibrary / ArrayLen(baize->foundations)) {
-        BaizeSetError(baize, "(CSOL) That would over-fill the Foundation");
-        return 0;
-    }
     // ArrayLen(tail) == 1
     return FoundationCanAcceptCard(baize, self, ArrayGet(tail, 0));
 }

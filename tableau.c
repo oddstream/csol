@@ -154,7 +154,7 @@ _Bool TableauComplete(struct Pile *const self)
         return 1;
     }
     struct Baize *baize = PileOwner(self);
-    int ndiscards = BaizeCountPiles(baize, "Discard");
+    int ndiscards = ArrayLen(baize->discards);
     if (ndiscards) {
         return (PileLen(self) == baize->numberOfCardsInLibrary / ndiscards) && (TableauUnsortedPairs(self) == 0);
     }

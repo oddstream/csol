@@ -88,6 +88,11 @@ void BaizeCreatePiles(struct Baize *const self)
         self->piles = ArrayNew(8);
     }
 
+    if (self->discards) {
+        ArrayReset(self->discards);
+    } else {
+        self->discards = ArrayNew(8);
+    }
     if (self->foundations) {
         ArrayReset(self->foundations);
     } else {

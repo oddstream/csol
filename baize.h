@@ -26,6 +26,7 @@ struct Baize {
     struct Array *piles;
     struct Pile *stock;         // a struct Stock*
     struct Pile *waste;         // a struct Waste*, may be NULL, used by status bar
+    struct Array *discards;
     struct Array *foundations;  // used by collect
     struct Array *tableaux;
 

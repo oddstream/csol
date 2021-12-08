@@ -235,16 +235,12 @@ void BaizeUpdateFromSnapshot(struct Baize *const self, struct Snapshot *snap)
         struct SavedCardArray *sca = ArrayGet(snap->savedPiles, i);
         struct Pile* dstPile = ArrayGet(self->piles, i);
         ArrayReset(dstPile->cards);
-
         SavedCardArrayCopyToPile(sca, self->cardLibrary, dstPile);
-
-        if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
-            ((struct Stock*)self->stock)->recycles = snap->recycles;
-        }
-
-        self->bookmark = snap->bookmark;
-
         ScrunchPile(dstPile);
+    }
+    self->bookmark = snap->bookmark;
+    if (snap->recycles != ((struct Stock*)self->stock)->recycles) {
+        ((struct Stock*)self->stock)->recycles = snap->recycles;
     }
 }
 
@@ -409,7 +405,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
 
     char fname[256];
     strcpy(fname, homeDir);
-    strcat(fname, "/.config/oddstream.games/csol");
+    strcat(fname, "/.config/oddstream.games/gomps4");
     if (!createDirectories(fname)) {
         return;
     }
@@ -448,7 +444,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
 
     char fname[256];
     strcpy(fname, homeDir);
-    strcat(fname, "/.config/oddstream.games/csol/saved.txt");
+    strcat(fname, "/.config/oddstream.games/gomps4/saved.txt");
 
     struct Array *undoStack = NULL;
     FILE* f = fopen(fname, "r");

@@ -51,7 +51,7 @@ _Bool DiscardCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
         BaizeSetError(baize, "(CSOL) Can only move cards to an empty Discard");
         return 0;
     }
-    int ndiscards = BaizeCountPiles(baize, self->category);
+    int ndiscards = ArrayLen(baize->discards);
     if (ndiscards) {
         if ( ArrayLen(tail) != baize->numberOfCardsInLibrary / ndiscards ) {
             BaizeSetError(baize, "(CSOL) Can only move a full set of cards to a Discard");
