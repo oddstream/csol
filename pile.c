@@ -490,11 +490,6 @@ _Bool PileMoveCard(struct Pile *const self, struct Pile *const src)
         }
     }
 
-    // special case: waste may need refanning if we took a card from it
-    if ( src->fanType == FAN_DOWN3 || src->fanType == FAN_LEFT3 || src->fanType == FAN_RIGHT3 ) {
-        PileRefan(src);
-    }
-
     ScrunchPile(self);
 
     return 1;
@@ -540,11 +535,6 @@ _Bool PileMoveCards(struct Pile *const self, struct Card const* c)
         if (tc) {
             CardFlipUp(tc);
         }
-    }
-
-    // special case: waste may need refanning if we took a card from it
-    if ( src->fanType == FAN_DOWN3 || src->fanType == FAN_LEFT3 || src->fanType == FAN_RIGHT3 ) {
-        PileRefan(src);
     }
 
     ScrunchPile(self);

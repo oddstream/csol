@@ -9,41 +9,11 @@
 #include "pile.h"
 #include "scrunch.h"
 
-void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth, const int windowHeight)
+void BaizeFindBuddyPiles(struct Baize *const baize)
 {
-    struct Pack *pack = baize->pack;
-
     size_t pi1, pi2;
     for ( struct Pile *p1 = ArrayFirst(baize->piles, &pi1); p1; p1 = ArrayNext(baize->piles, &pi1) ) {
-
-        /*
-            K&R style switch formatting, see P59 if you don't believe me
-            (ok, thay may have done it like this to fit in the book margins
-        */
-        p1->scrunchDims = (Vector2){.x=pack->width, .y=pack->height};
-        switch (p1->fanType) {
-        case FAN_NONE:
-        case FAN_DOWN3:
-        case FAN_LEFT3:
-        case FAN_RIGHT3:
-            break;
-        case FAN_DOWN:
-            // baize->dragOffset is always -ve
-            p1->scrunchDims.y = windowHeight - p1->pos.y + fabsf(baize->dragOffset.y);
-            break;
-        case FAN_LEFT:
-            p1->scrunchDims.x = p1->pos.x;
-            break;
-        case FAN_RIGHT:
-            // baize->dragOffset is always -ve
-            p1->scrunchDims.x = windowWidth - p1->pos.x + fabsf(baize->dragOffset.x);
-            break;
-        default:
-            break;
-        }
-
-        p1->fanFactor = p1->defaultFanFactor;
-
+        p1->buddyPile = NULL;
         for ( struct Pile *p2 = ArrayFirst(baize->piles, &pi2); p2; p2 = ArrayNext(baize->piles, &pi2) ) {
             if (p2 == p1) {
                 continue;
@@ -56,36 +26,83 @@ void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth,
                 break;
             case FAN_DOWN:
                 if (p1->slot.x == p2->slot.x && p2->slot.y > p1->slot.y) {
-                    // fprintf(stdout,
-                    //     "INFO: %s: found %s pile at %.0f,%.0f "
-                    //     "that is above %s pile at %.0f,%.0f"
-                    //     "\n",
-                    // __func__,
-                    // p1->category, p1->slot.x, p1->slot.y,
-                    // p2->category, p2->slot.x, p2->slot.y);
-                    p1->scrunchDims.y = p2->pos.y - p1->pos.y;
+                    fprintf(stdout,
+                        "INFO: %s: found buddy pile for %s (at %.0f,%.0f) "
+                        "that is above %s pile at %.0f,%.0f"
+                        "\n",
+                    __func__,
+                    p1->category, p1->slot.x, p1->slot.y,
+                    p2->category, p2->slot.x, p2->slot.y);
+                    p1->buddyPile = p2;
                 }
                 break;
             case FAN_LEFT:
                 if (p1->slot.y == p2->slot.y && p2->slot.x < p1->slot.x) {
-                    p1->scrunchDims.x = p1->pos.x - p2->pos.x;
+                    p1->buddyPile = p2;
                 }
                 break;
             case FAN_RIGHT:
                 if (p1->slot.y == p2->slot.y && p2->slot.x > p1->slot.x) {
-                    p1->scrunchDims.x = p2->pos.x - p1->pos.x;
+                    p1->buddyPile = p2;
                 }
                 break;
             default:
                 break;
             }
+            if (p1->buddyPile) {
+                break;
+            }
         }
-
     }
 }
 
-// calculate the width and heigh this pile would be if it had a specified fan factor
-static Vector2 calcPileDimensions(struct Pile *const pile, float fanFactor)
+void BaizeCalculateScrunchDims(struct Baize *const baize, const int windowWidth, const int windowHeight)
+{
+    struct Pack *pack = baize->pack;
+
+    size_t index;
+    for ( struct Pile *p = ArrayFirst(baize->piles, &index); p; p = ArrayNext(baize->piles, &index) ) {
+
+        /*
+            K&R style switch formatting, see P59 if you don't believe me
+            (ok, thay may have done it like this to fit in the book margins
+        */
+        p->scrunchDims = (Vector2){.x=pack->width, .y=pack->height};
+        switch (p->fanType) {
+        case FAN_NONE:
+        case FAN_DOWN3:
+        case FAN_LEFT3:
+        case FAN_RIGHT3:
+            break;
+        case FAN_DOWN:
+            if (p->buddyPile) {
+                p->scrunchDims.y = p->buddyPile->pos.y - p->pos.y;
+            } else {
+                // baize->dragOffset is always -ve
+                p->scrunchDims.y = windowHeight - p->pos.y + fabsf(baize->dragOffset.y);
+            }
+            break;
+        case FAN_LEFT:
+            p->scrunchDims.x = p->pos.x;
+            break;
+        case FAN_RIGHT:
+            if (p->buddyPile) {
+                p->scrunchDims.x = p->buddyPile->pos.x - p->pos.x;
+            } else {
+                // baize->dragOffset is always -ve
+                p->scrunchDims.x = windowWidth - p->pos.x + fabsf(baize->dragOffset.x);
+            }
+            break;
+        default:
+            break;
+        }
+
+        p->fanFactor = p->defaultFanFactor;
+    }
+}
+
+// calculate the width and height this pile would be if it had a specified fan factor
+static Vector2 PileCalcFannedRect(struct Pile *const pile, float fanFactor)
 {
     struct Baize *baize = PileOwner(pile);
     struct Pack *pack = baize->pack;
@@ -170,7 +187,7 @@ void ScrunchPile(struct Pile *const pile)
 
     float fanFactor;
     for ( fanFactor = pile->defaultFanFactor; fanFactor < MAX_FAN_FACTOR; fanFactor += 0.33333333333f ) {
-        Vector2 dims = calcPileDimensions(pile, fanFactor);
+        Vector2 dims = PileCalcFannedRect(pile, fanFactor);
         if (pile->fanType == FAN_DOWN) {
             if (dims.y < pile->scrunchDims.y) {
                 break;
@@ -195,7 +212,7 @@ void ScrunchDrawDebug(struct Pile *const pile)
 {
     struct Baize *baize = PileOwner(pile);
     struct Pack *pack = baize->pack;
-    
+
     Rectangle r = PileScreenRect(pile);
 
     char buff[64];
@@ -206,7 +223,7 @@ void ScrunchDrawDebug(struct Pile *const pile)
     r.height = pile->scrunchDims.y;
     DrawRectangleRoundedLines(r, pack->roundness, 9, 1.0, RED);
 
-    Vector2 dims = calcPileDimensions(pile, pile->fanFactor);
+    Vector2 dims = PileCalcFannedRect(pile, pile->fanFactor);
     r.width = dims.x;
     r.height = dims.y;
     DrawRectangleRoundedLines(r, pack->roundness, 9, 1.0, GREEN);

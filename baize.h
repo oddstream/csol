@@ -33,9 +33,9 @@ struct Baize {
     struct Array *tail;
     struct Array *undoStack;
     size_t bookmark;
+
     Vector2 lastTouch;
     struct Pile *touchedPile;
-
     struct Widget *touchedWidget;
 
     _Bool dragging;

@@ -36,14 +36,19 @@ struct Pile {
     struct PileVtable *vtable;
     struct Baize *owner;
     char category[16];
+
     Vector2 slot;   // pile baize position index
     Vector2 pos;    // baize coords (screen coords are calculated)
     Vector2 pos1;   // waste pos
     Vector2 pos2;   // waste pos
+
     enum FanType fanType;
     float fanFactor;    // all non-waste fan types, both horz and vert
     float defaultFanFactor;
+
     Vector2 scrunchDims;
+    struct Pile *buddyPile;
+
     char label[MAX_PILE_LABEL + 1];
     struct Array *cards;
 };

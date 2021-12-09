@@ -120,6 +120,7 @@ void BaizeCreatePiles(struct Baize *const self)
     }
 
     // now the piles know their slots, calculate and set their positions
+    BaizeFindBuddyPiles(self);
     BaizeLayoutCommand(self, NULL);
     UiUpdateTitleBar(self->ui, self->variantName);
 }
