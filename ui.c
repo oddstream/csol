@@ -100,7 +100,7 @@ struct UI* UiNew(void)
             }
             tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 0, NULL, NULL);
             if ( tw ) {
-                TextWidgetSetText(tw, "MOVES");
+                // TextWidgetSetText(tw, "MOVES");
                 self->statusBar->super.widgets = ArrayPush(self->statusBar->super.widgets, tw);
             }
             tw = TextWidgetNew((struct Container*)self->statusBar, NONE, &fontRobotoRegular14, 14.0f, 1, NULL, NULL);

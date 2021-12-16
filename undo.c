@@ -195,7 +195,7 @@ static void BaizeUpdateStatusBar(struct Baize *const self)
         }
     }
 
-    sprintf(zCenter, "MOVES: %lu", ArrayLen(self->undoStack) - 1);
+    zCenter[0] = '\0';
 
     if (BaizeComplete(self)) {
         strcpy(zRight, "COMPLETE");
