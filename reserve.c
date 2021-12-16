@@ -22,7 +22,7 @@ static struct PileVtable reserveVtable = {
 
     &PileReset,
     &PileUpdate,
-    &PileDraw,
+    &ReserveDraw,
     &PileFree,
 };
 
@@ -66,4 +66,10 @@ int ReserveCollect(struct Pile *const self)
 _Bool ReserveComplete(struct Pile *const self)
 {
     return PileEmpty(self);
+}
+
+void ReserveDraw(struct Pile *const self)
+{
+    (void)self;
+    // override PileDraw() to draw nothing
 }

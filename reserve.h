@@ -21,5 +21,6 @@ _Bool ReserveCanAcceptTail(struct Baize *const baize, struct Pile *const self, s
 int ReserveCollect(struct Pile *const self);
 _Bool ReserveComplete(struct Pile *const self);
 int ReserveUnsortedPairs(struct Pile *const self);
+void ReserveDraw(struct Pile *const self);
 
 #endif

@@ -10,7 +10,7 @@ There are also eight foundations that build up in suit, e.g. 7♦, 8♦, 9♦...
 The game includes one reserve pile with twenty cards that can be played onto the tableau or foundations.
 There is a deck usually at the bottom right that turns up one card at a time.
 One card is dealt onto the first foundation. This rank will be used as a base for the other foundations.
-The foundations build up in suit, wrapping from King to Ace as necessary. 
+The foundations build up in suit, wrapping from King to Ace as necessary.
 ]]
 
 dofile("variants/~Library.lua")
@@ -25,7 +25,7 @@ function BuildPiles()
     AddPile("Waste", 2, 1, FAN_RIGHT3)
 
     AddPile("Reserve", 4, 1, FAN_RIGHT)
-    
+
     for x = 1, 8 do
         AddPile("Foundation", x, 2, FAN_NONE)
     end
@@ -147,4 +147,16 @@ end
 
 function Stock.TailTapped(tail)
     MoveCard(Stock.Pile, Waste.Pile)
+end
+
+function AfterMove()
+	-- Empty spaces are filled automatically from the reserve.
+    for _, pile in ipairs(Tableau.Piles) do
+        if Empty(pile) then
+            if Len(Reserve.Pile) > 0 then
+                MoveCard(Reserve.Pile, pile)
+            end
+        end
+    end
+
 end
