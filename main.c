@@ -28,8 +28,8 @@ float fontSpacing = 1.2f;
 
 int flag_nolerp = 0;
 int flag_noflip = 0;
-int flag_noload = 0;
-int flag_nosave = 0;
+// int flag_noload = 0;
+// int flag_nosave = 0;
 int flag_noshuf = 0;
 int flag_nodraw = 0;
 
@@ -63,8 +63,8 @@ int main(int argc, char* argv[], char* envp[])
             {"variant", required_argument,  0,                  'v'},
             {"width",   required_argument,  0,                  'w'},
             {"height",  required_argument,  0,                  'h'},
-            {"noload",  no_argument,        &flag_noload,       1},
-            {"nosave",  no_argument,        &flag_nosave,       1},
+            // {"noload",  no_argument,        &flag_noload,       1},
+            // {"nosave",  no_argument,        &flag_nosave,       1},
             {"nolerp",  no_argument,        &flag_nolerp,       1},
             {"noflip",  no_argument,        &flag_noflip,       1},
             {"noshuf",  no_argument,        &flag_noshuf,       1},
@@ -211,7 +211,6 @@ int main(int argc, char* argv[], char* envp[])
     }
 #endif
 
-    struct Array *loadedUndoStack = variantName[0] == '\0' ? LoadUndoFromFile(variantName /* out */) : NULL;
     struct Baize* baize = BaizeNew(packName[0] ? packName : "default");
     if ( BaizeValid(baize) ) {
 
@@ -226,15 +225,8 @@ int main(int argc, char* argv[], char* envp[])
         StartCommandQueue();
         OpenLua(baize);
         BaizeCreatePiles(baize);
-        BaizeResetState(baize, loadedUndoStack);  // Baize takes ownership of loadedUndoStack
-        if (loadedUndoStack) {
-            BaizeUndo0(baize);
-            if (ArrayLen(baize->undoStack) == 1) {
-                baize->script->StartGame(baize);
-            }
-        } else {
-            baize->script->StartGame(baize);
-        }
+        BaizeResetState(baize, NULL);
+        baize->script->StartGame(baize);
         BaizeUndoPush(baize);
 
         while ( !WindowShouldClose() ) {   // Detect window close button or ESC key
@@ -247,7 +239,6 @@ int main(int argc, char* argv[], char* envp[])
         }
         StopCommandQueue();
 
-        BaizeSaveUndoToFile(baize);
         BaizeFree(baize);
         CloseLua();
     }

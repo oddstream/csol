@@ -175,7 +175,7 @@ void ScrunchPile(struct Pile *const pile)
     struct Pack *pack = baize->pack;
 
     if (!(pile->scrunchDims.x > pack->width || pile->scrunchDims.y > pack->height)) {
-        return; // disregard waste-style piles and those that do not fan
+        goto RefanAndReturn; // disregard waste-style piles and those that do not fan
     }
 
     // Vector2 pos;
@@ -200,6 +200,7 @@ void ScrunchPile(struct Pile *const pile)
         // fprintf(stdout, "going round again\n");
     }
     pile->fanFactor = fanFactor;
+RefanAndReturn:
     PileRefan(pile);    // don't optimize this call
 }
 

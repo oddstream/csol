@@ -19,7 +19,9 @@ void BaizeRestartDealCommand(struct Baize *const self, void* param);
 void BaizeUndo0(struct Baize *const self);
 void BaizeUndoCommand(struct Baize *const, void* param);
 
+#if 0
 void BaizeSaveUndoToFile(struct Baize *const self);
 struct Array* LoadUndoFromFile(char *variantName);
+#endif
 
 #endif

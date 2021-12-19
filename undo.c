@@ -115,6 +115,7 @@ static void SavedCardArrayCopyToPile(struct SavedCardArray *const sca, struct Ca
     }
 }
 
+#if 0
 static void SavedCardArrayWriteToFile(FILE* f, struct SavedCardArray *const sca)
 {
     // sca->label will not be empty
@@ -130,6 +131,7 @@ static void SavedCardArrayWriteToFile(FILE* f, struct SavedCardArray *const sca)
     }
     fprintf(f, "\n");
 }
+#endif
 
 static void SavedCardArrayFree(struct SavedCardArray *const sca)
 {
@@ -171,6 +173,7 @@ static void SnapshotFree(struct Snapshot *s)
     free(s);
 }
 
+#if 0
 static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
 {
     fprintf(f, "#%lu %lu %d\n", index, s->bookmark, s->recycles);
@@ -180,6 +183,7 @@ static void SnapshotWriteToFile(FILE* f, size_t index, struct Snapshot *s)
         SavedCardArrayWriteToFile(f, sca);
     }
 }
+#endif
 
 static void BaizeUpdateStatusBar(struct Baize *const self)
 {
@@ -350,6 +354,7 @@ void BaizeUndoCommand(struct Baize *const self, void* param)
     BaizeUpdateStatusBar(self);
 }
 
+#if 0
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -384,7 +389,9 @@ static _Bool createDirectories(char *src)
     }
     return 1;
 }
+#endif
 
+#if 0
 void BaizeSaveUndoToFile(struct Baize *const self)
 {
     extern int flag_nosave; if (flag_nosave) return;
@@ -429,7 +436,9 @@ void BaizeSaveUndoToFile(struct Baize *const self)
 
     // fprintf(stdout, "GetWorkingDirectory is %s\n", GetWorkingDirectory());
 }
+#endif
 
+#if 0
 struct Array* LoadUndoFromFile(char *variantName /* out */)
 {
     extern int flag_noload; if (flag_noload) return NULL;
@@ -547,3 +556,4 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
 
     return undoStack;
 }
+#endif

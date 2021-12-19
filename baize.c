@@ -588,11 +588,7 @@ void BaizeUpdate(struct Baize *const self)
         BaizeUndoCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_S) ) {
-        if ( IsKeyDown(KEY_LEFT_SHIFT) ) {
-            BaizeSaveUndoToFile(self);
-        } else {
-            BaizeSavePositionCommand(self, NULL);
-        }
+        BaizeSavePositionCommand(self, NULL);
     }
     if ( IsKeyReleased(KEY_L) ) {
         BaizeLoadPositionCommand(self, NULL);
