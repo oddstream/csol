@@ -50,8 +50,11 @@ _Bool WasteCanMoveTail(struct Array *const tail)
 
 _Bool WasteCanAcceptCard(struct Baize *const baize, struct Pile *const self, struct Card *const c)
 {
-    (void)baize;
-
+    struct Pile *src = CardOwner(c);
+    if (src != baize->stock) {
+        BaizeSetError(baize, "(CSOL) Can only move cards to Waste from Stock");
+        return 0;
+    }
     struct Array1 tail = Array1New(c);
     return CanTailBeAppended(self, (struct Array*)&tail);
     // don't need to free an Array1
@@ -61,6 +64,12 @@ _Bool WasteCanAcceptTail(struct Baize *const baize, struct Pile *const self, str
 {
     if (ArrayLen(tail) == 1) {
         return WasteCanAcceptCard(baize, self, ArrayGet(tail, 0));
+    }
+    struct Card *c = ArrayGet(tail, 0);
+    struct Pile *src = CardOwner(c);
+    if (src != baize->stock) {
+        BaizeSetError(baize, "(CSOL) Can only move cards to Waste from Stock");
+        return 0;
     }
     return CanTailBeAppended(self, tail);
 }

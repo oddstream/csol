@@ -95,8 +95,6 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
             struct Card *c2 = ArrayGet(tail, 0);
             return CardCompare_DownAltColor(c1, c2);
         }
-    } else if (strcmp(pile->category, "Waste")==0) {
-        return "Waste can only accept cards from Stock";
     }
     return (void*)0;
 }
