@@ -6,8 +6,8 @@
   Cards are dealt one at a time.
   When an ace turns up, it forms a foundation which builds up to King regardless of suit.
   Four such foundations should be built.
-  A card that cannot yet be placed on the foundation is placed onto one of four wastepiles; 
-  once placed, it cannot be moved, but the top card of each wastepile remains available 
+  A card that cannot yet be placed on the foundation is placed onto one of four wastepiles;
+  once placed, it cannot be moved, but the top card of each wastepile remains available
   to be placed on a foundation.
 
   The game is won if all cards are emptied from the wastepiles and built on the foundations.
@@ -24,7 +24,7 @@ function BuildPiles()
     AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
 
     AddPile("Waste", 2, 1, FAN_RIGHT3)
-    
+
     for x = 4, 7 do
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
@@ -50,19 +50,6 @@ function Tableau.TailMoveError(tail)
 end
 
 -- TailAppendError constraints
-
-function Waste.TailAppendError(pile, tail)
-    if Len(pile) > 0 then
-        return "The Waste already contains a card"
-    end
-    if Len(tail) > 1 then
-        return "The Waste can only accept a single card"
-    end
-    if CardOwner(First(tail)) ~= STOCK then
-        return "The Waste can only accept cards from the Stock"
-    end
-    return nil
-end
 
 function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then

@@ -10,7 +10,7 @@ function BuildPiles()
 
     AddPile("Stock", 1, 1, FAN_NONE, 1, 4)
     AddPile("Waste", 2, 1, FAN_RIGHT3)
-    
+
     for x = 4, 7 do
         local pile = AddPile("Foundation", x, 1, FAN_NONE)
         PileLabel(pile, U[1])
@@ -42,13 +42,6 @@ function Tableau.TailMoveError(tail)
 end
 
 -- TailAppendError constraints
-
-function Waste.TailAppendError(pile, tail)
-    if CardOwner(First(tail)) ~= Stock.Pile then
-        return "The Waste can only accept cards from the Stock"
-    end
-    return nil
-end
 
 function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then

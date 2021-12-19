@@ -79,13 +79,6 @@ end
 
 -- TailAppendError constraints
 
-function Waste.TailAppendError(pile, tail)
-    if CardOwner(First(tail)) ~= STOCK then
-        return "The Waste can only accept cards from the Stock"
-    end
-    return nil
-end
-
 function Foundation.TailAppendError(pile, tail)
     if Empty(pile) then
         local c1 = First(tail)

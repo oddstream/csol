@@ -2,7 +2,7 @@
 
 --[[
     Style
-    
+
     Lua globals are in UPPER_CASE, and use underscores between words
     function names are in MixedCase
     functions that apply to a type of pile are suffixed by _piletype
@@ -28,7 +28,7 @@ local function DemoteCards(pile, ord)
                 hasChanged = true
             end
         end
-    until not hasChanged 
+    until not hasChanged
 end
 
 local function PromoteCards(pile, ord)
@@ -45,7 +45,7 @@ local function PromoteCards(pile, ord)
                 hasChanged = true
             end
         end
-    until not hasChanged 
+    until not hasChanged
 end
 
 local function SortCards(pile)
@@ -62,7 +62,7 @@ local function SortCards(pile)
                 hasChanged = true
             end
         end
-    until not hasChanged 
+    until not hasChanged
 end
 
 function BuildPiles()
@@ -121,7 +121,7 @@ function StartGame()
 
     -- MoveCard(Stock.Pile, Foundation.Piles[1], 1, 0)
 
-    for _, pile in ipairs(Tableau.Piles) do 
+    for _, pile in ipairs(Tableau.Piles) do
         for n = 1, 5 do
             MoveCard(Stock.Pile, pile)
         end
@@ -131,7 +131,7 @@ function StartGame()
         Refan(pile)
     end
 --[[
-    for _, pile in ipairs(Tableau.Piles) do 
+    for _, pile in ipairs(Tableau.Piles) do
         for n = 1, 5 do
             CardProne(Get(pile, n), true)
         end
@@ -195,14 +195,6 @@ end
 
 -- TailAppendError constraints
 
-function Waste.TailAppendError(pile, tail)
-    io.stderr:write("Waste.TailAppendError\n")
-    if CardOwner(First(tail)) ~= Stock.Pile then
-        return "The Waste can only accept cards from the Stock"
-    end
-    return nil
-end
-
 function Foundation.TailAppendError(pile, tail)
     io.stderr:write("Foundation.TailAppendError\n")
     if Empty(pile) then
@@ -257,7 +249,7 @@ function Stock.PileTapped(pile)
         StockRecycles(recycles)
     end
 end
-    
+
 function Stock.TailTapped(tail)
     io.stderr:write("Stock.TailTapped\n")
     for i = 1, STOCK_DEAL_CARDS do
