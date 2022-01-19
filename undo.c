@@ -412,7 +412,7 @@ void BaizeSaveUndoToFile(struct Baize *const self)
 
     char fname[256];
     strcpy(fname, homeDir);
-    strcat(fname, "/.config/oddstream.games/gomps4");
+    strcat(fname, "/.config/oddstream.games/csol");
     if (!createDirectories(fname)) {
         return;
     }
@@ -453,7 +453,7 @@ struct Array* LoadUndoFromFile(char *variantName /* out */)
 
     char fname[256];
     strcpy(fname, homeDir);
-    strcat(fname, "/.config/oddstream.games/gomps4/saved.txt");
+    strcat(fname, "/.config/oddstream.games/csol/saved.txt");
 
     struct Array *undoStack = NULL;
     FILE* f = fopen(fname, "r");

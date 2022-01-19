@@ -1,7 +1,7 @@
 # https://www.gnu.org/software/make/manual/make.html
 # make -recon
 
-PROJECT_NAME ?= gomps4
+PROJECT_NAME ?= csol
 BUILD_MODE ?= DEBUG
 EXECUTABLE ?= $(PROJECT_NAME)
 
@@ -35,9 +35,9 @@ CFLAGS += -std=c99
 # https://airbus-seclab.github.io/c-compiler-security/
 CFLAGS += -Wall -Wextra -Wpedantic -Werror
 #  -Wformat-overflow=2
-CFLAGS += -Wformat=2 -Wformat-truncation=2 -Wformat-security 
-CFLAGS += -Wnull-dereference -Wtrampolines -Walloca -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2 
-CFLAGS += -Wcast-qual -Wstringop-overflow=4 -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=5 
+CFLAGS += -Wformat=2 -Wformat-truncation=2 -Wformat-security
+CFLAGS += -Wnull-dereference -Wtrampolines -Walloca -Warray-bounds=2 -Wimplicit-fallthrough=3 -Wshift-overflow=2
+CFLAGS += -Wcast-qual -Wstringop-overflow=4 -Wlogical-op -Wduplicated-cond -Wduplicated-branches -Wformat-signedness -Wshadow -Wstrict-overflow=5
 CFLAGS += -Wundef -Wstrict-prototypes -Wswitch-default -Wswitch-enum -Wcast-align=strict -Wunused
 # if using alloca don't add these
 CFLAGS += -Wstack-protector -Wstack-usage=1000000
@@ -45,7 +45,7 @@ CFLAGS += -fsanitize=undefined
 # https://kristerw.github.io/2021/10/19/fast-math/
 CFLAGS += -ffast-math
 CFLAGS += -D_FORTIFY_SOURCE=2
-CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE 
+CFLAGS += -fstack-protector-strong -fstack-clash-protection -fPIE
 
 # https://stackoverflow.com/questions/13224209/gcc-wunused-function-not-working-but-other-warnings-are-working/23756859
 #CFLAGS += -ffunction-sections -fdata-sections
@@ -57,7 +57,7 @@ INCLUDE_PATHS = -I$(RAYLIB_H_INSTALL_PATH) -I$(LUA_PATH)
 LDFLAGS = -L$(LUA_PATH) -L$(RAYLIB_INSTALL_PATH) -fsanitize=undefined
 
 # Library flags or names given to compilers when they are supposed to invoke the linker, ‘ld’.
-LDLIBS = -lraylib -llua -lGL -lm -ldl -lpthread 
+LDLIBS = -lraylib -llua -lGL -lm -ldl -lpthread
 # libdl is the dynamic linking library, omitting it produces:
 # /usr/bin/ld: /usr/local/lib/libraylib.a(rglfw.o): undefined reference to symbol 'dlclose@@GLIBC_2.2.5'
 # /usr/bin/ld: /lib/x86_64-linux-gnu/libdl.so.2: error adding symbols: DSO missing from command line

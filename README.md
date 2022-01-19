@@ -1,8 +1,8 @@
-# gomps4
+# Csol
 
 Towards a polymorphic solitaire engine in C99, [raylib](https://raylib.com/) with each variant configured by a small [Lua](https://lua.org) script. So-called because it's the fourth iteration of Gilbert Oddstream's Minimal Polymorphic Solitaire engine.
 
-Development is currently stalled because of the difficulty of making decent scalable cards. gomps5 (written in Go + ebiten) is addressing this.
+Development is currently stalled because of the difficulty of making decent scalable cards. Gosol (written in Go + ebiten) is addressing this.
 
 ## Architecture
 
@@ -10,7 +10,7 @@ The fundamental objects are:
 
 ### Card
 
-gomps4 creates a library of the required number of cards (which depends on the number of packs used, and if any cards were filtered out), thereafter any reference to a card really means 'a pointer into the card library'.
+Csol creates a library of the required number of cards (which depends on the number of packs used, and if any cards were filtered out), thereafter any reference to a card really means 'a pointer into the card library'.
 
 Cards are drawn either using a spritesheet or by Unicode card glyphs. Ideal would be drawing SVG cards direct to the screen (or, rather, creating resolution-dependant spritesheets at runtime), but I can't find a suitable SVG library.
 
@@ -40,7 +40,7 @@ Each different game is implemented in it's own script (some of which are built-i
 
 ## What the script does
 
-### Procedures implemented in script that gomps4 invokes
+### Procedures implemented in script that csol invokes
 
 ```Lua
 BuildPiles
@@ -50,7 +50,7 @@ StartGame
 AfterMove
 ```
 
-### Functions provided by gomps4 for use by script
+### Functions provided by csol for use by script
 
 ```Lua
 AddPile
@@ -92,7 +92,7 @@ StockRecycles
 Toast
 ```
 
-### Global variables defined by gomps4 for use by script
+### Global variables defined by csol for use by script
 
 ```Lua
 FAN_*
@@ -169,7 +169,7 @@ The C maintains a complete copy of the baize, piles, and cards as a tree-shaped 
 
 The Lua scripts are given access to both the root and branches of the table.
 
-This gets ugly when two things happen (1) the Lua script moves a card; it would seem natural to move it in the table, but then gomps4 would have to parse the tree and update the cards positions, and (2) gomps4 would have the overhead of rebuilding the tree after everu user move (including undo).
+This gets ugly when two things happen (1) the Lua script moves a card; it would seem natural to move it in the table, but then csol would have to parse the tree and update the cards positions, and (2) csol would have the overhead of rebuilding the tree after everu user move (including undo).
 
 Also, a tail of cards being dragged would fall outside this tree.
 
