@@ -257,32 +257,6 @@ function Stock.TailTapped(tail)
     end
 end
 
---[[
-function Waste.TailTapped(tail)
-    io.stderr:write("Waste.TailTapped\n")
-    if Len(tail) == 1 then
-        for _, pile in ipairs(Foundation.Piles) do
-            if not Foundation.TailAppendError(pile, tail) then
-                MoveCard(CardOwner(First(tail)), pile)
-                break
-            end
-        end
-    end
-end
-
-function Tableau.TailTapped(tail)
-    io.stderr:write("Tableau.TailTapped\n")
-    if Len(tail) == 1 then
-        for _, pile in ipairs(Foundation.Piles) do
-            if not Foundation.TailAppendError(pile, tail) then
-                MoveCard(CardOwner(First(tail)), pile)
-                break
-            end
-        end
-    end
-end
-]]
-
 function AfterMove()
   io.stdout:write("AfterMove\n")
     for _, pile in ipairs(Tableau.Piles) do

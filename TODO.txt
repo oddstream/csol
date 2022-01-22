@@ -1,0 +1,9 @@
+ TailTapped sending cards to empty piles with K accept in Clondike
+ERROR: PileDrawCenteredGlyph: Symbol font not loaded when loading same card design twice
+(the whole card things is broken anyway - no one likes retro, unicode can't be flipped, and they don't scale)
+ PileMoveCards() should return void, all undo pushed managed by CRC
+ Use gosol method of doing accept (label)
+ retire retro cards
+
+x CardTapped should be TailTapped
+x Klondike not using new TailTapped

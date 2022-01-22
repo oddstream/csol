@@ -15,7 +15,7 @@ static struct PileVtable reserveVtable = {
     &ReserveCanMoveTail,
     &ReserveCanAcceptCard,
     &ReserveCanAcceptTail,
-    &CardGenericTapped,
+    &GenericTailTapped,
     &ReserveCollect,
     &ReserveComplete,
     &PileGenericUnsortedPairs,

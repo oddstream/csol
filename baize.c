@@ -621,17 +621,13 @@ void BaizeUpdate(struct Baize *const self)
     }
 #endif
     if (IsKeyReleased(KEY_ZERO)) {
-        BaizeChangePackCommand(self, "retro");
+        BaizeChangePackCommand(self, "default");
     } else if (IsKeyReleased(KEY_ONE)) {
-        BaizeChangePackCommand(self, "small");
+        BaizeChangePackCommand(self, "scaled");
     } else if (IsKeyReleased(KEY_TWO)) {
-        BaizeChangePackCommand(self, "medium");
-    } else if (IsKeyReleased(KEY_THREE)) {
-        BaizeChangePackCommand(self, "large");
+        BaizeChangePackCommand(self, "unicode");
     } else if (IsKeyReleased(KEY_FOUR)) {
         BaizeChangePackCommand(self, "fourcolor");
-    } else if (IsKeyReleased(KEY_FIVE)) {
-        BaizeChangePackCommand(self, "unicode");
     }
 
     UiUpdate(self->ui);

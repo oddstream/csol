@@ -16,7 +16,7 @@ static struct PileVtable foundationVtable = {
     &FoundationCanMoveTail,
     &FoundationCanAcceptCard,
     &FoundationCanAcceptTail,
-    &CardInertTapped,
+    &InertTailTapped,
     &PileInertCollect,
     &FoundationComplete,
     &PileInertUnsortedPairs,

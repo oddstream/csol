@@ -144,9 +144,7 @@ static void TailTapped(struct Array *const tail)
     struct Pile* pile = CardOwner(c0);
 
     if (!LuaUtilSetupTableMethod(pile->category, "TailTapped")) {
-        if (ArrayLen(tail) == 1) {
-            pile->vtable->CardTapped(c0);
-        }
+        pile->vtable->TailTapped(tail);
     } else {
         // push one arg, the tail
         lua_pushlightuserdata(L, tail);

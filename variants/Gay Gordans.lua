@@ -14,7 +14,7 @@ end
 function BuildPiles()
 
     AddPile("Stock", 6, -5, FAN_NONE, 1, 4)    -- hidden
-    
+
     -- Partlett describes five piles of ten cards each,
     -- but that often gets stuck at the beginning,
     -- and is so unlikely to proceed that it's not really a game
@@ -85,7 +85,7 @@ function Tableau.TailAppendError(pile, tail)
     local c2 = First(tail)
     -- io.stderr:write("TailAppendError " .. CardOrdinal(c1) .. " and " .. CardOrdinal(c2) .."\n")
 
-    -- "Eliminate any two numerals that total eleven, such as A+10 etc. 
+    -- "Eliminate any two numerals that total eleven, such as A+10 etc.
     -- Marry off Kings and Queens in couples, each couple being of two different suits (to avoid inbreeding).
     -- Jacks (Gordons) pair off and exit (or exeunt) together."
     if CardOrdinal(c1) + CardOrdinal(c2) == 11 then
@@ -103,14 +103,6 @@ function Tableau.TailAppendError(pile, tail)
 end
 
 -- Actions
-
-function Reserve.TailTapped(tail)
-    -- do nothing, default is to send to Foundation
-end
-
-function Tableau.TailTapped(tail)
-    -- do nothing, default is to send to Foundation
-end
 
 function AfterMove()
     if LAST_PILE_COUPLED == nil then

@@ -31,8 +31,16 @@ function StartGame()
         for n = 1, 4 do
             local c = MoveCard(Stock.Pile, pile)
           end
-      end
+    end
 
+    MoveCard(Stock.Pile, Waste.Pile)
+
+end
+
+function AfterMove()
+    if Empty(Waste.Pile) and not Empty(Stock.Pile) then
+        MoveCard(Stock.Pile, Waste.Pile)
+    end
 end
 
 -- TailMoveError constraints (Tableau only)

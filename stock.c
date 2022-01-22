@@ -18,7 +18,7 @@ static struct PileVtable stockVtable = {
     &StockCanMoveTail,
     &StockCanAcceptCard,
     &StockCanAcceptTail,
-    &CardInertTapped,
+    &InertTailTapped,
     &PileInertCollect,
     &StockComplete,
     &PileGenericUnsortedPairs,

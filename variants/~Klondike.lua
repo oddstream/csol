@@ -36,6 +36,14 @@ function StartGame()
         CardProne(Last(pile), false)
         deal = deal + 1
     end
+
+    MoveCard(Stock.Pile, Waste.Pile)
+end
+
+function AfterMove()
+    if Empty(Waste.Pile) and not Empty(Stock.Pile) then
+        MoveCard(Stock.Pile, Waste.Pile)
+    end
 end
 
 -- TailMoveError constraints (Tableau only)

@@ -16,7 +16,7 @@ static struct PileVtable discardVtable = {
     &DiscardCanMoveTail,
     &PileInertCanAcceptCard,
     &DiscardCanAcceptTail,
-    &CardInertTapped,
+    &InertTailTapped,
     &PileInertCollect,
     &DiscardComplete,
     &PileInertUnsortedPairs,

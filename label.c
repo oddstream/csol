@@ -15,7 +15,7 @@ static struct PileVtable labelVtable = {
     &PileInertCanMoveTail,
     &PileInertCanAcceptCard,
     &PileInertCanAcceptTail,
-    &CardInertTapped,
+    &InertTailTapped,
     &PileInertCollect,
     &PileInertComplete,
     &PileInertUnsortedPairs,

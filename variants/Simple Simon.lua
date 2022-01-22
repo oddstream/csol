@@ -9,7 +9,7 @@ end
 function BuildPiles()
 
     AddPile("Stock", -5, -5, FAN_NONE, 1, 4)    -- hidden off screen
-    
+
     for x = 4, 7 do
         AddPile("Discard", x, 1, FAN_NONE)
     end
@@ -73,7 +73,7 @@ function Discard.TailAppendError(pile, tail)
 end
 
 function Tableau.TailAppendError(pile, tail)
-    -- A card can be placed on any card on the top of a column whose rank is greater than it by one (with no cards that can be placed above an Ace). 
+    -- A card can be placed on any card on the top of a column whose rank is greater than it by one (with no cards that can be placed above an Ace).
     if Empty(pile) then
         -- An empty column may be filled by any card
     else
@@ -99,7 +99,3 @@ function Tableau.UnsortedPairs(pile)
 end
 
 -- Actions
-
-function Tableau.TailTapped(tail)
-    -- do nothing
-end

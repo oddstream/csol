@@ -48,12 +48,15 @@ static void StartGame(struct Baize *const baize)
         dealDown++;
         PileMoveCard(pile, baize->stock);
     }
+    PileMoveCard(baize->waste, baize->stock);
     ((struct Stock*)baize->stock)->recycles = 32767;
 }
 
 static void AfterMove(struct Baize *const baize)
 {
-    (void)baize;
+    if ( PileEmpty(baize->waste) && !PileEmpty(baize->stock) ) {
+        PileMoveCard(baize->waste, baize->stock);
+    }
 }
 
 static const char* TailMoveError(struct Array *const tail)
@@ -125,9 +128,7 @@ static void TailTapped(struct Array *const tail)
             PileMoveCard(baize->waste, baize->stock);
         }
     } else {
-        if (ArrayLen(tail) == 1) {
-            pile->vtable->CardTapped(c1);
-        }
+        pile->vtable->TailTapped(tail);
     }
 }
 

@@ -14,7 +14,7 @@ static struct PileVtable cellVtable = {
     &CellCanMoveTail,
     &CellCanAcceptCard,
     &CellCanAcceptTail,
-    &CardGenericTapped,
+    &GenericTailTapped,
     &CellCollect,
     &CellComplete,
     &PileInertUnsortedPairs,

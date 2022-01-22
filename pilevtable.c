@@ -8,6 +8,7 @@
 #include "card.h"
 #include "pile.h"
 #include "scrunch.h"
+#include "trace.h"
 
 _Bool PileInertCanMoveTail(struct Array *const tail)
 {
@@ -31,22 +32,56 @@ _Bool PileInertCanAcceptTail(struct Baize *const baize, struct Pile *const self,
     return 0;
 }
 
-void CardInertTapped(struct Card *const c)
+void InertTailTapped(struct Array *const tail)
 {
-    (void)c;
+    (void)tail;
 }
 
-void CardGenericTapped(struct Card *const c)
+void GenericTailTapped(struct Array *const tail)
 {
-    struct Pile *pile = CardOwner(c);
+    struct Card *card = ArrayGet(tail, 0);
+    struct Pile *pile = CardOwner(card);
     struct Baize *baize = PileOwner(pile);
     size_t index;
-    for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
-        if ( fp->vtable->CanAcceptCard(baize, fp, c) ) {
-            if ( PileMoveCard(fp, pile) ) {
-                break;
+
+    if ( ArrayLen(tail) == 1 ) {
+        // can only send single cards to Foundation piles
+        for ( struct Pile* fp = ArrayFirst(baize->foundations, &index); fp; fp = ArrayNext(baize->foundations, &index) ) {
+            if ( fp->vtable->CanAcceptCard(baize, fp, card) ) {
+                if ( PileMoveCard(fp, pile) ) {
+                    return;
+                }
             }
         }
+    }
+
+    struct Pile *chosenPile = (void*)0;
+    for ( struct Pile* tp = ArrayFirst(baize->tableaux, &index); tp; tp = ArrayNext(baize->tableaux, &index) ) {
+        if ( tp == pile )
+            continue;
+        if ( PileEmpty(tp) && tp->label[0] == '\0' )
+            continue;
+        if ( pile->vtable->CanMoveTail(baize->tail) ) {
+            if ( tp->vtable->CanAcceptTail(baize, tp, baize->tail) ) {
+                // CSOL_INFO("pile %s can accept tail", tp->category);
+                struct Card *tc = PilePeekCard(tp);
+                if ( (tc != NULL) && (card->id.suit == tc->id.suit) ) {
+                    chosenPile = tp;
+                    break;
+                }
+                if ( chosenPile == NULL || PileLen(tp) < PileLen(chosenPile) ) {
+                    chosenPile = tp;
+                }
+            } else {
+                // CSOL_INFO("pile %s cannot accept tail", tp->category);
+            }
+        }
+    }
+    if ( chosenPile ) {
+        // CSOL_INFO("pile %s will accept tail", chosenPile->category);
+        PileMoveCards(chosenPile, card);
+        // don't call BaizeAfterUserMove(baize);
+        // need to undo push is handled by caller
     }
 }
 
