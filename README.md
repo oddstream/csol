@@ -192,7 +192,6 @@ This (fourth) version is different because it's much simpler, is written in good
 It may eventually know how to play:
 
 * Aces and Kings
-* Acme
 * Algerian
 * Alhambra
 * American Toad (also The Toad)
@@ -200,7 +199,7 @@ It may eventually know how to play:
 * Baker's Dozen (also Baker's Dozen Relaxed)
 * Bisley
 * Bristol (also Dover)
-* Canfield (also Acme, Storehouse)
+* Canfield (also Storehouse)
 * Cruel, Ripple Fan
 * Duchess
 * Gay Gordons
@@ -239,9 +238,9 @@ Some will never make it here because they are just poor games:
 * ~~Movable card highlighting (the more useful a move looks, the more the card gets highlighted)~~ This has not been included because the author feels this ruins the essence of playing solitaire.
 * Statistics (including percent complete and streaks - streaks are great) (TODO)
 * Cards spin and flutter when you complete a game, so you feel rewarded and happy (TODO)
-* Turn-offable one tap interface. Partial. In order to keep the essence of solitaire play, single tapping on a tableau/cell/waste card will try and send that card to a foundation, nothing more.
+* One tap interface. Single tapping on a tableau/cell/waste card will try and send that card to a foundation, and, failing that, to a suitable tableau pile.
 * Slightly randomized sounds (TODO)
-* Automatic saving and reloading of the game in progress
+* Automatic saving and reloading of the game in progress (RETIRED for the moment)
 * Pile scrunching, and a draggable baize; if cards spill out of view to the bottom or right of the screen, just drag the baize to move them into view
 
 A lot a features have been tried and discarded, in order to keep the game (and player) focused. *Weniger aber besser*, as [Dieter Rams](https://en.wikipedia.org/wiki/Dieter_Rams) taught us. Design is all about saying "no", as Steve Jobs preached. Just because a feature *can* be implemented, does not mean it *should* be. Movable card highlighting is one notable feature that fell under this bus.
