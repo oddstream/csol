@@ -622,8 +622,6 @@ void BaizeUpdate(struct Baize *const self)
 #endif
     if (IsKeyReleased(KEY_ZERO)) {
         BaizeChangePackCommand(self, "default");
-    } else if (IsKeyReleased(KEY_ONE)) {
-        BaizeChangePackCommand(self, "scaled");
     } else if (IsKeyReleased(KEY_TWO)) {
         BaizeChangePackCommand(self, "unicode");
     } else if (IsKeyReleased(KEY_FOUR)) {

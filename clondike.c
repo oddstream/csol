@@ -92,7 +92,10 @@ static const char* TailAppendError(struct Pile *const pile, struct Array *const 
         }
     } else if (strcmp(pile->category, "Tableau")==0) {
         if (PileEmpty(pile)) {
-            ;
+            struct Card *c1 = ArrayGet(tail, 0);
+            if (CardOrdinal(c1) != 13) {
+                return "Tableau can only accept an King";
+            }
         } else {
             struct Card *c1 = PilePeekCard(pile);
             struct Card *c2 = ArrayGet(tail, 0);
