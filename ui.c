@@ -162,29 +162,31 @@ struct UI* UiNew(void)
 
         self->variantDrawer = NavDrawerNew();
         if (self->variantDrawer) {
-            int count = 0;
-            char **files = GetDirectoryFiles("variants", &count);
-            if ( count ) {
+            // raylib 4.0 -> 4.5 changed the GetDirectoryFiles() API to GetDirectoryFiles()
+            FilePathList fpl = LoadDirectoryFiles("variants");
+            if ( fpl.count ) {
 
-                qsort(files, count, sizeof(char*), cmpfunc);
+                // qsort(files, count, sizeof(char*), cmpfunc);
                 // qsortfiles(files, count);
+                qsort(fpl.paths, fpl.count, sizeof(char*), cmpfunc);
 
-                for ( int i=0; i<count; i++ ) {
+                for ( unsigned int i=0; i<fpl.count; i++ ) {
                     // fprintf(stdout, "FILE: %s\n", files[i]);
-                    if (IsFileExtension(files[i], ".lua")) {
-                        const char* vname = GetFileNameWithoutExt(files[i]);
+                    if (IsFileExtension(fpl.paths[i], ".lua")) {
+                        const char* vname = GetFileNameWithoutExt(fpl.paths[i]);
                         if (vname[0] == '~') {
                             continue;
                         }
                         struct TextWidget *tw = TextWidgetNew((struct Container*)self->variantDrawer, NONE, &fontRobotoMedium24, 24.0f, -1, BaizeChangeVariantCommand, UtilStrDup(vname));
                         if ( tw ) {
-                            TextWidgetSetText(tw, GetFileNameWithoutExt(files[i]));
+                            // TextWidgetSetText(tw, GetFileNameWithoutExt(files[i]));
+                            TextWidgetSetText(tw, GetFileNameWithoutExt(fpl.paths[i]));
                             self->variantDrawer->super.super.widgets = ArrayPush(self->variantDrawer->super.super.widgets, tw);
                         }
                     }
                 }
             }
-            ClearDirectoryFiles();
+            UnloadDirectoryFiles(fpl);
             self->containers = ArrayPush(self->containers, self->variantDrawer);
         }
 

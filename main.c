@@ -152,7 +152,7 @@ int main(int argc, char* argv[], char* envp[])
      }
 #endif
 
-#if 0
+#if 1
     fprintf(stderr, "C version %ld\n", __STDC_VERSION__);
     fprintf(stderr, "sizeof(int) == %lu\n", sizeof(int));
     fprintf(stderr, "sizeof(float) == %lu\n", sizeof(float));
@@ -164,8 +164,8 @@ int main(int argc, char* argv[], char* envp[])
     fprintf(stderr, "sizeof(Baize) == %lu\n", sizeof(struct Baize));
 
     fprintf(stdout, "INFO: %s: nolerp=%d\n", __func__, flag_nolerp);
-    fprintf(stdout, "INFO: %s: noload=%d\n", __func__, flag_noload);
-    fprintf(stdout, "INFO: %s: nosave=%d\n", __func__, flag_nosave);
+    // fprintf(stdout, "INFO: %s: noload=%d\n", __func__, flag_noload);
+    // fprintf(stdout, "INFO: %s: nosave=%d\n", __func__, flag_nosave);
 #endif
 
     baizeColor = (Color){.r=0, .g=70, .b=0, .a=255};   // darker than darkgreen

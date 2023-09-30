@@ -64,7 +64,7 @@ _Bool ArrayValid(struct Array *const self)
         fprintf(stderr, "ERROR: %s: bad magic, expected %x, got %x\n", __func__, ARRAY_MAGIC, self->magic);
         return 0;
     }
-    if(self->used > self->size) {
+    if (self->used > self->size) {
         fprintf(stderr, "ERROR: %s: used=%lu, size=%lu\n", __func__, self->used, self->size);
         return 0;
     }
@@ -175,7 +175,7 @@ struct Array* ArrayPush(struct Array *self, void* element)
 {
     // a->used is the number of used entries,
     // because a->array[a->used++] updates a->used only *after* the array has been accessed.
-    // Therefore a->used can go up to a->size 
+    // Therefore a->used can go up to a->size
     if ( self->used == self->size ) {
         struct Array *new = calloc(1, sizeof(struct Array) + sizeof(void*[self->size * 2]));
         if (new) {

@@ -168,7 +168,7 @@ void BaizePositionPiles(struct Baize *const self, const int windowWidth, const i
 
     pilePaddingX = self->pack->width / 10.0f;
     pilePaddingY = self->pack->height / 10.0f;
-    float w = pilePaddingX + self->pack->width * (maxX + 2);
+    float w = pilePaddingX + self->pack->width * (maxX + 1.5);
     leftMargin = ((float)windowWidth - w) / 2.0f;
     topMargin = TITLEBAR_HEIGHT + pilePaddingY;
 

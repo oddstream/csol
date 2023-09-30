@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <raylib.h>
 
 #include "baize.h"
 #include "pile.h"
